@@ -2,7 +2,7 @@
 
 This repository is a work in progress units type checker and type inference system.
 
-See github.com/typetools/checker-framework and github.com/opprop/generic-type-inference-solver.
+See http://www.github.com/typetools/checker-framework and http://www.github.com/opprop/generic-type-inference-solver.
 
 # Installation
 

@@ -2,3 +2,6 @@
 
 # eclipse output
 bin/
+
+# gradle config
+.gradle/

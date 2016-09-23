@@ -10,24 +10,22 @@ package ontology.qual;
 // However, put this class into {@code Ontology} would cause a nullpointer exception in jsr308-langtools/**/{@code JavaCompiler#resolveIdent(String name)}
 // the reason of this null pointer exception need to be investigated.
 public enum OntologyValue {
+  TOP("TOP"),
+  SEQUENCE("sequence"),
+  POSITION_3D("3DPosition"),
+  VELOCITY_3D("3DVelocity"),
+  FORCE_3D("3DForce"),
+  TORQUE_3D("3DTorque"),
+  BOTTOM("BOTTOM");
 
-    TOP("TOP"),
-    SEQUENCE("sequence"),
-    POSITION_3D("3DPosition"),
-    VELOCITY_3D("3DVelocity"),
-    FORCE_3D("3DForce"),
-    TORQUE_3D("3DTorque"),
-    BOTTOM("BOTTOM");
+  private String value;
 
-    private String value;
+  private OntologyValue(String v) {
+    this.value = v;
+  }
 
-    private OntologyValue(String v) {
-        this.value = v;
-    }
-
-    @Override
-    public String toString() {
-        return this.value;
-    }
-
+  @Override
+  public String toString() {
+    return this.value;
+  }
 }

@@ -1,0 +1,11 @@
+language: java
+
+install:
+  - pip install --user  -r requirements.txt
+
+script: ./.travis-build.sh
+
+sudo: false
+
+jdk:
+  - oraclejdk8

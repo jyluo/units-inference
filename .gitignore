@@ -3,5 +3,27 @@
 # eclipse output
 bin/
 
-# gradle config
+# lib dependencies
+lib/
+
+#gradle config
 .gradle/
+
+# gradle output
+dist/
+build/
+
+# corpus
+corpus/
+
+#example classes and annotated output
+ontologyExample/**/*.class
+ontologyExample/annotated
+ontologyExample/default.jaif
+
+#archive test cases
+intersectionTest/
+missingAnno/
+superTypeArgTest/
+unsat/
+violateCons/

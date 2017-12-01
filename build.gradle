@@ -1,14 +1,37 @@
 apply plugin: 'java'
 
-sourceCompatibility = "1.8"
-
 /************************ system variables ************************/
 def env         = System.getenv()
 
 def javaHome    = env["JAVA_HOME"]
 
+//TODO: copy from CF Inference, need refactor later on
+//determined based on the the version of the currently running JVM
+def jreVersion  = {
+    def envJreVersion = env["CFI_JRE_VERSION"];
+    if(envJreVersion == null) {
+        def jreVersionStr  = System.getProperty("java.version");
+        def matches        = ( jreVersionStr =~ /^(\d\.\d+)\..*$/ )
+
+        final double jreVer;
+        if(matches.matches()) {
+            jreVer = Double.parseDouble(matches.group(1));
+        } else {
+            throw new RuntimeException("Could not determine version from property java.version=" + jreVersionStr);
+        }
+
+        return jreVer
+    } else {
+        return envJreVersion;
+    }
+}.call()
+
 /************************ jsr308 variables ************************/
 def jsr308Dir   = env["JSR308"] ?: file(new File("..")).absolutePath
+
+def jsr308_langtoolsDir = (jsr308Dir + "/jsr308-langtools")
+
+def annotationToolsDir = jsr308Dir + "/annotation-tools"
 
 def checkerFrameworkDir = jsr308Dir + "/checker-framework"
 
@@ -16,6 +39,8 @@ def cfInferenceDir = jsr308Dir + "/checker-framework-inference"
 
 // dir of generic type inference solver 
 def gtisDir = jsr308Dir + "/generic-type-inference-solver"
+
+def ontologyDir = jsr308Dir + "/ontology"
 
 /************************ util functions ************************/
 //Closure that creates a file from a base directory and a name of the file in that directory
@@ -58,6 +83,8 @@ dependencies {
     //       should we also snapshot a copy of sat4j from mavenCentral into ontology?
     compile 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.4'
     compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
+    compile fileTree(dir: "lib", include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
 }
 
 sourceSets {
@@ -76,7 +103,52 @@ sourceSets {
         compileClasspath += files("bin")
     }
 
-    // TODO: add test src path when have unit tests
+    test {
+        java {
+            srcDirs = ["tests/ontology"]
+            include "**/*.java"
+            compileClasspath += toPackageClasspath
+            runtimeClasspath += compileClasspath
+        }
+    }
 }
 
-buildDir = "bin"
+task copyZ3 (type: Copy) {
+    from cfInferenceDir + "/lib/com.microsoft.z3.jar" into file('lib/')
+}
+
+//Switch the Javac used to the JSR308
+tasks.compileJava {
+  description = 'Compiles this project using the jsr308 compiler.'
+  options.fork = true
+  options.compilerArgs = [
+      '-implicit:class',
+      '-Awarns', '-Xmaxwarns', '10000']
+  if(jreVersion == 1.7) {
+    options.compilerArgs += ['-source' , '7', '-target', '7']
+  }
+  options.forkOptions.executable="$jsr308_langtoolsDir/dist/bin/javac"
+} dependsOn(copyZ3)
+
+
+tasks.clean {
+    delete += "bin"
+    delete += "dist"
+}
+
+test {
+    systemProperty "path.afu.scripts", "$annotationToolsDir/annotation-file-utilities/scripts"
+    systemProperty "path.inference.script", "$cfInferenceDir/scripts/inference"
+    environment "external_checker_classpath", "$ontologyDir/bin"
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"
+        exceptionFormat = 'full'
+        showExceptions true
+        showCauses true
+        showStackTraces true
+        showStandardStreams true
+    }
+    jvmArgs "-Xbootclasspath/p:$cfInferenceDir/dist/javac.jar"
+}
+
+libsDirName="../dist"

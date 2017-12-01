@@ -1,17 +1,26 @@
 #!/bin/bash
 
+set -e
+
 WORKING_DIR=$(pwd)
 
-if [ ! -z ${JSR308+x} ] ; then
-    JSR308=$(cd $(dirname "$0")/.. && pwd)
+if [ -z "${JSR308}" ] ; then
+    export JSR308=$(cd $(dirname "$0")/.. && pwd)
 fi
 
 DLJC="$JSR308"/do-like-javac
 export AFU="$JSR308"/annotation-tools/annotation-file-utilities
 export PATH="$PATH":"$AFU"/scripts
 
-export CLASSPATH="$JSR308"/ontology/bin:"$JSR308"/generic-type-inference-solver/bin
+export CLASSPATH="$JSR308"/ontology/bin
 
+export DYLD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
+export LD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
+
+
+CHECKER=ontology.OntologyChecker
+SOLVER=ontology.solvers.backend.OntologyConstraintSolver
+SET_SOLVER=ontology.solvers.backend.jacop.OntologyJaCopSolver
 
 #parsing build command of the target program
 build_cmd="$1"
@@ -23,8 +32,16 @@ do
 done
 
 cd "$WORKING_DIR"
-running_cmd="python $DLJC/dljc -t inference --checker ontology.OntologyChecker --solver ontology.solvers.backend.OntologyConstraintSolver --solverArgs=\"backEndType=maxsatbackend.Lingeling,solveInParallel=false\" -o logs -m ROUNDTRIP -afud $WORKING_DIR/annotated -- $build_cmd"
-# running_cmd="python $DLJC/dljc -t inference --checker ontology.OntologyChecker --solver ontology.solvers.backend.OntologyConstraintSolver -o logs -m ROUNDTRIP -afud $WORKING_DIR/annotated -- $build_cmd"
+
+infer_cmd="python $DLJC/dljc -t inference --crashExit true --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+
+# debug_onlyCompile="--onlyCompileBytecodeBase true"
+debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $JSR308/ontology/bin $debug_onlyCompile --expectOutputRegex 'Z3 Unsatisfiable' --checker $DATAFLOW_CHECKER --solver $DATAFLOW_SOLVER --solverArgs=\"collectStatistic=true,solver=Z3\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+
+
+running_cmd=$infer_cmd
+
+
 echo "============ Important variables ============="
 echo "JSR308: $JSR308"
 echo "CLASSPATH: $CLASSPATH"

@@ -1,13 +1,11 @@
-# Units Inference System
+# ontology
+[![build-status](https://travis-ci.org/opprop/ontology.svg?branch=master)](https://travis-ci.org/opprop/ontology)
 
-This repository is a work in progress units type checker and type inference system.
 
-See http://www.github.com/typetools/checker-framework and http://www.github.com/opprop/generic-type-inference-solver.
+Ontology Inference System
 
-# Installation
+# Instructions
 
-TODO
+- For instruction of integrating Ontology for the 2nd integration test, and a general description of what input of Ontology takes in, and what output of Ontology would produce, please see `README_2nd_integration.md`.
 
-# Usage
-
-TODO
+- For instruction of running Ontology on a specific sub-set of sci-corpus, please see `README_run_ontology_on_corpus.md`.

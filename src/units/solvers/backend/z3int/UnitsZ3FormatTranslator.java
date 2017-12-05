@@ -1,30 +1,26 @@
-package units.solvers.backend.z3Int;
-
-import org.checkerframework.javacutil.AnnotationUtils;
+package units.solvers.backend.z3int;
 
 import com.microsoft.z3.BitVecExpr;
 import com.microsoft.z3.BoolExpr;
-
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.InequalityConstraint;
 import checkers.inference.model.PreferenceConstraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.SubtypeConstraint;
-import checkers.inference.solver.backend.z3.Z3BitVectorCodec;
-import checkers.inference.solver.backend.z3.Z3BitVectorFormatTranslator;
+import checkers.inference.solver.backend.z3Int.Z3IntCodec;
+import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
-import units.util.OntologyUtils;
 
-public class OntologyZ3FormatTranslator extends Z3BitVectorFormatTranslator {
+public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator {
 
-    public OntologyZ3FormatTranslator(Lattice lattice) {
+    public UnitsZ3FormatTranslator(Lattice lattice) {
         super(lattice);
     }
 
     @Override
-    protected Z3BitVectorCodec createZ3BitVectorCodec() {
-        return new OntologyZ3BitVectorCodec();
+    protected Z3IntCodec createZ3BitVectorCodec() {
+        return new UnitsZ3IntCodec();
     }
 
     @Override
@@ -33,7 +29,9 @@ public class OntologyZ3FormatTranslator extends Z3BitVectorFormatTranslator {
         // TODO: how to encode POLY?
         for (Slot slot : constraint.getSlots()) {
             if (isPolyOntology(slot)) {
-                return EMPTY_VALUE;
+                // Return true as empty value, to filter out poly ontology.
+                // TODO: Make encoder.emptyValue public, then using that consistent empty value here.
+                return context.mkTrue();
             }
         }
 
@@ -51,18 +49,15 @@ public class OntologyZ3FormatTranslator extends Z3BitVectorFormatTranslator {
         return super.serialize(constraint);
     }
 
-     @Override
-    protected boolean isSubtypeSubSet() {
-        return false;
-    }
-
     @Override
     public BoolExpr serialize(EqualityConstraint constraint) {
         // Ignore constraints that contains POLY_ONTOLOGY, as currently we don't encode POLY_ONTOLOGY into the domain.
         // TODO: how to encode POLY?
         for (Slot slot : constraint.getSlots()) {
             if (isPolyOntology(slot)) {
-                return EMPTY_VALUE;
+                // Return true as empty value, to filter out poly ontology.
+                // TODO: Make encoder.emptyValue public, then using that consistent empty value here.
+                return context.mkTrue();
             }
         }
         return super.serialize(constraint);
@@ -74,7 +69,9 @@ public class OntologyZ3FormatTranslator extends Z3BitVectorFormatTranslator {
         // TODO: how to encode POLY?
         for (Slot slot : constraint.getSlots()) {
             if (isPolyOntology(slot)) {
-                return EMPTY_VALUE;
+                // Return true as empty value, to filter out poly ontology.
+                // TODO: Make encoder.emptyValue public, then using that consistent empty value here.
+                return context.mkTrue();
             }
         }
         return super.serialize(constraint);
@@ -86,7 +83,9 @@ public class OntologyZ3FormatTranslator extends Z3BitVectorFormatTranslator {
         // TODO: how to encode POLY?
         for (Slot slot : preferenceConstraint.getSlots()) {
             if (isPolyOntology(slot)) {
-                return EMPTY_VALUE;
+                // Return true as empty value, to filter out poly ontology.
+                // TODO: Make encoder.emptyValue public, then using that consistent empty value here.
+                return context.mkTrue();
             }
         }
         return super.serialize(preferenceConstraint);
@@ -94,6 +93,7 @@ public class OntologyZ3FormatTranslator extends Z3BitVectorFormatTranslator {
 
     protected boolean isPolyOntology(Slot slot) {
         return slot instanceof ConstantSlot &&
-                AnnotationUtils.areSameIgnoringValues(((ConstantSlot) slot).getValue(), OntologyUtils.POLY_ONTOLOGY);
+                true;
+                // AnnotationUtils.areSameIgnoringValues(((ConstantSlot) slot).getValue(), OntologyUtils.POLY_ONTOLOGY);
     }
 }

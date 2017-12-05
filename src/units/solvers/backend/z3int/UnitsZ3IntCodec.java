@@ -1,6 +1,5 @@
 package units.solvers.backend.z3int;
 
-import java.math.BigInteger;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import checkers.inference.solver.backend.z3Int.Z3IntCodec;
@@ -14,13 +13,13 @@ public class UnitsZ3IntCodec implements Z3IntCodec {
     }
 
     @Override
-    public BigInteger encodeConstantAM(AnnotationMirror am) {
-        // TODO Auto-generated method stub
-        return null;
+    public String encodeConstantAM(AnnotationMirror am) {
+        // TODO 
+        return "0";
     }
 
     @Override
-    public AnnotationMirror decodeNumeralValue(BigInteger numeralValue,
+    public AnnotationMirror decodeNumeralValue(long numeralValue,
             ProcessingEnvironment processingEnvironment) {
         // TODO Auto-generated method stub
         return null;

@@ -1,7 +1,7 @@
 package units.solvers.backend.z3int;
 
-import com.microsoft.z3.BitVecExpr;
 import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.IntExpr;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.InequalityConstraint;
@@ -19,7 +19,7 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator {
     }
 
     @Override
-    protected Z3IntCodec createZ3BitVectorCodec() {
+    protected Z3IntCodec createZ3IntCodec() {
         return new UnitsZ3IntCodec();
     }
 
@@ -40,8 +40,8 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator {
         // Soft constraints for subtypeConstraint
         Slot subtypeSlot = constraint.getSubtype();
         Slot supertypeSlot = constraint.getSupertype();
-        BitVecExpr subtypeBV = subtypeSlot.serialize(this);
-        BitVecExpr supertypeBV = supertypeSlot.serialize(this);
+        IntExpr subtypeBV = subtypeSlot.serialize(this);
+        IntExpr supertypeBV = supertypeSlot.serialize(this);
         // int weight = 1;
         // if (subtypeSlot instanceof ConstantSlot) {
         // weight = 2;

@@ -10,12 +10,13 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             BaseAnnotatedTypeFactory factory, boolean infer) {
         super(checker, ichecker, factory, infer);
     }
-    
+
     // Slots created in ATF
-    
+
     // Constraints created in Visitor
-    
-    // see https://github.com/topnessman/immutability/blob/master/src/main/java/pico/inference/PICOInferenceVisitor.java
-    
-    
+
+    // see
+    // https://github.com/topnessman/immutability/blob/master/src/main/java/pico/inference/PICOInferenceVisitor.java
+
+
 }

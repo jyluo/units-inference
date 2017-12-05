@@ -21,6 +21,4 @@ import org.checkerframework.framework.qual.SubtypeOf;
 // If you want an alias for "m", e.g. "Meter", simply create that
 // annotation and add this meta-annotation:
 // @UnitsMultiple(quantity=m.class, prefix=Prefix.one)
-public @interface m {
-    Prefix value() default Prefix.one;
-}
+public @interface m {}

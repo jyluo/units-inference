@@ -11,6 +11,7 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.LiteralTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceQualifierHierarchy;
@@ -20,6 +21,7 @@ import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
+import units.qual.Dimensionless;
 import units.qual.UnitsBottom;
 import units.qual.UnknownUnits;
 import units.qual.m;
@@ -32,6 +34,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     protected final AnnotationMirror BOTTOM =
             AnnotationBuilder.fromClass(elements, UnitsBottom.class);
 
+    protected final AnnotationMirror DIMENSIONLESS =
+            AnnotationBuilder.fromClass(elements, Dimensionless.class);
     protected final AnnotationMirror METER = AnnotationBuilder.fromClass(elements, m.class);
     protected final AnnotationMirror SECOND = AnnotationBuilder.fromClass(elements, s.class);
 
@@ -109,20 +113,38 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
 
         @Override
-        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            // Overrides only required if i want to replace a varslot iwth constant slot
-            // varAnnotator adds varSlots, call it sometimes, see InfTreeANnotator
-            
-            // Create an AM
-            AnnotationMirror anno = METER; // TODO
-            // Create a slot
-            ConstantSlot cs = variableAnnotator.createConstant(anno, node);
-            // Replace atm value
-            type.replaceAnnotation(cs.getValue());
-            // Visit the atm with the tree
-            variableAnnotator.visit(type, node);
+        public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
+            // TODO: refine it down to number literals
 
+            // number literals are always dimensionless
+
+            // Create an AM
+            AnnotationMirror anno = DIMENSIONLESS; // Default for all literals
+            // Create a slot
+            ConstantSlot cs = variableAnnotator.createConstant(anno, literalTree);
+            // Replace atm value
+            atm.replaceAnnotation(cs.getValue());
+            // Visit the atm with the tree
+            variableAnnotator.visit(atm, literalTree);
             return null;
+        }
+
+        @Override
+        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
+            // // Overrides only required if i want to replace a varslot iwth constant slot
+            // // varAnnotator adds varSlots, call it sometimes, see InfTreeANnotator
+            //
+            // // Create an AM
+            // AnnotationMirror anno = METER; // TODO
+            // // Create a slot
+            // ConstantSlot cs = variableAnnotator.createConstant(anno, node);
+            // // Replace atm value
+            // type.replaceAnnotation(cs.getValue());
+            // // Visit the atm with the tree
+            // variableAnnotator.visit(type, node);
+            //
+            // return null;
+            return super.visitBinary(node, type);
         }
 
         // @Override

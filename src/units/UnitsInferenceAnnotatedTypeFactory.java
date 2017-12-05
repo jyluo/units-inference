@@ -9,7 +9,6 @@ import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
-import org.checkerframework.javacutil.AnnotationBuilder;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.LiteralTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
@@ -21,23 +20,9 @@ import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
-import units.qual.Dimensionless;
-import units.qual.UnitsBottom;
-import units.qual.UnknownUnits;
-import units.qual.m;
-import units.qual.s;
+import units.util.UnitsUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
-
-    protected final AnnotationMirror UNKNOWNUNITS =
-            AnnotationBuilder.fromClass(elements, UnknownUnits.class);
-    protected final AnnotationMirror BOTTOM =
-            AnnotationBuilder.fromClass(elements, UnitsBottom.class);
-
-    protected final AnnotationMirror DIMENSIONLESS =
-            AnnotationBuilder.fromClass(elements, Dimensionless.class);
-    protected final AnnotationMirror METER = AnnotationBuilder.fromClass(elements, m.class);
-    protected final AnnotationMirror SECOND = AnnotationBuilder.fromClass(elements, s.class);
 
     public UnitsInferenceAnnotatedTypeFactory(InferenceChecker inferenceChecker,
             boolean withCombineConstraints, BaseAnnotatedTypeFactory realTypeFactory,
@@ -45,6 +30,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             ConstraintManager constraintManager) {
         super(inferenceChecker, withCombineConstraints, realTypeFactory, realChecker, slotManager,
                 constraintManager);
+        UnitsUtils.getInstance(processingEnv, elements);
         postInit();
     }
 
@@ -119,7 +105,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // number literals are always dimensionless
 
             // Create an AM
-            AnnotationMirror anno = DIMENSIONLESS; // Default for all literals
+            AnnotationMirror anno = UnitsUtils.DIMENSIONLESS; // Default for all literals
             // Create a slot
             ConstantSlot cs = variableAnnotator.createConstant(anno, literalTree);
             // Replace atm value

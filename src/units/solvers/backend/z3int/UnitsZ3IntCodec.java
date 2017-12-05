@@ -13,9 +13,9 @@ public class UnitsZ3IntCodec implements Z3IntCodec {
     }
 
     @Override
-    public String encodeConstantAM(AnnotationMirror am) {
+    public long encodeConstantAM(AnnotationMirror am) {
         // TODO 
-        return "0";
+        return 0L;
     }
 
     @Override

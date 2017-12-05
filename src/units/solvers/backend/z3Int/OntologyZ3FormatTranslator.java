@@ -1,4 +1,4 @@
-package ontology.solvers.backend.z3;
+package units.solvers.backend.z3Int;
 
 import org.checkerframework.javacutil.AnnotationUtils;
 
@@ -14,7 +14,7 @@ import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.solver.backend.z3.Z3BitVectorCodec;
 import checkers.inference.solver.backend.z3.Z3BitVectorFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
-import ontology.util.OntologyUtils;
+import units.util.OntologyUtils;
 
 public class OntologyZ3FormatTranslator extends Z3BitVectorFormatTranslator {
 

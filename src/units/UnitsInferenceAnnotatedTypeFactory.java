@@ -110,8 +110,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         @Override
         public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            // TODO: create slots
-
+            // Overrides only required if i want to replace a varslot iwth constant slot
+            // varAnnotator adds varSlots, call it sometimes, see InfTreeANnotator
+            
             // Create an AM
             AnnotationMirror anno = METER; // TODO
             // Create a slot

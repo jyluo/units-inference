@@ -1,4 +1,4 @@
-package ontology.solvers.backend.z3;
+package units.solvers.backend.z3Int;
 
 import java.math.BigInteger;
 import java.util.Collections;
@@ -15,9 +15,8 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 
 import checkers.inference.solver.backend.z3.Z3BitVectorCodec;
-//import checkers.inference.solver.backend.z3backend.Z3BitVectorCodec;
-import ontology.qual.OntologyValue;
-import ontology.util.OntologyUtils;
+import units.qual.OntologyValue;
+import units.util.OntologyUtils;
 
 public class OntologyZ3BitVectorCodec implements Z3BitVectorCodec {
 

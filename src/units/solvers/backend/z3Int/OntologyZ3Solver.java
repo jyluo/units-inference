@@ -1,4 +1,4 @@
-package ontology.solvers.backend.z3;
+package units.solvers.backend.z3Int;
 
 import checkers.inference.solver.SolverEngine;
 import checkers.inference.solver.backend.FormatTranslator;

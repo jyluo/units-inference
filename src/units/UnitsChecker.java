@@ -1,6 +1,7 @@
 package units;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import checkers.inference.BaseInferrableChecker;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferrableChecker;
@@ -17,6 +18,12 @@ public class UnitsChecker extends BaseInferrableChecker {
     @Override
     public UnitsVisitor createVisitor(InferenceChecker iChecker, BaseAnnotatedTypeFactory factory,
             boolean infer) {
+        
+        
+        // Silly test
+        @SuppressWarnings("rawtypes")
+        CallableDeclaration declaration = null;
+        
         return new UnitsVisitor(this, iChecker, factory, infer);
     }
 

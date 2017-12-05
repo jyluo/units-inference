@@ -1,4 +1,4 @@
-package ontology;
+package units;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,12 +9,12 @@ import org.checkerframework.javacutil.Pair;
 import org.junit.runners.Parameterized.Parameters;
 
 import checkers.inference.test.CFInferenceTest;
-import ontology.solvers.backend.OntologyConstraintSolver;
+import units.solvers.backend.OntologyConstraintSolver;
 
-public class OntologyTest extends CFInferenceTest {
+public class UnitsTest extends CFInferenceTest {
  
-    public OntologyTest(File testFile) {
-        super(testFile, ontology.OntologyChecker.class, "ontology",
+    public UnitsTest(File testFile) {
+        super(testFile, units.UnitsChecker.class, "units",
                 "-Anomsgtext", "-d", "tests/build/outputdir");
     }
 
@@ -27,7 +27,7 @@ public class OntologyTest extends CFInferenceTest {
     public Pair<String, List<String>> getSolverNameAndOptions() {
         final String solverName = OntologyConstraintSolver.class.getCanonicalName();
         List<String> solverOptions = new ArrayList<>();
-        solverOptions.add("solver=Z3");
+        solverOptions.add("solver=Z3Int");
         return Pair.<String, List<String>>of(solverName, solverOptions);
     }
 

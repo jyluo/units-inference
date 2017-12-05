@@ -1,9 +1,4 @@
-package ontology.solvers.backend;
-
-import ontology.qual.OntologyValue;
-import ontology.solvers.backend.z3.OntologyZ3FormatTranslator;
-import ontology.util.OntologyStatisticUtil;
-import ontology.util.OntologyUtils;
+package units;
 
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -42,6 +37,10 @@ import checkers.inference.solver.constraintgraph.Vertex;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.frontend.LatticeBuilder;
 import checkers.inference.solver.frontend.TwoQualifiersLattice;
+import units.qual.OntologyValue;
+import units.solvers.backend.z3.OntologyZ3FormatTranslator;
+import units.util.OntologyStatisticUtil;
+import units.util.OntologyUtils;
 
 public class OntologyConstraintSolver extends SolverEngine {
 

@@ -1,8 +1,16 @@
 package units.qual;
 
-import static org.checkerframework.framework.qual.LiteralKind.*;
-import static org.checkerframework.framework.qual.TypeUseLocation.*;
-
+import static org.checkerframework.framework.qual.LiteralKind.BOOLEAN;
+import static org.checkerframework.framework.qual.LiteralKind.CHAR;
+import static org.checkerframework.framework.qual.LiteralKind.DOUBLE;
+import static org.checkerframework.framework.qual.LiteralKind.FLOAT;
+import static org.checkerframework.framework.qual.LiteralKind.INT;
+import static org.checkerframework.framework.qual.LiteralKind.LONG;
+import static org.checkerframework.framework.qual.LiteralKind.STRING;
+import static org.checkerframework.framework.qual.TypeUseLocation.EXCEPTION_PARAMETER;
+import static org.checkerframework.framework.qual.TypeUseLocation.LOCAL_VARIABLE;
+import static org.checkerframework.framework.qual.TypeUseLocation.PARAMETER;
+import static org.checkerframework.framework.qual.TypeUseLocation.RESOURCE_VARIABLE;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

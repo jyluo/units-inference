@@ -3,7 +3,6 @@ package units.qual;
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_LOWER_BOUND;
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_UPPER_BOUND;
 import static org.checkerframework.framework.qual.TypeUseLocation.LOWER_BOUND;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

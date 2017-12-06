@@ -17,9 +17,10 @@ build/
 corpus/
 
 #example classes and annotated output
-ontologyExample/**/*.class
-ontologyExample/annotated
-ontologyExample/default.jaif
+testing/**/*.class
+testing/annotated
+testing/default.jaif
+testing/statistic.txt
 
 #archive test cases
 intersectionTest/

@@ -1,6 +1,5 @@
 package units.util;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.ErrorReporter;
-import units.qual.BaseUnitExpo;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
 import units.qual.UnitsBottom;
@@ -61,33 +59,14 @@ public class UnitsUtils {
     public static AnnotationMirror createInternalUnit(String originalName, int prefixExponent, Map<String, Integer> exponents) {
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsInternal.class);
 
-        BaseUnitExpo[] expos = new BaseUnitExpo[exponents.size()];
-        
-        int i = 0;
-        for (String key : exponents.keySet()) {
-            expos[i] = new BaseUnitExpo() {
-                @Override
-                public String baseUnit() {
-                    return key;
-                }
-
-                @Override
-                public int exponent() {
-                    return exponents.get(key);
-                }
-
-                @Override
-                public Class<? extends Annotation> annotationType() {
-                    return BaseUnitExpo.class;
-                }
-            };
-
-            i++;
+        List<Integer> expos = new ArrayList<>();
+        for(String key : exponents.keySet()) {
+            expos.add(exponents.get(key));
         }
 
         builder.setValue("originalName", originalName);
         builder.setValue("prefixExponent", prefixExponent);
-        builder.setValue("exponents", expos);
+        builder.setValue("exponents", expos.toArray(new Integer[] {}));
         return builder.build();
     }
     

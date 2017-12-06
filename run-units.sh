@@ -8,19 +8,21 @@ CFI="$ROOT"/checker-framework-inference
 
 SOLVER=units.solvers.backend.UnitsSolverEngine
 
-DEBUG_SOVLER=checkers.inference.solver.DebugSolver
+DEBUG_SOLVER=checkers.inference.solver.DebugSolver
 
 IS_HACK=true
 
 CHECKER=units.UnitsChecker
 
-# SOLVER="$DEBUG_SOVLER"
+# Debug
+SOLVER="$DEBUG_SOLVER"
 # IS_HACK=false
 DEBUG_CLASSPATH=""
 
 export CLASSPATH="$ROOT"/units-inference/bin:$DEBUG_CLASSPATH:.
 export external_checker_classpath="$ROOT"/units-inference/bin
 
+# Inference
 $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistic=true,solver=Z3Int" --hacks="$IS_HACK" -m ROUNDTRIP -afud ./annotated "$@"
 
 # TYPE CHECKING

@@ -25,5 +25,5 @@ public @interface UnitsInternal {
     // annotation[], ... O(n) access, order does not matter, safer, but can't work with AnnotationBuilder
     // BaseUnitExpo[] exponents();
     
-    int[] exponents();
+    int[] exponents() default {};
 }

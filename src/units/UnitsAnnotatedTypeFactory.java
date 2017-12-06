@@ -2,7 +2,9 @@ package units;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
@@ -15,9 +17,12 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
+import org.checkerframework.javacutil.AnnotationUtils;
 import com.sun.source.tree.BinaryTree;
+import units.qual.UnitsAlias;
 import units.qual.UnitsBottom;
 import units.qual.UnknownUnits;
+import units.util.UnitsUtils;
 
 public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
@@ -47,6 +52,22 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 //        qualSet.addAll(externalQualsMap.values());
 
         return qualSet;
+    }
+    
+    @Override
+    public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
+        for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement().getAnnotationMirrors()) {
+            if(AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
+                
+                Map<String, Integer> exponents = new TreeMap<>();
+                exponents.put("m", 1);
+                exponents.put("s", 1);
+                
+                return UnitsUtils.createInternalUnit("dummy", 1, exponents);
+            }
+        }
+        
+        return super.aliasedAnnotation(anno);
     }
     
     @Override

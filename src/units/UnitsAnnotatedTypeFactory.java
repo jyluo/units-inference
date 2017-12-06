@@ -1,5 +1,8 @@
 package units;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
@@ -28,6 +31,24 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         postInit();
     }
 
+    @Override
+    protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
+        // Use the Units Annotated Type Loader instead of the default one
+        loader = new UnitsAnnotationClassLoader(checker);
+
+        // get all the loaded annotations
+        Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
+        qualSet.addAll(getBundledTypeQualifiersWithPolyAll());
+
+//        // load all the external units
+//        loadAllExternalUnits();
+//
+//        // copy all loaded external Units to qual set
+//        qualSet.addAll(externalQualsMap.values());
+
+        return qualSet;
+    }
+    
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new UnitsQualifierHierarchy(factory, BOTTOM);

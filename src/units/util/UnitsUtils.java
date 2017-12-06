@@ -1,20 +1,28 @@
 package units.util;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.ErrorReporter;
+import units.qual.BaseUnitExpo;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
 import units.qual.UnitsBottom;
+import units.qual.UnitsInternal;
 import units.qual.UnknownUnits;
 import units.qual.m;
 import units.qual.s;
 
 public class UnitsUtils {
     private static UnitsUtils singletonInstance;
-
+    private static ProcessingEnvironment processingEnv;
+    private static Elements elements;
+    
     public static AnnotationMirror POLYUNIT;
     public static AnnotationMirror UNKNOWNUNITS;
     public static AnnotationMirror DIMENSIONLESS;
@@ -24,6 +32,9 @@ public class UnitsUtils {
     public static AnnotationMirror SECOND;
 
     private UnitsUtils(ProcessingEnvironment processingEnv, Elements elements) {
+        UnitsUtils.processingEnv = processingEnv;
+        UnitsUtils.elements = elements;
+
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
         UNKNOWNUNITS = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
         DIMENSIONLESS = AnnotationBuilder.fromClass(elements, Dimensionless.class);
@@ -47,6 +58,39 @@ public class UnitsUtils {
         return singletonInstance;
     }
 
+    public static AnnotationMirror createInternalUnit(String originalName, int prefixExponent, Map<String, Integer> exponents) {
+        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsInternal.class);
+
+        BaseUnitExpo[] expos = new BaseUnitExpo[exponents.size()];
+        
+        int i = 0;
+        for (String key : exponents.keySet()) {
+            expos[i] = new BaseUnitExpo() {
+                @Override
+                public String baseUnit() {
+                    return key;
+                }
+
+                @Override
+                public int exponent() {
+                    return exponents.get(key);
+                }
+
+                @Override
+                public Class<? extends Annotation> annotationType() {
+                    return BaseUnitExpo.class;
+                }
+            };
+
+            i++;
+        }
+
+        builder.setValue("originalName", originalName);
+        builder.setValue("prefixExponent", prefixExponent);
+        builder.setValue("exponents", expos);
+        return builder.build();
+    }
+    
     //
     // public static OntologyValue determineOntologyValue(TypeMirror type) {
     // if (TypesUtils.isDeclaredOfName(type, "java.util.LinkedList")

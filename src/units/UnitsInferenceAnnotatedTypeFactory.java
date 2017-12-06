@@ -1,5 +1,10 @@
 package units;
 
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
@@ -34,6 +39,24 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         postInit();
     }
 
+    @Override
+    protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
+        // Use the Units Annotated Type Loader instead of the default one
+        loader = new UnitsAnnotationClassLoader(checker);
+
+        // get all the loaded annotations
+        Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
+        qualSet.addAll(getBundledTypeQualifiersWithPolyAll());
+
+//        // load all the external units
+//        loadAllExternalUnits();
+//
+//        // copy all loaded external Units to qual set
+//        qualSet.addAll(externalQualsMap.values());
+
+        return qualSet;
+    }
+    
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new UnitsInferenceQualifierHierarchy(factory);
@@ -116,21 +139,23 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
 
         @Override
-        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            // // Overrides only required if i want to replace a varslot iwth constant slot
-            // // varAnnotator adds varSlots, call it sometimes, see InfTreeANnotator
-            //
-            // // Create an AM
-            // AnnotationMirror anno = METER; // TODO
-            // // Create a slot
-            // ConstantSlot cs = variableAnnotator.createConstant(anno, node);
-            // // Replace atm value
-            // type.replaceAnnotation(cs.getValue());
-            // // Visit the atm with the tree
-            // variableAnnotator.visit(type, node);
-            //
-            // return null;
-            return super.visitBinary(node, type);
+        public Void visitBinary(BinaryTree binaryTree, AnnotatedTypeMirror atm) {
+            // Overrides only required if i want to replace a varslot with constant slot
+            // varAnnotator adds varSlots, call it sometimes, see InfTreeANnotator
+
+            Map<String, Integer> exponents = new HashMap<>();
+            exponents.put("s", 1);
+            exponents.put("m", 1);
+
+            AnnotationMirror anno = UnitsUtils.createInternalUnit("dummy", 1, exponents);
+
+            ConstantSlot cs = variableAnnotator.createConstant(anno, binaryTree);
+
+            atm.replaceAnnotation(cs.getValue());
+
+            variableAnnotator.visit(atm, binaryTree);
+
+            return null;
         }
 
         // @Override

@@ -15,5 +15,5 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@SubtypeOf(UnknownUnits.class)
+@UnitsAlias(@BaseUnitExpo(baseUnit= "s", exponent = 1))
 public @interface s {}

@@ -15,15 +15,14 @@ IS_HACK=true
 CHECKER=units.UnitsChecker
 
 # Debug
-SOLVER="$DEBUG_SOLVER"
+# SOLVER="$DEBUG_SOLVER"
 # IS_HACK=false
-DEBUG_CLASSPATH=""
 
-export CLASSPATH="$ROOT"/units-inference/bin:$DEBUG_CLASSPATH:.
+export CLASSPATH="$ROOT"/units-inference/bin:.
 export external_checker_classpath="$ROOT"/units-inference/bin
 
 # Inference
 $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistic=true,solver=Z3Int" --hacks="$IS_HACK" -m ROUNDTRIP -afud ./annotated "$@"
 
 # TYPE CHECKING
-# $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistic=true,solver=z3" --hacks="$IS_HACK" -m TYPECHECK "$@"
+# $CFI/scripts/inference --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistic=true,solver=Z3Int" --cfArgs="-AprintErrorStack" --hacks="$IS_HACK" -m TYPECHECK "$@"

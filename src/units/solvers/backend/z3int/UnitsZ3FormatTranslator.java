@@ -23,70 +23,70 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator {
     protected Z3IntCodec createZ3IntCodec() {
         return new UnitsZ3IntCodec();
     }
-
-    @Override
-    public BoolExpr serialize(SubtypeConstraint constraint) {
-        // Ignore constraints that contains POLY_ONTOLOGY, as currently we don't encode
-        // POLY_ONTOLOGY into the domain.
-        // TODO: how to encode POLY?
-        for (Slot slot : constraint.getSlots()) {
-            if (isPolyUnit(slot)) {
-                // Return true as empty value, to filter out poly ontology.
-                // TODO: Make encoder.emptyValue public, then using that consistent empty value
-                // here.
-                return context.mkTrue();
-            }
-        }
-
-        // Soft constraints for subtypeConstraint
-        Slot subtypeSlot = constraint.getSubtype();
-        Slot supertypeSlot = constraint.getSupertype();
-        IntExpr subtypeBV = subtypeSlot.serialize(this);
-        IntExpr supertypeBV = supertypeSlot.serialize(this);
-        // int weight = 1;
-        // if (subtypeSlot instanceof ConstantSlot) {
-        // weight = 2;
-        // }
-
-        addConstraint(context.mkEq(subtypeBV, supertypeBV));
-        return super.serialize(constraint);
-    }
-
-    @Override
-    public BoolExpr serialize(EqualityConstraint constraint) {
-        // Ignore constraints that contains POLY_ONTOLOGY, as currently we don't encode
-        // POLY_ONTOLOGY into the domain.
-        // TODO: how to encode POLY?
-        for (Slot slot : constraint.getSlots()) {
-            if (isPolyUnit(slot)) {
-                // Return true as empty value, to filter out poly ontology.
-                // TODO: Make encoder.emptyValue public, then using that consistent empty value
-                // here.
-                return context.mkTrue();
-            }
-        }
-        return super.serialize(constraint);
-    }
-
-    @Override
-    public BoolExpr serialize(InequalityConstraint constraint) {
-        // Ignore constraints that contains POLY_ONTOLOGY, as currently we don't encode
-        // POLY_ONTOLOGY into the domain.
-        // TODO: how to encode POLY?
-        for (Slot slot : constraint.getSlots()) {
-            if (isPolyUnit(slot)) {
-                // Return true as empty value, to filter out poly ontology.
-                // TODO: Make encoder.emptyValue public, then using that consistent empty value
-                // here.
-                return context.mkTrue();
-            }
-        }
-        return super.serialize(constraint);
-    }
-
-    protected boolean isPolyUnit(Slot slot) {
-        UnitsUtils.getInstance();
-        return slot instanceof ConstantSlot && AnnotationUtils
-                .areSameIgnoringValues(((ConstantSlot) slot).getValue(), UnitsUtils.POLYUNIT);
-    }
+//
+//    @Override
+//    public BoolExpr serialize(SubtypeConstraint constraint) {
+//        // Ignore constraints that contains POLY_ONTOLOGY, as currently we don't encode
+//        // POLY_ONTOLOGY into the domain.
+//        // TODO: how to encode POLY?
+//        for (Slot slot : constraint.getSlots()) {
+//            if (isPolyUnit(slot)) {
+//                // Return true as empty value, to filter out poly ontology.
+//                // TODO: Make encoder.emptyValue public, then using that consistent empty value
+//                // here.
+//                return context.mkTrue();
+//            }
+//        }
+//
+//        // Soft constraints for subtypeConstraint
+//        Slot subtypeSlot = constraint.getSubtype();
+//        Slot supertypeSlot = constraint.getSupertype();
+//        IntExpr subtypeBV = subtypeSlot.serialize(this);
+//        IntExpr supertypeBV = supertypeSlot.serialize(this);
+//        // int weight = 1;
+//        // if (subtypeSlot instanceof ConstantSlot) {
+//        // weight = 2;
+//        // }
+//
+//        addConstraint(context.mkEq(subtypeBV, supertypeBV));
+//        return super.serialize(constraint);
+//    }
+//
+//    @Override
+//    public BoolExpr serialize(EqualityConstraint constraint) {
+//        // Ignore constraints that contains POLY_ONTOLOGY, as currently we don't encode
+//        // POLY_ONTOLOGY into the domain.
+//        // TODO: how to encode POLY?
+//        for (Slot slot : constraint.getSlots()) {
+//            if (isPolyUnit(slot)) {
+//                // Return true as empty value, to filter out poly ontology.
+//                // TODO: Make encoder.emptyValue public, then using that consistent empty value
+//                // here.
+//                return context.mkTrue();
+//            }
+//        }
+//        return super.serialize(constraint);
+//    }
+//
+//    @Override
+//    public BoolExpr serialize(InequalityConstraint constraint) {
+//        // Ignore constraints that contains POLY_ONTOLOGY, as currently we don't encode
+//        // POLY_ONTOLOGY into the domain.
+//        // TODO: how to encode POLY?
+//        for (Slot slot : constraint.getSlots()) {
+//            if (isPolyUnit(slot)) {
+//                // Return true as empty value, to filter out poly ontology.
+//                // TODO: Make encoder.emptyValue public, then using that consistent empty value
+//                // here.
+//                return context.mkTrue();
+//            }
+//        }
+//        return super.serialize(constraint);
+//    }
+//
+//    protected boolean isPolyUnit(Slot slot) {
+//        UnitsUtils.getInstance();
+//        return slot instanceof ConstantSlot && AnnotationUtils
+//                .areSameIgnoringValues(((ConstantSlot) slot).getValue(), UnitsUtils.POLYUNIT);
+//    }
 }

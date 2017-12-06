@@ -40,7 +40,7 @@ def cfInferenceDir = jsr308Dir + "/checker-framework-inference"
 // dir of generic type inference solver 
 def gtisDir = jsr308Dir + "/generic-type-inference-solver"
 
-def ontologyDir = jsr308Dir + "/ontology"
+def unitsDir = jsr308Dir + "/units-inference"
 
 /************************ util functions ************************/
 //Closure that creates a file from a base directory and a name of the file in that directory
@@ -80,7 +80,7 @@ dependencies {
     // solver backend dependencies
     // TODO: should be removed when we get rid of classic solver
     // TODO: currently the runtime dependencies of sat4j is bit tricky --- it actually uses the sat4j from cfi/dist
-    //       should we also snapshot a copy of sat4j from mavenCentral into ontology?
+    //       should we also snapshot a copy of sat4j from mavenCentral into units?
     compile 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.4'
     compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
     compile fileTree(dir: "lib", include: ['*.jar'])
@@ -105,8 +105,8 @@ sourceSets {
 
     test {
         java {
-            srcDirs = ["tests/ontology"]
-            include "**/*.java"
+            srcDirs = ["tests/units"]
+            include "*.java"
             compileClasspath += toPackageClasspath
             runtimeClasspath += compileClasspath
         }
@@ -139,7 +139,7 @@ tasks.clean {
 test {
     systemProperty "path.afu.scripts", "$annotationToolsDir/annotation-file-utilities/scripts"
     systemProperty "path.inference.script", "$cfInferenceDir/scripts/inference"
-    environment "external_checker_classpath", "$ontologyDir/bin"
+    environment "external_checker_classpath", "$unitsDir/bin"
     testLogging {
         events "PASSED", "FAILED", "SKIPPED"
         exceptionFormat = 'full'

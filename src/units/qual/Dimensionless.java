@@ -27,7 +27,6 @@ import org.checkerframework.framework.qual.SubtypeOf;
  * @checker_framework.manual #units-checker Units Checker
  */
 @SubtypeOf(UnknownUnits.class)
-@DefaultQualifierInHierarchy
 @DefaultFor({
     // exceptions are always dimensionless
     EXCEPTION_PARAMETER,
@@ -44,6 +43,7 @@ import org.checkerframework.framework.qual.SubtypeOf;
     }, // not sure that literals need to be impliclty declared
     typeNames = {Throwable.class, Exception.class, Class.class}
 )
+@UnitsAlias({0,0})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})

@@ -90,7 +90,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         public UnitsInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
             super(multiGraphFactory);
         }
-
+        
         // @Override
         // protected Set<AnnotationMirror> findBottoms(
         // Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {

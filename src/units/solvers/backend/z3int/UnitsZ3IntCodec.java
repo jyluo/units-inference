@@ -2,27 +2,32 @@ package units.solvers.backend.z3int;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.javacutil.AnnotationUtils;
 import checkers.inference.solver.backend.z3Int.Z3IntCodec;
+import units.util.UnitsUtils;
 
 public class UnitsZ3IntCodec implements Z3IntCodec {
 
     @Override
-    public int getFixedBitVectorSize() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
     public long encodeConstantAM(AnnotationMirror am) {
-        // TODO 
+        System.out.println(" === ENCODING constant AM: " + am);
+        
+        if(AnnotationUtils.areSame(am, UnitsUtils.UNKNOWNUNITS)) {
+            return 30L;
+        }
+
         return 0L;
     }
 
     @Override
     public AnnotationMirror decodeNumeralValue(long numeralValue,
-            ProcessingEnvironment processingEnvironment) {
-        // TODO Auto-generated method stub
-        return null;
+            ProcessingEnvironment processingEnv) {
+        
+        System.out.println(" === DECODING soln: " + numeralValue);
+        
+        return UnitsUtils.DIMENSIONLESS;
+        
+        // default return null for no solution.
     }
     //
     // private final int domainSize;

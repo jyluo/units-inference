@@ -33,6 +33,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     public UnitsAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
+        UnitsUtils.getInstance(processingEnv, elements);
         postInit();
     }
 
@@ -79,6 +80,26 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         public UnitsQualifierHierarchy(MultiGraphFactory mgf, AnnotationMirror bottom) {
             super(mgf, bottom);
+        }
+        
+        @Override
+        public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
+            // @UnitsInternal <: Top
+            if (AnnotationUtils.areSame(superAnno, UnitsUtils.UNKNOWNUNITS)) {
+                return true;
+            }
+
+            // Bottom <: UnitsInternal
+            if (AnnotationUtils.areSame(subAnno, UnitsUtils.BOTTOM)) {
+                return true;
+            }
+
+            // @UnitsInternal <: @UnitsInternal
+            if (AnnotationUtils.areSameIgnoringValues(subAnno, superAnno)) {
+                return AnnotationUtils.areSame(subAnno, superAnno);
+            }
+
+            return super.isSubtype(subAnno, superAnno);
         }
     }
 

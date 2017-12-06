@@ -3,6 +3,7 @@ package units.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
@@ -35,7 +36,7 @@ public class UnitsUtils {
 
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
         UNKNOWNUNITS = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
-        DIMENSIONLESS = AnnotationBuilder.fromClass(elements, Dimensionless.class);
+        DIMENSIONLESS = createInternalUnit("Dimensionless", 0, new TreeMap<>());
         BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
 
         METER = AnnotationBuilder.fromClass(elements, m.class);
@@ -64,7 +65,7 @@ public class UnitsUtils {
             expos.add(exponents.get(key));
         }
 
-        builder.setValue("originalName", originalName);
+        // builder.setValue("originalName", originalName);
         builder.setValue("prefixExponent", prefixExponent);
         builder.setValue("exponents", expos.toArray(new Integer[] {}));
         return builder.build();

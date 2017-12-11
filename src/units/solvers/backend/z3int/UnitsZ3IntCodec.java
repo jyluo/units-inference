@@ -1,8 +1,10 @@
 package units.solvers.backend.z3int;
 
+import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
+import com.microsoft.z3.Expr;
 import checkers.inference.solver.backend.z3Int.Z3IntCodec;
 import units.util.UnitsUtils;
 
@@ -20,7 +22,7 @@ public class UnitsZ3IntCodec implements Z3IntCodec {
     }
 
     @Override
-    public AnnotationMirror decodeNumeralValue(long numeralValue,
+    public AnnotationMirror decodeSolution(Set<Expr> numeralValue,
             ProcessingEnvironment processingEnv) {
         
         System.out.println(" === DECODING soln: " + numeralValue);

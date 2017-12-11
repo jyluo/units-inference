@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.VariableElement;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -17,6 +18,7 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
+import org.checkerframework.javacutil.TreeUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.LiteralTree;
@@ -39,10 +41,9 @@ import units.util.UnitsUtils;
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
 
     public UnitsInferenceAnnotatedTypeFactory(InferenceChecker inferenceChecker,
-            boolean withCombineConstraints, BaseAnnotatedTypeFactory realTypeFactory,
-            InferrableChecker realChecker, SlotManager slotManager,
-            ConstraintManager constraintManager) {
-        super(inferenceChecker, withCombineConstraints, realTypeFactory, realChecker, slotManager,
+            BaseAnnotatedTypeFactory realTypeFactory, InferrableChecker realChecker,
+            SlotManager slotManager, ConstraintManager constraintManager) {
+        super(inferenceChecker, false, realTypeFactory, realChecker, slotManager,
                 constraintManager);
         UnitsUtils.getInstance(processingEnv, elements);
         postInit();
@@ -68,19 +69,19 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
-        for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
-                .getAnnotationMirrors()) {
-            if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
-
-                System.out.println(" aliasing " + anno);
-
-                Map<String, Integer> exponents = new TreeMap<>();
-                exponents.put("m", 1);
-                exponents.put("s", 1);
-
-                return UnitsUtils.createInternalUnit("dummy", 1, exponents);
-            }
-        }
+//        for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
+//                .getAnnotationMirrors()) {
+//            if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
+//
+//                System.out.println(" aliasing " + anno);
+//
+//                Map<String, Integer> exponents = new TreeMap<>();
+//                exponents.put("m", 1);
+//                exponents.put("s", 1);
+//
+//                return UnitsUtils.createInternalUnit("dummy", 1, exponents);
+//            }
+//        }
 
         return super.aliasedAnnotation(anno);
     }
@@ -172,6 +173,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public TreeAnnotator createTreeAnnotator() {
+        UnitsUtils.getInstance(processingEnv, elements);
         return new ListTreeAnnotator(
                 new ImplicitsTreeAnnotator(this), new UnitsInferenceTreeAnnotator(
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
@@ -186,42 +188,51 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     slotManager);
         }
 
-        // @Override
-        // public Void visitIdentifier(IdentifierTree node, AnnotatedTypeMirror identifierType) {
-        // System.out.println(" visitID " + node + " atm: " + identifierType);
-        //
-        // return super.visitIdentifier(node, identifierType);
-        // }
+        @Override
+        public Void visitIdentifier(IdentifierTree node, AnnotatedTypeMirror identifierType) {
+            System.out.println(" visitID " + node + " atm: " + identifierType);
 
-        // @Override
-        // public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
-        //
-        // System.out.println(" UIATF visitVar tree: " + varTree);
-        // System.out.println(" atm: " + atm);
-        //
-        // super.visitVariable(varTree, atm);
-        //
-        // System.out.println(" post atm: " + atm);
-        //
-        // return null;
-        // }
+            return super.visitIdentifier(node, identifierType);
+        }
+//
+//        @Override
+//        public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
+//
+//            System.out.println(" UIATF visitVar tree: " + varTree);
+//            System.out.println(" atm: " + atm);
+//            System.out.println("   modifiers: " + varTree.getModifiers());
+//            System.out.println("   name: " + varTree.getName());
+//            System.out.println("   name expression: " + varTree.getNameExpression());
+//            System.out.println("   type: " + varTree.getType());
+//            System.out.println("   init: " + varTree.getInitializer());
+//            
+//            VariableElement varEle = TreeUtils.elementFromDeclaration(varTree);
+//            
+//            System.out.println("   varEle: " + varEle);
+//            
+//            super.visitVariable(varTree, atm);
+//            
+//            System.out.println(" post atm: " + atm);
+//
+//            return null;
+//        }
 
-        // @Override
-        // public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
-        // // TODO: refine it down to number literals
-        //
-        // // number literals are always dimensionless
-        //
-        // // Create an AM
-        // AnnotationMirror anno = UnitsUtils.DIMENSIONLESS; // Default for all literals
-        // // Create a slot
-        // ConstantSlot cs = variableAnnotator.createConstant(anno, literalTree);
-        // // Replace atm value
-        // atm.replaceAnnotation(cs.getValue());
-        // // Visit the atm with the tree
-        // variableAnnotator.visit(atm, literalTree);
-        // return null;
-        // }
+        @Override
+        public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
+            // TODO: refine it down to number literals
+
+            // number literals are always dimensionless
+
+            // Create an AM
+            AnnotationMirror anno = UnitsUtils.DIMENSIONLESS; // Default for all literals
+            // Create a slot
+            ConstantSlot cs = variableAnnotator.createConstant(anno, literalTree);
+            // Replace atm value
+            atm.replaceAnnotation(cs.getValue());
+            // Visit the atm with the tree
+            variableAnnotator.visit(atm, literalTree);
+            return null;
+        }
 
         @Override
         public Void visitBinary(BinaryTree binaryTree, AnnotatedTypeMirror atm) {

@@ -35,10 +35,15 @@ public class UnitsChecker extends BaseInferrableChecker {
             InferrableChecker realChecker, BaseAnnotatedTypeFactory realTypeFactory,
             SlotManager slotManager, ConstraintManager constraintManager) {
         return new UnitsInferenceAnnotatedTypeFactory(
-                inferenceChecker, realChecker.withCombineConstraints(), realTypeFactory,
-                realChecker, slotManager, constraintManager);
+                inferenceChecker, realTypeFactory, realChecker, slotManager, constraintManager);
     }
 
+//    @Override
+//    public boolean isConstant(Tree node) {
+//        System.out.println(" UnitsChecker isConstant " + node);
+//        return super.isConstant(node);
+//    }
+//    
     @Override
     public boolean isInsertMainModOfLocalVar() {
         return true;

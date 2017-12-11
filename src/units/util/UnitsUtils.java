@@ -21,11 +21,11 @@ public class UnitsUtils {
     private static UnitsUtils singletonInstance;
     private static ProcessingEnvironment processingEnv;
     private static Elements elements;
-    
+
     public static AnnotationMirror POLYUNIT;
     public static AnnotationMirror UNKNOWNUNITS;
-    public static AnnotationMirror DIMENSIONLESS;
     public static AnnotationMirror BOTTOM;
+    public static AnnotationMirror DIMENSIONLESS;
 
     public static AnnotationMirror METER;
     public static AnnotationMirror SECOND;
@@ -36,8 +36,13 @@ public class UnitsUtils {
 
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
         UNKNOWNUNITS = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
-        DIMENSIONLESS = createInternalUnit("Dimensionless", 0, new TreeMap<>());
         BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
+
+        // TODO: loop all base dimensions
+        Map<String, Integer> dimensionlessMap = new TreeMap<>();
+        dimensionlessMap.put("s", 0);
+        dimensionlessMap.put("m", 0);
+        DIMENSIONLESS = createInternalUnit("Dimensionless", 0, dimensionlessMap);
 
         METER = AnnotationBuilder.fromClass(elements, m.class);
         SECOND = AnnotationBuilder.fromClass(elements, s.class);
@@ -57,11 +62,12 @@ public class UnitsUtils {
         return singletonInstance;
     }
 
-    public static AnnotationMirror createInternalUnit(String originalName, int prefixExponent, Map<String, Integer> exponents) {
+    public static AnnotationMirror createInternalUnit(String originalName, int prefixExponent,
+            Map<String, Integer> exponents) {
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsInternal.class);
 
         List<Integer> expos = new ArrayList<>();
-        for(String key : exponents.keySet()) {
+        for (String key : exponents.keySet()) {
             expos.add(exponents.get(key));
         }
 
@@ -70,7 +76,7 @@ public class UnitsUtils {
         builder.setValue("exponents", expos.toArray(new Integer[] {}));
         return builder.build();
     }
-    
+
     //
     // public static OntologyValue determineOntologyValue(TypeMirror type) {
     // if (TypesUtils.isDeclaredOfName(type, "java.util.LinkedList")

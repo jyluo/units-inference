@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.VariableElement;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
@@ -22,6 +24,7 @@ import org.checkerframework.javacutil.TreeUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.VariableTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
@@ -35,6 +38,7 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
+import checkers.inference.util.CopyUtil;
 import units.qual.UnitsAlias;
 import units.util.UnitsUtils;
 
@@ -69,19 +73,19 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
-//        for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
-//                .getAnnotationMirrors()) {
-//            if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
-//
-//                System.out.println(" aliasing " + anno);
-//
-//                Map<String, Integer> exponents = new TreeMap<>();
-//                exponents.put("m", 1);
-//                exponents.put("s", 1);
-//
-//                return UnitsUtils.createInternalUnit("dummy", 1, exponents);
-//            }
-//        }
+        // for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
+        // .getAnnotationMirrors()) {
+        // if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
+        //
+        // System.out.println(" aliasing " + anno);
+        //
+        // Map<String, Integer> exponents = new TreeMap<>();
+        // exponents.put("m", 1);
+        // exponents.put("s", 1);
+        //
+        // return UnitsUtils.createInternalUnit("dummy", 1, exponents);
+        // }
+        // }
 
         return super.aliasedAnnotation(anno);
     }
@@ -98,6 +102,36 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 AnnotatedTypeFactory realTypeFactory, InferrableChecker realChecker,
                 SlotManager slotManager, ConstraintManager constraintManager) {
             super(typeFactory, realTypeFactory, realChecker, slotManager, constraintManager);
+        }
+
+        @Override
+        public Void visitDeclared(AnnotatedDeclaredType adt, Tree tree) {
+            // Use super to create variableSlots first
+            super.visitDeclared(adt, tree);
+
+            if (tree instanceof BinaryTree) {
+                return null;
+            }
+
+            switch (tree.getKind()) {
+                case VARIABLE:
+                    // TODO: filter out enum? See super implementation
+
+                    // Add an equality constraint between the varAnnot and the type qualifier
+                    // declared on the variable (or default type qualifier)
+                    AnnotatedTypeMirror useType = realTypeFactory.getAnnotatedType(tree);
+                    ConstantSlot csUseType = variableAnnotator.createConstant(
+                            useType.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS), tree);
+                    Slot vsVarAnnot =
+                            slotManager.getSlot(adt.getAnnotationInHierarchy(getVarAnnot()));
+                    constraintManager.addEqualityConstraint(vsVarAnnot, csUseType);
+                    break;
+
+                default:
+                    break;
+            }
+
+            return null;
         }
 
         @Override
@@ -194,28 +228,28 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             return super.visitIdentifier(node, identifierType);
         }
-//
-//        @Override
-//        public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
-//
-//            System.out.println(" UIATF visitVar tree: " + varTree);
-//            System.out.println(" atm: " + atm);
-//            System.out.println("   modifiers: " + varTree.getModifiers());
-//            System.out.println("   name: " + varTree.getName());
-//            System.out.println("   name expression: " + varTree.getNameExpression());
-//            System.out.println("   type: " + varTree.getType());
-//            System.out.println("   init: " + varTree.getInitializer());
-//            
-//            VariableElement varEle = TreeUtils.elementFromDeclaration(varTree);
-//            
-//            System.out.println("   varEle: " + varEle);
-//            
-//            super.visitVariable(varTree, atm);
-//            
-//            System.out.println(" post atm: " + atm);
-//
-//            return null;
-//        }
+        //
+        // @Override
+        // public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
+        //
+        // System.out.println(" UIATF visitVar tree: " + varTree);
+        // System.out.println(" atm: " + atm);
+        // System.out.println(" modifiers: " + varTree.getModifiers());
+        // System.out.println(" name: " + varTree.getName());
+        // System.out.println(" name expression: " + varTree.getNameExpression());
+        // System.out.println(" type: " + varTree.getType());
+        // System.out.println(" init: " + varTree.getInitializer());
+        //
+        // VariableElement varEle = TreeUtils.elementFromDeclaration(varTree);
+        //
+        // System.out.println(" varEle: " + varEle);
+        //
+        // super.visitVariable(varTree, atm);
+        //
+        // System.out.println(" post atm: " + atm);
+        //
+        // return null;
+        // }
 
         @Override
         public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {

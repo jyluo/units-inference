@@ -16,9 +16,11 @@ import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.Pair;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.LiteralTree;
+import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.VariableTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
@@ -29,17 +31,22 @@ import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.Slot;
+import checkers.inference.model.VariableSlot;
 import units.qual.UnitsAlias;
 import units.util.UnitsUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
 
+    private final ConstraintManager constraintManager;
+    
     public UnitsInferenceAnnotatedTypeFactory(InferenceChecker inferenceChecker,
             boolean withCombineConstraints, BaseAnnotatedTypeFactory realTypeFactory,
             InferrableChecker realChecker, SlotManager slotManager,
             ConstraintManager constraintManager) {
         super(inferenceChecker, withCombineConstraints, realTypeFactory, realChecker, slotManager,
                 constraintManager);
+        this.constraintManager = constraintManager;
         UnitsUtils.getInstance(processingEnv, elements);
         postInit();
     }
@@ -79,7 +86,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         
         return super.aliasedAnnotation(anno);
     }
-    
+
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new UnitsInferenceQualifierHierarchy(factory);
@@ -127,17 +134,20 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new ImplicitsTreeAnnotator(this), new UnitsInferenceTreeAnnotator(
-                        this, realChecker, realTypeFactory, variableAnnotator, slotManager));
+                new ImplicitsTreeAnnotator(this),
+                new UnitsInferenceTreeAnnotator(
+                        this, realChecker, realTypeFactory, variableAnnotator, slotManager,
+                        constraintManager));
     }
 
     public class UnitsInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
         public UnitsInferenceTreeAnnotator(InferenceAnnotatedTypeFactory atypeFactory,
                 InferrableChecker realChecker, AnnotatedTypeFactory realAnnotatedTypeFactory,
-                VariableAnnotator variableAnnotator, SlotManager slotManager) {
+                VariableAnnotator variableAnnotator, SlotManager slotManager,
+                ConstraintManager constraintManager) {
             super(atypeFactory, realChecker, realAnnotatedTypeFactory, variableAnnotator,
-                    slotManager);
+                    slotManager, constraintManager);
         }
         
 //        @Override
@@ -147,18 +157,18 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 //            return super.visitIdentifier(node, identifierType);
 //        }
 
-        @Override
-        public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
-            
-            System.out.println(" UIATF visitVar tree: " + varTree);
-            System.out.println("      atm: " + atm);
-            
-            super.visitVariable(varTree, atm);
-            
-            System.out.println(" post atm: " + atm);
-            
-            return null;
-        }
+//        @Override
+//        public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
+//            
+//            System.out.println(" UIATF visitVar tree: " + varTree);
+//            System.out.println("      atm: " + atm);
+//            
+//            super.visitVariable(varTree, atm);
+//            
+//            System.out.println(" post atm: " + atm);
+//            
+//            return null;
+//        }
         
 //        @Override
 //        public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
@@ -179,18 +189,40 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         @Override
         public Void visitBinary(BinaryTree binaryTree, AnnotatedTypeMirror atm) {
-            // Overrides only required if i want to replace a varslot with constant slot
-            // varAnnotator adds varSlots, call it sometimes, see InfTreeANnotator
+            Kind kind = binaryTree.getKind();
+            switch(kind) {
+                case PLUS:
+                    // visit to create a varslot for the result atm
+                    variableAnnotator.visit(atm, binaryTree);
+                    addArithmeticConstraint(kind, binaryTree, atm);
+                    return null;
+                default:
+                    return super.visitBinary(binaryTree, atm);
+            }
+            
+//            Map<String, Integer> exponents = new TreeMap<>();
+//            exponents.put("m", 1);
+//            exponents.put("s", 1);
+//
+//            AnnotationMirror anno = UnitsUtils.createInternalUnit("dummy", 1, exponents);
+//            ConstantSlot cs = variableAnnotator.createConstant(anno, binaryTree);
+//            atm.replaceAnnotation(cs.getValue());
+//            variableAnnotator.visit(atm, binaryTree);
+        }
+        
+        private void addArithmeticConstraint(Kind kind, BinaryTree binaryTree,
+                AnnotatedTypeMirror atm) {
+            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
+            AnnotatedTypeMirror rhsATM =
+                    atypeFactory.getAnnotatedType(binaryTree.getRightOperand());
 
-            Map<String, Integer> exponents = new TreeMap<>();
-            exponents.put("m", 1);
-            exponents.put("s", 1);
+            Slot lhs = slotManager.getVariableSlot(lhsATM);
+            Slot rhs = slotManager.getVariableSlot(rhsATM);
+            Slot result = slotManager.getVariableSlot(atm);
 
-            AnnotationMirror anno = UnitsUtils.createInternalUnit("dummy", 1, exponents);
-            ConstantSlot cs = variableAnnotator.createConstant(anno, binaryTree);
-            atm.replaceAnnotation(cs.getValue());
-            variableAnnotator.visit(atm, binaryTree);
-            return null;
+            if (binaryTree.getKind() == Kind.PLUS) {
+                constraintManager.addAdditionConstraint(lhs, rhs, result);
+            }
         }
 
         // @Override

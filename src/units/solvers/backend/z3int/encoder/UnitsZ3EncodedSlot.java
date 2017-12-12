@@ -12,9 +12,7 @@ public class UnitsZ3EncodedSlot {
     private final int slotID;
 
     private BoolExpr uu;
-    // private BoolExpr uuEquality;
     private BoolExpr ub;
-    // private BoolExpr ubEquality;
 
     private IntExpr prefixExponent;
 

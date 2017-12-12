@@ -25,7 +25,7 @@ public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
      */
     @Override
     protected boolean isSupportedAnnotationClass(Class<? extends Annotation> annoClass) {
-        if(annoClass.getAnnotation(UnitsAlias.class) != null) {
+        if (annoClass.getAnnotation(UnitsAlias.class) != null) {
             return false;
         }
 

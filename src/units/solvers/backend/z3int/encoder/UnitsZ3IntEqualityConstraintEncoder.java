@@ -13,12 +13,12 @@ import checkers.inference.util.ConstraintVerifier;
 import units.util.UnitsUtils;
 
 public class UnitsZ3IntEqualityConstraintEncoder
-        extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot>
+        extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
         implements EqualityConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntEqualityConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
-            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> z3IntFormatTranslator) {
+            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 

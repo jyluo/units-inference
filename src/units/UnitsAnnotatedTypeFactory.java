@@ -46,15 +46,15 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
         qualSet.addAll(getBundledTypeQualifiersWithPolyAll());
 
-//        // load all the external units
-//        loadAllExternalUnits();
-//
-//        // copy all loaded external Units to qual set
-//        qualSet.addAll(externalQualsMap.values());
-        
+        // // load all the external units
+        // loadAllExternalUnits();
+        //
+        // // copy all loaded external Units to qual set
+        // qualSet.addAll(externalQualsMap.values());
+
         return qualSet;
     }
-    
+
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
         // TODO: proper alias conversion

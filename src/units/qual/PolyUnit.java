@@ -10,14 +10,17 @@ import org.checkerframework.framework.qual.PolymorphicQualifier;
 /**
  * A polymorphic qualifier for the units-of-measure type system implemented by the Units Checker.
  *
- * <p>Any method written using @PolyUnit conceptually has many versions: in each one, every instance
+ * <p>
+ * Any method written using @PolyUnit conceptually has many versions: in each one, every instance
  * of @PolyUnit has been replaced by a different unit qualifier such as @kg (kilograms) or @h
  * (hours).
  *
- * <p>The following example shows how method {@code triplePolyUnit} can be used to process either
+ * <p>
+ * The following example shows how method {@code triplePolyUnit} can be used to process either
  * meters or seconds:
  *
- * <pre><code>
+ * <pre>
+ * <code>
  * {@literal @}PolyUnit int triplePolyUnit(@PolyUnit int amount) {
  *    return 3*amount;
  *  }
@@ -32,7 +35,8 @@ import org.checkerframework.framework.qual.PolymorphicQualifier;
  *    // :: error: (assignment.type.incompatible)
  *   {@literal @}s int sec3 = triplePolyUnit(m1);
  *  }
- * </code></pre>
+ * </code>
+ * </pre>
  *
  * @checker_framework.manual #units-checker Units Checker
  * @checker_framework.manual #qualifier-polymorphism Qualifier polymorphism
@@ -41,4 +45,5 @@ import org.checkerframework.framework.qual.PolymorphicQualifier;
 @PolymorphicQualifier(UnknownUnits.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface PolyUnit {}
+public @interface PolyUnit {
+}

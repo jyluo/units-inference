@@ -25,10 +25,11 @@ import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 import units.solvers.backend.z3int.encoder.UnitsZ3EncodedSlot;
 import units.solvers.backend.z3int.encoder.UnitsZ3IntConstraintEncoderFactory;
+import units.solvers.backend.z3int.encoder.UnitsZ3SolutionSlot;
 import units.util.UnitsUtils;
 
 public class UnitsZ3FormatTranslator
-        extends Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> {
+        extends Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> {
 
     public static BoolExpr Z3TRUE;
     public static BoolExpr Z3FALSE;
@@ -129,7 +130,7 @@ public class UnitsZ3FormatTranslator
             ProcessingEnvironment processingEnv) {
 
         Map<Integer, AnnotationMirror> result = new HashMap<>();
-        Map<Integer, UnitsZ3EncodedSlot> solutionSlots = new HashMap<>();
+        Map<Integer, UnitsZ3SolutionSlot> solutionSlots = new HashMap<>();
 
         System.out.println("========== SOLUTION ==========");
 
@@ -156,13 +157,12 @@ public class UnitsZ3FormatTranslator
             int slotID = slot.first;
             String component = slot.second;
 
-            // Create a fresh constant encoded slot if needed in the map
+            // Create a fresh solution slot if needed in the map
             if (!solutionSlots.containsKey(slotID)) {
-                solutionSlots.put(slotID, UnitsZ3EncodedSlot.makeConstantSlot(ctx, slotID));
+                solutionSlots.put(slotID, new UnitsZ3SolutionSlot(slotID));
             }
 
-            // TODO: could define a SolutionSlot datatype with primitive bools and ints
-            UnitsZ3EncodedSlot z3Slot = solutionSlots.get(slotID);
+            UnitsZ3SolutionSlot z3Slot = solutionSlots.get(slotID);
             if (component.contentEquals(UnitsUtils.uuSlotName)) {
                 z3Slot.setUnknownUnits(constInterp.isTrue());
             } else if (component.contentEquals(UnitsUtils.ubSlotName)) {
@@ -193,10 +193,12 @@ public class UnitsZ3FormatTranslator
 
     // Convert a UnitsZ3EncodedSlot to an AnnotationMirror
     @Override
-    public AnnotationMirror decodeSolution(UnitsZ3EncodedSlot solutionSlot,
+    public AnnotationMirror decodeSolution(UnitsZ3SolutionSlot solutionSlot,
             ProcessingEnvironment processingEnv) {
-        System.out.println(solutionSlot);
-        return null;
-    }
 
+        // TODO: infer original name somehow
+        return UnitsUtils.createInternalUnit("", solutionSlot.getUnknownUnits(),
+                solutionSlot.getUnitsBottom(), solutionSlot.getPrefixExponent(),
+                solutionSlot.getExponents());
+    }
 }

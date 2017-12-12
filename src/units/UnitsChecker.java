@@ -42,12 +42,12 @@ public class UnitsChecker extends BaseInferrableChecker {
                 inferenceChecker, realTypeFactory, realChecker, slotManager, constraintManager);
     }
 
-//    @Override
-//    public boolean isConstant(Tree node) {
-//        System.out.println(" UnitsChecker isConstant " + node);
-//        return super.isConstant(node);
-//    }
-//    
+    // @Override
+    // public boolean isConstant(Tree node) {
+    // System.out.println(" UnitsChecker isConstant " + node);
+    // return super.isConstant(node);
+    // }
+    //
     @Override
     public boolean isInsertMainModOfLocalVar() {
         return true;

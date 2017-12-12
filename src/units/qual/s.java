@@ -14,5 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@UnitsAlias({0,1})
-public @interface s {}
+@UnitsAlias({0, 1})
+public @interface s {
+}

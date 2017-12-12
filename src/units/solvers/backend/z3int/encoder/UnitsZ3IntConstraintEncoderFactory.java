@@ -25,10 +25,10 @@ import checkers.inference.util.ConstraintVerifier;
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
 public class UnitsZ3IntConstraintEncoderFactory
-        extends Z3IntConstraintEncoderFactory<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> {
+        extends Z3IntConstraintEncoderFactory<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> {
     public UnitsZ3IntConstraintEncoderFactory(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
-            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> z3IntFormatTranslator) {
+            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 

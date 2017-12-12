@@ -101,7 +101,7 @@ public class UnitsUtils {
     public static final String uuSlotName = "UnknownUnits";
     public static final String ubSlotName = "UnitsBottom";
     public static final String prefixSlotName = "Prefix";
-    
+
     public static String z3VarName(int slotID, String component) {
         return slotID + String.valueOf(idComponentSeparator) + component;
     }

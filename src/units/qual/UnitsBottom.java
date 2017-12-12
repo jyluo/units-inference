@@ -22,14 +22,12 @@ import org.checkerframework.framework.qual.TargetLocations;
  * @checker_framework.manual #bottom-type the bottom type
  */
 @SubtypeOf({}) // needs to be done programmatically
-@ImplicitFor(
-    types = {TypeKind.VOID, TypeKind.NULL},
-    typeNames = Void.class,
-    literals = LiteralKind.NULL
-)
+@ImplicitFor(types = {TypeKind.VOID, TypeKind.NULL}, typeNames = Void.class,
+        literals = LiteralKind.NULL)
 @DefaultFor({LOWER_BOUND})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @TargetLocations({EXPLICIT_LOWER_BOUND, EXPLICIT_UPPER_BOUND})
-public @interface UnitsBottom {}
+public @interface UnitsBottom {
+}

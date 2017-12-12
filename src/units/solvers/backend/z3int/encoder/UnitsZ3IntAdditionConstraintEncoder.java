@@ -12,12 +12,12 @@ import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 
 public class UnitsZ3IntAdditionConstraintEncoder
-        extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot>
+        extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
         implements AdditionConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntAdditionConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
-            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> z3IntFormatTranslator) {
+            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 

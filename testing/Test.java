@@ -7,6 +7,8 @@ class Main {
             @BaseUnit(unit = "s", exponent = -3)
         }) Integer x = 5 + 6;
 
+        Integer y = x;
+
         // @m Integer x = 5 + 6;
 
         // Integer y = 5 + 6;

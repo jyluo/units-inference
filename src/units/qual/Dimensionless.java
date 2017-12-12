@@ -27,23 +27,20 @@ import org.checkerframework.framework.qual.SubtypeOf;
  */
 @SubtypeOf(UnknownUnits.class)
 @DefaultFor({
-    // exceptions are always dimensionless
-    EXCEPTION_PARAMETER,
-    // most user classes are dimensionless, and when used as a local reference there will be
-    // many type.invalid errors, this is a better default, where any variable that should be
-    // refined can be tagged UnknownUnits
-    LOCAL_VARIABLE, // this somehow also applies to enhanced for loop variables
-    RESOURCE_VARIABLE,
-    PARAMETER,
-})
-@ImplicitFor(
-    literals = {
-        INT, LONG, FLOAT, DOUBLE, BOOLEAN, CHAR, STRING
-    }, // not sure that literals need to be impliclty declared
-    typeNames = {Throwable.class, Exception.class, Class.class}
-)
-@UnitsAlias({0,0})
+        // exceptions are always dimensionless
+        EXCEPTION_PARAMETER,
+        // most user classes are dimensionless, and when used as a local reference there will be
+        // many type.invalid errors, this is a better default, where any variable that should be
+        // refined can be tagged UnknownUnits
+        LOCAL_VARIABLE, // this somehow also applies to enhanced for loop variables
+        RESOURCE_VARIABLE, PARAMETER,})
+@ImplicitFor(literals = {INT, LONG, FLOAT, DOUBLE, BOOLEAN, CHAR, STRING}, // not sure that literals
+                                                                           // need to be impliclty
+                                                                           // declared
+        typeNames = {Throwable.class, Exception.class, Class.class})
+@UnitsAlias({0, 0})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface Dimensionless {}
+public @interface Dimensionless {
+}

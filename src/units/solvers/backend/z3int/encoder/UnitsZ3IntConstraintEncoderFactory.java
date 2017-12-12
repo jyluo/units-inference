@@ -24,22 +24,22 @@ import checkers.inference.util.ConstraintVerifier;
  *
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
-public class UnitsZ3IntConstraintEncoderFactory extends Z3IntConstraintEncoderFactory {
+public class UnitsZ3IntConstraintEncoderFactory extends Z3IntConstraintEncoderFactory<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> {
     public UnitsZ3IntConstraintEncoderFactory(Lattice lattice, ConstraintVerifier verifier,
-            Context context, Z3IntFormatTranslator z3IntFormatTranslator) {
+            Context context, Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> z3IntFormatTranslator) {
         super(lattice, verifier, context, z3IntFormatTranslator);
     }
 
     @Override
     public UnitsZ3IntSubtypeConstraintEncoder createSubtypeConstraintEncoder() {
         return new UnitsZ3IntSubtypeConstraintEncoder(
-                lattice, verifier, context, z3IntFormatTranslator);
+                lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
     @Override
     public EqualityConstraintEncoder<BoolExpr> createEqualityConstraintEncoder() {
         return new UnitsZ3IntEqualityConstraintEncoder(
-                lattice, verifier, context, z3IntFormatTranslator);
+                lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class UnitsZ3IntConstraintEncoderFactory extends Z3IntConstraintEncoderFa
     @Override
     public AdditionConstraintEncoder<BoolExpr> createAdditionConstraintEncoder() {
         return new UnitsZ3IntAdditionConstraintEncoder(
-                lattice, verifier, context, z3IntFormatTranslator);
+                lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
     @Override

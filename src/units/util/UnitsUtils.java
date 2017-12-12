@@ -3,13 +3,14 @@ package units.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.ErrorReporter;
-import units.qual.Dimensionless;
 import units.qual.PolyUnit;
 import units.qual.UnitsBottom;
 import units.qual.UnitsInternal;
@@ -27,6 +28,9 @@ public class UnitsUtils {
     public static AnnotationMirror BOTTOM;
     public static AnnotationMirror DIMENSIONLESS;
 
+    // an instance of {@link UnitsInternal} with no values in its elements
+    public static AnnotationMirror RAWUNITSINTERNAL;
+
     public static AnnotationMirror METER;
     public static AnnotationMirror SECOND;
 
@@ -43,6 +47,8 @@ public class UnitsUtils {
         dimensionlessMap.put("s", 0);
         dimensionlessMap.put("m", 0);
         DIMENSIONLESS = createInternalUnit("Dimensionless", 0, dimensionlessMap);
+
+        RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsInternal.class);
 
         METER = AnnotationBuilder.fromClass(elements, m.class);
         SECOND = AnnotationBuilder.fromClass(elements, s.class);
@@ -71,88 +77,26 @@ public class UnitsUtils {
             expos.add(exponents.get(key));
         }
 
-        // builder.setValue("originalName", originalName);
+        builder.setValue("originalName", originalName);
         builder.setValue("prefixExponent", prefixExponent);
         builder.setValue("exponents", expos.toArray(new Integer[] {}));
-        return builder.build();
-    }
+        AnnotationMirror result = builder.build();
 
-    //
-    // public static OntologyValue determineOntologyValue(TypeMirror type) {
-    // if (TypesUtils.isDeclaredOfName(type, "java.util.LinkedList")
-    // || TypesUtils.isDeclaredOfName(type, "java.util.ArrayList")
-    // || type.getKind().equals(TypeKind.ARRAY)) {
-    // return OntologyValue.SEQUENCE;
-    // }
-    // // cannot determine OntologyValue by the given type
-    // return OntologyValue.TOP;
-    // }
-    //
-    // public static boolean isOntologyTop(AnnotationMirror type) {
-    // if (!AnnotationUtils.areSameIgnoringValues(ONTOLOGY, type)) {
-    // return false;
-    // }
-    //
-    // OntologyValue[] values = getOntologyValues(type);
-    // for (OntologyValue value : values) {
-    // if (value == OntologyValue.TOP) {
-    // return true;
-    // }
-    // }
-    //
-    // return false;
-    // }
-    //
-    // public static AnnotationMirror createOntologyAnnotationByValues(ProcessingEnvironment
-    // processingEnv,
-    // OntologyValue... values) {
-    // validateOntologyValues(values);
-    // AnnotationBuilder builder = new AnnotationBuilder(processingEnv, Ontology.class);
-    // builder.setValue("values", values);
-    // return builder.build();
-    // }
-    //
-    // public static OntologyValue[] getOntologyValues(AnnotationMirror type) {
-    // List<OntologyValue> ontologyValueList = AnnotationUtils.getElementValueEnumArray(type,
-    // "values", OntologyValue.class, true);
-    // return ontologyValueList.toArray(new OntologyValue[ontologyValueList.size()]);
-    // }
-    //
-    // public static EnumSet<OntologyValue> lubOfOntologyValues(EnumSet<OntologyValue> valueSet1,
-    // EnumSet<OntologyValue> valueSet2) {
-    // EnumSet<OntologyValue> lub = EnumSet.noneOf(OntologyValue.class);
-    //
-    // for (OntologyValue value1 : valueSet1) {
-    // if (value1 == OntologyValue.TOP) {
-    // lub.clear();
-    // break;
-    // }
-    // if (valueSet2.contains(value1)) {
-    // lub.add(value1);
-    // }
-    // }
-    //
-    // if (lub.isEmpty()) {
-    // lub.add(OntologyValue.TOP);
-    // }
-    //
-    // return lub;
-    // }
-    //
-    // /**
-    // * check whether the passed values are validated as arguments of Ontology qualifier
-    // * valid values should not be null, and contains at least one ontology value, and
-    // * doesn't cotains null element inside the array.
-    // * @param values the checking values
-    // */
-    // protected static void validateOntologyValues(OntologyValue... values) {
-    // if (values == null || values.length < 1) {
-    // ErrorReporter.errorAbort("ontology values are invalid: " + values);
-    // }
-    // for (OntologyValue value : values) {
-    // if (value == null) {
-    // ErrorReporter.errorAbort("ontology values are invalid: " + values);
-    // }
-    // }
-    // }
+        return result;
+    }
+    
+    public static String slotName(int slotID, String component) {
+        return slotID + " " + component;
+    }
+    
+    private static Set<String> baseUnits;
+    
+    public static Set<String> baseUnits() {
+        if(baseUnits == null) {
+            baseUnits = new TreeSet<>();
+            baseUnits.add("m");
+            baseUnits.add("s");
+        }
+        return baseUnits;
+    }
 }

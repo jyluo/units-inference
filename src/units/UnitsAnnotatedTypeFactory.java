@@ -57,20 +57,22 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
-        for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement().getAnnotationMirrors()) {
-            if(AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
-                
+        // TODO: proper alias conversion
+        for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
+                .getAnnotationMirrors()) {
+            if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
+
                 Map<String, Integer> exponents = new TreeMap<>();
                 exponents.put("m", 1);
                 exponents.put("s", 1);
-                
+
                 return UnitsUtils.createInternalUnit("dummy", 1, exponents);
             }
         }
-        
+
         return super.aliasedAnnotation(anno);
     }
-    
+
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new UnitsQualifierHierarchy(factory, BOTTOM);
@@ -81,7 +83,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         public UnitsQualifierHierarchy(MultiGraphFactory mgf, AnnotationMirror bottom) {
             super(mgf, bottom);
         }
-        
+
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
             // @UnitsInternal <: Top
@@ -102,12 +104,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return super.isSubtype(subAnno, superAnno);
         }
     }
-
-    // @Override
-    // protected void addCheckedCodeDefaults(QualifierDefaults defaults) {
-    // TypeUseLocation[] topLocations = {TypeUseLocation.ALL};
-    // defaults.addCheckedCodeDefaults(OntologyUtils.ONTOLOGY_TOP, topLocations);
-    // }
 
     @Override
     public TreeAnnotator createTreeAnnotator() {

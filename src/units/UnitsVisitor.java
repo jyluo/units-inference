@@ -1,8 +1,6 @@
 package units;
 
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import com.sun.source.tree.AssignmentTree;
-import com.sun.source.tree.VariableTree;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceVisitor;
 
@@ -13,17 +11,17 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         super(checker, ichecker, factory, infer);
     }
 
-    @Override
-    public Void visitVariable(VariableTree node, Void p) {
-        System.out.println(" UnitsVisitor visitVariable: " + node);
-        return super.visitVariable(node, p);
-    }
-    
-    @Override
-    public Void visitAssignment(AssignmentTree node, Void p) {
-        System.out.println(" UnitsVisitor visitAssignment: " + node);
-        return super.visitAssignment(node, p);
-    }
+//    @Override
+//    public Void visitVariable(VariableTree node, Void p) {
+//        System.out.println(" UnitsVisitor visitVariable: " + node);
+//        return super.visitVariable(node, p);
+//    }
+//    
+//    @Override
+//    public Void visitAssignment(AssignmentTree node, Void p) {
+//        System.out.println(" UnitsVisitor visitAssignment: " + node);
+//        return super.visitAssignment(node, p);
+//    }
     
     // Slots created in ATF
 

@@ -1,10 +1,7 @@
 package units.solvers.backend.z3int.encoder;
 
-import java.util.Set;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.IntExpr;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -14,21 +11,22 @@ import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEn
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 
-public class UnitsZ3IntSubtypeConstraintEncoder extends Z3IntAbstractConstraintEncoder
+public class UnitsZ3IntSubtypeConstraintEncoder
+        extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot>
         implements SubtypeConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntSubtypeConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
-            Context context, Z3IntFormatTranslator z3IntFormatTranslator) {
+            Context context,
+            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> z3IntFormatTranslator) {
         super(lattice, verifier, context, z3IntFormatTranslator);
     }
 
     // fornow very hacky
     // subtype <: supertype if int value of subtype <= supertype
     protected BoolExpr encode(Slot subtype, Slot supertype) {
-        Set<Expr> subtypeInt = subtype.serialize(z3IntFormatTranslator);
-        Set<Expr> supertypeInt = supertype.serialize(z3IntFormatTranslator);
+        UnitsZ3EncodedSlot subtypeInt = subtype.serialize(z3IntFormatTranslator);
+        UnitsZ3EncodedSlot supertypeInt = supertype.serialize(z3IntFormatTranslator);
 
-        // TODO: move this class into Units encoder and specialize
         return null; // context.mkLe(subtypeInt, supertypeInt);
     }
 

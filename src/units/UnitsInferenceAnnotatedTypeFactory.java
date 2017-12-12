@@ -12,9 +12,9 @@ import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
+import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.VariableTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
@@ -24,6 +24,7 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
+import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
@@ -94,27 +95,45 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         @Override
         public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree binaryTree) {
-            // Identical to super implementation except that we don't create a LUB constraint here
-            // by default.
+            // Super creates an LUB constraint by default, we create an VariableSlot here instead
+            // for the result of the binary op and create LUB constraint in tree annotator.
             if (treeToVarAnnoPair.containsKey(binaryTree)) {
                 atm.replaceAnnotations(treeToVarAnnoPair.get(binaryTree).second);
             } else {
-                AnnotatedTypeMirror a =
-                        inferenceTypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
-                AnnotatedTypeMirror b =
-                        inferenceTypeFactory.getAnnotatedType(binaryTree.getRightOperand());
-                Set<? extends AnnotationMirror> lubs = inferenceTypeFactory.getQualifierHierarchy()
-                        .leastUpperBounds(a.getEffectiveAnnotations(), b.getEffectiveAnnotations());
-                atm.clearAnnotations();
-                atm.addAnnotations(lubs);
-                if (slotManager.getVariableSlot(atm).isVariable()) {
-                    final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair =
-                            Pair.<VariableSlot, Set<? extends AnnotationMirror>>of(
-                                    slotManager.getVariableSlot(atm), lubs);
-                    treeToVarAnnoPair.put(binaryTree, varATMPair);
-                } else {
-                    // The slot returned was a constant. Regenerating it is ok.
+                VariableSlot result = slotManager.getVariableSlot(atm);
+                if (result == null) {
+                    // if we want the result to be inserted into source, use this version:
+                    // result = slotManager.createVariableSlot(treeToLocation(binaryTree));
+
+                    // create a non-insertable var slot
+                    AnnotatedTypeMirror lhsATM =
+                            inferenceTypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
+                    AnnotatedTypeMirror rhsATM =
+                            inferenceTypeFactory.getAnnotatedType(binaryTree.getRightOperand());
+
+                    VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
+                    VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
+
+                    // TODO: renamed CombVariableSlot to TernaryVarSlot
+                    CombVariableSlot newResult = slotManager.createCombVariableSlot(lhs, rhs);
+
+                    lhs.addMergedToSlot(newResult);
+                    rhs.addMergedToSlot(newResult);
+
+                    result = newResult;
                 }
+
+                AnnotationMirror resultAM = slotManager.getAnnotation(result);
+                atm.clearAnnotations();
+                atm.replaceAnnotation(resultAM);
+
+                Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
+                resultSet.add(resultAM);
+
+                final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair =
+                        Pair.<VariableSlot, Set<? extends AnnotationMirror>>of(
+                                slotManager.getVariableSlot(atm), resultSet);
+                treeToVarAnnoPair.put(binaryTree, varATMPair);
             }
         }
     }
@@ -154,65 +173,90 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // Use super to create a varAnnot for the variable declaration
             super.visitVariable(varTree, atm);
 
-            // Add an equality constraint between the varAnnot and the type qualifier
-            // declared on the variable (or default type qualifier)
+            boolean hasExplicitUnitsAnnotation = false;
             AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(varTree);
-            AnnotationMirror realAnno = realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
-            ConstantSlot declaredAnnoSlot = variableAnnotator.createConstant(realAnno, varTree);
-            Slot varAnnotSlot = slotManager.getSlot(atm.getAnnotationInHierarchy(getVarAnnot()));
-            constraintManager.addEqualityConstraint(varAnnotSlot, declaredAnnoSlot);
+            for (AnnotationMirror anno : realATM.getExplicitAnnotations()) {
+                if (realTypeFactory.isSupportedQualifier(anno)) {
+                    hasExplicitUnitsAnnotation = true;
+                    break;
+                }
+            }
+
+            if (hasExplicitUnitsAnnotation) {
+                // Create a ConstantSlot for the explicit annotation
+                AnnotationMirror realAnno =
+                        realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
+                ConstantSlot declaredAnnoSlot = variableAnnotator.createConstant(realAnno, varTree);
+                // Get the VariableSlot generated for the variable
+                Slot varAnnotSlot =
+                        slotManager.getSlot(atm.getAnnotationInHierarchy(getVarAnnot()));
+                // Add Equality constraint between the VariableSlot and the ConstantSlot
+                constraintManager.addEqualityConstraint(varAnnotSlot, declaredAnnoSlot);
+            }
 
             return null;
         }
 
-        @Override
-        public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
-            // get the default type for literals
-            AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(literalTree);
-            AnnotationMirror realAnno = realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
-            ConstantSlot cs = variableAnnotator.createConstant(realAnno, literalTree);
-            atm.replaceAnnotation(cs.getValue());
-            variableAnnotator.visit(atm, literalTree);
-            return null;
-        }
+        // @Override
+        // public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
+        // // apply the default type for literals
+        // // TODO: generally inference should not apply defaults, and instead create slots.
+        // // In units, this results in literals being casted into a unit type. Should create
+        // // post-inference code-fix tool to replace casts with UnitsTools multiplication.
+        // AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(literalTree);
+        // AnnotationMirror realAnno = realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
+        // ConstantSlot cs = variableAnnotator.createConstant(realAnno, literalTree);
+        // atm.replaceAnnotation(cs.getValue());
+        // variableAnnotator.visit(atm, literalTree);
+        // return null;
+        // }
 
         @Override
         public Void visitBinary(BinaryTree binaryTree, AnnotatedTypeMirror atm) {
-            Kind kind = binaryTree.getKind();
-            switch (kind) {
-                case PLUS:
-                    // visit to create a varslot for the result atm
-                    variableAnnotator.visit(atm, binaryTree);
-                    addArithmeticConstraint(kind, binaryTree, atm);
-                    return null;
-                default:
-                    return super.visitBinary(binaryTree, atm);
+            // From super:
+            // Unary trees and compound assignments (x++ or x +=y) get desugared
+            // by dataflow to be x = x + 1 and x = x + y.
+            // Dataflow will then look up the types of the binary operations (x + 1) and (y + 1)
+            //
+            // InferenceTransfer currently sets the value of a compound assignment or unary
+            // to be the just the type of the variable.
+            // So, the type returned from this for desugared trees is not used.
+            // We don't create a constraint to reduce confusion
+            if (realTypeFactory.getPath(binaryTree) == null) {
+                // Desugared tree's don't have paths.
+                // There currently is some case that we are missing that requires us to annotate
+                // these.
+                return null;
             }
 
-            // Map<String, Integer> exponents = new TreeMap<>();
-            // exponents.put("m", 1);
-            // exponents.put("s", 1);
-            //
-            // AnnotationMirror anno = UnitsUtils.createInternalUnit("dummy", 1, exponents);
-            // ConstantSlot cs = variableAnnotator.createConstant(anno, binaryTree);
-            // atm.replaceAnnotation(cs.getValue());
-            // variableAnnotator.visit(atm, binaryTree);
-        }
+            // visit via variableAnnotator to create a ArithmeticVariableSlot for the result atm
+            variableAnnotator.visit(atm, binaryTree);
 
-        private void addArithmeticConstraint(Kind kind, BinaryTree binaryTree,
-                AnnotatedTypeMirror atm) {
+            Kind kind = binaryTree.getKind();
             AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
             AnnotatedTypeMirror rhsATM =
                     atypeFactory.getAnnotatedType(binaryTree.getRightOperand());
+            VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
+            VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
+            VariableSlot result = slotManager.getVariableSlot(atm);
 
-            Slot lhs = slotManager.getVariableSlot(lhsATM);
-            Slot rhs = slotManager.getVariableSlot(rhsATM);
-            Slot result = slotManager.getVariableSlot(atm);
-
-            if (binaryTree.getKind() == Kind.PLUS) {
-                constraintManager.addAdditionConstraint(lhs, rhs, result);
+            // TODO: can compute direct results for Constant-Constant here or do it at inference
+            // currently computed at inference
+            switch (kind) {
+                case PLUS:
+                    constraintManager.addAdditionConstraint(lhs, rhs, result);
+                    break;
+                default:
+                    // Create LUB constraint by default
+                    // TODO: formally define LUBConstraint in constraintManager
+                    constraintManager.addSubtypeConstraint(lhs, result);
+                    constraintManager.addSubtypeConstraint(rhs, result);
+                    break;
             }
-        }
+            atm.clearAnnotations();
+            atm.addAnnotation(slotManager.getAnnotation(result));
 
+            return null;
+        }
     }
 }

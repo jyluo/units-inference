@@ -16,9 +16,9 @@ public class UnitsZ3IntSubtypeConstraintEncoder
         implements SubtypeConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntSubtypeConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
-            Context context,
+            Context ctx,
             Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> z3IntFormatTranslator) {
-        super(lattice, verifier, context, z3IntFormatTranslator);
+        super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
     // fornow very hacky

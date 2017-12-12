@@ -20,56 +20,47 @@ public class UnitsZ3EncodedSlot {
 
     private final Map<String, IntExpr> exponents;
 
-    private UnitsZ3EncodedSlot(Context context, int slotID) {
-        this.ctx = context;
+    private UnitsZ3EncodedSlot(Context ctx, int slotID) {
+        this.ctx = ctx;
         this.slotID = slotID;
         exponents = new HashMap<>();
-        // uu = ctx.mkBoolConst(UnitsUtils.slotName(slotID, UnknownUnits.class.getSimpleName()));
-        // ub = ctx.mkBoolConst(UnitsUtils.slotName(slotID, UnitsBottom.class.getSimpleName()));
     }
 
-    public static UnitsZ3EncodedSlot MakeConstant(Context context, int slotID) {
-        UnitsZ3EncodedSlot z3ConstSlot = new UnitsZ3EncodedSlot(context, slotID);
+    public static UnitsZ3EncodedSlot makeConstantSlot(Context ctx, int slotID) {
+        UnitsZ3EncodedSlot slot = new UnitsZ3EncodedSlot(ctx, slotID);
 
         // default UU value is false
-        z3ConstSlot.uu = context.mkBool(false);
+        slot.uu = ctx.mkBool(false);
         // default UU value is false
-        z3ConstSlot.ub = context.mkBool(false);
+        slot.ub = ctx.mkBool(false);
         // default prefixExponent is 0
-        z3ConstSlot.prefixExponent = context.mkInt(0);
+        slot.prefixExponent = ctx.mkInt(0);
 
         for (String baseUnit : UnitsUtils.baseUnits()) {
             // default exponents are 0
-            z3ConstSlot.exponents.put(baseUnit, context.mkInt(0));
+            slot.exponents.put(baseUnit, ctx.mkInt(0));
         }
 
-        return z3ConstSlot;
+        return slot;
     }
 
-    public static UnitsZ3EncodedSlot MakeVariable(Context context, int slotID) {
-        UnitsZ3EncodedSlot z3VarSlot = new UnitsZ3EncodedSlot(context, slotID);
+    public static UnitsZ3EncodedSlot makeVariableSlot(Context ctx, int slotID) {
+        UnitsZ3EncodedSlot slot = new UnitsZ3EncodedSlot(ctx, slotID);
 
-        // default UU value is false
-        z3VarSlot.uu = context.mkBool(false);
-        // default UU value is false
-        z3VarSlot.ub = context.mkBool(false);
-        // default prefixExponent is 0
-        z3VarSlot.prefixExponent = context.mkInt(0);
+        slot.uu = ctx.mkBoolConst(UnitsUtils.z3VarName(slotID, UnitsUtils.uuSlotName));
+        slot.ub = ctx.mkBoolConst(UnitsUtils.z3VarName(slotID, UnitsUtils.ubSlotName));
+        slot.prefixExponent =
+                ctx.mkIntConst(UnitsUtils.z3VarName(slotID, UnitsUtils.prefixSlotName));
 
         for (String baseUnit : UnitsUtils.baseUnits()) {
-            // default exponents are 0
-            z3VarSlot.exponents.put(baseUnit, context.mkInt(0));
+            slot.exponents.put(baseUnit, ctx.mkIntConst(UnitsUtils.z3VarName(slotID, baseUnit)));
         }
 
-        return z3VarSlot;
+        return slot;
     }
 
     public void setUnknownUnits(boolean val) {
         uu = ctx.mkBool(val);
-    }
-
-    public void setUnknownUnits(BoolExpr uuBoolExpr) {
-        uu = uuBoolExpr;
     }
 
     public BoolExpr getUnknownUnits() {
@@ -78,10 +69,6 @@ public class UnitsZ3EncodedSlot {
 
     public void setUnitsBottom(boolean val) {
         ub = ctx.mkBool(val);
-    }
-
-    public void setUnitsBottom(BoolExpr ubBoolExpr) {
-        ub = ubBoolExpr;
     }
 
     public BoolExpr getUnitsBottom() {
@@ -109,11 +96,11 @@ public class UnitsZ3EncodedSlot {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        sb.append("slot ");
         sb.append(slotID);
-        sb.append(" : ");
-        sb.append(" UU = " + uu.toString());
+        sb.append(" : UU = " + uu.toString());
         sb.append(" UB = " + ub.toString());
-        sb.append(" p = " + prefixExponent.toString());
+        sb.append(" Prefix = " + prefixExponent.toString());
         for (String baseUnit : UnitsUtils.baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }

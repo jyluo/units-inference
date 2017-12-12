@@ -1,11 +1,15 @@
 package units;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import checkers.inference.BaseInferrableChecker;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.model.ConstraintManager;
+import units.qual.BaseUnit;
 
 public class UnitsChecker extends BaseInferrableChecker {
 
@@ -52,5 +56,12 @@ public class UnitsChecker extends BaseInferrableChecker {
     @Override
     public boolean withCombineConstraints() {
         return false;
+    }
+
+    @Override
+    public Set<Class<? extends Annotation>> dependentAnnotationsForJaifInsertion() {
+        Set<Class<? extends Annotation>> additionalAnnos = new HashSet<>();
+        additionalAnnos.add(BaseUnit.class);
+        return additionalAnnos;
     }
 }

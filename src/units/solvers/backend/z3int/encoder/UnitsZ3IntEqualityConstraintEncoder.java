@@ -17,13 +17,12 @@ public class UnitsZ3IntEqualityConstraintEncoder
         implements EqualityConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntEqualityConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
-            Context context,
+            Context ctx,
             Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3EncodedSlot> z3IntFormatTranslator) {
-        super(lattice, verifier, context, z3IntFormatTranslator);
+        super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
-    // fornow very hacky
-    // fst = snd iff the int value is equal
+    // fst = snd iff the bool and int component values are equal
     protected BoolExpr encode(Slot fst, Slot snd) {
         UnitsZ3EncodedSlot fstESlot = fst.serialize(z3IntFormatTranslator);
         UnitsZ3EncodedSlot sndESlot = snd.serialize(z3IntFormatTranslator);

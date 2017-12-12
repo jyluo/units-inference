@@ -19,13 +19,15 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) // TODO fix
 public @interface UnitsInternal {
+
     String originalName() default "default";
+
+    boolean unknownUnits() default false;
+
+    boolean unitsBottom() default false;
+
     int prefixExponent() default 0;
 
-    // only primitive type, String, Class, annotation, enumeration are permitted or 1-dimensional arrays thereof
-    // int[], fast access, ordering must be enforced internally (sorted by base unit names)
-    // annotation[], ... O(n) access, order does not matter, safer, but can't work with AnnotationBuilder
-    // BaseUnitExpo[] exponents();
-    
-    int[] exponents() default {};
+    // only primitives, String, Class, annotation, enumeration are permitted or 1D arrays thereof
+    BaseUnit[] baseUnits() default {};
 }

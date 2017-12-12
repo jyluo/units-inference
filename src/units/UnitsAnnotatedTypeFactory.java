@@ -51,7 +51,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 //
 //        // copy all loaded external Units to qual set
 //        qualSet.addAll(externalQualsMap.values());
-
+        
         return qualSet;
     }
     
@@ -66,7 +66,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 exponents.put("m", 1);
                 exponents.put("s", 1);
 
-                return UnitsUtils.createInternalUnit("dummy", 1, exponents);
+                return UnitsUtils.createInternalUnit("dummy", false, false, 1, exponents);
             }
         }
 

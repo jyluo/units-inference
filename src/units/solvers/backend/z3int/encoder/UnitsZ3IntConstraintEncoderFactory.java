@@ -77,14 +77,14 @@ public class UnitsZ3IntConstraintEncoderFactory
 
     @Override
     public SubtractionConstraintEncoder<BoolExpr> createSubtractionConstraintEncoder() {
-        // TODO Auto-generated method stub
-        return null;
+        return new UnitsZ3IntSubtractionConstraintEncoder(
+                lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
     @Override
     public MultiplicationConstraintEncoder<BoolExpr> createMultiplicationConstraintEncoder() {
-        // TODO Auto-generated method stub
-        return null;
+        return new UnitsZ3IntMultiplicationConstraintEncoder(
+                lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
     @Override

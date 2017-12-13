@@ -5,23 +5,23 @@ import com.microsoft.z3.Context;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.encoder.ternary.AdditionConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ternary.SubtractionConstraintEncoder;
 import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 
-public class UnitsZ3IntAdditionConstraintEncoder
+public class UnitsZ3IntSubtractionConstraintEncoder
         extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
-        implements AdditionConstraintEncoder<BoolExpr> {
+        implements SubtractionConstraintEncoder<BoolExpr> {
 
-    public UnitsZ3IntAdditionConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
+    public UnitsZ3IntSubtractionConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
             Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
-    // Addition between 2 slots resulting in res slot, is encoded as 3 a way equality
+    // Subtraction between 2 slots resulting in res slot, is encoded as 3 a way equality
     // ie lhs == rhs, and rhs == res.
     protected BoolExpr encode(Slot lhs, Slot rhs, Slot res) {
         return UnitsZ3EncoderUtils.tripleEquality(ctx, lhs.serialize(z3IntFormatTranslator),

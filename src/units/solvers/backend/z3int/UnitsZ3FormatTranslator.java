@@ -205,6 +205,8 @@ public class UnitsZ3FormatTranslator
     public AnnotationMirror decodeSolution(UnitsZ3SolutionSlot solutionSlot,
             ProcessingEnvironment processingEnv) {
 
+        // TODO: translate @UnitsInternal annotations to string from @Units annotations
+        // TODO: further translate some of the units to the alias symbols where possible
         if (solutionSlot.getUnknownUnits()) {
             return UnitsUtils.UNKNOWNUNITS;
         } else if (solutionSlot.getUnitsBottom()) {

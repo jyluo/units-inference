@@ -5,26 +5,27 @@ import com.microsoft.z3.Context;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.encoder.ternary.AdditionConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ternary.MultiplicationConstraintEncoder;
 import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 
-public class UnitsZ3IntAdditionConstraintEncoder
+public class UnitsZ3IntMultiplicationConstraintEncoder
         extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
-        implements AdditionConstraintEncoder<BoolExpr> {
+        implements MultiplicationConstraintEncoder<BoolExpr> {
 
-    public UnitsZ3IntAdditionConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
+    public UnitsZ3IntMultiplicationConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
             Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
-    // Addition between 2 slots resulting in res slot, is encoded as 3 a way equality
-    // ie lhs == rhs, and rhs == res.
+    // Multiplication between 2 slots resulting in res slot, is the sum of the component exponents
+    // unless either lhs or rhs is UnknownUnits or UnitsBottom, for which then the result is always
+    // UnknownUnits
     protected BoolExpr encode(Slot lhs, Slot rhs, Slot res) {
-        return UnitsZ3EncoderUtils.tripleEquality(ctx, lhs.serialize(z3IntFormatTranslator),
+        return UnitsZ3EncoderUtils.multiply(ctx, lhs.serialize(z3IntFormatTranslator),
                 rhs.serialize(z3IntFormatTranslator), res.serialize(z3IntFormatTranslator));
     }
 
@@ -45,12 +46,10 @@ public class UnitsZ3IntAdditionConstraintEncoder
 
     @Override
     public BoolExpr encodeConstant_Constant(ConstantSlot lhs, ConstantSlot rhs, VariableSlot res) {
-        // if lhs == rhs, then encode equality between rhs and res
-        if (verifier.areEqual(lhs, rhs)) {
-            return UnitsZ3EncoderUtils.equality(ctx, rhs.serialize(z3IntFormatTranslator),
-                    res.serialize(z3IntFormatTranslator));
-        } else {
-            return contradictoryValue;
-        }
+        // encode equality between result of multiplication and res
+        // TODO: create computeable multiply method
+        // return UnitsZ3EncoderUtils.equality(ctx, rhs.serialize(z3IntFormatTranslator),
+        // res.serialize(z3IntFormatTranslator));
+        return emptyValue;
     }
 }

@@ -21,40 +21,36 @@ public class UnitsZ3IntAdditionConstraintEncoder
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
-    // fornow very hacky
-    // subtype <: supertype if int value of subtype <= supertype
-    protected BoolExpr encode(Slot subtype, Slot supertype) {
-        UnitsZ3EncodedSlot subtypeInt = subtype.serialize(z3IntFormatTranslator);
-        UnitsZ3EncodedSlot supertypeInt = supertype.serialize(z3IntFormatTranslator);
-
-        return null; // context.mkLe(subtypeInt, supertypeInt);
+    // Addition between 2 slots, resulting in res slot, is encoded as 3 a way equality
+    // ie lhs == rhs, and rhs == res.
+    protected BoolExpr encode(Slot lhs, Slot rhs, Slot res) {
+        return UnitsZ3EncoderUtils.tripleEquality(ctx, lhs.serialize(z3IntFormatTranslator),
+                rhs.serialize(z3IntFormatTranslator), res.serialize(z3IntFormatTranslator));
     }
 
     @Override
-    public BoolExpr encodeVariable_Variable(VariableSlot lhs, VariableSlot rhs,
-            VariableSlot result) {
-        // TODO Auto-generated method stub
-        return null;
+    public BoolExpr encodeVariable_Variable(VariableSlot lhs, VariableSlot rhs, VariableSlot res) {
+        return encode(lhs, rhs, res);
     }
 
     @Override
-    public BoolExpr encodeVariable_Constant(VariableSlot lhs, ConstantSlot rhs,
-            VariableSlot result) {
-        // TODO Auto-generated method stub
-        return null;
+    public BoolExpr encodeVariable_Constant(VariableSlot lhs, ConstantSlot rhs, VariableSlot res) {
+        return encode(lhs, rhs, res);
     }
 
     @Override
-    public BoolExpr encodeConstant_Variable(ConstantSlot lhs, VariableSlot rhs,
-            VariableSlot result) {
-        // TODO Auto-generated method stub
-        return null;
+    public BoolExpr encodeConstant_Variable(ConstantSlot lhs, VariableSlot rhs, VariableSlot res) {
+        return encode(lhs, rhs, res);
     }
 
     @Override
-    public BoolExpr encodeConstant_Constant(ConstantSlot lhs, ConstantSlot rhs,
-            VariableSlot result) {
-        // TODO Auto-generated method stub
-        return null;
+    public BoolExpr encodeConstant_Constant(ConstantSlot lhs, ConstantSlot rhs, VariableSlot res) {
+        // if lhs == rhs, then encode equality between rhs and res
+        if (verifier.areEqual(lhs, rhs)) {
+            return UnitsZ3EncoderUtils.equality(ctx, rhs.serialize(z3IntFormatTranslator),
+                    res.serialize(z3IntFormatTranslator));
+        } else {
+            return contradictoryValue;
+        }
     }
 }

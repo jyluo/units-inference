@@ -10,7 +10,6 @@ import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
-import units.util.UnitsUtils;
 
 public class UnitsZ3IntEqualityConstraintEncoder
         extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
@@ -22,20 +21,10 @@ public class UnitsZ3IntEqualityConstraintEncoder
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
-    // fst = snd iff the bool and int component values are equal
+    // 2 Slots are equal if their components are equal
     protected BoolExpr encode(Slot fst, Slot snd) {
-        UnitsZ3EncodedSlot fstESlot = fst.serialize(z3IntFormatTranslator);
-        UnitsZ3EncodedSlot sndESlot = snd.serialize(z3IntFormatTranslator);
-
-        BoolExpr result =
-                ctx.mkAnd(ctx.mkEq(fstESlot.getUnknownUnits(), sndESlot.getUnknownUnits()),
-                        ctx.mkEq(fstESlot.getUnitsBottom(), sndESlot.getUnitsBottom()),
-                        ctx.mkEq(fstESlot.getPrefixExponent(), sndESlot.getPrefixExponent()));
-        for (String baseUnit : UnitsUtils.baseUnits()) {
-            result = ctx.mkAnd(result,
-                    ctx.mkEq(fstESlot.getExponent(baseUnit), sndESlot.getExponent(baseUnit)));
-        }
-        return result;
+        return UnitsZ3EncoderUtils.equality(ctx, fst.serialize(z3IntFormatTranslator),
+                snd.serialize(z3IntFormatTranslator));
     }
 
     @Override

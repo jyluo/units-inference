@@ -21,13 +21,9 @@ public class UnitsZ3IntSubtypeConstraintEncoder
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
-    // fornow very hacky
-    // subtype <: supertype if int value of subtype <= supertype
     protected BoolExpr encode(Slot subtype, Slot supertype) {
-        UnitsZ3EncodedSlot subtypeInt = subtype.serialize(z3IntFormatTranslator);
-        UnitsZ3EncodedSlot supertypeInt = supertype.serialize(z3IntFormatTranslator);
-
-        return null; // context.mkLe(subtypeInt, supertypeInt);
+        return UnitsZ3EncoderUtils.subtype(ctx, subtype.serialize(z3IntFormatTranslator),
+                supertype.serialize(z3IntFormatTranslator));
     }
 
     @Override
@@ -47,6 +43,7 @@ public class UnitsZ3IntSubtypeConstraintEncoder
 
     @Override
     public BoolExpr encodeConstant_Constant(ConstantSlot subtype, ConstantSlot supertype) {
+        // TODO: need to implement this in real qual hierarchy
         return verifier.isSubtype(subtype, supertype) ? emptyValue : contradictoryValue;
     }
 }

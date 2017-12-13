@@ -70,6 +70,18 @@ public class UnitsUtils {
         return singletonInstance;
     }
 
+    private static Set<String> baseUnits;
+
+    public static Set<String> baseUnits() {
+        if (baseUnits == null) {
+            baseUnits = new TreeSet<>();
+            // TODO: integrate with RealATF and add actual base units declared by user
+            baseUnits.add("m");
+            baseUnits.add("s");
+        }
+        return baseUnits;
+    }
+
     public static AnnotationMirror createInternalUnit(String originalName, boolean unknownUnits,
             boolean unitsBottom, int prefixExponent, Map<String, Integer> exponents) {
         // not allowed to set both a UU and UB to true on the same annotation
@@ -97,6 +109,7 @@ public class UnitsUtils {
         return result;
     }
 
+    // Encoder utilities ==========================================================================
     private static final char idComponentSeparator = '-';
     public static final String uuSlotName = "UnknownUnits";
     public static final String ubSlotName = "UnitsBottom";
@@ -121,16 +134,5 @@ public class UnitsUtils {
         }
 
         return Pair.of(slotID, component);
-    }
-
-    private static Set<String> baseUnits;
-
-    public static Set<String> baseUnits() {
-        if (baseUnits == null) {
-            baseUnits = new TreeSet<>();
-            baseUnits.add("m");
-            baseUnits.add("s");
-        }
-        return baseUnits;
     }
 }

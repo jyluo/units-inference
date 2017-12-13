@@ -7,6 +7,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
+import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
@@ -78,44 +79,52 @@ public class UnitsZ3FormatTranslator
         // Makes a constant encoded slot with default values
         UnitsZ3EncodedSlot encodedSlot = UnitsZ3EncodedSlot.makeConstantSlot(ctx, slotID);
 
-        // Replace values in constant encoded slot with values in the constant slot's annotation
-        Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues =
-                slot.getValue().getElementValues();
-        for (ExecutableElement elem : elementValues.keySet()) {
+        AnnotationMirror anno = slot.getValue();
+        if (AnnotationUtils.areSame(anno, UnitsUtils.UNKNOWNUNITS)) {
+            encodedSlot.setUnknownUnits(true);
+        } else if (AnnotationUtils.areSame(anno, UnitsUtils.BOTTOM)) {
+            encodedSlot.setUnitsBottom(true);
+        } else {
+            // Replace values in constant encoded slot with values in the annotation
+            Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues =
+                    anno.getElementValues();
+            for (ExecutableElement elem : elementValues.keySet()) {
 
-            Object annotationValue = elementValues.get(elem).getValue();
+                Object annotationValue = elementValues.get(elem).getValue();
 
-            if (elem.getSimpleName().contentEquals("unknownUnits")) {
-                encodedSlot.setUnknownUnits(((Boolean) annotationValue));
+                if (elem.getSimpleName().contentEquals("unknownUnits")) {
+                    encodedSlot.setUnknownUnits(((Boolean) annotationValue));
 
-            } else if (elem.getSimpleName().contentEquals("unitsBottom")) {
-                encodedSlot.setUnitsBottom(((Boolean) annotationValue));
+                } else if (elem.getSimpleName().contentEquals("unitsBottom")) {
+                    encodedSlot.setUnitsBottom(((Boolean) annotationValue));
 
-            } else if (elem.getSimpleName().contentEquals("prefixExponent")) {
-                encodedSlot.setPrefixExponent(((Integer) annotationValue));
+                } else if (elem.getSimpleName().contentEquals("prefixExponent")) {
+                    encodedSlot.setPrefixExponent(((Integer) annotationValue));
 
-            } else if (elem.getSimpleName().contentEquals("baseUnits")) {
-                // for each base unit that is declared
-                for (Compound bu : (List<Compound>) annotationValue) {
+                } else if (elem.getSimpleName().contentEquals("baseUnits")) {
+                    // for each base unit that is declared
+                    for (Compound bu : (List<Compound>) annotationValue) {
 
-                    // extract the unit and exponent
-                    Map<MethodSymbol, Attribute> buElementValues = bu.getElementValues();
-                    String unit = "none";
-                    int exponent = 0;
+                        // extract the unit and exponent
+                        Map<MethodSymbol, Attribute> buElementValues = bu.getElementValues();
+                        String unit = "none";
+                        int exponent = 0;
 
-                    for (MethodSymbol key : buElementValues.keySet()) {
-                        System.out.println(key.getSimpleName() + " => " + buElementValues.get(key));
+                        for (MethodSymbol key : buElementValues.keySet()) {
+                            System.out.println(
+                                    key.getSimpleName() + " => " + buElementValues.get(key));
 
-                        // TODO: is there any better ways to do this aside from name equality?
-                        if (key.getSimpleName().contentEquals("unit")) {
-                            unit = buElementValues.get(key).getValue().toString();
-                        } else if (key.getSimpleName().contentEquals("exponent")) {
-                            exponent =
-                                    Integer.valueOf(buElementValues.get(key).getValue().toString());
+                            // TODO: is there any better ways to do this aside from name equality?
+                            if (key.getSimpleName().contentEquals("unit")) {
+                                unit = buElementValues.get(key).getValue().toString();
+                            } else if (key.getSimpleName().contentEquals("exponent")) {
+                                exponent = Integer
+                                        .valueOf(buElementValues.get(key).getValue().toString());
+                            }
                         }
-                    }
 
-                    encodedSlot.setExponent(unit, exponent);
+                        encodedSlot.setExponent(unit, exponent);
+                    }
                 }
             }
         }
@@ -196,9 +205,15 @@ public class UnitsZ3FormatTranslator
     public AnnotationMirror decodeSolution(UnitsZ3SolutionSlot solutionSlot,
             ProcessingEnvironment processingEnv) {
 
-        // TODO: infer original name somehow
-        return UnitsUtils.createInternalUnit("", solutionSlot.getUnknownUnits(),
-                solutionSlot.getUnitsBottom(), solutionSlot.getPrefixExponent(),
-                solutionSlot.getExponents());
+        if (solutionSlot.getUnknownUnits()) {
+            return UnitsUtils.UNKNOWNUNITS;
+        } else if (solutionSlot.getUnitsBottom()) {
+            return UnitsUtils.BOTTOM;
+        } else {
+            // TODO: infer original name somehow
+            return UnitsUtils.createInternalUnit("", solutionSlot.getUnknownUnits(),
+                    solutionSlot.getUnitsBottom(), solutionSlot.getPrefixExponent(),
+                    solutionSlot.getExponents());
+        }
     }
 }

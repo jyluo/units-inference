@@ -40,7 +40,7 @@ public class UnitsZ3EncoderUtils {
                         ),
                         // super = top ==> no constraints on sub
                         superT.getUnknownUnits()
-                        ),
+                    ),
                     // super = bottom ==> sub = bottom
                     ctx.mkAnd(superT.getUnitsBottom(), subT.getUnitsBottom())
                 );

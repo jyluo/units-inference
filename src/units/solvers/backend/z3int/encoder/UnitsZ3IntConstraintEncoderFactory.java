@@ -65,7 +65,7 @@ public class UnitsZ3IntConstraintEncoderFactory
     }
 
     @Override
-    public ViewpointAdaptationConstraintEncoder<BoolExpr> createCombineConstraintEncoder() {
+    public ViewpointAdaptationConstraintEncoder<BoolExpr> createViewpointAdaptationConstraintEncoder() {
         return null;
     }
 

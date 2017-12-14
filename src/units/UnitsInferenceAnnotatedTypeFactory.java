@@ -24,10 +24,10 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
-import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
+import checkers.inference.model.TernaryVariableSlot;
 import checkers.inference.model.VariableSlot;
 import units.util.UnitsUtils;
 
@@ -115,7 +115,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
 
                     // TODO: renamed CombVariableSlot to TernaryVarSlot
-                    CombVariableSlot newResult = slotManager.createCombVariableSlot(lhs, rhs);
+                    TernaryVariableSlot newResult = slotManager.createTernaryVariableSlot(lhs, rhs);
 
                     lhs.addMergedToSlot(newResult);
                     rhs.addMergedToSlot(newResult);

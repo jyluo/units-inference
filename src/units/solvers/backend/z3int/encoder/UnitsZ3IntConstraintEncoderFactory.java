@@ -89,13 +89,13 @@ public class UnitsZ3IntConstraintEncoderFactory
 
     @Override
     public DivisionConstraintEncoder<BoolExpr> createDivisionConstraintEncoder() {
-        // TODO Auto-generated method stub
-        return null;
+        return new UnitsZ3IntDivisionConstraintEncoder(
+                lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
     @Override
     public ModulusConstraintEncoder<BoolExpr> createModulusConstraintEncoder() {
-        // TODO Auto-generated method stub
-        return null;
+        return new UnitsZ3IntModulusConstraintEncoder(
+                lattice, verifier, ctx, z3IntFormatTranslator);
     }
 }

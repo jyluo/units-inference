@@ -5,27 +5,27 @@ import com.microsoft.z3.Context;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.encoder.ternary.MultiplicationConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ternary.DivisionConstraintEncoder;
 import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
 
-public class UnitsZ3IntMultiplicationConstraintEncoder
+public class UnitsZ3IntDivisionConstraintEncoder
         extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
-        implements MultiplicationConstraintEncoder<BoolExpr> {
+        implements DivisionConstraintEncoder<BoolExpr> {
 
-    public UnitsZ3IntMultiplicationConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
+    public UnitsZ3IntDivisionConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
             Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
-    // Multiplication between 2 slots resulting in res slot, is the sum of the component exponents
+    // Division between 2 slots resulting in res slot, is the difference of the component exponents
     // unless either lhs or rhs is UnknownUnits or UnitsBottom, for which then the result is always
     // UnknownUnits
     protected BoolExpr encode(Slot lhs, Slot rhs, Slot res) {
-        return UnitsZ3EncoderUtils.multiply(ctx, lhs.serialize(z3IntFormatTranslator),
+        return UnitsZ3EncoderUtils.divide(ctx, lhs.serialize(z3IntFormatTranslator),
                 rhs.serialize(z3IntFormatTranslator), res.serialize(z3IntFormatTranslator));
     }
 
@@ -46,12 +46,8 @@ public class UnitsZ3IntMultiplicationConstraintEncoder
 
     @Override
     public BoolExpr encodeConstant_Constant(ConstantSlot lhs, ConstantSlot rhs, VariableSlot res) {
-        // encode equality between result of multiplication and res
-
-        // TODO: how to test const-const?
-
-        // TODO: create computeable multiply method, then create constant slot for the computed
-        // result, then serialize the computed result making it equal to res.
+        // encode equality between result of division and res
+        // TODO: create computeable divide method
         // return UnitsZ3EncoderUtils.equality(ctx, rhs.serialize(z3IntFormatTranslator),
         // res.serialize(z3IntFormatTranslator));
         return emptyValue;

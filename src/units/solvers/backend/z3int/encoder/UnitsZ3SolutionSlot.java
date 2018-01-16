@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import units.util.UnitsUtils;
 
+/**
+ * A data structure class to encapsulate a set of java variables representing a unit. TODO: move to
+ * type checking package and give it a better name.
+ */
 public class UnitsZ3SolutionSlot {
     private final int slotID;
 

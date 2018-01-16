@@ -114,9 +114,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
                     VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
 
-                    // TODO: renamed CombVariableSlot to TernaryVarSlot
                     TernaryVariableSlot newResult = slotManager.createTernaryVariableSlot(lhs, rhs);
-
                     lhs.addMergedToSlot(newResult);
                     rhs.addMergedToSlot(newResult);
 
@@ -199,10 +197,12 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         // @Override
         // public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
-        // // apply the default type for literals
-        // // TODO: generally inference should not apply defaults, and instead create slots.
-        // // In units, this results in literals being casted into a unit type. Should create
-        // // post-inference code-fix tool to replace casts with UnitsTools multiplication.
+        // // NOTE: generally inference should not apply defaults, and instead create slots.
+        // // In units, this results in literals being casted into a unit type.
+        // // TODO: Should create a post-inference code-fix tool to replace casts with UnitsTools
+        // multiplication.
+        //
+        // // The code here applies the default type for literals, which is not what we want
         // AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(literalTree);
         // AnnotationMirror realAnno = realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
         // ConstantSlot cs = variableAnnotator.createConstant(realAnno, literalTree);
@@ -245,6 +245,18 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             switch (kind) {
                 case PLUS:
                     constraintManager.addAdditionConstraint(lhs, rhs, result);
+                    break;
+                case MINUS:
+                    constraintManager.addSubtractionConstraint(lhs, rhs, result);
+                    break;
+                case MULTIPLY:
+                    constraintManager.addMultiplicationConstraint(lhs, rhs, result);
+                    break;
+                case DIVIDE:
+                    constraintManager.addDivisionConstraint(lhs, rhs, result);
+                    break;
+                case REMAINDER:
+                    constraintManager.addModulusConstraint(lhs, rhs, result);
                     break;
                 default:
                     // Create LUB constraint by default

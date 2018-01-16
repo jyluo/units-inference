@@ -7,6 +7,10 @@ import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import units.util.UnitsUtils;
 
+/**
+ * A data structure class to encapsulate a set of Z3 variables representing an encoded constant or
+ * variable slot, and in turn a unit.
+ */
 public class UnitsZ3EncodedSlot {
     private final Context ctx;
     private final int slotID;

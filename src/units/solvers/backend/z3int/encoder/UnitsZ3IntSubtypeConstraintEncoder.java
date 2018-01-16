@@ -43,7 +43,7 @@ public class UnitsZ3IntSubtypeConstraintEncoder
 
     @Override
     public BoolExpr encodeConstant_Constant(ConstantSlot subtype, ConstantSlot supertype) {
-        // TODO: need to implement this in real qual hierarchy
+        // TODO: need to implement subtype check in real qual hierarchy
         return verifier.isSubtype(subtype, supertype) ? emptyValue : contradictoryValue;
     }
 }

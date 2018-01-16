@@ -97,4 +97,44 @@ public class UnitsZ3EncoderUtils {
         /* @formatter:on // this is for eclipse formatter */
         return multiplyEncoding;
     }
+
+    public static BoolExpr divide(Context ctx, UnitsZ3EncodedSlot lhs, UnitsZ3EncodedSlot rhs,
+            UnitsZ3EncodedSlot res) {
+        /* @formatter:off // this is for eclipse formatter */
+        // Forall base units, r_exponent = lhs_exponent - rhs_exponent
+        BoolExpr exponents = ctx.mkTrue();
+        for (String baseUnit : UnitsUtils.baseUnits()) {
+            exponents = ctx.mkAnd(exponents,
+                ctx.mkEq(
+                    res.getExponent(baseUnit),
+                    ctx.mkSub(lhs.getExponent(baseUnit), rhs.getExponent(baseUnit))
+                )
+            );
+        }
+        BoolExpr divideEncoding =
+            ctx.mkXor(
+                // if either lhs or rhs is UnknownUnits or UnitsBottom, then result is UnknownUnits
+                ctx.mkAnd(
+                    ctx.mkOr(
+                        lhs.getUnknownUnits(),
+                        lhs.getUnitsBottom(),
+                        rhs.getUnknownUnits(),
+                        rhs.getUnitsBottom()
+                    ),
+                    res.getUnknownUnits()
+                ),
+                // otherwise res component = lhs component - rhs component
+                ctx.mkAnd(
+                    ctx.mkNot(res.getUnknownUnits()),
+                    ctx.mkNot(res.getUnitsBottom()),
+                    ctx.mkEq(
+                        res.getPrefixExponent(),
+                        ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent())
+                    ),
+                    exponents
+                )
+            );
+        /* @formatter:on // this is for eclipse formatter */
+        return divideEncoding;
+    }
 }

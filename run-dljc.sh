@@ -12,15 +12,14 @@ DLJC="$JSR308"/do-like-javac
 export AFU="$JSR308"/annotation-tools/annotation-file-utilities
 export PATH="$PATH":"$AFU"/scripts
 
-export CLASSPATH="$JSR308"/ontology/bin
+export CLASSPATH="$JSR308"/units-inference/bin
 
 export DYLD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
 export LD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
 
 
-CHECKER=ontology.OntologyChecker
-SOLVER=ontology.solvers.backend.OntologyConstraintSolver
-SET_SOLVER=ontology.solvers.backend.jacop.OntologyJaCopSolver
+CHECKER=units.UnitsChecker
+SOLVER=units.solvers.backend.UnitsSolverEngine
 
 #parsing build command of the target program
 build_cmd="$1"
@@ -33,10 +32,10 @@ done
 
 cd "$WORKING_DIR"
 
-infer_cmd="python $DLJC/dljc -t inference --crashExit true --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+infer_cmd="python $DLJC/dljc -t inference --crashExit true --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
 
 # debug_onlyCompile="--onlyCompileBytecodeBase true"
-debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $JSR308/ontology/bin $debug_onlyCompile --expectOutputRegex 'Z3 Unsatisfiable' --checker $DATAFLOW_CHECKER --solver $DATAFLOW_SOLVER --solverArgs=\"collectStatistic=true,solver=Z3\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $JSR308/units-inference/bin $debug_onlyCompile --expectOutputRegex 'Z3 Unsatisfiable' --checker $DATAFLOW_CHECKER --solver $DATAFLOW_SOLVER --solverArgs=\"collectStatistic=true,solver=Z3\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
 
 
 running_cmd=$infer_cmd

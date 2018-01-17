@@ -6,13 +6,13 @@ echo "$ROOT"/units-inference/bin
 
 CFI="$ROOT"/checker-framework-inference
 
+CHECKER=units.UnitsChecker
+
 SOLVER=units.solvers.backend.UnitsSolverEngine
 
 # DEBUG_SOLVER=checkers.inference.solver.DebugSolver
 
 IS_HACK=true
-
-CHECKER=units.UnitsChecker
 
 # Debug
 # SOLVER="$DEBUG_SOLVER"

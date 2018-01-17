@@ -1,18 +1,18 @@
 # Build the tool
 
-For building the entire tool chain for Ontology, just run below
-command in directory `Ontology`:
+For building the entire tool chain for Units, just run below
+command in directory `units-inference`:
 
 ```bash
-# cd ontology
+# cd units-inference
 ./pascali-setup.sh
 ```
 
-# Running Ontology on sci-corpus
+# Running Units on sci-corpus
 
 ## Dependencies & prerequisites 
 
-To run driver script `run-ontology-on-corpus.py`, you need first to
+To run driver script `run-units-on-corpus.py`, you need first to
 install below packages:
 
 - pyYaml: `pip install pyyaml`
@@ -24,24 +24,24 @@ The driver script need python version higher than `2.7.10`.
 We currently use a customized version of
 [do-like-javac](https://github.com/pascaliUWat/do-like-javac.git). In
 `pascali-setup.sh` we download this version of DLJC in the parent dir
-of ontology.
+of units-inference.
 
 You also need to install Lithium for the test case minimizer:
 https://github.com/pascaliUWat/do-like-javac/blob/master/README_testminimizer.md
 
 
 ## Running the tool
-To run ontology on sci-corpus, just run following command:
+To run units-inference on sci-corpus, just run following command:
 
 ```bash
-# cd ontology
-python run-ontology-on-corpus.py
+# cd units-inference
+python run-units-on-corpus.py
 ```
 
 This script would first fetching the projects defined in
 `projects.yml` from
 [opprop-benchmarks](https://github.com/opprop-benchmarks) into
-`ontology/corpus`, then running Ontology on this corpus.
+`units-inference/corpus`, then running Units on this corpus.
 
 After this script finished, you can check the `logs/infer.log` under
 each project directory to see the tool running log, and

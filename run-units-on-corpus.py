@@ -4,8 +4,8 @@ import subprocess
 import shlex
 import argparse
 
-ONTOLOGY_DIR = os.path.dirname(os.path.realpath(__file__))
-BENCHMARK_DIR = os.path.join(ONTOLOGY_DIR, "corpus")
+UNITS_INFERENCE_DIR = os.path.dirname(os.path.realpath(__file__))
+BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, "corpus")
 
 
 def main(argv):
@@ -13,7 +13,7 @@ def main(argv):
     parser.add_argument('--corpus-file', dest='corpus_file')
     args = parser.parse_args()
 
-    tool_excutable = os.path.join(ONTOLOGY_DIR, "run-dljc.sh")
+    tool_excutable = os.path.join(UNITS_INFERENCE_DIR, "run-dljc.sh")
 
     print "----- Fetching corpus... -----"
     if not os.path.exists(BENCHMARK_DIR):
@@ -24,7 +24,7 @@ def main(argv):
     print "Enter corpus dir {}.".format(BENCHMARK_DIR)
     os.chdir(BENCHMARK_DIR)
 
-    with open (os.path.join(ONTOLOGY_DIR, args.corpus_file)) as projects:
+    with open (os.path.join(UNITS_INFERENCE_DIR, args.corpus_file)) as projects:
         for project in yaml.load(projects)["projects"]:
             project_dir = os.path.join(BENCHMARK_DIR, project["name"])
             if not os.path.exists(project_dir):
@@ -35,7 +35,7 @@ def main(argv):
     print "----- Runnning Ontlogy on corpus... -----"
 
     failed_projects = list()
-    with open (os.path.join(ONTOLOGY_DIR, args.corpus_file)) as projects:
+    with open (os.path.join(UNITS_INFERENCE_DIR, args.corpus_file)) as projects:
         for project in yaml.load(projects)["projects"]:
             project_dir = os.path.join(BENCHMARK_DIR, project["name"])
             project_dir = os.path.join(BENCHMARK_DIR, project["name"])

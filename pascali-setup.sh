@@ -9,7 +9,8 @@ WORKING_DIR=$(cd $(dirname "$0") && pwd)
 # export SHELLOPTS
 
 #default value is pascaliUWat. REPO_SITE may be set to other value for travis test purpose.
-export REPO_SITE="${REPO_SITE:-pascaliUWat}"
+# export REPO_SITE="${REPO_SITE:-pascaliUWat}"
+export REPO_SITE="${REPO_SITE:-opprop}"
 
 echo "------ Downloading everthing from REPO_SITE: $REPO_SITE ------"
 
@@ -60,5 +61,5 @@ fi
 
 (cd $JSR308/checker-framework-inference && gradle dist)
 
-##### build ontology without testing
-(cd $JSR308/ontology && gradle build -x test)
+##### build units-inference without testing
+(cd $JSR308/units-inference && gradle build -x test)

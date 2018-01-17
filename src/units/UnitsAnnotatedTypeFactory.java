@@ -8,7 +8,6 @@ import java.util.TreeMap;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
-import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
@@ -134,17 +133,11 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 case PLUS:
                     if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         type.replaceAnnotation(lhsAM);
-                    } else {
-//                        checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
-//                                rhsAM.toString()), node);
                     }
                     break;
                 case MINUS:
                     if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         type.replaceAnnotation(lhsAM);
-                    } else {
-//                        checker.report(Result.failure("subtraction.unit.mismatch", lhsAM.toString(),
-//                                rhsAM.toString()), node);
                     }
                     break;
                 case MULTIPLY:

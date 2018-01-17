@@ -25,6 +25,10 @@ class Main {
 
         z = x % x;
 
+        z = x + y;
+
+        z = x - y;
+
         // Integer y = x;
 
         // @m Integer x = 5 + 6;

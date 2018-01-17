@@ -1,35 +1,34 @@
-package units.solvers.backend.z3int.encoder;
+package units.internalrepresentation;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import units.util.UnitsUtils;
+import units.util.UnitsZ3EncoderUtils;
 
 /**
- * A data structure class to encapsulate a set of Z3 variables representing an encoded constant or
- * variable slot, and in turn a unit.
+ * A data structure class to encapsulate a set of Z3 variables representing a unit for inference.
  */
-public class UnitsZ3EncodedSlot {
+public class InferenceUnit {
     private final Context ctx;
     private final int slotID;
 
     private BoolExpr uu;
     private BoolExpr ub;
-
     private IntExpr prefixExponent;
-
+    // Tree map maintaining sorted order on base unit names
     private final Map<String, IntExpr> exponents;
 
-    private UnitsZ3EncodedSlot(Context ctx, int slotID) {
+    private InferenceUnit(Context ctx, int slotID) {
         this.ctx = ctx;
         this.slotID = slotID;
-        exponents = new HashMap<>();
+        exponents = new TreeMap<>();
     }
 
-    public static UnitsZ3EncodedSlot makeConstantSlot(Context ctx, int slotID) {
-        UnitsZ3EncodedSlot slot = new UnitsZ3EncodedSlot(ctx, slotID);
+    public static InferenceUnit makeConstantSlot(Context ctx, int slotID) {
+        InferenceUnit slot = new InferenceUnit(ctx, slotID);
 
         // default UU value is false
         slot.uu = ctx.mkBool(false);
@@ -46,16 +45,19 @@ public class UnitsZ3EncodedSlot {
         return slot;
     }
 
-    public static UnitsZ3EncodedSlot makeVariableSlot(Context ctx, int slotID) {
-        UnitsZ3EncodedSlot slot = new UnitsZ3EncodedSlot(ctx, slotID);
+    public static InferenceUnit makeVariableSlot(Context ctx, int slotID) {
+        InferenceUnit slot = new InferenceUnit(ctx, slotID);
 
-        slot.uu = ctx.mkBoolConst(UnitsUtils.z3VarName(slotID, UnitsUtils.uuSlotName));
-        slot.ub = ctx.mkBoolConst(UnitsUtils.z3VarName(slotID, UnitsUtils.ubSlotName));
-        slot.prefixExponent =
-                ctx.mkIntConst(UnitsUtils.z3VarName(slotID, UnitsUtils.prefixSlotName));
+        slot.uu = ctx
+                .mkBoolConst(UnitsZ3EncoderUtils.z3VarName(slotID, UnitsZ3EncoderUtils.uuSlotName));
+        slot.ub = ctx
+                .mkBoolConst(UnitsZ3EncoderUtils.z3VarName(slotID, UnitsZ3EncoderUtils.ubSlotName));
+        slot.prefixExponent = ctx.mkIntConst(
+                UnitsZ3EncoderUtils.z3VarName(slotID, UnitsZ3EncoderUtils.prefixSlotName));
 
         for (String baseUnit : UnitsUtils.baseUnits()) {
-            slot.exponents.put(baseUnit, ctx.mkIntConst(UnitsUtils.z3VarName(slotID, baseUnit)));
+            slot.exponents.put(baseUnit,
+                    ctx.mkIntConst(UnitsZ3EncoderUtils.z3VarName(slotID, baseUnit)));
         }
 
         return slot;
@@ -111,7 +113,7 @@ public class UnitsZ3EncodedSlot {
 
     @Override
     public int hashCode() {
-        final int prime = 41;
+        final int prime = 31;
         int result = 1;
         result = prime * result + ((exponents == null) ? 0 : exponents.hashCode());
         result = prime * result + ((prefixExponent == null) ? 0 : prefixExponent.hashCode());
@@ -123,35 +125,48 @@ public class UnitsZ3EncodedSlot {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        UnitsZ3EncodedSlot other = (UnitsZ3EncodedSlot) obj;
+        }
+        InferenceUnit other = (InferenceUnit) obj;
         if (exponents == null) {
-            if (other.exponents != null)
+            if (other.exponents != null) {
                 return false;
-        } else if (!exponents.equals(other.exponents))
+            }
+        } else if (!exponents.equals(other.exponents)) {
             return false;
+        }
         if (prefixExponent == null) {
-            if (other.prefixExponent != null)
+            if (other.prefixExponent != null) {
                 return false;
-        } else if (!prefixExponent.equals(other.prefixExponent))
+            }
+        } else if (!prefixExponent.equals(other.prefixExponent)) {
             return false;
-        if (slotID != other.slotID)
+        }
+        if (slotID != other.slotID) {
             return false;
+        }
         if (ub == null) {
-            if (other.ub != null)
+            if (other.ub != null) {
                 return false;
-        } else if (!ub.equals(other.ub))
+            }
+        } else if (!ub.equals(other.ub)) {
             return false;
+        }
         if (uu == null) {
-            if (other.uu != null)
+            if (other.uu != null) {
                 return false;
-        } else if (!uu.equals(other.uu))
+            }
+        } else if (!uu.equals(other.uu)) {
             return false;
+        }
         return true;
     }
+
 }

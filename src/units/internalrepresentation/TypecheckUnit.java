@@ -1,27 +1,27 @@
-package units.solvers.backend.z3int.encoder;
+package units.internalrepresentation;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import units.util.UnitsUtils;
 
 /**
- * A data structure class to encapsulate a set of java variables representing a unit. TODO: move to
- * type checking package and give it a better name.
+ * A data structure class to encapsulate a set of java variables representing a unit for type
+ * checking.
  */
-public class UnitsZ3SolutionSlot {
-    private final int slotID;
-
+public class TypecheckUnit {
+    // note: original name is stored but not currently used in toString, hashcode, or equals
+    private String originalName;
     private boolean uu;
     private boolean ub;
-
     private int prefixExponent;
-
+    // Tree map maintaining sorted order on base unit names
     private final Map<String, Integer> exponents;
 
-    public UnitsZ3SolutionSlot(int slotID) {
-        this.slotID = slotID;
-        exponents = new HashMap<>();
+    public TypecheckUnit() {
+        exponents = new TreeMap<>();
 
+        // default originalName value is "default"
+        originalName = "default";
         // default UU value is false
         uu = false;
         // default UU value is false
@@ -35,8 +35,17 @@ public class UnitsZ3SolutionSlot {
         }
     }
 
+    public void setOriginalName(String val) {
+        originalName = val;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
     public void setUnknownUnits(boolean val) {
         uu = val;
+        assert !(uu && ub);
     }
 
     public boolean getUnknownUnits() {
@@ -45,6 +54,7 @@ public class UnitsZ3SolutionSlot {
 
     public void setUnitsBottom(boolean val) {
         ub = val;
+        assert !(uu && ub);
     }
 
     public boolean getUnitsBottom() {
@@ -74,12 +84,23 @@ public class UnitsZ3SolutionSlot {
     }
 
     @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(" UU = " + uu);
+        sb.append(" UB = " + ub);
+        sb.append(" Prefix = " + prefixExponent);
+        for (String baseUnit : UnitsUtils.baseUnits()) {
+            sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
+        }
+        return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((exponents == null) ? 0 : exponents.hashCode());
         result = prime * result + prefixExponent;
-        result = prime * result + slotID;
         result = prime * result + (ub ? 1231 : 1237);
         result = prime * result + (uu ? 1231 : 1237);
         return result;
@@ -87,26 +108,32 @@ public class UnitsZ3SolutionSlot {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        UnitsZ3SolutionSlot other = (UnitsZ3SolutionSlot) obj;
+        }
+        TypecheckUnit other = (TypecheckUnit) obj;
         if (exponents == null) {
-            if (other.exponents != null)
+            if (other.exponents != null) {
                 return false;
-        } else if (!exponents.equals(other.exponents))
+            }
+        } else if (!exponents.equals(other.exponents)) {
             return false;
-        if (prefixExponent != other.prefixExponent)
+        }
+        if (prefixExponent != other.prefixExponent) {
             return false;
-        if (slotID != other.slotID)
+        }
+        if (ub != other.ub) {
             return false;
-        if (ub != other.ub)
+        }
+        if (uu != other.uu) {
             return false;
-        if (uu != other.uu)
-            return false;
+        }
         return true;
     }
 }

@@ -212,7 +212,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // }
 
         @Override
-        public Void visitBinary(BinaryTree binaryTree, AnnotatedTypeMirror atm) {
+        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror atm) {
             // From super:
             // Unary trees and compound assignments (x++ or x +=y) get desugared
             // by dataflow to be x = x + 1 and x = x + y.
@@ -222,7 +222,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // to be the just the type of the variable.
             // So, the type returned from this for desugared trees is not used.
             // We don't create a constraint to reduce confusion
-            if (realTypeFactory.getPath(binaryTree) == null) {
+            if (realTypeFactory.getPath(node) == null) {
                 // Desugared tree's don't have paths.
                 // There currently is some case that we are missing that requires us to annotate
                 // these.
@@ -230,12 +230,11 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             }
 
             // visit via variableAnnotator to create a ArithmeticVariableSlot for the result atm
-            variableAnnotator.visit(atm, binaryTree);
+            variableAnnotator.visit(atm, node);
 
-            Kind kind = binaryTree.getKind();
-            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
-            AnnotatedTypeMirror rhsATM =
-                    atypeFactory.getAnnotatedType(binaryTree.getRightOperand());
+            Kind kind = node.getKind();
+            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(node.getLeftOperand());
+            AnnotatedTypeMirror rhsATM = atypeFactory.getAnnotatedType(node.getRightOperand());
             VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
             VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
             VariableSlot result = slotManager.getVariableSlot(atm);

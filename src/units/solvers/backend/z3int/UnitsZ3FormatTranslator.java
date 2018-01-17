@@ -24,13 +24,13 @@ import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
-import units.solvers.backend.z3int.encoder.UnitsZ3EncodedSlot;
+import units.internalrepresentation.InferenceUnit;
+import units.internalrepresentation.TypecheckUnit;
 import units.solvers.backend.z3int.encoder.UnitsZ3IntConstraintEncoderFactory;
-import units.solvers.backend.z3int.encoder.UnitsZ3SolutionSlot;
 import units.util.UnitsUtils;
+import units.util.UnitsZ3EncoderUtils;
 
-public class UnitsZ3FormatTranslator
-        extends Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> {
+public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit, TypecheckUnit> {
 
     public static BoolExpr Z3TRUE;
     public static BoolExpr Z3FALSE;
@@ -54,14 +54,14 @@ public class UnitsZ3FormatTranslator
     }
 
     @Override
-    protected UnitsZ3EncodedSlot serializeVarSlot(VariableSlot slot) {
+    protected InferenceUnit serializeVarSlot(VariableSlot slot) {
         int slotID = slot.getId();
 
         if (serializedSlots.containsKey(slotID)) {
             return serializedSlots.get(slotID);
         }
 
-        UnitsZ3EncodedSlot encodedSlot = UnitsZ3EncodedSlot.makeVariableSlot(ctx, slotID);
+        InferenceUnit encodedSlot = InferenceUnit.makeVariableSlot(ctx, slotID);
 
         serializedSlots.put(slotID, encodedSlot);
         return encodedSlot;
@@ -69,7 +69,7 @@ public class UnitsZ3FormatTranslator
 
     @SuppressWarnings("unchecked")
     @Override
-    protected UnitsZ3EncodedSlot serializeConstantSlot(ConstantSlot slot) {
+    protected InferenceUnit serializeConstantSlot(ConstantSlot slot) {
         int slotID = slot.getId();
 
         if (serializedSlots.containsKey(slotID)) {
@@ -77,7 +77,7 @@ public class UnitsZ3FormatTranslator
         }
 
         // Makes a constant encoded slot with default values
-        UnitsZ3EncodedSlot encodedSlot = UnitsZ3EncodedSlot.makeConstantSlot(ctx, slotID);
+        InferenceUnit encodedSlot = InferenceUnit.makeConstantSlot(ctx, slotID);
 
         AnnotationMirror anno = slot.getValue();
         if (AnnotationUtils.areSame(anno, UnitsUtils.UNKNOWNUNITS)) {
@@ -139,7 +139,7 @@ public class UnitsZ3FormatTranslator
             ProcessingEnvironment processingEnv) {
 
         Map<Integer, AnnotationMirror> result = new HashMap<>();
-        Map<Integer, UnitsZ3SolutionSlot> solutionSlots = new HashMap<>();
+        Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
 
         System.out.println("========== SOLUTION ==========");
 
@@ -162,21 +162,21 @@ public class UnitsZ3FormatTranslator
 
             // Get slotID and component name
             Pair<Integer, String> slot =
-                    UnitsUtils.slotFromZ3VarName(funcDecl.getName().toString());
+                    UnitsZ3EncoderUtils.slotFromZ3VarName(funcDecl.getName().toString());
             int slotID = slot.first;
             String component = slot.second;
 
             // Create a fresh solution slot if needed in the map
             if (!solutionSlots.containsKey(slotID)) {
-                solutionSlots.put(slotID, new UnitsZ3SolutionSlot(slotID));
+                solutionSlots.put(slotID, new TypecheckUnit());
             }
 
-            UnitsZ3SolutionSlot z3Slot = solutionSlots.get(slotID);
-            if (component.contentEquals(UnitsUtils.uuSlotName)) {
+            TypecheckUnit z3Slot = solutionSlots.get(slotID);
+            if (component.contentEquals(UnitsZ3EncoderUtils.uuSlotName)) {
                 z3Slot.setUnknownUnits(constInterp.isTrue());
-            } else if (component.contentEquals(UnitsUtils.ubSlotName)) {
+            } else if (component.contentEquals(UnitsZ3EncoderUtils.ubSlotName)) {
                 z3Slot.setUnitsBottom(constInterp.isTrue());
-            } else if (component.contentEquals(UnitsUtils.prefixSlotName)) {
+            } else if (component.contentEquals(UnitsZ3EncoderUtils.prefixSlotName)) {
                 z3Slot.setPrefixExponent(Integer.valueOf(constInterp.toString()));
             } else {
                 // assumes it is a base unit exponent
@@ -202,7 +202,7 @@ public class UnitsZ3FormatTranslator
 
     // Convert a UnitsZ3EncodedSlot to an AnnotationMirror
     @Override
-    public AnnotationMirror decodeSolution(UnitsZ3SolutionSlot solutionSlot,
+    public AnnotationMirror decodeSolution(TypecheckUnit solutionSlot,
             ProcessingEnvironment processingEnv) {
 
         // TODO: translate @UnitsInternal annotations to string from @Units annotations

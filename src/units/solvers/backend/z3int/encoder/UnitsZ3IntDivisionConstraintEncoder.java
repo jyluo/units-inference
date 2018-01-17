@@ -10,14 +10,17 @@ import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
+import units.internalrepresentation.InferenceUnit;
+import units.internalrepresentation.TypecheckUnit;
+import units.util.UnitsZ3EncoderUtils;
 
 public class UnitsZ3IntDivisionConstraintEncoder
-        extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
+        extends Z3IntAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
         implements DivisionConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntDivisionConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
-            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
+            Z3IntFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
@@ -46,10 +49,10 @@ public class UnitsZ3IntDivisionConstraintEncoder
 
     @Override
     public BoolExpr encodeConstant_Constant(ConstantSlot lhs, ConstantSlot rhs, VariableSlot res) {
-        // encode equality between result of division and res
-        // TODO: create computeable divide method
-        // return UnitsZ3EncoderUtils.equality(ctx, rhs.serialize(z3IntFormatTranslator),
-        // res.serialize(z3IntFormatTranslator));
-        return emptyValue;
+        // It is more efficient to encode an equality between the result of lhs / rhs and res, but
+        // to do that requires access to slotManager here to create a constant slot for the
+        // annotation mirror of the result of lhs / rhs. We defer, regrettably, to use z3 to do the
+        // calculations instead.
+        return encode(lhs, rhs, res);
     }
 }

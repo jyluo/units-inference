@@ -1,14 +1,45 @@
-package units.solvers.backend.z3int.encoder;
+package units.util;
 
+import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.util.UnitsUtils;
+import units.internalrepresentation.InferenceUnit;
 
+/**
+ * Utility class with methods for defining z3 variable names and encoding of various relationships
+ * between Units.
+ */
 public class UnitsZ3EncoderUtils {
+
+    private static final char idComponentSeparator = '-';
+    public static final String uuSlotName = "UnknownUnits";
+    public static final String ubSlotName = "UnitsBottom";
+    public static final String prefixSlotName = "Prefix";
+
+    public static String z3VarName(int slotID, String component) {
+        return slotID + String.valueOf(idComponentSeparator) + component;
+    }
+
+    public static Pair<Integer, String> slotFromZ3VarName(String z3VarName) {
+        int dashIndex = z3VarName.indexOf(idComponentSeparator);
+
+        int slotID;
+        String component;
+
+        if (dashIndex < 0) {
+            slotID = Integer.valueOf(z3VarName);
+            component = null;
+        } else {
+            slotID = Integer.valueOf(z3VarName.substring(0, dashIndex));
+            component = z3VarName.substring(dashIndex + 1);
+        }
+
+        return Pair.of(slotID, component);
+    }
 
     // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
-    public static BoolExpr equality(Context ctx, UnitsZ3EncodedSlot fst, UnitsZ3EncodedSlot snd) {
+    public static BoolExpr equality(Context ctx, InferenceUnit fst, InferenceUnit snd) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr equalityEncoding =
             ctx.mkAnd(
@@ -29,8 +60,7 @@ public class UnitsZ3EncoderUtils {
     // super != top and super != bottom --> sub = super or sub = bottom
     // super = top --> no constraints on sub
     // super = bottom --> sub = bottom
-    public static BoolExpr subtype(Context ctx, UnitsZ3EncodedSlot subT,
-            UnitsZ3EncodedSlot superT) {
+    public static BoolExpr subtype(Context ctx, InferenceUnit subT, InferenceUnit superT) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr subtypeEncoding =
             ctx.mkXor(
@@ -52,14 +82,14 @@ public class UnitsZ3EncoderUtils {
     }
 
     // For Addition and Subtraction
-    public static BoolExpr tripleEquality(Context ctx, UnitsZ3EncodedSlot lhs,
-            UnitsZ3EncodedSlot rhs, UnitsZ3EncodedSlot res) {
+    public static BoolExpr tripleEquality(Context ctx, InferenceUnit lhs, InferenceUnit rhs,
+            InferenceUnit res) {
         // set lhs == rhs, and rhs == res, transitively lhs == res
         return ctx.mkAnd(equality(ctx, lhs, rhs), equality(ctx, rhs, res));
     }
 
-    public static BoolExpr multiply(Context ctx, UnitsZ3EncodedSlot lhs, UnitsZ3EncodedSlot rhs,
-            UnitsZ3EncodedSlot res) {
+    public static BoolExpr multiply(Context ctx, InferenceUnit lhs, InferenceUnit rhs,
+            InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent + rhs_exponent
         BoolExpr exponents = ctx.mkTrue();
@@ -98,8 +128,8 @@ public class UnitsZ3EncoderUtils {
         return multiplyEncoding;
     }
 
-    public static BoolExpr divide(Context ctx, UnitsZ3EncodedSlot lhs, UnitsZ3EncodedSlot rhs,
-            UnitsZ3EncodedSlot res) {
+    public static BoolExpr divide(Context ctx, InferenceUnit lhs, InferenceUnit rhs,
+            InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent - rhs_exponent
         BoolExpr exponents = ctx.mkTrue();

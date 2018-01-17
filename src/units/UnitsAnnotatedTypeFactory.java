@@ -19,9 +19,12 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.Tree.Kind;
 import units.qual.UnitsAlias;
 import units.qual.UnitsBottom;
+import units.qual.UnitsInternal;
 import units.qual.UnknownUnits;
+import units.util.UnitsTypecheckUtils;
 import units.util.UnitsUtils;
 
 public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
@@ -86,19 +89,21 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
-            // @UnitsInternal <: Top
+            // Case: @UnitsInternal <: Top
             if (AnnotationUtils.areSame(superAnno, UnitsUtils.UNKNOWNUNITS)) {
                 return true;
             }
 
-            // Bottom <: UnitsInternal
+            // Case: Bottom <: @UnitsInternal
             if (AnnotationUtils.areSame(subAnno, UnitsUtils.BOTTOM)) {
                 return true;
             }
 
-            // @UnitsInternal <: @UnitsInternal
-            if (AnnotationUtils.areSameIgnoringValues(subAnno, superAnno)) {
-                return AnnotationUtils.areSame(subAnno, superAnno);
+            // Case: @UnitsInternal(x) <: @UnitsInternal(y)
+            if (AnnotationUtils.areSameByClass(subAnno, UnitsInternal.class)
+                    && AnnotationUtils.areSameByClass(superAnno, UnitsInternal.class)
+                    && AnnotationUtils.areSameIgnoringValues(subAnno, superAnno)) {
+                return UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
             }
 
             return super.isSubtype(subAnno, superAnno);
@@ -118,8 +123,42 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            // TODO: Type checking rules, same as standard Units ATF
-            return super.visitBinary(node, type);
+            Kind kind = node.getKind();
+            AnnotationMirror lhsAM = atypeFactory.getAnnotatedType(node.getLeftOperand())
+                    .getAnnotationInHierarchy(UNKNOWNUNITS);
+            AnnotationMirror rhsAM = atypeFactory.getAnnotatedType(node.getRightOperand())
+                    .getAnnotationInHierarchy(UNKNOWNUNITS);
+
+            switch (kind) {
+                case PLUS:
+                    if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                        type.replaceAnnotation(lhsAM);
+                    } else {
+                        // TODO: issue warning
+                    }
+                    break;
+                case MINUS:
+                    if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                        type.replaceAnnotation(lhsAM);
+                    } else {
+                        // TODO: issue warning
+                    }
+                    break;
+                case MULTIPLY:
+                    type.replaceAnnotation(UnitsTypecheckUtils.multiplication(lhsAM, rhsAM));
+                    break;
+                case DIVIDE:
+                    type.replaceAnnotation(UnitsTypecheckUtils.division(lhsAM, rhsAM));
+                    break;
+                case REMAINDER:
+                    type.replaceAnnotation(lhsAM);
+                    break;
+                default:
+                    // Check LUB by default
+                    return super.visitBinary(node, type);
+            }
+
+            return null;
         }
     }
 }

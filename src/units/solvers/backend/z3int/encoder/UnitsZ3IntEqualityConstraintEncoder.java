@@ -10,14 +10,18 @@ import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.util.ConstraintVerifier;
+import units.internalrepresentation.InferenceUnit;
+import units.internalrepresentation.TypecheckUnit;
+import units.util.UnitsTypecheckUtils;
+import units.util.UnitsZ3EncoderUtils;
 
 public class UnitsZ3IntEqualityConstraintEncoder
-        extends Z3IntAbstractConstraintEncoder<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot>
+        extends Z3IntAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
         implements EqualityConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntEqualityConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,
-            Z3IntFormatTranslator<UnitsZ3EncodedSlot, UnitsZ3SolutionSlot> z3IntFormatTranslator) {
+            Z3IntFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
         super(lattice, verifier, ctx, z3IntFormatTranslator);
     }
 
@@ -44,6 +48,8 @@ public class UnitsZ3IntEqualityConstraintEncoder
 
     @Override
     public BoolExpr encodeConstant_Constant(ConstantSlot fst, ConstantSlot snd) {
-        return verifier.areEqual(fst, snd) ? emptyValue : contradictoryValue;
+        return UnitsTypecheckUtils.unitsEqual(fst.getValue(), snd.getValue())
+                ? emptyValue
+                : contradictoryValue;
     }
 }

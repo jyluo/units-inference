@@ -3,19 +3,17 @@ package units;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.checkerframework.framework.test.TestUtilities;
 import org.checkerframework.javacutil.Pair;
 import org.junit.runners.Parameterized.Parameters;
-
 import checkers.inference.test.CFInferenceTest;
 import units.solvers.backend.UnitsSolverEngine;
 
 public class UnitsTest extends CFInferenceTest {
- 
+
     public UnitsTest(File testFile) {
-        super(testFile, units.UnitsChecker.class, "units",
-                "-Anomsgtext", "-d", "tests/build/outputdir");
+        super(testFile, units.UnitsChecker.class, "units", "-Anomsgtext", "-d",
+                "tests/build/outputdir");
     }
 
     @Override
@@ -32,7 +30,7 @@ public class UnitsTest extends CFInferenceTest {
     }
 
     @Parameters
-    public static List<File> getTestFiles(){
+    public static List<File> getTestFiles() {
         List<File> testfiles = new ArrayList<>();
         testfiles.addAll(TestUtilities.getJavaFilesAsArgumentList(new File("testing")));
         return testfiles;

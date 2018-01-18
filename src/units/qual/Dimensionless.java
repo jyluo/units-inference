@@ -38,7 +38,7 @@ import org.checkerframework.framework.qual.SubtypeOf;
                                                                            // need to be impliclty
                                                                            // declared
         typeNames = {Throwable.class, Exception.class, Class.class})
-@UnitsAlias({0, 0})
+@UnitsAlias({})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})

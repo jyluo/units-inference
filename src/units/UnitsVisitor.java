@@ -18,31 +18,33 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
     @Override
     public Void visitBinary(BinaryTree node, Void p) {
+        if (!infer && atypeFactory instanceof UnitsAnnotatedTypeFactory) {
+            UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
 
-        UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
+            Kind kind = node.getKind();
+            AnnotationMirror lhsAM = atf.getAnnotatedType(node.getLeftOperand())
+                    .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
+            AnnotationMirror rhsAM = atf.getAnnotatedType(node.getRightOperand())
+                    .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
 
-        Kind kind = node.getKind();
-        AnnotationMirror lhsAM = atf.getAnnotatedType(node.getLeftOperand())
-                .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
-        AnnotationMirror rhsAM = atf.getAnnotatedType(node.getRightOperand())
-                .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
-
-        switch (kind) {
-            case PLUS:
-                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
-                            rhsAM.toString()), node);
-                }
-                break;
-            case MINUS:
-                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("subtraction.unit.mismatch", lhsAM.toString(),
-                            rhsAM.toString()), node);
-                }
-                break;
-            default:
-                break;
+            switch (kind) {
+                case PLUS:
+                    if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                        checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
+                                rhsAM.toString()), node);
+                    }
+                    break;
+                case MINUS:
+                    if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                        checker.report(Result.failure("subtraction.unit.mismatch", lhsAM.toString(),
+                                rhsAM.toString()), node);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
+
         return super.visitBinary(node, p);
     }
 

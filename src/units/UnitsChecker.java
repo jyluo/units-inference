@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import org.checkerframework.framework.qual.StubFiles;
 import checkers.inference.BaseInferrableChecker;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferrableChecker;
@@ -11,6 +12,7 @@ import checkers.inference.SlotManager;
 import checkers.inference.model.ConstraintManager;
 import units.qual.BaseUnit;
 
+@StubFiles({"JavaBoxedPrimitives.astub", "JavaLangSystem.astub"})
 public class UnitsChecker extends BaseInferrableChecker {
 
     @Override

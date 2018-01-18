@@ -20,6 +20,7 @@ export LD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
 
 CHECKER=units.UnitsChecker
 SOLVER=units.solvers.backend.UnitsSolverEngine
+DEBUG_SOLVER=checkers.inference.solver.DebugSolver
 
 #parsing build command of the target program
 build_cmd="$1"
@@ -32,14 +33,14 @@ done
 
 cd "$WORKING_DIR"
 
-infer_cmd="python $DLJC/dljc -t inference --crashExit true --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+infer_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs --mode=\"INFER\" -afud $WORKING_DIR/annotated -- $build_cmd "
 
 # debug_onlyCompile="--onlyCompileBytecodeBase true"
-debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $JSR308/units-inference/bin $debug_onlyCompile --expectOutputRegex 'Z3 Unsatisfiable' --checker $DATAFLOW_CHECKER --solver $DATAFLOW_SOLVER --solverArgs=\"collectStatistic=true,solver=Z3\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+# debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $JSR308/units-inference/bin $debug_onlyCompile --expectOutputRegex 'Unsatisfiable' --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+debug_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $DEBUG_SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs --mode=\"ROUNDTRIP\" -afud $WORKING_DIR/annotated -- $build_cmd "
 
-
+#running_cmd=$infer_cmd
 running_cmd=$infer_cmd
-
 
 echo "============ Important variables ============="
 echo "JSR308: $JSR308"

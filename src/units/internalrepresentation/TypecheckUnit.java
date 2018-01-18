@@ -45,19 +45,19 @@ public class TypecheckUnit {
 
     public void setUnknownUnits(boolean val) {
         uu = val;
-        assert !(uu && ub);
+        // assert !(uu && ub);
     }
 
-    public boolean getUnknownUnits() {
+    public boolean isUnknownUnits() {
         return uu;
     }
 
     public void setUnitsBottom(boolean val) {
         ub = val;
-        assert !(uu && ub);
+        // assert !(uu && ub);
     }
 
-    public boolean getUnitsBottom() {
+    public boolean isUnitsBottom() {
         return ub;
     }
 

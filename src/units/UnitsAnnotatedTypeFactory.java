@@ -20,6 +20,7 @@ import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
+import units.qual.IsBaseUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsBottom;
 import units.qual.UnitsInternal;
@@ -60,16 +61,38 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
-        // TODO: proper alias conversion
         for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
                 .getAnnotationMirrors()) {
             if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
-
                 Map<String, Integer> exponents = new TreeMap<>();
-                exponents.put("m", 1);
-                exponents.put("s", 1);
 
-                return UnitsUtils.createInternalUnit("dummy", false, false, 1, exponents);
+                int prefix = 0;
+                // default all base units to exponent 0
+                for (String bu : UnitsUtils.baseUnits()) {
+                    exponents.put(bu, 0);
+                }
+                // replace default base unit exponents from anno
+                for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(metaAnno, "value",
+                        AnnotationMirror.class, true)) {
+                    exponents.put(AnnotationUtils.getElementValue(bu, "unit", String.class, false),
+                            AnnotationUtils.getElementValue(bu, "exponent", Integer.class, true));
+                    prefix += AnnotationUtils.getElementValue(bu, "prefix", Integer.class, true);
+                }
+
+                UnitsUtils.addUnitsAnnotation(anno);
+                return UnitsUtils.createInternalUnit("", false, false, prefix, exponents);
+            }
+
+            if (AnnotationUtils.areSameByClass(metaAnno, IsBaseUnit.class)) {
+                Map<String, Integer> exponents = new TreeMap<>();
+                // default all base units to exponent 0
+                for (String bu : UnitsUtils.baseUnits()) {
+                    exponents.put(bu, 0);
+                }
+                exponents.put(anno.getAnnotationType().asElement().getSimpleName().toString(), 1);
+
+                UnitsUtils.addUnitsAnnotation(anno);
+                return UnitsUtils.createInternalUnit("", false, false, 0, exponents);
             }
         }
 

@@ -1,13 +1,9 @@
 package units.solvers.backend.z3int;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
-import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
@@ -15,9 +11,6 @@ import com.microsoft.z3.Expr;
 import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.IntNum;
 import com.microsoft.z3.Model;
-import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Attribute.Compound;
-import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
@@ -67,7 +60,6 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit
         return encodedSlot;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected InferenceUnit serializeConstantSlot(ConstantSlot slot) {
         int slotID = slot.getId();
@@ -76,56 +68,22 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit
             return serializedSlots.get(slotID);
         }
 
+        AnnotationMirror anno = slot.getValue();
+        TypecheckUnit unit = UnitsUtils.createTypecheckUnit(anno);
+
         // Makes a constant encoded slot with default values
         InferenceUnit encodedSlot = InferenceUnit.makeConstantSlot(ctx, slotID);
 
-        AnnotationMirror anno = slot.getValue();
-        if (AnnotationUtils.areSame(anno, UnitsUtils.UNKNOWNUNITS)) {
+        // Replace values in constant encoded slot with values in the annotation
+        if (unit.isUnknownUnits()) {
             encodedSlot.setUnknownUnits(true);
-        } else if (AnnotationUtils.areSame(anno, UnitsUtils.BOTTOM)) {
+        } else if (unit.isUnitsBottom()) {
             encodedSlot.setUnitsBottom(true);
         } else {
-            // Replace values in constant encoded slot with values in the annotation
-            Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues =
-                    anno.getElementValues();
-            for (ExecutableElement elem : elementValues.keySet()) {
-
-                Object annotationValue = elementValues.get(elem).getValue();
-
-                if (elem.getSimpleName().contentEquals("unknownUnits")) {
-                    encodedSlot.setUnknownUnits(((Boolean) annotationValue));
-
-                } else if (elem.getSimpleName().contentEquals("unitsBottom")) {
-                    encodedSlot.setUnitsBottom(((Boolean) annotationValue));
-
-                } else if (elem.getSimpleName().contentEquals("prefixExponent")) {
-                    encodedSlot.setPrefixExponent(((Integer) annotationValue));
-
-                } else if (elem.getSimpleName().contentEquals("baseUnits")) {
-                    // for each base unit that is declared
-                    for (Compound bu : (List<Compound>) annotationValue) {
-
-                        // extract the unit and exponent
-                        Map<MethodSymbol, Attribute> buElementValues = bu.getElementValues();
-                        String unit = "none";
-                        int exponent = 0;
-
-                        for (MethodSymbol key : buElementValues.keySet()) {
-                            System.out.println(
-                                    key.getSimpleName() + " => " + buElementValues.get(key));
-
-                            // TODO: is there any better ways to do this aside from name equality?
-                            if (key.getSimpleName().contentEquals("unit")) {
-                                unit = buElementValues.get(key).getValue().toString();
-                            } else if (key.getSimpleName().contentEquals("exponent")) {
-                                exponent = Integer
-                                        .valueOf(buElementValues.get(key).getValue().toString());
-                            }
-                        }
-
-                        encodedSlot.setExponent(unit, exponent);
-                    }
-                }
+            encodedSlot.setPrefixExponent(unit.getPrefixExponent());
+            Map<String, Integer> expos = unit.getExponents();
+            for (String bu : expos.keySet()) {
+                encodedSlot.setExponent(bu, unit.getExponent(bu));
             }
         }
 
@@ -140,8 +98,6 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit
 
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
-
-        System.out.println("========== SOLUTION ==========");
 
         // Model maps slotID-component to IntNum or BoolExpr
         // We collect all components for a given slotID, creating a solution slot for each slotID
@@ -207,14 +163,14 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit
 
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
         // TODO: further translate some of the units to the alias symbols where possible
-        if (solutionSlot.getUnknownUnits()) {
+        if (solutionSlot.isUnknownUnits()) {
             return UnitsUtils.UNKNOWNUNITS;
-        } else if (solutionSlot.getUnitsBottom()) {
+        } else if (solutionSlot.isUnitsBottom()) {
             return UnitsUtils.BOTTOM;
         } else {
             // TODO: infer original name somehow
-            return UnitsUtils.createInternalUnit("", solutionSlot.getUnknownUnits(),
-                    solutionSlot.getUnitsBottom(), solutionSlot.getPrefixExponent(),
+            return UnitsUtils.createInternalUnit("", solutionSlot.isUnknownUnits(),
+                    solutionSlot.isUnitsBottom(), solutionSlot.getPrefixExponent(),
                     solutionSlot.getExponents());
         }
     }

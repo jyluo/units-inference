@@ -69,7 +69,7 @@ public class UnitsZ3EncoderUtils {
                     ctx.mkAnd(
                         ctx.mkNot(superT.getUnknownUnits()),   
                         ctx.mkNot(superT.getUnitsBottom()),
-                        ctx.mkXor(equality(ctx, subT, superT), superT.getUnitsBottom()) 
+                        ctx.mkXor(equality(ctx, subT, superT), subT.getUnitsBottom()) 
                     ),
                     // super = top ==> no constraints on sub
                     superT.getUnknownUnits()

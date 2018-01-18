@@ -3,15 +3,20 @@ import units.qual.*;
 class Main {
     public Main() {
         // @m
-        @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 0, baseUnits = {
-            @BaseUnit(unit = "m", exponent = 1)
-        }) Integer x = 5 + 6;
+        // @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 0, baseUnits = {
+        //     @BaseUnit(unit = "m", exponent = 1)
+        // }) Integer x = 10;
 
-        x = 7 - 8;
+        // @ms
+        @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = -3, baseUnits = {
+            @BaseUnit(unit = "s", exponent = 1)
+        }) Integer x = 10;
 
-        x = 1 * 2;
+        // x = 7 - 8;
 
-        x = 12 / 5;
+        // x = 1 * 2;
+
+        // x = 12 / 5;
 
         // x = 40 % 9;
 
@@ -20,19 +25,54 @@ class Main {
             @BaseUnit(unit = "s", exponent = 1)
         }) Integer y = 90;
 
-        // @mPERs
+        // // @mPERs
         Integer z = x / y;
 
-        z = x % x;
+        @UnitsBottom Integer g = 10;
 
-        z = x + y;
+        z = g;
 
-        z = x - y;
+        // @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = -3, baseUnits = {
+        //     @BaseUnit(unit = "s", exponent = 1)
+        // })
+        float ms = toInferMethod(System.currentTimeMillis());
+        // ms = toInferMethod(myTimeMillis());
 
-        // Integer y = x;
-
-        // @m Integer x = 5 + 6;
-
-        // Integer y = 9 - 10 - 11;
+        String word = null;
+        if(false) {
+            word = "stuff";
+        }
     }
+
+    @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = -3, baseUnits = {
+            @BaseUnit(unit = "s", exponent = 1)
+    }) long myTimeMillis() {
+        return 10;
+    }
+
+    float toInferMethod(float input) {
+        return input * Math.signum(input);
+    }
+
+
+    private float r;
+    private float i;
+
+    public String jblas_complexfloat(){
+        if (i >= 0) {
+          return r + " + " + i + "i";
+        } else {
+          return r + " - " + (-i) + "i";
+        }
+    }
+
+    class Inner {
+        public Inner(){}
+    }
+
+    public void testClasses(){
+        String x = "test";
+        Inner y = new Inner();
+    }
+
 }

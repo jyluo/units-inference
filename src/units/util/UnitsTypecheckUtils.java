@@ -12,8 +12,8 @@ public class UnitsTypecheckUtils {
         TypecheckUnit result = new TypecheckUnit();
 
         // if either lhs or rhs is UnknownUnits or UnitsBottom, then result is UnknownUnits
-        if (lhs.getUnknownUnits() || lhs.getUnitsBottom() || rhs.getUnknownUnits()
-                || rhs.getUnitsBottom()) {
+        if (lhs.isUnknownUnits() || lhs.isUnitsBottom() || rhs.isUnknownUnits()
+                || rhs.isUnitsBottom()) {
             result.setUnknownUnits(true);
             return result;
         }
@@ -37,8 +37,8 @@ public class UnitsTypecheckUtils {
         TypecheckUnit result = new TypecheckUnit();
 
         // if either lhs or rhs is UnknownUnits or UnitsBottom, then result is UnknownUnits
-        if (lhs.getUnknownUnits() || lhs.getUnitsBottom() || rhs.getUnknownUnits()
-                || rhs.getUnitsBottom()) {
+        if (lhs.isUnknownUnits() || lhs.isUnitsBottom() || rhs.isUnknownUnits()
+                || rhs.isUnitsBottom()) {
             result.setUnknownUnits(true);
             return result;
         }

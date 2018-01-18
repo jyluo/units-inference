@@ -2,6 +2,7 @@ package units.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,10 +12,10 @@ import java.util.TreeSet;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
+import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
-import com.sun.tools.javac.code.Attribute.Compound;
 import units.internalrepresentation.TypecheckUnit;
 import units.qual.BaseUnit;
 import units.qual.PolyUnit;
@@ -81,28 +82,42 @@ public class UnitsUtils {
         return singletonInstance;
     }
 
-    private static Set<String> baseUnits;
+    private static Set<String> baseUnits = new TreeSet<>();
+
+    public static void addBaseUnit(String baseUnit) {
+        baseUnits.add(baseUnit);
+    }
 
     public static Set<String> baseUnits() {
-        if (baseUnits == null) {
-            baseUnits = new TreeSet<>();
-            // TODO: integrate with RealATF and add actual base units declared by user
-            baseUnits.add("m");
-            baseUnits.add("s");
-        }
         return baseUnits;
     }
 
-    // TODO: see of cache should be from string name to unit?
+    // contains all supported units annotations, including aliases
+    private static Set<AnnotationMirror> unitsAnnotations = new HashSet<>();
+
+    public static void addUnitsAnnotation(AnnotationMirror anno) {
+        unitsAnnotations.add(anno);
+    }
+
+    public static boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
+            AnnotationMirror anno) {
+        return unitsAnnotations.contains(anno) || realTypeFactory.isSupportedQualifier(anno);
+    }
+
     // A 1 to 1 mapping between an annotation mirror and its unique typecheck unit.
     private static Map<AnnotationMirror, TypecheckUnit> typecheckUnitCache = new HashMap<>();
 
     public static TypecheckUnit createTypecheckUnit(AnnotationMirror anno) {
-        if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
-            TypecheckUnit unit;
-            if (!typecheckUnitCache.containsKey(anno)) {
-                unit = new TypecheckUnit();
+        if (!typecheckUnitCache.containsKey(anno)) {
+            TypecheckUnit unit = new TypecheckUnit();
 
+            if (AnnotationUtils.areSameByClass(anno, UnknownUnits.class)) {
+                unit.setUnknownUnits(true);
+
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsBottom.class)) {
+                unit.setUnitsBottom(true);
+
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
                 unit.setOriginalName(
                         AnnotationUtils.getElementValue(anno, "originalName", String.class, true));
                 unit.setUnknownUnits(
@@ -112,30 +127,27 @@ public class UnitsUtils {
                 unit.setPrefixExponent(AnnotationUtils.getElementValue(anno, "prefixExponent",
                         Integer.class, true));
 
-                Map<String, Integer> buExponents = new HashMap<>();
+                Map<String, Integer> exponents = new HashMap<>();
                 // default all base units to exponent 0
-                for (String bu : UnitsUtils.baseUnits) {
-                    buExponents.put(bu, 0);
+                for (String bu : UnitsUtils.baseUnits()) {
+                    exponents.put(bu, 0);
                 }
-                // replace default base unit exponents from anno
-                for (Compound bu : AnnotationUtils.getElementValueArray(anno, "baseUnits",
-                        Compound.class, true)) {
-                    buExponents.put(
-                            AnnotationUtils.getElementValue(bu, "unit", String.class, false),
+                for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(anno, "baseUnits",
+                        AnnotationMirror.class, true)) {
+                    exponents.put(AnnotationUtils.getElementValue(bu, "unit", String.class, false),
                             AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
                 }
 
-                for (String bu : buExponents.keySet()) {
-                    unit.setExponent(bu, buExponents.get(bu));
+                for (String bu : exponents.keySet()) {
+                    unit.setExponent(bu, exponents.get(bu));
                 }
-
-                typecheckUnitCache.put(anno, unit);
             } else {
-                unit = typecheckUnitCache.get(anno);
+                // not a units annotation
+                return null;
             }
-            return unit;
+            typecheckUnitCache.put(anno, unit);
         }
-        return null;
+        return typecheckUnitCache.get(anno);
     }
 
     public static AnnotationMirror createInternalUnit(TypecheckUnit unit) {
@@ -147,8 +159,8 @@ public class UnitsUtils {
         }
 
         // otherwise create an internal unit for the typecheck unit and add to cache
-        AnnotationMirror anno = createInternalUnit(unit.getOriginalName(), unit.getUnknownUnits(),
-                unit.getUnitsBottom(), unit.getPrefixExponent(), unit.getExponents());
+        AnnotationMirror anno = createInternalUnit(unit.getOriginalName(), unit.isUnknownUnits(),
+                unit.isUnitsBottom(), unit.getPrefixExponent(), unit.getExponents());
 
         typecheckUnitCache.put(anno, unit);
         return anno;

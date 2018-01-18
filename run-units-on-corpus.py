@@ -7,7 +7,6 @@ import argparse
 UNITS_INFERENCE_DIR = os.path.dirname(os.path.realpath(__file__))
 BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, "corpus")
 
-
 def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('--corpus-file', dest='corpus_file')

@@ -26,7 +26,6 @@ import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
-import checkers.inference.model.Slot;
 import checkers.inference.model.TernaryVariableSlot;
 import checkers.inference.model.VariableSlot;
 import units.util.UnitsUtils;
@@ -62,21 +61,16 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
-        // for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
-        // .getAnnotationMirrors()) {
-        // if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
-        //
-        // System.out.println(" aliasing " + anno);
-        //
-        // Map<String, Integer> exponents = new TreeMap<>();
-        // exponents.put("m", 1);
-        // exponents.put("s", 1);
-        //
-        // return UnitsUtils.createInternalUnit("dummy", 1, exponents);
-        // }
-        // }
+        // TODO: cache results
+        // TODO: alias empty @units.qual.UnitsInternal to instantiated dimensionless
+        // TODO: alias dimensionless?
+        AnnotationMirror result = realTypeFactory.aliasedAnnotation(anno);
+        // System.out.println(" === Aliasing: " + anno.toString() + " ==> " + result);
 
-        return super.aliasedAnnotation(anno);
+        if (result == null) {
+            result = super.aliasedAnnotation(anno);
+        }
+        return result;
     }
 
     @Override
@@ -134,6 +128,17 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 treeToVarAnnoPair.put(binaryTree, varATMPair);
             }
         }
+
+        // private VariableSlot getOrCreateSlot(AnnotatedTypeMirror atm, Tree tree) {
+        // // create a var slot from scratch if the atm doesn't have one.
+        // VariableSlot slot = slotManager.getVariableSlot(atm);
+        // if (slot == null) {
+        // slot = slotManager.createVariableSlot(treeToLocation(tree));
+        // // slot = slotManager.getVariableSlot(atm);
+        // assert slot != null;
+        // }
+        // return slot;
+        // }
     }
 
     @Override
@@ -173,8 +178,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             boolean hasExplicitUnitsAnnotation = false;
             AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(varTree);
+
+            // TODO: aliases and base unit annos used in variable declarations don't work right now
             for (AnnotationMirror anno : realATM.getExplicitAnnotations()) {
-                if (realTypeFactory.isSupportedQualifier(anno)) {
+                if (UnitsUtils.isUnitsAnnotation(realTypeFactory, anno)) {
                     hasExplicitUnitsAnnotation = true;
                     break;
                 }
@@ -186,8 +193,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
                 ConstantSlot declaredAnnoSlot = variableAnnotator.createConstant(realAnno, varTree);
                 // Get the VariableSlot generated for the variable
-                Slot varAnnotSlot =
-                        slotManager.getSlot(atm.getAnnotationInHierarchy(getVarAnnot()));
+                VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
                 // Add Equality constraint between the VariableSlot and the ConstantSlot
                 constraintManager.addEqualityConstraint(varAnnotSlot, declaredAnnoSlot);
             }
@@ -269,5 +275,17 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             return null;
         }
+        //
+        // private VariableSlot getOrCreateSlot(AnnotatedTypeMirror atm, Tree tree) {
+        // // create a var slot from scratch if the atm doesn't have one.
+        // VariableSlot slot = slotManager.getVariableSlot(atm);
+        // if (slot == null) {
+        // slot = slotManager.createVariableSlot(VariableAnnotator.treeToLocation(atypeFactory,
+        // tree));
+        // // slot = slotManager.getVariableSlot(atm);
+        // assert slot != null;
+        // }
+        // return slot;
+        // }
     }
 }

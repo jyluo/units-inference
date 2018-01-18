@@ -8,6 +8,9 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BaseUnit {
 
+    // value of p in 10 ^ p as a prefix, for kilo p = 3, for milli p = -3
+    int prefix() default 0;
+
     String unit() default "none";
 
     int exponent() default 0;

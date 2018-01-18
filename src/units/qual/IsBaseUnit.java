@@ -5,17 +5,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.checkerframework.framework.qual.SubtypeOf;
 
 /**
- * Meter.
- *
- * @checker_framework.manual #units-checker Units Checker
+ * Meta annotation used to declare that a unit is a base unit.
  */
 @Documented
+@Target({ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@IsBaseUnit
-@SubtypeOf(UnknownUnits.class)
-public @interface m {
+public @interface IsBaseUnit {
 }

@@ -163,15 +163,15 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit
 
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
         // TODO: further translate some of the units to the alias symbols where possible
-        if (solutionSlot.isUnknownUnits()) {
-            return UnitsUtils.UNKNOWNUNITS;
-        } else if (solutionSlot.isUnitsBottom()) {
-            return UnitsUtils.BOTTOM;
-        } else {
+//        if (solutionSlot.isUnknownUnits()) {
+//            return UnitsUtils.UNKNOWNUNITS;
+//        } else if (solutionSlot.isUnitsBottom()) {
+//            return UnitsUtils.BOTTOM;
+//        } else {
             // TODO: infer original name somehow
             return UnitsUtils.createInternalUnit("", solutionSlot.isUnknownUnits(),
                     solutionSlot.isUnitsBottom(), solutionSlot.getPrefixExponent(),
                     solutionSlot.getExponents());
-        }
+//        }
     }
 }

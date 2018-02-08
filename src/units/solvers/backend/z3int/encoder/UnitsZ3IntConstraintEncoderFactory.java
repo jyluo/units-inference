@@ -7,12 +7,12 @@ import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncode
 import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
-import checkers.inference.solver.backend.encoder.ternary.AdditionConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ternary.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.encoder.ternary.DivisionConstraintEncoder;
 import checkers.inference.solver.backend.encoder.ternary.ModulusConstraintEncoder;
 import checkers.inference.solver.backend.encoder.ternary.MultiplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.ternary.SubtractionConstraintEncoder;
-import checkers.inference.solver.backend.encoder.viewpointadaptation.ViewpointAdaptationConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ternary.ViewpointAdaptationConstraintEncoder;
 import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
@@ -72,7 +72,7 @@ public class UnitsZ3IntConstraintEncoderFactory
     }
 
     @Override
-    public AdditionConstraintEncoder<BoolExpr> createAdditionConstraintEncoder() {
+    public ArithmeticConstraintEncoder<BoolExpr> createAdditionConstraintEncoder() {
         return new UnitsZ3IntAdditionConstraintEncoder(
                 lattice, verifier, ctx, z3IntFormatTranslator);
     }

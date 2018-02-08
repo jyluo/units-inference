@@ -5,7 +5,7 @@ import com.microsoft.z3.Context;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.encoder.ternary.AdditionConstraintEncoder;
+import checkers.inference.solver.backend.encoder.ternary.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
 import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
@@ -17,7 +17,7 @@ import units.util.UnitsZ3EncoderUtils;
 
 public class UnitsZ3IntAdditionConstraintEncoder
         extends Z3IntAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
-        implements AdditionConstraintEncoder<BoolExpr> {
+        implements ArithmeticConstraintEncoder<BoolExpr> {
 
     public UnitsZ3IntAdditionConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
             Context ctx,

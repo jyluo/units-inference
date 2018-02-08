@@ -57,25 +57,29 @@ public class UnitsZ3EncoderUtils {
     }
 
     // sub <: super has 3 cases:
-    // super != top and super != bottom --> sub = super or sub = bottom
+    // not (super = top or super = bottom) --> sub = super xor sub = bottom
     // super = top --> no constraints on sub
     // super = bottom --> sub = bottom
     public static BoolExpr subtype(Context ctx, InferenceUnit subT, InferenceUnit superT) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr subtypeEncoding =
-            ctx.mkXor(
-                ctx.mkXor(
-                     // super != top and super != bottom ==> sub = super or sub = bottom
-                    ctx.mkAnd(
-                        ctx.mkNot(superT.getUnknownUnits()),   
-                        ctx.mkNot(superT.getUnitsBottom()),
-                        ctx.mkXor(equality(ctx, subT, superT), subT.getUnitsBottom()) 
+            ctx.mkAnd(
+                //ctx.mkImplies(arg0, arg1)
+                // not (super = top or super = bottom) --> sub = super xor sub = bottom
+                ctx.mkOr(
+                    ctx.mkOr(
+                        superT.getUnknownUnits(),
+                        superT.getUnitsBottom()
                     ),
-                    // super = top ==> no constraints on sub
-                    superT.getUnknownUnits()
+                    ctx.mkXor(equality(ctx, subT, superT), subT.getUnitsBottom()) 
                 ),
-                // super = bottom ==> sub = bottom
-                ctx.mkAnd(superT.getUnitsBottom(), subT.getUnitsBottom())
+                // super = bottom --> sub = bottom
+                ctx.mkOr(
+                    ctx.mkNot(
+                        superT.getUnitsBottom()
+                    ),
+                    subT.getUnitsBottom()
+                )
             );
         /* @formatter:on // this is for eclipse formatter */
         return subtypeEncoding;
@@ -102,27 +106,21 @@ public class UnitsZ3EncoderUtils {
             );
         }
         BoolExpr multiplyEncoding =
-            ctx.mkXor(
-                // if either lhs or rhs is UnknownUnits or UnitsBottom, then result is UnknownUnits
-                ctx.mkAnd(
-                    ctx.mkOr(
-                        lhs.getUnknownUnits(),
-                        lhs.getUnitsBottom(),
-                        rhs.getUnknownUnits(),
-                        rhs.getUnitsBottom()
-                    ),
-                    res.getUnknownUnits()
+            // res component = lhs component + rhs component
+            ctx.mkAnd(
+                ctx.mkEq(
+                    res.getUnknownUnits(),
+                    ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())
                 ),
-                // otherwise res component = lhs component + rhs component
-                ctx.mkAnd(
-                    ctx.mkNot(res.getUnknownUnits()),
-                    ctx.mkNot(res.getUnitsBottom()),
-                    ctx.mkEq(
-                        res.getPrefixExponent(),
-                        ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent())
-                    ),
-                    exponents
-                )
+                ctx.mkEq(
+                    res.getUnitsBottom(),
+                    ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())
+                ),
+                ctx.mkEq(
+                    res.getPrefixExponent(),
+                    ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent())
+                ),
+                exponents
             );
         /* @formatter:on // this is for eclipse formatter */
         return multiplyEncoding;
@@ -142,28 +140,22 @@ public class UnitsZ3EncoderUtils {
             );
         }
         BoolExpr divideEncoding =
-            ctx.mkXor(
-                // if either lhs or rhs is UnknownUnits or UnitsBottom, then result is UnknownUnits
+                // res component = lhs component + rhs component
                 ctx.mkAnd(
-                    ctx.mkOr(
-                        lhs.getUnknownUnits(),
-                        lhs.getUnitsBottom(),
-                        rhs.getUnknownUnits(),
-                        rhs.getUnitsBottom()
+                    ctx.mkEq(
+                        res.getUnknownUnits(),
+                        ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())
                     ),
-                    res.getUnknownUnits()
-                ),
-                // otherwise res component = lhs component - rhs component
-                ctx.mkAnd(
-                    ctx.mkNot(res.getUnknownUnits()),
-                    ctx.mkNot(res.getUnitsBottom()),
+                    ctx.mkEq(
+                        res.getUnitsBottom(),
+                        ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())
+                    ),
                     ctx.mkEq(
                         res.getPrefixExponent(),
                         ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent())
                     ),
                     exponents
-                )
-            );
+                );
         /* @formatter:on // this is for eclipse formatter */
         return divideEncoding;
     }

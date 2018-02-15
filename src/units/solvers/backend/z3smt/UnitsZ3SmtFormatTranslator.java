@@ -1,4 +1,4 @@
-package units.solvers.backend.z3int;
+package units.solvers.backend.z3smt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,21 +14,21 @@ import com.microsoft.z3.Model;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
-import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
+import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.util.ConstraintVerifier;
 import units.internalrepresentation.InferenceUnit;
 import units.internalrepresentation.TypecheckUnit;
-import units.solvers.backend.z3int.encoder.UnitsZ3IntConstraintEncoderFactory;
+import units.solvers.backend.z3smt.encoder.UnitsZ3SmtConstraintEncoderFactory;
 import units.util.UnitsUtils;
 import units.util.UnitsZ3EncoderUtils;
 
-public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit, TypecheckUnit> {
+public class UnitsZ3SmtFormatTranslator
+        extends Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> {
 
     public static BoolExpr Z3TRUE;
     public static BoolExpr Z3FALSE;
 
-    public UnitsZ3FormatTranslator(Lattice lattice) {
+    public UnitsZ3SmtFormatTranslator(Lattice lattice) {
         super(lattice);
     }
 
@@ -36,14 +36,13 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit
     protected void finishInitializingEncoders() {
         super.finishInitializingEncoders();
         // Context is now available
-        UnitsZ3FormatTranslator.Z3TRUE = ctx.mkBool(true);
-        UnitsZ3FormatTranslator.Z3FALSE = ctx.mkBool(false);
+        UnitsZ3SmtFormatTranslator.Z3TRUE = ctx.mkBool(true);
+        UnitsZ3SmtFormatTranslator.Z3FALSE = ctx.mkBool(false);
     }
 
     @Override
-    protected ConstraintEncoderFactory<BoolExpr> createConstraintEncoderFactory(
-            ConstraintVerifier verifier) {
-        return new UnitsZ3IntConstraintEncoderFactory(lattice, verifier, ctx, this);
+    protected ConstraintEncoderFactory<BoolExpr> createConstraintEncoderFactory() {
+        return new UnitsZ3SmtConstraintEncoderFactory(lattice, ctx, this);
     }
 
     @Override
@@ -163,15 +162,15 @@ public class UnitsZ3FormatTranslator extends Z3IntFormatTranslator<InferenceUnit
 
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
         // TODO: further translate some of the units to the alias symbols where possible
-//        if (solutionSlot.isUnknownUnits()) {
-//            return UnitsUtils.UNKNOWNUNITS;
-//        } else if (solutionSlot.isUnitsBottom()) {
-//            return UnitsUtils.BOTTOM;
-//        } else {
-            // TODO: infer original name somehow
-            return UnitsUtils.createInternalUnit("", solutionSlot.isUnknownUnits(),
-                    solutionSlot.isUnitsBottom(), solutionSlot.getPrefixExponent(),
-                    solutionSlot.getExponents());
-//        }
+        // if (solutionSlot.isUnknownUnits()) {
+        // return UnitsUtils.UNKNOWNUNITS;
+        // } else if (solutionSlot.isUnitsBottom()) {
+        // return UnitsUtils.BOTTOM;
+        // } else {
+        // TODO: infer original name somehow
+        return UnitsUtils.createInternalUnit("", solutionSlot.isUnknownUnits(),
+                solutionSlot.isUnitsBottom(), solutionSlot.getPrefixExponent(),
+                solutionSlot.getExponents());
+        // }
     }
 }

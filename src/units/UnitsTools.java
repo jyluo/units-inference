@@ -1,6 +1,10 @@
 package units;
 
-import units.qual.*;
+import units.qual.BaseUnit;
+import units.qual.Dimensionless;
+import units.qual.UnitsBottom;
+import units.qual.UnitsInternal;
+import units.qual.UnknownUnits;
 
 @SuppressWarnings("units")
 public class UnitsTools {

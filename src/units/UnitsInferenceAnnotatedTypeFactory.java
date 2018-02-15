@@ -15,9 +15,8 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.Tree;
-import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.VariableTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
@@ -27,10 +26,8 @@ import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
-import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
-import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import units.util.UnitsUtils;
 
@@ -111,18 +108,18 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
                     VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
 
-//                    // if there's no var slots available for LHS or RHS, replace with a constant
-//                    // slot of the default or implicit annotation computed from real type factory
-//                    if (lhs == null) {
-//                        lhs = slotManager.createConstantSlot(
-//                                realTypeFactory.getAnnotatedType(node.getLeftOperand())
-//                                        .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
-//                    }
-//                    if (rhs == null) {
-//                        rhs = slotManager.createConstantSlot(
-//                                realTypeFactory.getAnnotatedType(node.getRightOperand())
-//                                        .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
-//                    }
+                    // // if there's no var slots available for LHS or RHS, replace with a constant
+                    // // slot of the default or implicit annotation computed from real type factory
+                    // if (lhs == null) {
+                    // lhs = slotManager.createConstantSlot(
+                    // realTypeFactory.getAnnotatedType(node.getLeftOperand())
+                    // .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
+                    // }
+                    // if (rhs == null) {
+                    // rhs = slotManager.createConstantSlot(
+                    // realTypeFactory.getAnnotatedType(node.getRightOperand())
+                    // .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
+                    // }
 
                     result = slotManager.createArithmeticVariableSlot(
                             ArithmeticOperationKind.fromTreeKind(node.getKind()), lhs, rhs);

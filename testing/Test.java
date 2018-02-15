@@ -1,78 +1,95 @@
 import units.qual.*;
+import units.UnitsTools;
 
 class Main {
+    // public void subtypeTest() {
+    //     // Test 1:
+    //     // @var <: @m
+    //     Integer v1 = 5;
+
+    //     @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 0, baseUnits = {
+    //         @BaseUnit(unit = "m", exponent = 1)
+    //     }) Integer m = v1;
+
+    //     // Test 2:
+    //     // @var <: @top
+    //     Integer v2 = 5;
+
+    //     @UnitsInternal(unknownUnits = true, unitsBottom = false, prefixExponent = 0, baseUnits = {})
+    //     Integer top = v2;
+
+    //     // Test 3:
+    //     // @var <: @bottom
+    //     Integer v3 = 5;
+
+    //     @UnitsInternal(unknownUnits = false, unitsBottom = true, prefixExponent = 0, baseUnits = {})
+    //     Integer bottom = v3;
+
+    //     // Test 4:
+    //     // @bottom <: @top
+    //     top = bottom;
+
+    //     // Test 5:
+    //     // @bottom <: @var
+    //     v1 = bottom;
+    //     v2 = bottom;
+    //     v3 = bottom;
+
+    //     // Test 6: unsat tests, uncomment to run and see that there's 0 annotations
+    //     // // @m <: @bottom
+    //     // bottom = v1;
+    //     // @top <: @bottom
+    //     bottom = top;       // not working... why???
+    // }
+    @m Integer a = 10;
+    @m Integer b = 20;
+
+    public void typecheckTest(){
+        a = b;   // this is okay in typecheck mode
+    }
+
     public Main() {
         // @m
-        // @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 0, baseUnits = {
-        //     @BaseUnit(unit = "m", exponent = 1)
-        // }) Integer x = 10;
-
-        // @ms
-        @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = -3, baseUnits = {
-            @BaseUnit(unit = "s", exponent = 1)
+        @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 0, baseUnits = {
+            @BaseUnit(unit = "m", exponent = 1)
         }) Integer x = 10;
 
-        // x = 7 - 8;
-
-        // x = 1 * 2;
-
-        // x = 12 / 5;
-
-        // x = 40 % 9;
-
-        // @s
-        @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 0, baseUnits = {
-            @BaseUnit(unit = "s", exponent = 1)
-        }) Integer y = 90;
-
-        // // @mPERs
-        Integer z = x / y;
-
-        @UnitsBottom Integer g = 10;
-
-        z = g;
-
-        // @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = -3, baseUnits = {
-        //     @BaseUnit(unit = "s", exponent = 1)
-        // })
-        float ms = toInferMethod(System.currentTimeMillis());
-        // ms = toInferMethod(myTimeMillis());
-
-        String word = null;
-        if(false) {
-            word = "stuff";
-        }
-    }
-
-    @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = -3, baseUnits = {
-            @BaseUnit(unit = "s", exponent = 1)
-    }) long myTimeMillis() {
-        return 10;
-    }
-
-    float toInferMethod(float input) {
-        return input * Math.signum(input);
+        @m Integer y = 20;
     }
 
 
-    private float r;
-    private float i;
 
-    public String jblas_complexfloat(){
-        if (i >= 0) {
-          return r + " + " + i + "i";
-        } else {
-          return r + " - " + (-i) + "i";
-        }
-    }
 
-    class Inner {
-        public Inner(){}
-    }
+    // @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = -3, baseUnits = {
+    //         @BaseUnit(unit = "s", exponent = 1)
+    // }) long myTimeMillis() {
+    //     return 10;
+    // }
 
-    public void testClasses(){
-        String x = "test";
-        Inner y = new Inner();
-    }
+    // float toInferMethod(float input) {
+    //     return input * Math.signum(input);
+    //   // return Math.signum(input) * input;
+    //   // return 10 * UnitsTools.m;
+    // }
+
+    // private float r;
+    // private float i;
+
+    // public String jblas_complexfloat(){
+    //     if (i >= 0) {
+    //       return r + " + " + i + "i";
+    //     } else {
+    //       return r + " - " + (-i) + "i";
+    //     }
+    // }
+
+    // class Inner {
+    //     public Inner(){}
+    // }
+
+    // public void testClasses(){
+    //     String x = "test";
+    //     Inner y = new Inner();
+    // }
 
 }

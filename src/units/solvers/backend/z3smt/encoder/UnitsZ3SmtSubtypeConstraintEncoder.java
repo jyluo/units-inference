@@ -1,4 +1,4 @@
-package units.solvers.backend.z3int.encoder;
+package units.solvers.backend.z3smt.encoder;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -6,22 +6,20 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
-import checkers.inference.solver.backend.z3Int.Z3IntFormatTranslator;
-import checkers.inference.solver.backend.z3Int.encoder.Z3IntAbstractConstraintEncoder;
+import checkers.inference.solver.backend.z3smt.Z3SmtFormatTranslator;
+import checkers.inference.solver.backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.util.ConstraintVerifier;
 import units.internalrepresentation.InferenceUnit;
 import units.internalrepresentation.TypecheckUnit;
 import units.util.UnitsZ3EncoderUtils;
 
-public class UnitsZ3IntSubtypeConstraintEncoder
-        extends Z3IntAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
+public class UnitsZ3SmtSubtypeConstraintEncoder
+        extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
         implements SubtypeConstraintEncoder<BoolExpr> {
 
-    public UnitsZ3IntSubtypeConstraintEncoder(Lattice lattice, ConstraintVerifier verifier,
-            Context ctx,
-            Z3IntFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
-        super(lattice, verifier, ctx, z3IntFormatTranslator);
+    public UnitsZ3SmtSubtypeConstraintEncoder(Lattice lattice, Context ctx,
+            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
+        super(lattice, ctx, z3IntFormatTranslator);
     }
 
     protected BoolExpr encode(Slot subtype, Slot supertype) {
@@ -42,10 +40,5 @@ public class UnitsZ3IntSubtypeConstraintEncoder
     @Override
     public BoolExpr encodeConstant_Variable(ConstantSlot subtype, VariableSlot supertype) {
         return encode(subtype, supertype);
-    }
-
-    @Override
-    public BoolExpr encodeConstant_Constant(ConstantSlot subtype, ConstantSlot supertype) {
-        return verifier.isSubtype(subtype, supertype) ? emptyValue : contradictoryValue;
     }
 }

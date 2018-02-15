@@ -9,6 +9,7 @@ import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotationClassLoader;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
@@ -42,10 +43,13 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     @Override
-    protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
+    protected AnnotationClassLoader createAnnotationClassLoader() {
         // Use the Units Annotated Type Loader instead of the default one
-        loader = new UnitsAnnotationClassLoader(checker);
+        return new UnitsAnnotationClassLoader(checker);
+    }
 
+    @Override
+    protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         // get all the loaded annotations
         Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
         qualSet.addAll(getBundledTypeQualifiersWithPolyAll());
@@ -63,6 +67,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
         for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
                 .getAnnotationMirrors()) {
+
+            // Check to see if it is an alias unit
             if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
                 Map<String, Integer> exponents = new TreeMap<>();
 
@@ -83,6 +89,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return UnitsUtils.createInternalUnit("", false, false, prefix, exponents);
             }
 
+            // Check to see if it declares a base unit
             if (AnnotationUtils.areSameByClass(metaAnno, IsBaseUnit.class)) {
                 Map<String, Integer> exponents = new TreeMap<>();
                 // default all base units to exponent 0

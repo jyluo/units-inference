@@ -27,6 +27,7 @@ public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
      */
     @Override
     protected boolean isSupportedAnnotationClass(Class<? extends Annotation> annoClass) {
+
         if (annoClass.getAnnotation(IsBaseUnit.class) != null) {
             UnitsUtils.addBaseUnit(annoClass.getSimpleName());
             return false;

@@ -12,8 +12,8 @@ import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncode
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import units.internalrepresentation.InferenceUnit;
-import units.internalrepresentation.TypecheckUnit;
+import units.representation.InferenceUnit;
+import units.representation.TypecheckUnit;
 
 /**
  * Z3 implementation of {@link checkers.inference.solver.backend.encoder.ConstraintEncoderFactory}

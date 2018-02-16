@@ -3,7 +3,8 @@ package units.util;
 import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.internalrepresentation.InferenceUnit;
+import units.representation.InferenceUnit;
+import units.representation.UnitsRepresentationUtils;
 
 /**
  * Utility class with methods for defining z3 variable names and encoding of various relationships
@@ -47,7 +48,7 @@ public class UnitsZ3SmtEncoderUtils {
                 ctx.mkEq(fst.getUnitsBottom(), snd.getUnitsBottom()),
                 ctx.mkEq(fst.getPrefixExponent(), snd.getPrefixExponent())
             );
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             equalityEncoding = ctx.mkAnd(equalityEncoding,
                 ctx.mkEq(fst.getExponent(baseUnit), snd.getExponent(baseUnit))
             );
@@ -97,7 +98,7 @@ public class UnitsZ3SmtEncoderUtils {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent + rhs_exponent
         BoolExpr exponents = ctx.mkTrue();
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             exponents = ctx.mkAnd(exponents,
                 ctx.mkEq(
                     res.getExponent(baseUnit),
@@ -131,7 +132,7 @@ public class UnitsZ3SmtEncoderUtils {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent - rhs_exponent
         BoolExpr exponents = ctx.mkTrue();
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             exponents = ctx.mkAnd(exponents,
                 ctx.mkEq(
                     res.getExponent(baseUnit),

@@ -1,7 +1,8 @@
 package units.util;
 
 import javax.lang.model.element.AnnotationMirror;
-import units.internalrepresentation.TypecheckUnit;
+import units.representation.TypecheckUnit;
+import units.representation.UnitsRepresentationUtils;
 
 /**
  * Utility class with methods for computing the result unit of various arithmetic operations.
@@ -20,7 +21,7 @@ public class UnitsTypecheckUtils {
 
         // otherwise res component = lhs component + rhs component
         result.setPrefixExponent(lhs.getPrefixExponent() + rhs.getPrefixExponent());
-        for (String bu : UnitsUtils.baseUnits()) {
+        for (String bu : UnitsRepresentationUtils.baseUnits()) {
             result.setExponent(bu, lhs.getExponent(bu) + rhs.getExponent(bu));
         }
 
@@ -28,9 +29,9 @@ public class UnitsTypecheckUtils {
     }
 
     public static AnnotationMirror multiplication(AnnotationMirror lhsAM, AnnotationMirror rhsAM) {
-        TypecheckUnit lhs = UnitsUtils.createTypecheckUnit(lhsAM);
-        TypecheckUnit rhs = UnitsUtils.createTypecheckUnit(rhsAM);
-        return UnitsUtils.createInternalUnit(multiplication(lhs, rhs));
+        TypecheckUnit lhs = UnitsRepresentationUtils.createTypecheckUnit(lhsAM);
+        TypecheckUnit rhs = UnitsRepresentationUtils.createTypecheckUnit(rhsAM);
+        return UnitsRepresentationUtils.createInternalUnit(multiplication(lhs, rhs));
     }
 
     public static TypecheckUnit division(TypecheckUnit lhs, TypecheckUnit rhs) {
@@ -45,7 +46,7 @@ public class UnitsTypecheckUtils {
 
         // otherwise res component = lhs component - rhs component
         result.setPrefixExponent(lhs.getPrefixExponent() - rhs.getPrefixExponent());
-        for (String bu : UnitsUtils.baseUnits()) {
+        for (String bu : UnitsRepresentationUtils.baseUnits()) {
             result.setExponent(bu, lhs.getExponent(bu) - rhs.getExponent(bu));
         }
 
@@ -53,14 +54,14 @@ public class UnitsTypecheckUtils {
     }
 
     public static AnnotationMirror division(AnnotationMirror lhsAM, AnnotationMirror rhsAM) {
-        TypecheckUnit lhs = UnitsUtils.createTypecheckUnit(lhsAM);
-        TypecheckUnit rhs = UnitsUtils.createTypecheckUnit(rhsAM);
-        return UnitsUtils.createInternalUnit(division(lhs, rhs));
+        TypecheckUnit lhs = UnitsRepresentationUtils.createTypecheckUnit(lhsAM);
+        TypecheckUnit rhs = UnitsRepresentationUtils.createTypecheckUnit(rhsAM);
+        return UnitsRepresentationUtils.createInternalUnit(division(lhs, rhs));
     }
 
     public static boolean unitsEqual(AnnotationMirror lhsAM, AnnotationMirror rhsAM) {
-        TypecheckUnit lhs = UnitsUtils.createTypecheckUnit(lhsAM);
-        TypecheckUnit rhs = UnitsUtils.createTypecheckUnit(rhsAM);
+        TypecheckUnit lhs = UnitsRepresentationUtils.createTypecheckUnit(lhsAM);
+        TypecheckUnit rhs = UnitsRepresentationUtils.createTypecheckUnit(rhsAM);
         return lhs.equals(rhs);
     }
 }

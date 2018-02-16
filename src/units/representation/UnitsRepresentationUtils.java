@@ -1,4 +1,4 @@
-package units.util;
+package units.representation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +16,6 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
-import units.internalrepresentation.TypecheckUnit;
 import units.qual.BaseUnit;
 import units.qual.PolyUnit;
 import units.qual.UnitsBottom;
@@ -32,8 +31,8 @@ import units.qual.s;
  *
  * TODO: {@code @Unit}, and alias forms.
  */
-public class UnitsUtils {
-    private static UnitsUtils singletonInstance;
+public class UnitsRepresentationUtils {
+    private static UnitsRepresentationUtils singletonInstance;
     private static ProcessingEnvironment processingEnv;
     private static Elements elements;
 
@@ -48,9 +47,9 @@ public class UnitsUtils {
     public static AnnotationMirror METER;
     public static AnnotationMirror SECOND;
 
-    private UnitsUtils(ProcessingEnvironment processingEnv, Elements elements) {
-        UnitsUtils.processingEnv = processingEnv;
-        UnitsUtils.elements = elements;
+    private UnitsRepresentationUtils(ProcessingEnvironment processingEnv, Elements elements) {
+        UnitsRepresentationUtils.processingEnv = processingEnv;
+        UnitsRepresentationUtils.elements = elements;
 
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
         UNKNOWNUNITS = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
@@ -68,16 +67,16 @@ public class UnitsUtils {
         SECOND = AnnotationBuilder.fromClass(elements, s.class);
     }
 
-    public static UnitsUtils getInstance(ProcessingEnvironment processingEnv, Elements elements) {
+    public static UnitsRepresentationUtils getInstance(ProcessingEnvironment processingEnv, Elements elements) {
         if (singletonInstance == null) {
-            singletonInstance = new UnitsUtils(processingEnv, elements);
+            singletonInstance = new UnitsRepresentationUtils(processingEnv, elements);
         }
         return singletonInstance;
     }
 
-    public static UnitsUtils getInstance() {
+    public static UnitsRepresentationUtils getInstance() {
         if (singletonInstance == null) {
-            ErrorReporter.errorAbort("getInstance() called without initializing UnitsUtils.");
+            ErrorReporter.errorAbort("getInstance() called without initializing UnitsRepresentationUtils.");
         }
         return singletonInstance;
     }
@@ -129,7 +128,7 @@ public class UnitsUtils {
 
                 Map<String, Integer> exponents = new HashMap<>();
                 // default all base units to exponent 0
-                for (String bu : UnitsUtils.baseUnits()) {
+                for (String bu : UnitsRepresentationUtils.baseUnits()) {
                     exponents.put(bu, 0);
                 }
                 for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(anno, "baseUnits",

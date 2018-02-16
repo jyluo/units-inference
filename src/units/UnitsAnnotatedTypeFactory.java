@@ -26,8 +26,8 @@ import units.qual.UnitsAlias;
 import units.qual.UnitsBottom;
 import units.qual.UnitsInternal;
 import units.qual.UnknownUnits;
+import units.representation.UnitsRepresentationUtils;
 import units.util.UnitsTypecheckUtils;
-import units.util.UnitsUtils;
 
 public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
@@ -38,7 +38,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     public UnitsAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
-        UnitsUtils.getInstance(processingEnv, elements);
+        UnitsRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
     }
 
@@ -74,7 +74,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
                 int prefix = 0;
                 // default all base units to exponent 0
-                for (String bu : UnitsUtils.baseUnits()) {
+                for (String bu : UnitsRepresentationUtils.baseUnits()) {
                     exponents.put(bu, 0);
                 }
                 // replace default base unit exponents from anno
@@ -85,21 +85,21 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     prefix += AnnotationUtils.getElementValue(bu, "prefix", Integer.class, true);
                 }
 
-                UnitsUtils.addUnitsAnnotation(anno);
-                return UnitsUtils.createInternalUnit("", false, false, prefix, exponents);
+                UnitsRepresentationUtils.addUnitsAnnotation(anno);
+                return UnitsRepresentationUtils.createInternalUnit("", false, false, prefix, exponents);
             }
 
             // Check to see if it declares a base unit
             if (AnnotationUtils.areSameByClass(metaAnno, IsBaseUnit.class)) {
                 Map<String, Integer> exponents = new TreeMap<>();
                 // default all base units to exponent 0
-                for (String bu : UnitsUtils.baseUnits()) {
+                for (String bu : UnitsRepresentationUtils.baseUnits()) {
                     exponents.put(bu, 0);
                 }
                 exponents.put(anno.getAnnotationType().asElement().getSimpleName().toString(), 1);
 
-                UnitsUtils.addUnitsAnnotation(anno);
-                return UnitsUtils.createInternalUnit("", false, false, 0, exponents);
+                UnitsRepresentationUtils.addUnitsAnnotation(anno);
+                return UnitsRepresentationUtils.createInternalUnit("", false, false, 0, exponents);
             }
         }
 
@@ -120,12 +120,12 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
             // Case: @UnitsInternal <: Top
-            if (AnnotationUtils.areSame(superAnno, UnitsUtils.UNKNOWNUNITS)) {
+            if (AnnotationUtils.areSame(superAnno, UnitsRepresentationUtils.UNKNOWNUNITS)) {
                 return true;
             }
 
             // Case: Bottom <: @UnitsInternal
-            if (AnnotationUtils.areSame(subAnno, UnitsUtils.BOTTOM)) {
+            if (AnnotationUtils.areSame(subAnno, UnitsRepresentationUtils.BOTTOM)) {
                 return true;
             }
 

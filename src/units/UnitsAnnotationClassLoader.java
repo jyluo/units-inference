@@ -6,7 +6,7 @@ import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotationClassLoader;
 import units.qual.IsBaseUnit;
 import units.qual.UnitsAlias;
-import units.util.UnitsUtils;
+import units.representation.UnitsRepresentationUtils;
 
 public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
 
@@ -29,7 +29,7 @@ public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
     protected boolean isSupportedAnnotationClass(Class<? extends Annotation> annoClass) {
 
         if (annoClass.getAnnotation(IsBaseUnit.class) != null) {
-            UnitsUtils.addBaseUnit(annoClass.getSimpleName());
+            UnitsRepresentationUtils.addBaseUnit(annoClass.getSimpleName());
             return false;
         }
 

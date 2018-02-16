@@ -1,11 +1,10 @@
-package units.internalrepresentation;
+package units.representation;
 
 import java.util.Map;
 import java.util.TreeMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
-import units.util.UnitsUtils;
 import units.util.UnitsZ3SmtEncoderUtils;
 
 /**
@@ -37,7 +36,7 @@ public class InferenceUnit {
         // default prefixExponent is 0
         slot.prefixExponent = ctx.mkInt(0);
 
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             // default exponents are 0
             slot.exponents.put(baseUnit, ctx.mkInt(0));
         }
@@ -55,7 +54,7 @@ public class InferenceUnit {
         slot.prefixExponent = ctx.mkIntConst(
                 UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
 
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             slot.exponents.put(baseUnit,
                     ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
         }
@@ -105,7 +104,7 @@ public class InferenceUnit {
         sb.append(" : UU = " + uu.toString());
         sb.append(" UB = " + ub.toString());
         sb.append(" Prefix = " + prefixExponent.toString());
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

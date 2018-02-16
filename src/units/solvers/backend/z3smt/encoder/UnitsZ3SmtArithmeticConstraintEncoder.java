@@ -11,8 +11,8 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import units.internalrepresentation.InferenceUnit;
-import units.internalrepresentation.TypecheckUnit;
+import units.representation.InferenceUnit;
+import units.representation.TypecheckUnit;
 import units.util.UnitsTypecheckUtils;
 import units.util.UnitsZ3SmtEncoderUtils;
 

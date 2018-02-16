@@ -1,8 +1,7 @@
-package units.internalrepresentation;
+package units.representation;
 
 import java.util.Map;
 import java.util.TreeMap;
-import units.util.UnitsUtils;
 
 /**
  * A data structure class to encapsulate a set of java variables representing a unit for type
@@ -29,7 +28,7 @@ public class TypecheckUnit {
         // default prefixExponent is 0
         prefixExponent = 0;
 
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             // default exponents are 0
             exponents.put(baseUnit, 0);
         }
@@ -89,7 +88,7 @@ public class TypecheckUnit {
         sb.append(" UU = " + uu);
         sb.append(" UB = " + ub);
         sb.append(" Prefix = " + prefixExponent);
-        for (String baseUnit : UnitsUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

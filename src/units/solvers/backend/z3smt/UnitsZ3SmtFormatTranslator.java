@@ -16,10 +16,10 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
-import units.internalrepresentation.InferenceUnit;
-import units.internalrepresentation.TypecheckUnit;
+import units.representation.InferenceUnit;
+import units.representation.TypecheckUnit;
+import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtConstraintEncoderFactory;
-import units.util.UnitsUtils;
 import units.util.UnitsZ3SmtEncoderUtils;
 
 public class UnitsZ3SmtFormatTranslator
@@ -68,7 +68,7 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         AnnotationMirror anno = slot.getValue();
-        TypecheckUnit unit = UnitsUtils.createTypecheckUnit(anno);
+        TypecheckUnit unit = UnitsRepresentationUtils.createTypecheckUnit(anno);
 
         // Makes a constant encoded slot with default values
         InferenceUnit encodedSlot = InferenceUnit.makeConstantSlot(ctx, slotID);
@@ -163,12 +163,12 @@ public class UnitsZ3SmtFormatTranslator
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
         // TODO: further translate some of the units to the alias symbols where possible
         // if (solutionSlot.isUnknownUnits()) {
-        // return UnitsUtils.UNKNOWNUNITS;
+        // return UnitsRepresentationUtils.UNKNOWNUNITS;
         // } else if (solutionSlot.isUnitsBottom()) {
-        // return UnitsUtils.BOTTOM;
+        // return UnitsRepresentationUtils.BOTTOM;
         // } else {
         // TODO: infer original name somehow
-        return UnitsUtils.createInternalUnit("", solutionSlot.isUnknownUnits(),
+        return UnitsRepresentationUtils.createInternalUnit("", solutionSlot.isUnknownUnits(),
                 solutionSlot.isUnitsBottom(), solutionSlot.getPrefixExponent(),
                 solutionSlot.getExponents());
         // }

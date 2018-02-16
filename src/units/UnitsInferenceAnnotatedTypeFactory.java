@@ -27,10 +27,10 @@ import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
+import units.representation.UnitsRepresentationUtils;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
-import units.util.UnitsUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
 
@@ -39,7 +39,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             SlotManager slotManager, ConstraintManager constraintManager) {
         super(inferenceChecker, false, realTypeFactory, realChecker, slotManager,
                 constraintManager);
-        UnitsUtils.getInstance(processingEnv, elements);
+        UnitsRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
     }
 
@@ -117,12 +117,12 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     // if (lhs == null) {
                     // lhs = slotManager.createConstantSlot(
                     // realTypeFactory.getAnnotatedType(node.getLeftOperand())
-                    // .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
+                    // .getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS));
                     // }
                     // if (rhs == null) {
                     // rhs = slotManager.createConstantSlot(
                     // realTypeFactory.getAnnotatedType(node.getRightOperand())
-                    // .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
+                    // .getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS));
                     // }
 
                     result = slotManager.createArithmeticVariableSlot(
@@ -170,7 +170,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public TreeAnnotator createTreeAnnotator() {
-        UnitsUtils.getInstance(processingEnv, elements);
+        UnitsRepresentationUtils.getInstance(processingEnv, elements);
         return new ListTreeAnnotator(
                 new ImplicitsTreeAnnotator(this), new UnitsInferenceTreeAnnotator(
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
@@ -195,7 +195,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             // TODO: aliases and base unit annos used in variable declarations don't work right now
             for (AnnotationMirror anno : realATM.getExplicitAnnotations()) {
-                if (UnitsUtils.isUnitsAnnotation(realTypeFactory, anno)) {
+                if (UnitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
                     hasExplicitUnitsAnnotation = true;
                     break;
                 }
@@ -204,7 +204,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             if (hasExplicitUnitsAnnotation) {
                 // Create a ConstantSlot for the explicit annotation
                 AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
+                        realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
                 ConstantSlot declaredAnnoSlot = variableAnnotator.createConstant(realAnno, varTree);
                 // Get the VariableSlot generated for the variable
                 VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
@@ -224,7 +224,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         //
         // // The code here applies the default type for literals, which is not what we want
         // AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(literalTree);
-        // AnnotationMirror realAnno = realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
+        // AnnotationMirror realAnno = realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
         // ConstantSlot cs = variableAnnotator.createConstant(realAnno, literalTree);
         // atm.replaceAnnotation(cs.getValue());
         // variableAnnotator.visit(atm, literalTree);
@@ -264,12 +264,12 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             if (lhs == null) {
                 lhs = slotManager
                         .createConstantSlot(realTypeFactory.getAnnotatedType(node.getLeftOperand())
-                                .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
+                                .getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS));
             }
             if (rhs == null) {
                 rhs = slotManager
                         .createConstantSlot(realTypeFactory.getAnnotatedType(node.getRightOperand())
-                                .getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS));
+                                .getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS));
             }
 
             // TODO: can compute direct results for Constant-Constant here or do it at inference
@@ -299,7 +299,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             // TODO: aliases and base unit annos used in variable declarations don't work right now
             for (AnnotationMirror anno : realATM.getAnnotations()) {
-                if (UnitsUtils.isUnitsAnnotation(realTypeFactory, anno)) {
+                if (UnitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
                     hasExplicitUnitsAnnotation = true;
                     break;
                 }
@@ -308,7 +308,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             if (hasExplicitUnitsAnnotation) {
                 // Create a ConstantSlot for the explicit annotation
                 AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(UnitsUtils.UNKNOWNUNITS);
+                        realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
                 ConstantSlot declaredAnnoSlot =
                         variableAnnotator.createConstant(realAnno, typeCast);
                 // Get the VariableSlot generated for the variable

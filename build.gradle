@@ -75,8 +75,8 @@ dependencies {
     // TODO: should be removed when we get rid of classic solver
     // TODO: currently the runtime dependencies of sat4j is bit tricky --- it actually uses the sat4j from cfi/dist
     //       should we also snapshot a copy of sat4j from mavenCentral into units?
-    compile 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.4'
-    compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
+    // compile 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.4'
+    // compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
     compile fileTree(dir: "lib", include: ['*.jar'])
     testCompile 'junit:junit:4.12'
 }

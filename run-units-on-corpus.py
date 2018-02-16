@@ -31,7 +31,7 @@ def main(argv):
 
     print "----- Fetching corpus done. -----"
 
-    print "----- Runnning Ontlogy on corpus... -----"
+    print "----- Runnning Units Inference on corpus... -----"
 
     failed_projects = list()
     with open (os.path.join(UNITS_INFERENCE_DIR, args.corpus_file)) as projects:
@@ -56,7 +56,7 @@ def main(argv):
     else:
         print "----- Inference succeed infer all projects. -----"
 
-    print "----- Runnning Ontlogy on corpus done. -----"
+    print "----- Runnning Units Inference on corpus done. -----"
 
     rtn_code = 1 if len(failed_projects) > 0 else 0
 

@@ -6,7 +6,7 @@ bin/
 # lib dependencies
 lib/
 
-#gradle config
+# gradle config
 .gradle/
 
 # gradle output
@@ -16,15 +16,11 @@ build/
 # corpus
 corpus/
 
-#example classes and annotated output
+# example classes and annotated output
 testing/**/*.class
 testing/annotated
 testing/default.jaif
 testing/statistic.txt
 
-#archive test cases
-intersectionTest/
-missingAnno/
-superTypeArgTest/
-unsat/
-violateCons/
+# manual tests
+manual-tests/

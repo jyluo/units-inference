@@ -1,4 +1,4 @@
-package checkers.inference.solver.backend.z3smt;
+package backend.z3smt;
 
 import java.util.Collection;
 import java.util.HashMap;

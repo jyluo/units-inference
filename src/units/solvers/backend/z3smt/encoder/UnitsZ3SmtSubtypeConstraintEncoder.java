@@ -23,7 +23,6 @@ public class UnitsZ3SmtSubtypeConstraintEncoder
     }
 
     protected BoolExpr encode(Slot subtype, Slot supertype) {
-        System.out.println(" SUPER SLOT: " + supertype);
         return UnitsZ3SmtEncoderUtils.subtype(ctx, subtype.serialize(z3SmtFormatTranslator),
                 supertype.serialize(z3SmtFormatTranslator));
     }

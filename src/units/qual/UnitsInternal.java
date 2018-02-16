@@ -17,7 +17,8 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @DefaultQualifierInHierarchy
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) // TODO fix
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) // TODO somehow make this not usable by
+                                                            // users?
 public @interface UnitsInternal {
 
     String originalName() default "default";
@@ -28,6 +29,5 @@ public @interface UnitsInternal {
 
     int prefixExponent() default 0;
 
-    // only primitives, String, Class, annotation, enumeration are permitted or 1D arrays thereof
     BaseUnit[] baseUnits() default {};
 }

@@ -11,7 +11,7 @@ import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncode
 import checkers.inference.solver.frontend.Lattice;
 import units.internalrepresentation.InferenceUnit;
 import units.internalrepresentation.TypecheckUnit;
-import units.util.UnitsZ3EncoderUtils;
+import units.util.UnitsZ3SmtEncoderUtils;
 
 public class UnitsZ3SmtEqualityConstraintEncoder
         extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
@@ -24,8 +24,8 @@ public class UnitsZ3SmtEqualityConstraintEncoder
 
     // 2 Slots are equal if their components are equal
     protected BoolExpr encode(Slot fst, Slot snd) {
-        return UnitsZ3EncoderUtils.equality(ctx, fst.serialize(z3IntFormatTranslator),
-                snd.serialize(z3IntFormatTranslator));
+        return UnitsZ3SmtEncoderUtils.equality(ctx, fst.serialize(z3SmtFormatTranslator),
+                snd.serialize(z3SmtFormatTranslator));
     }
 
     @Override

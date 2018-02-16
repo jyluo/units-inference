@@ -9,7 +9,7 @@ import units.internalrepresentation.InferenceUnit;
  * Utility class with methods for defining z3 variable names and encoding of various relationships
  * between Units.
  */
-public class UnitsZ3EncoderUtils {
+public class UnitsZ3SmtEncoderUtils {
 
     private static final char idComponentSeparator = '-';
     public static final String uuSlotName = "UnknownUnits";

@@ -20,7 +20,7 @@ import units.internalrepresentation.InferenceUnit;
 import units.internalrepresentation.TypecheckUnit;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtConstraintEncoderFactory;
 import units.util.UnitsUtils;
-import units.util.UnitsZ3EncoderUtils;
+import units.util.UnitsZ3SmtEncoderUtils;
 
 public class UnitsZ3SmtFormatTranslator
         extends Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> {
@@ -117,7 +117,7 @@ public class UnitsZ3SmtFormatTranslator
 
             // Get slotID and component name
             Pair<Integer, String> slot =
-                    UnitsZ3EncoderUtils.slotFromZ3VarName(funcDecl.getName().toString());
+                    UnitsZ3SmtEncoderUtils.slotFromZ3VarName(funcDecl.getName().toString());
             int slotID = slot.first;
             String component = slot.second;
 
@@ -127,11 +127,11 @@ public class UnitsZ3SmtFormatTranslator
             }
 
             TypecheckUnit z3Slot = solutionSlots.get(slotID);
-            if (component.contentEquals(UnitsZ3EncoderUtils.uuSlotName)) {
+            if (component.contentEquals(UnitsZ3SmtEncoderUtils.uuSlotName)) {
                 z3Slot.setUnknownUnits(constInterp.isTrue());
-            } else if (component.contentEquals(UnitsZ3EncoderUtils.ubSlotName)) {
+            } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.ubSlotName)) {
                 z3Slot.setUnitsBottom(constInterp.isTrue());
-            } else if (component.contentEquals(UnitsZ3EncoderUtils.prefixSlotName)) {
+            } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.prefixSlotName)) {
                 z3Slot.setPrefixExponent(Integer.valueOf(constInterp.toString()));
             } else {
                 // assumes it is a base unit exponent

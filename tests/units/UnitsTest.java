@@ -25,7 +25,7 @@ public class UnitsTest extends CFInferenceTest {
     public Pair<String, List<String>> getSolverNameAndOptions() {
         final String solverName = UnitsSolverEngine.class.getCanonicalName();
         List<String> solverOptions = new ArrayList<>();
-        solverOptions.add("solver=Z3Int");
+        // solverOptions.add("solver=Z3Int");
         return Pair.<String, List<String>>of(solverName, solverOptions);
     }
 

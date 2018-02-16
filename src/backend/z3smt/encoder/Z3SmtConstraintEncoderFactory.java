@@ -16,12 +16,12 @@ import checkers.inference.solver.frontend.Lattice;
 public abstract class Z3SmtConstraintEncoderFactory<SlotEncodingT, SlotSolutionT>
         extends AbstractConstraintEncoderFactory<BoolExpr> {
     protected final Context ctx;
-    protected final Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3IntFormatTranslator;
+    protected final Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator;
 
     public Z3SmtConstraintEncoderFactory(Lattice lattice, Context ctx,
-            Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3IntFormatTranslator) {
+            Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator) {
         super(lattice);
         this.ctx = ctx;
-        this.z3IntFormatTranslator = z3IntFormatTranslator;
+        this.z3SmtFormatTranslator = z3SmtFormatTranslator;
     }
 }

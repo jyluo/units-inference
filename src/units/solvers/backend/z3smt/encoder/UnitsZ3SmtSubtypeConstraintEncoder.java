@@ -11,7 +11,7 @@ import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder
 import checkers.inference.solver.frontend.Lattice;
 import units.internalrepresentation.InferenceUnit;
 import units.internalrepresentation.TypecheckUnit;
-import units.util.UnitsZ3EncoderUtils;
+import units.util.UnitsZ3SmtEncoderUtils;
 
 public class UnitsZ3SmtSubtypeConstraintEncoder
         extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
@@ -23,8 +23,9 @@ public class UnitsZ3SmtSubtypeConstraintEncoder
     }
 
     protected BoolExpr encode(Slot subtype, Slot supertype) {
-        return UnitsZ3EncoderUtils.subtype(ctx, subtype.serialize(z3IntFormatTranslator),
-                supertype.serialize(z3IntFormatTranslator));
+        System.out.println(" SUPER SLOT: " + supertype);
+        return UnitsZ3SmtEncoderUtils.subtype(ctx, subtype.serialize(z3SmtFormatTranslator),
+                supertype.serialize(z3SmtFormatTranslator));
     }
 
     @Override

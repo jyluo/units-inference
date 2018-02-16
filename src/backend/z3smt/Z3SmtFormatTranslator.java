@@ -9,6 +9,7 @@ import com.microsoft.z3.Context;
 import com.microsoft.z3.Model;
 import com.microsoft.z3.Solver;
 import checkers.inference.model.ArithmeticVariableSlot;
+import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
@@ -72,6 +73,11 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
 
     @Override
     public SlotEncodingT serialize(RefinementVariableSlot slot) {
+        return serializeVarSlot(slot);
+    }
+
+    @Override
+    public SlotEncodingT serialize(CombVariableSlot slot) {
         return serializeVarSlot(slot);
     }
 

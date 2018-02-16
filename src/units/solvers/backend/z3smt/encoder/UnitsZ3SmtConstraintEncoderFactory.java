@@ -30,12 +30,12 @@ public class UnitsZ3SmtConstraintEncoderFactory
 
     @Override
     public UnitsZ3SmtSubtypeConstraintEncoder createSubtypeConstraintEncoder() {
-        return new UnitsZ3SmtSubtypeConstraintEncoder(lattice, ctx, z3IntFormatTranslator);
+        return new UnitsZ3SmtSubtypeConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
     }
 
     @Override
     public EqualityConstraintEncoder<BoolExpr> createEqualityConstraintEncoder() {
-        return new UnitsZ3SmtEqualityConstraintEncoder(lattice, ctx, z3IntFormatTranslator);
+        return new UnitsZ3SmtEqualityConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
     }
 
     @Override

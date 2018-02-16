@@ -6,7 +6,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import units.util.UnitsUtils;
-import units.util.UnitsZ3EncoderUtils;
+import units.util.UnitsZ3SmtEncoderUtils;
 
 /**
  * A data structure class to encapsulate a set of Z3 variables representing a unit for inference.
@@ -49,15 +49,15 @@ public class InferenceUnit {
         InferenceUnit slot = new InferenceUnit(ctx, slotID);
 
         slot.uu = ctx
-                .mkBoolConst(UnitsZ3EncoderUtils.z3VarName(slotID, UnitsZ3EncoderUtils.uuSlotName));
+                .mkBoolConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.uuSlotName));
         slot.ub = ctx
-                .mkBoolConst(UnitsZ3EncoderUtils.z3VarName(slotID, UnitsZ3EncoderUtils.ubSlotName));
+                .mkBoolConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.ubSlotName));
         slot.prefixExponent = ctx.mkIntConst(
-                UnitsZ3EncoderUtils.z3VarName(slotID, UnitsZ3EncoderUtils.prefixSlotName));
+                UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
 
         for (String baseUnit : UnitsUtils.baseUnits()) {
             slot.exponents.put(baseUnit,
-                    ctx.mkIntConst(UnitsZ3EncoderUtils.z3VarName(slotID, baseUnit)));
+                    ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
         }
 
         return slot;

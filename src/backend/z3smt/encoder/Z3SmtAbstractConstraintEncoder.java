@@ -13,13 +13,13 @@ public class Z3SmtAbstractConstraintEncoder<SlotEncodingT, SlotSolutionT>
         extends AbstractConstraintEncoder<BoolExpr> {
 
     protected final Context ctx;
-    protected final Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3IntFormatTranslator;
+    protected final Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator;
 
     public Z3SmtAbstractConstraintEncoder(Lattice lattice, Context ctx,
-            Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3IntFormatTranslator) {
+            Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator) {
         // empty value is z3True, contradictory value is z3False
         super(lattice, ctx.mkTrue(), ctx.mkFalse());
         this.ctx = ctx;
-        this.z3IntFormatTranslator = z3IntFormatTranslator;
+        this.z3SmtFormatTranslator = z3SmtFormatTranslator;
     }
 }

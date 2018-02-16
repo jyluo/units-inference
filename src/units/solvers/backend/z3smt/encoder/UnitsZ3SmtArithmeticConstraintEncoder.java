@@ -14,7 +14,7 @@ import checkers.inference.solver.frontend.Lattice;
 import units.internalrepresentation.InferenceUnit;
 import units.internalrepresentation.TypecheckUnit;
 import units.util.UnitsTypecheckUtils;
-import units.util.UnitsZ3EncoderUtils;
+import units.util.UnitsZ3SmtEncoderUtils;
 
 public class UnitsZ3SmtArithmeticConstraintEncoder
         extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
@@ -34,31 +34,32 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
             case SUBTRACTION:
                 // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
                 // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
-                return UnitsZ3EncoderUtils.tripleEquality(ctx,
-                        leftOperand.serialize(z3IntFormatTranslator),
-                        rightOperand.serialize(z3IntFormatTranslator),
-                        result.serialize(z3IntFormatTranslator));
+                return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
+                        leftOperand.serialize(z3SmtFormatTranslator),
+                        rightOperand.serialize(z3SmtFormatTranslator),
+                        result.serialize(z3SmtFormatTranslator));
             case MULTIPLICATION:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
                 // UnitsBottom, for which then the result is always UnknownUnits
-                return UnitsZ3EncoderUtils.multiply(ctx,
-                        leftOperand.serialize(z3IntFormatTranslator),
-                        rightOperand.serialize(z3IntFormatTranslator),
-                        result.serialize(z3IntFormatTranslator));
+                return UnitsZ3SmtEncoderUtils.multiply(ctx,
+                        leftOperand.serialize(z3SmtFormatTranslator),
+                        rightOperand.serialize(z3SmtFormatTranslator),
+                        result.serialize(z3SmtFormatTranslator));
             case DIVISION:
                 // Division between 2 slots resulting in result slot, is the difference of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
                 // UnitsBottom, for which then the result is always UnknownUnits
-                return UnitsZ3EncoderUtils.divide(ctx, leftOperand.serialize(z3IntFormatTranslator),
-                        rightOperand.serialize(z3IntFormatTranslator),
-                        result.serialize(z3IntFormatTranslator));
+                return UnitsZ3SmtEncoderUtils.divide(ctx,
+                        leftOperand.serialize(z3SmtFormatTranslator),
+                        rightOperand.serialize(z3SmtFormatTranslator),
+                        result.serialize(z3SmtFormatTranslator));
             case MODULUS:
                 // Modulus between 2 slots resulting in result slot, is always an equality between
                 // leftOperand and result slots
-                return UnitsZ3EncoderUtils.equality(ctx,
-                        leftOperand.serialize(z3IntFormatTranslator),
-                        result.serialize(z3IntFormatTranslator));
+                return UnitsZ3SmtEncoderUtils.equality(ctx,
+                        leftOperand.serialize(z3SmtFormatTranslator),
+                        result.serialize(z3SmtFormatTranslator));
             default:
                 ErrorReporter
                         .errorAbort("Attempting to encode an unsupported arithmetic operation: "
@@ -98,9 +99,9 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                 // result
                 return UnitsTypecheckUtils.unitsEqual(leftOperand.getValue(),
                         rightOperand.getValue())
-                                ? UnitsZ3EncoderUtils.equality(ctx,
-                                        rightOperand.serialize(z3IntFormatTranslator),
-                                        result.serialize(z3IntFormatTranslator))
+                                ? UnitsZ3SmtEncoderUtils.equality(ctx,
+                                        rightOperand.serialize(z3SmtFormatTranslator),
+                                        result.serialize(z3SmtFormatTranslator))
                                 : contradictoryValue;
             case MULTIPLICATION:
                 // It is more efficient to encode an equality between the result of leftOperand *

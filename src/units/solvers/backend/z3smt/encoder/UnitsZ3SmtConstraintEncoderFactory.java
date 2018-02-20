@@ -24,8 +24,8 @@ import units.representation.TypecheckUnit;
 public class UnitsZ3SmtConstraintEncoderFactory
         extends Z3SmtConstraintEncoderFactory<InferenceUnit, TypecheckUnit> {
     public UnitsZ3SmtConstraintEncoderFactory(Lattice lattice, Context ctx,
-            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
-        super(lattice, ctx, z3IntFormatTranslator);
+            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+        super(lattice, ctx, z3SmtFormatTranslator);
     }
 
     @Override
@@ -65,7 +65,6 @@ public class UnitsZ3SmtConstraintEncoderFactory
 
     @Override
     public ArithmeticConstraintEncoder<BoolExpr> createArithmeticConstraintEncoder() {
-        // TODO Auto-generated method stub
-        return null;
+        return new UnitsZ3SmtArithmeticConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
     }
 }

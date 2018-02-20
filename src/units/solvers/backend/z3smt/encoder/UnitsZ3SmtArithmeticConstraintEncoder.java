@@ -21,8 +21,8 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
         implements ArithmeticConstraintEncoder<BoolExpr> {
 
     public UnitsZ3SmtArithmeticConstraintEncoder(Lattice lattice, Context ctx,
-            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
-        super(lattice, ctx, z3IntFormatTranslator);
+            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+        super(lattice, ctx, z3SmtFormatTranslator);
     }
 
     // Encoding for var-var, var-const, const-var combos of add/sub, and also const-const for

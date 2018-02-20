@@ -21,13 +21,13 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
     public Z3SmtSolver(SolverEnvironment solverEnvironment, Collection<Slot> slots,
             Collection<Constraint> constraints,
-            Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3IntFormatTranslator,
+            Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator,
             Lattice lattice) {
-        super(solverEnvironment, slots, constraints, z3IntFormatTranslator, lattice);
+        super(solverEnvironment, slots, constraints, z3SmtFormatTranslator, lattice);
         ctx = new Context();
         solver = ctx.mkSolver();
-        z3IntFormatTranslator.initContext(ctx);
-        z3IntFormatTranslator.initSolver(solver);
+        z3SmtFormatTranslator.initContext(ctx);
+        z3SmtFormatTranslator.initSolver(solver);
     }
 
     // Main entry point

@@ -18,8 +18,8 @@ public class UnitsZ3SmtSubtypeConstraintEncoder
         implements SubtypeConstraintEncoder<BoolExpr> {
 
     public UnitsZ3SmtSubtypeConstraintEncoder(Lattice lattice, Context ctx,
-            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
-        super(lattice, ctx, z3IntFormatTranslator);
+            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+        super(lattice, ctx, z3SmtFormatTranslator);
     }
 
     protected BoolExpr encode(Slot subtype, Slot supertype) {

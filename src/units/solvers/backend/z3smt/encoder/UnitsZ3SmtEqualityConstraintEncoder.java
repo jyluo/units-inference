@@ -18,8 +18,8 @@ public class UnitsZ3SmtEqualityConstraintEncoder
         implements EqualityConstraintEncoder<BoolExpr> {
 
     public UnitsZ3SmtEqualityConstraintEncoder(Lattice lattice, Context ctx,
-            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3IntFormatTranslator) {
-        super(lattice, ctx, z3IntFormatTranslator);
+            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+        super(lattice, ctx, z3SmtFormatTranslator);
     }
 
     // 2 Slots are equal if their components are equal

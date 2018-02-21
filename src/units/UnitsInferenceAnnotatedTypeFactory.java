@@ -118,6 +118,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     default:
                         // TODO: replace with LUBSlot pending mier's PR
                         result = slotManager.createCombVariableSlot(lhs, rhs);
+                        break;
                 }
 
                 // insert varannot of the slot into the ATM

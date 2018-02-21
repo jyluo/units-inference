@@ -19,19 +19,18 @@ import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 
 public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTypeFactory> {
 
-    protected final SlotManager slotManager;
-    protected final ConstraintManager constraintManager;
-
     public UnitsVisitor(UnitsChecker checker, InferenceChecker ichecker,
             BaseAnnotatedTypeFactory factory, boolean infer) {
         super(checker, ichecker, factory, infer);
-        constraintManager = InferenceMain.getInstance().getConstraintManager();
-        slotManager = InferenceMain.getInstance().getSlotManager();
     }
 
     @Override
     public Void visitBinary(BinaryTree node, Void p) {
         if (infer) {
+            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+            ConstraintManager constraintManager =
+                    InferenceMain.getInstance().getConstraintManager();
+
             AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(node.getLeftOperand());
             AnnotatedTypeMirror rhsATM = atypeFactory.getAnnotatedType(node.getRightOperand());
             VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
@@ -47,24 +46,25 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                             VariableAnnotator.treeToLocation(atypeFactory, node));
                     constraintManager.addArithmeticConstraint(
                             ArithmeticOperationKind.fromTreeKind(node.getKind()), lhs, rhs, result);
+                    break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
                     VariableSlot lubSlot = slotManager.createCombVariableSlot(lhs, rhs);
                     // Create LUB constraint by default
                     constraintManager.addSubtypeConstraint(lhs, lubSlot);
                     constraintManager.addSubtypeConstraint(rhs, lubSlot);
+                    break;
             }
 
         } else { // if (atypeFactory instanceof UnitsAnnotatedTypeFactory)
             UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
 
-            Kind kind = node.getKind();
             AnnotationMirror lhsAM = atf.getAnnotatedType(node.getLeftOperand())
                     .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
             AnnotationMirror rhsAM = atf.getAnnotatedType(node.getRightOperand())
                     .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
 
-            switch (kind) {
+            switch (node.getKind()) {
                 case PLUS:
                     if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),

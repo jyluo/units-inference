@@ -37,8 +37,17 @@ public class UnitsRepresentationUtils {
     private static Elements elements;
 
     public static AnnotationMirror POLYUNIT;
+
+    // alias versions of the annotations (ie @UnknownUnits, @UnitsBottom)
     public static AnnotationMirror UNKNOWNUNITS;
     public static AnnotationMirror BOTTOM;
+
+    // instances of {@link UnitsInternal} with values to represent UnknownUnits and UnitsBottom
+    public static AnnotationMirror INTERNAL_UNKNOWNUNITS;
+    public static AnnotationMirror INTERNAL_BOTTOM;
+
+    // an instance of {@link UnitsInternal} with default values in its elements, which represents
+    // dimensionless
     public static AnnotationMirror DIMENSIONLESS;
 
     // an instance of {@link UnitsInternal} with no values in its elements
@@ -56,10 +65,15 @@ public class UnitsRepresentationUtils {
         BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
 
         // TODO: loop all base dimensions
-        Map<String, Integer> dimensionlessMap = new TreeMap<>();
-        dimensionlessMap.put("s", 0);
-        dimensionlessMap.put("m", 0);
-        DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, dimensionlessMap);
+        Map<String, Integer> zeroBaseDimensions = new TreeMap<>();
+        zeroBaseDimensions.put("s", 0);
+        zeroBaseDimensions.put("m", 0);
+
+        INTERNAL_UNKNOWNUNITS =
+                createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
+        INTERNAL_BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
+
+        DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, zeroBaseDimensions);
 
         RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsInternal.class);
 

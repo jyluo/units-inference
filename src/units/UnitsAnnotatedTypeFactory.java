@@ -86,7 +86,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 }
 
                 UnitsRepresentationUtils.addUnitsAnnotation(anno);
-                return UnitsRepresentationUtils.createInternalUnit("", false, false, prefix, exponents);
+                return UnitsRepresentationUtils.createInternalUnit("", false, false, prefix,
+                        exponents);
             }
 
             // Check to see if it declares a base unit
@@ -108,24 +109,37 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
-        return new UnitsQualifierHierarchy(factory, BOTTOM);
+        return new UnitsQualifierHierarchy(factory);
     }
 
     private final class UnitsQualifierHierarchy extends GraphQualifierHierarchy {
 
-        public UnitsQualifierHierarchy(MultiGraphFactory mgf, AnnotationMirror bottom) {
-            super(mgf, bottom);
+        public UnitsQualifierHierarchy(MultiGraphFactory mgf) {
+            super(mgf, BOTTOM);
         }
 
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
+            // replace UnknownUnits and UnitsBottom with internal versions
+            if (AnnotationUtils.areSame(subAnno, UNKNOWNUNITS)) {
+                subAnno = UnitsRepresentationUtils.INTERNAL_UNKNOWNUNITS;
+            } else if (AnnotationUtils.areSame(subAnno, BOTTOM)) {
+                subAnno = UnitsRepresentationUtils.INTERNAL_BOTTOM;
+            }
+            if (AnnotationUtils.areSame(superAnno, UNKNOWNUNITS)) {
+                superAnno = UnitsRepresentationUtils.INTERNAL_UNKNOWNUNITS;
+            } else if (AnnotationUtils.areSame(superAnno, BOTTOM)) {
+                superAnno = UnitsRepresentationUtils.INTERNAL_BOTTOM;
+            }
+
             // Case: @UnitsInternal <: Top
-            if (AnnotationUtils.areSame(superAnno, UnitsRepresentationUtils.UNKNOWNUNITS)) {
+            if (AnnotationUtils.areSame(superAnno,
+                    UnitsRepresentationUtils.INTERNAL_UNKNOWNUNITS)) {
                 return true;
             }
 
             // Case: Bottom <: @UnitsInternal
-            if (AnnotationUtils.areSame(subAnno, UnitsRepresentationUtils.BOTTOM)) {
+            if (AnnotationUtils.areSame(subAnno, UnitsRepresentationUtils.INTERNAL_BOTTOM)) {
                 return true;
             }
 
@@ -136,6 +150,13 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
             }
 
+            // remove values inside UnitsInternal for any other subtype checks, via super
+            if (AnnotationUtils.areSameByClass(subAnno, UnitsInternal.class)) {
+                subAnno = UnitsRepresentationUtils.RAWUNITSINTERNAL;
+            } else if (AnnotationUtils.areSameByClass(superAnno, UnitsInternal.class)) {
+                superAnno = UnitsRepresentationUtils.RAWUNITSINTERNAL;
+            }
+            System.out.println(" CHECKING SUBTYPE " + subAnno + " <: " + superAnno);
             return super.isSubtype(subAnno, superAnno);
         }
     }

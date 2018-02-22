@@ -68,7 +68,7 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         AnnotationMirror anno = slot.getValue();
-        TypecheckUnit unit = UnitsRepresentationUtils.createTypecheckUnit(anno);
+        TypecheckUnit unit = UnitsRepresentationUtils.getInstance().createTypecheckUnit(anno);
 
         // Makes a constant encoded slot with default values
         InferenceUnit encodedSlot = InferenceUnit.makeConstantSlot(ctx, slotID);
@@ -168,9 +168,9 @@ public class UnitsZ3SmtFormatTranslator
         // return UnitsRepresentationUtils.BOTTOM;
         // } else {
         // TODO: infer original name somehow
-        return UnitsRepresentationUtils.createInternalUnit("", solutionSlot.isUnknownUnits(),
-                solutionSlot.isUnitsBottom(), solutionSlot.getPrefixExponent(),
-                solutionSlot.getExponents());
+        return UnitsRepresentationUtils.getInstance().createInternalUnit("",
+                solutionSlot.isUnknownUnits(), solutionSlot.isUnitsBottom(),
+                solutionSlot.getPrefixExponent(), solutionSlot.getExponents());
         // }
     }
 }

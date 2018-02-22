@@ -1,4 +1,4 @@
-package units.qual;
+package units.otherquals;
 
 /*
  * From http://en.wikipedia.org/wiki/SI_prefix:

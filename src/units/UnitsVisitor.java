@@ -16,6 +16,7 @@ import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
+import units.representation.UnitsRepresentationUtils;
 
 public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTypeFactory> {
 
@@ -59,10 +60,12 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         } else { // if (atypeFactory instanceof UnitsAnnotatedTypeFactory)
             UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
 
-            AnnotationMirror lhsAM = atf.getAnnotatedType(node.getLeftOperand())
-                    .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
-            AnnotationMirror rhsAM = atf.getAnnotatedType(node.getRightOperand())
-                    .getEffectiveAnnotationInHierarchy(atf.UNKNOWNUNITS);
+            AnnotationMirror lhsAM =
+                    atf.getAnnotatedType(node.getLeftOperand()).getEffectiveAnnotationInHierarchy(
+                            UnitsRepresentationUtils.getInstance().RAWUNITSINTERNAL);
+            AnnotationMirror rhsAM =
+                    atf.getAnnotatedType(node.getRightOperand()).getEffectiveAnnotationInHierarchy(
+                            UnitsRepresentationUtils.getInstance().RAWUNITSINTERNAL);
 
             switch (node.getKind()) {
                 case PLUS:

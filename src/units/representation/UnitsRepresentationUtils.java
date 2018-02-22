@@ -18,9 +18,7 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 import units.qual.BaseUnit;
 import units.qual.PolyUnit;
-import units.qual.UnitsBottom;
 import units.qual.UnitsInternal;
-import units.qual.UnknownUnits;
 import units.qual.m;
 import units.qual.s;
 
@@ -36,42 +34,41 @@ public class UnitsRepresentationUtils {
     private static ProcessingEnvironment processingEnv;
     private static Elements elements;
 
-    public static AnnotationMirror POLYUNIT;
-
-    // alias versions of the annotations (ie @UnknownUnits, @UnitsBottom)
-    public static AnnotationMirror UNKNOWNUNITS;
-    public static AnnotationMirror BOTTOM;
+    public AnnotationMirror POLYUNIT;
 
     // instances of {@link UnitsInternal} with values to represent UnknownUnits and UnitsBottom
-    public static AnnotationMirror INTERNAL_UNKNOWNUNITS;
-    public static AnnotationMirror INTERNAL_BOTTOM;
+    public AnnotationMirror UNKNOWNUNITS;
+    public AnnotationMirror BOTTOM;
 
     // an instance of {@link UnitsInternal} with default values in its elements, which represents
     // dimensionless
-    public static AnnotationMirror DIMENSIONLESS;
+    public AnnotationMirror DIMENSIONLESS;
 
     // an instance of {@link UnitsInternal} with no values in its elements
-    public static AnnotationMirror RAWUNITSINTERNAL;
+    public AnnotationMirror RAWUNITSINTERNAL;
 
-    public static AnnotationMirror METER;
-    public static AnnotationMirror SECOND;
+    public AnnotationMirror METER;
+    public AnnotationMirror SECOND;
 
     private UnitsRepresentationUtils(ProcessingEnvironment processingEnv, Elements elements) {
         UnitsRepresentationUtils.processingEnv = processingEnv;
         UnitsRepresentationUtils.elements = elements;
+    }
 
+    // postInit() is called after performing annotation loading to obtain the full list of base
+    // units
+    public void postInit() {
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
-        UNKNOWNUNITS = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
-        BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
 
-        // TODO: loop all base dimensions
         Map<String, Integer> zeroBaseDimensions = new TreeMap<>();
-        zeroBaseDimensions.put("s", 0);
-        zeroBaseDimensions.put("m", 0);
+        for (String baseUnit : baseUnits()) {
+            zeroBaseDimensions.put(baseUnit, 0);
+        }
+        // zeroBaseDimensions.put("s", 0);
+        // zeroBaseDimensions.put("m", 0);
 
-        INTERNAL_UNKNOWNUNITS =
-                createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
-        INTERNAL_BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
+        UNKNOWNUNITS = createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
+        BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
 
         DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, zeroBaseDimensions);
 
@@ -81,7 +78,8 @@ public class UnitsRepresentationUtils {
         SECOND = AnnotationBuilder.fromClass(elements, s.class);
     }
 
-    public static UnitsRepresentationUtils getInstance(ProcessingEnvironment processingEnv, Elements elements) {
+    public static UnitsRepresentationUtils getInstance(ProcessingEnvironment processingEnv,
+            Elements elements) {
         if (singletonInstance == null) {
             singletonInstance = new UnitsRepresentationUtils(processingEnv, elements);
         }
@@ -90,47 +88,42 @@ public class UnitsRepresentationUtils {
 
     public static UnitsRepresentationUtils getInstance() {
         if (singletonInstance == null) {
-            ErrorReporter.errorAbort("getInstance() called without initializing UnitsRepresentationUtils.");
+            ErrorReporter.errorAbort(
+                    "getInstance() called without initializing UnitsRepresentationUtils.");
         }
         return singletonInstance;
     }
 
-    private static Set<String> baseUnits = new TreeSet<>();
+    private final Set<String> baseUnits = new TreeSet<>();
 
-    public static void addBaseUnit(String baseUnit) {
+    public void addBaseUnit(String baseUnit) {
         baseUnits.add(baseUnit);
     }
 
-    public static Set<String> baseUnits() {
+    public Set<String> baseUnits() {
         return baseUnits;
     }
 
     // contains all supported units annotations, including aliases
-    private static Set<AnnotationMirror> unitsAnnotations = new HashSet<>();
+    private final Set<AnnotationMirror> unitsAnnotations = new HashSet<>();
 
-    public static void addUnitsAnnotation(AnnotationMirror anno) {
+    public void addUnitsAnnotation(AnnotationMirror anno) {
         unitsAnnotations.add(anno);
     }
 
-    public static boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
+    public boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
             AnnotationMirror anno) {
         return unitsAnnotations.contains(anno) || realTypeFactory.isSupportedQualifier(anno);
     }
 
     // A 1 to 1 mapping between an annotation mirror and its unique typecheck unit.
-    private static Map<AnnotationMirror, TypecheckUnit> typecheckUnitCache = new HashMap<>();
+    private final Map<AnnotationMirror, TypecheckUnit> typecheckUnitCache = new HashMap<>();
 
-    public static TypecheckUnit createTypecheckUnit(AnnotationMirror anno) {
+    public TypecheckUnit createTypecheckUnit(AnnotationMirror anno) {
         if (!typecheckUnitCache.containsKey(anno)) {
             TypecheckUnit unit = new TypecheckUnit();
 
-            if (AnnotationUtils.areSameByClass(anno, UnknownUnits.class)) {
-                unit.setUnknownUnits(true);
-
-            } else if (AnnotationUtils.areSameByClass(anno, UnitsBottom.class)) {
-                unit.setUnitsBottom(true);
-
-            } else if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+            if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
                 unit.setOriginalName(
                         AnnotationUtils.getElementValue(anno, "originalName", String.class, true));
                 unit.setUnknownUnits(
@@ -142,7 +135,7 @@ public class UnitsRepresentationUtils {
 
                 Map<String, Integer> exponents = new HashMap<>();
                 // default all base units to exponent 0
-                for (String bu : UnitsRepresentationUtils.baseUnits()) {
+                for (String bu : baseUnits()) {
                     exponents.put(bu, 0);
                 }
                 for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(anno, "baseUnits",
@@ -163,7 +156,7 @@ public class UnitsRepresentationUtils {
         return typecheckUnitCache.get(anno);
     }
 
-    public static AnnotationMirror createInternalUnit(TypecheckUnit unit) {
+    public AnnotationMirror createInternalUnit(TypecheckUnit unit) {
         // see if cache already has a mapping, if so return from cache
         for (Entry<AnnotationMirror, TypecheckUnit> entry : typecheckUnitCache.entrySet()) {
             if (unit.equals(entry.getValue())) {
@@ -179,7 +172,7 @@ public class UnitsRepresentationUtils {
         return anno;
     }
 
-    public static AnnotationMirror createInternalUnit(String originalName, boolean unknownUnits,
+    public AnnotationMirror createInternalUnit(String originalName, boolean unknownUnits,
             boolean unitsBottom, int prefixExponent, Map<String, Integer> exponents) {
         // not allowed to set both a UU and UB to true on the same annotation
         assert !(unknownUnits && unitsBottom);

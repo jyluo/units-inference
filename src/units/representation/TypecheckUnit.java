@@ -28,7 +28,7 @@ public class TypecheckUnit {
         // default prefixExponent is 0
         prefixExponent = 0;
 
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             // default exponents are 0
             exponents.put(baseUnit, 0);
         }
@@ -69,6 +69,7 @@ public class TypecheckUnit {
     }
 
     public void setExponent(String unit, int exp) {
+        System.out.println(" ===== setting unit " + unit);
         assert exponents.containsKey(unit);
         exponents.replace(unit, exp);
     }
@@ -88,7 +89,7 @@ public class TypecheckUnit {
         sb.append(" UU = " + uu);
         sb.append(" UB = " + ub);
         sb.append(" Prefix = " + prefixExponent);
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

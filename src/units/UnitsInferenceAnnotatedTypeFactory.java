@@ -31,13 +31,20 @@ import checkers.inference.model.VariableSlot;
 import units.representation.UnitsRepresentationUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
+    // static reference to the singleton instance
+    protected static UnitsRepresentationUtils unitsRepresentationUtils;
 
     public UnitsInferenceAnnotatedTypeFactory(InferenceChecker inferenceChecker,
             BaseAnnotatedTypeFactory realTypeFactory, InferrableChecker realChecker,
             SlotManager slotManager, ConstraintManager constraintManager) {
         super(inferenceChecker, false, realTypeFactory, realChecker, slotManager,
                 constraintManager);
-        UnitsRepresentationUtils.getInstance(processingEnv, elements);
+
+        // Should already be initialized in the real ATF
+        unitsRepresentationUtils = UnitsRepresentationUtils.getInstance();
+        // and it should already have some base units
+        assert !unitsRepresentationUtils.baseUnits().isEmpty();
+
         postInit();
     }
 
@@ -47,6 +54,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         return new UnitsAnnotationClassLoader(checker);
     }
 
+    // In Inference ATF, this returns the set of real qualifiers
     @Override
     protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         // get all the loaded annotations
@@ -58,6 +66,11 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         //
         // // copy all loaded external Units to qual set
         // qualSet.addAll(externalQualsMap.values());
+
+        // create internal use annotation mirrors using the base units that have been initialized.
+        // must be called here as other methods called within ATF.postInit() requires the annotation
+        // mirrors
+        unitsRepresentationUtils.postInit();
 
         return qualSet;
     }
@@ -74,6 +87,17 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             result = super.aliasedAnnotation(anno);
         }
         return result;
+    }
+
+    @Override
+    public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
+        return new UnitsInferenceQualifierHierarchy(factory);
+    }
+
+    private final class UnitsInferenceQualifierHierarchy extends InferenceQualifierHierarchy {
+        public UnitsInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
+            super(multiGraphFactory);
+        }
     }
 
     @Override
@@ -149,19 +173,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     }
 
     @Override
-    public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
-        return new UnitsInferenceQualifierHierarchy(factory);
-    }
-
-    private final class UnitsInferenceQualifierHierarchy extends InferenceQualifierHierarchy {
-
-        public UnitsInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
-            super(multiGraphFactory);
-        }
-
-    }
-
-    @Override
     public TreeAnnotator createTreeAnnotator() {
         UnitsRepresentationUtils.getInstance(processingEnv, elements);
         return new ListTreeAnnotator(
@@ -177,7 +188,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             super(atypeFactory, realChecker, realAnnotatedTypeFactory, variableAnnotator,
                     slotManager);
         }
-        
+
         // TODO: UnitsITAnnotator should only create slots
         // move constraint generation to UnitsVisitor
 
@@ -191,7 +202,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             // TODO: aliases and base unit annos used in variable declarations don't work right now
             for (AnnotationMirror anno : realATM.getExplicitAnnotations()) {
-                if (UnitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
+                if (unitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
                     hasExplicitUnitsAnnotation = true;
                     break;
                 }
@@ -200,7 +211,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             if (hasExplicitUnitsAnnotation) {
                 // Create a ConstantSlot for the explicit annotation
                 AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
+                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.UNKNOWNUNITS);
                 ConstantSlot declaredAnnoSlot = variableAnnotator.createConstant(realAnno, varTree);
                 // Get the VariableSlot generated for the variable
                 VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
@@ -220,37 +231,38 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         //
         // // The code here applies the default type for literals, which is not what we want
         // AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(literalTree);
-        // AnnotationMirror realAnno = realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
+        // AnnotationMirror realAnno =
+        // realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
         // ConstantSlot cs = variableAnnotator.createConstant(realAnno, literalTree);
         // atm.replaceAnnotation(cs.getValue());
         // variableAnnotator.visit(atm, literalTree);
         // return null;
         // }
 
-//        @Override
-//        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror atm) {
-//            // From super:
-//            // Unary trees and compound assignments (x++ or x +=y) get desugared
-//            // by dataflow to be x = x + 1 and x = x + y.
-//            // Dataflow will then look up the types of the binary operations (x + 1) and (y + 1)
-//            //
-//            // InferenceTransfer currently sets the value of a compound assignment or unary
-//            // to be the just the type of the variable.
-//            // So, the type returned from this for desugared trees is not used.
-//            // We don't create a constraint to reduce confusion
-//            if (realTypeFactory.getPath(node) == null) {
-//                // Desugared tree's don't have paths.
-//                // There currently is some case that we are missing that requires us to annotate
-//                // these.
-//                return null;
-//            }
-//
-//            // visit via variableAnnotator to create a ArithmeticVariableSlot or LUBSlot for the
-//            // result atm
-//            variableAnnotator.visit(atm, node);
-//
-//            return null;
-//        }
+        // @Override
+        // public Void visitBinary(BinaryTree node, AnnotatedTypeMirror atm) {
+        // // From super:
+        // // Unary trees and compound assignments (x++ or x +=y) get desugared
+        // // by dataflow to be x = x + 1 and x = x + y.
+        // // Dataflow will then look up the types of the binary operations (x + 1) and (y + 1)
+        // //
+        // // InferenceTransfer currently sets the value of a compound assignment or unary
+        // // to be the just the type of the variable.
+        // // So, the type returned from this for desugared trees is not used.
+        // // We don't create a constraint to reduce confusion
+        // if (realTypeFactory.getPath(node) == null) {
+        // // Desugared tree's don't have paths.
+        // // There currently is some case that we are missing that requires us to annotate
+        // // these.
+        // return null;
+        // }
+        //
+        // // visit via variableAnnotator to create a ArithmeticVariableSlot or LUBSlot for the
+        // // result atm
+        // variableAnnotator.visit(atm, node);
+        //
+        // return null;
+        // }
 
         @Override
         public Void visitTypeCast(TypeCastTree typeCast, AnnotatedTypeMirror atm) {
@@ -261,7 +273,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             // TODO: aliases and base unit annos used in variable declarations don't work right now
             for (AnnotationMirror anno : realATM.getAnnotations()) {
-                if (UnitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
+                if (unitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
                     hasExplicitUnitsAnnotation = true;
                     break;
                 }
@@ -270,7 +282,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             if (hasExplicitUnitsAnnotation) {
                 // Create a ConstantSlot for the explicit annotation
                 AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
+                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.UNKNOWNUNITS);
                 ConstantSlot declaredAnnoSlot =
                         variableAnnotator.createConstant(realAnno, typeCast);
                 // Get the VariableSlot generated for the variable

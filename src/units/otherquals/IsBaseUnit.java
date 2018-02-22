@@ -1,4 +1,4 @@
-package units.qual;
+package units.otherquals;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

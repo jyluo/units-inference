@@ -48,7 +48,7 @@ public class UnitsZ3SmtEncoderUtils {
                 ctx.mkEq(fst.getUnitsBottom(), snd.getUnitsBottom()),
                 ctx.mkEq(fst.getPrefixExponent(), snd.getPrefixExponent())
             );
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             equalityEncoding = ctx.mkAnd(equalityEncoding,
                 ctx.mkEq(fst.getExponent(baseUnit), snd.getExponent(baseUnit))
             );
@@ -98,7 +98,7 @@ public class UnitsZ3SmtEncoderUtils {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent + rhs_exponent
         BoolExpr exponents = ctx.mkTrue();
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             exponents = ctx.mkAnd(exponents,
                 ctx.mkEq(
                     res.getExponent(baseUnit),
@@ -132,7 +132,7 @@ public class UnitsZ3SmtEncoderUtils {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent - rhs_exponent
         BoolExpr exponents = ctx.mkTrue();
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             exponents = ctx.mkAnd(exponents,
                 ctx.mkEq(
                     res.getExponent(baseUnit),

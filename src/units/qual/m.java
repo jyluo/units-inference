@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.checkerframework.framework.qual.SubtypeOf;
+import units.otherquals.IsBaseUnit;
 
 /**
  * Meter.
@@ -16,5 +17,4 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @IsBaseUnit
-public @interface m {
-}
+public @interface m {}

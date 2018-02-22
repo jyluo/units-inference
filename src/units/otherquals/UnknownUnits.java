@@ -1,4 +1,4 @@
-package units.qual;
+package units.otherquals;
 
 import static org.checkerframework.framework.qual.TypeUseLocation.IMPLICIT_UPPER_BOUND;
 import java.lang.annotation.Documented;

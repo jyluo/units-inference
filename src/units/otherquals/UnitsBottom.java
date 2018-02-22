@@ -1,4 +1,4 @@
-package units.qual;
+package units.otherquals;
 
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_LOWER_BOUND;
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_UPPER_BOUND;

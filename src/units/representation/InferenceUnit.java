@@ -36,7 +36,7 @@ public class InferenceUnit {
         // default prefixExponent is 0
         slot.prefixExponent = ctx.mkInt(0);
 
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             // default exponents are 0
             slot.exponents.put(baseUnit, ctx.mkInt(0));
         }
@@ -47,14 +47,14 @@ public class InferenceUnit {
     public static InferenceUnit makeVariableSlot(Context ctx, int slotID) {
         InferenceUnit slot = new InferenceUnit(ctx, slotID);
 
-        slot.uu = ctx
-                .mkBoolConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.uuSlotName));
-        slot.ub = ctx
-                .mkBoolConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.ubSlotName));
+        slot.uu = ctx.mkBoolConst(
+                UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.uuSlotName));
+        slot.ub = ctx.mkBoolConst(
+                UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.ubSlotName));
         slot.prefixExponent = ctx.mkIntConst(
                 UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
 
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             slot.exponents.put(baseUnit,
                     ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
         }
@@ -104,7 +104,7 @@ public class InferenceUnit {
         sb.append(" : UU = " + uu.toString());
         sb.append(" UB = " + ub.toString());
         sb.append(" Prefix = " + prefixExponent.toString());
-        for (String baseUnit : UnitsRepresentationUtils.baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

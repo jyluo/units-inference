@@ -11,13 +11,16 @@ import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.qual.TypeUseLocation;
+import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotationClassLoader;
+import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
@@ -265,5 +268,18 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
             return null;
         }
+    }
+
+    // for use in AnnotatedTypeMirror.toString()
+    @Override
+    protected AnnotatedTypeFormatter createAnnotatedTypeFormatter() {
+        return new DefaultAnnotatedTypeFormatter(createAnnotationFormatter(),
+                checker.hasOption("printVerboseGenerics"), checker.hasOption("printAllQualifiers"));
+    }
+
+    // for use in generating error outputs
+    @Override
+    protected AnnotationFormatter createAnnotationFormatter() {
+        return new UnitsAnnotationFormatter(checker);
     }
 }

@@ -1,11 +1,13 @@
 package units;
 
 import java.util.List;
+import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.VariableElement;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.util.DefaultAnnotationFormatter;
+import units.representation.UnitsRepresentationUtils;
 
 public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
 
@@ -13,8 +15,23 @@ public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
 
     @Override
     public String formatAnnotationMirror(AnnotationMirror anno) {
-        // TODO: substitute known annotations with their aliases so that we print them as their more
+        
+        System.out.println(" === formatting: " + anno.toString());
+
+        // Substitutes known annotations with their aliases so that we print them as their more
         // understandable alias annotations
+        Map<AnnotationMirror, AnnotationMirror> unitsAliasMap =
+                UnitsRepresentationUtils.getInstance().getUnitsAliasMapSwapped();
+        for (AnnotationMirror key : unitsAliasMap.keySet()) {
+            
+            if (anno.toString().startsWith("@units.qual.UnitsInternal(unknownUnits=true")) {
+                System.out.println(" === comparing to: " + key.toString());
+            }
+
+            if (anno.toString().contentEquals(key.toString())) {
+                return super.formatAnnotationMirror(unitsAliasMap.get(key));
+            }
+        }
         return super.formatAnnotationMirror(anno);
     }
 

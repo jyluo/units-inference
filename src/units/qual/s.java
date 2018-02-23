@@ -5,7 +5,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import units.otherquals.IsBaseUnit;
 
 /**
  * A second (1/60 of a minute).

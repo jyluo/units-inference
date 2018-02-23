@@ -6,16 +6,15 @@ import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.Tree.Kind;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
+import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import units.representation.UnitsRepresentationUtils;
 
 public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTypeFactory> {

@@ -69,7 +69,6 @@ public class TypecheckUnit {
     }
 
     public void setExponent(String unit, int exp) {
-        System.out.println(" ===== setting unit " + unit);
         assert exponents.containsKey(unit);
         exponents.replace(unit, exp);
     }

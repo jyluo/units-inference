@@ -4,8 +4,8 @@ import java.lang.annotation.Annotation;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotationClassLoader;
-import units.otherquals.IsBaseUnit;
-import units.otherquals.UnitsAlias;
+import units.qual.IsBaseUnit;
+import units.qual.UnitsAlias;
 import units.representation.UnitsRepresentationUtils;
 
 public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
@@ -29,11 +29,12 @@ public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
     protected boolean isSupportedAnnotationClass(Class<? extends Annotation> annoClass) {
 
         if (annoClass.getAnnotation(IsBaseUnit.class) != null) {
-            UnitsRepresentationUtils.getInstance().addBaseUnit(annoClass.getSimpleName());
+            UnitsRepresentationUtils.getInstance().addBaseUnit(annoClass);
             return false;
         }
 
         if (annoClass.getAnnotation(UnitsAlias.class) != null) {
+            UnitsRepresentationUtils.getInstance().addAliasUnit(annoClass);
             return false;
         }
 

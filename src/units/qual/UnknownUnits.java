@@ -1,4 +1,4 @@
-package units.otherquals;
+package units.qual;
 
 import static org.checkerframework.framework.qual.TypeUseLocation.IMPLICIT_UPPER_BOUND;
 import java.lang.annotation.Documented;
@@ -14,8 +14,6 @@ import org.checkerframework.framework.qual.SubtypeOf;
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-// Note: unit relations for UnknownUnits are programatically added
-@SubtypeOf({})
 // @DefaultQualifierInHierarchyInUncheckedCode()
 // @DefaultInUncheckedCodeFor({TypeUseLocation.PARAMETER, TypeUseLocation.UPPER_BOUND})
 @DefaultFor({
@@ -23,6 +21,7 @@ import org.checkerframework.framework.qual.SubtypeOf;
         // EXCEPTION_PARAMETER, // exceptions are always top
         IMPLICIT_UPPER_BOUND, // <T>, so that T can take on any type in usage
 })
+@UnitsAlias({})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) // ElementType.TYPE,

@@ -1,4 +1,4 @@
-package units.otherquals;
+package units.qual;
 
 import static org.checkerframework.framework.qual.LiteralKind.BOOLEAN;
 import static org.checkerframework.framework.qual.LiteralKind.CHAR;

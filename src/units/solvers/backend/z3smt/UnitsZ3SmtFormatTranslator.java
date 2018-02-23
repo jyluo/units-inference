@@ -163,7 +163,7 @@ public class UnitsZ3SmtFormatTranslator
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
         // TODO: further translate some of the units to the alias symbols where possible
         // if (solutionSlot.isUnknownUnits()) {
-        // return UnitsRepresentationUtils.UNKNOWNUNITS;
+        // return UnitsRepresentationUtils.TOP;
         // } else if (solutionSlot.isUnitsBottom()) {
         // return UnitsRepresentationUtils.BOTTOM;
         // } else {

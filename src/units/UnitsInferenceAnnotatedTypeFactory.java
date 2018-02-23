@@ -6,12 +6,15 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotationClassLoader;
+import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
@@ -211,7 +214,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             if (hasExplicitUnitsAnnotation) {
                 // Create a ConstantSlot for the explicit annotation
                 AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.UNKNOWNUNITS);
+                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.TOP);
                 ConstantSlot declaredAnnoSlot = variableAnnotator.createConstant(realAnno, varTree);
                 // Get the VariableSlot generated for the variable
                 VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
@@ -232,7 +235,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // // The code here applies the default type for literals, which is not what we want
         // AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(literalTree);
         // AnnotationMirror realAnno =
-        // realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.UNKNOWNUNITS);
+        // realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.TOP);
         // ConstantSlot cs = variableAnnotator.createConstant(realAnno, literalTree);
         // atm.replaceAnnotation(cs.getValue());
         // variableAnnotator.visit(atm, literalTree);
@@ -282,7 +285,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             if (hasExplicitUnitsAnnotation) {
                 // Create a ConstantSlot for the explicit annotation
                 AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.UNKNOWNUNITS);
+                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.TOP);
                 ConstantSlot declaredAnnoSlot =
                         variableAnnotator.createConstant(realAnno, typeCast);
                 // Get the VariableSlot generated for the variable
@@ -306,5 +309,18 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // }
         // return slot;
         // }
+    }
+
+    // for use in AnnotatedTypeMirror.toString()
+    @Override
+    protected AnnotatedTypeFormatter createAnnotatedTypeFormatter() {
+        return new DefaultAnnotatedTypeFormatter(createAnnotationFormatter(),
+                checker.hasOption("printVerboseGenerics"), checker.hasOption("printAllQualifiers"));
+    }
+
+    // for use in generating error outputs
+    @Override
+    protected AnnotationFormatter createAnnotationFormatter() {
+        return new UnitsAnnotationFormatter(checker);
     }
 }

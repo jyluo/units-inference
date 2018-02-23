@@ -1,4 +1,4 @@
-package units.otherquals;
+package units.qual;
 
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_LOWER_BOUND;
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_UPPER_BOUND;
@@ -21,10 +21,10 @@ import org.checkerframework.framework.qual.TypeKind;
  * @checker_framework.manual #units-checker Units Checker
  * @checker_framework.manual #bottom-type the bottom type
  */
-@SubtypeOf({}) // needs to be done programmatically
 @ImplicitFor(types = {TypeKind.VOID, TypeKind.NULL}, typeNames = Void.class,
         literals = LiteralKind.NULL)
 @DefaultFor({LOWER_BOUND})
+@UnitsAlias({})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})

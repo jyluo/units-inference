@@ -78,11 +78,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         return qualSet;
     }
 
+    // In Inference ATF, this returns the alias for a given real qualifier
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
         // TODO: cache results
-        // TODO: alias empty @units.qual.UnitsInternal to instantiated dimensionless
-        // TODO: alias dimensionless?
         AnnotationMirror result = realTypeFactory.aliasedAnnotation(anno);
         // System.out.println(" === Aliasing: " + anno.toString() + " ==> " + result);
 
@@ -148,7 +147,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         break;
                 }
 
-                // insert varannot of the slot into the ATM
+                // insert varAnnot of the slot into the ATM
                 AnnotationMirror resultAM = slotManager.getAnnotation(result);
                 atm.clearAnnotations();
                 atm.replaceAnnotation(resultAM);
@@ -162,17 +161,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 treeToVarAnnoPair.put(node, varATMPair);
             }
         }
-
-        // private VariableSlot getOrCreateSlot(AnnotatedTypeMirror atm, Tree tree) {
-        // // create a var slot from scratch if the atm doesn't have one.
-        // VariableSlot slot = slotManager.getVariableSlot(atm);
-        // if (slot == null) {
-        // slot = slotManager.createVariableSlot(treeToLocation(tree));
-        // // slot = slotManager.getVariableSlot(atm);
-        // assert slot != null;
-        // }
-        // return slot;
-        // }
     }
 
     @Override
@@ -192,9 +180,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     slotManager);
         }
 
-        // TODO: UnitsITAnnotator should only create slots
-        // move constraint generation to UnitsVisitor
-
         @Override
         public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
             // Use super to create a varAnnot for the variable declaration
@@ -203,6 +188,15 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             boolean hasExplicitUnitsAnnotation = false;
             AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(varTree);
 
+            // TODO: annotations written in source do get aliased, but still show up in inference as
+            // a constant annot... how??
+
+            // on the one hand, this is okay because it won't get "inserted", and it isn't affecting
+            // inference correctness on the other hand, lots of extra constants
+            // Figure this out for @Unit?
+
+            // TODO: back mapping of inference result annots to surface units
+            
             // TODO: aliases and base unit annos used in variable declarations don't work right now
             for (AnnotationMirror anno : realATM.getExplicitAnnotations()) {
                 if (unitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {

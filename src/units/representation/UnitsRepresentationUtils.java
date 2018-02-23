@@ -76,7 +76,7 @@ public class UnitsRepresentationUtils {
      * representation, keyed on the string name of the (alias) annotation mirror
      */
     private final Map<AnnotationMirror, AnnotationMirror> unitsAnnotationMirrorMap =
-            new HashMap<>();
+            AnnotationUtils.createAnnotationMap();
 
     private UnitsRepresentationUtils(ProcessingEnvironment processingEnv, Elements elements) {
         UnitsRepresentationUtils.processingEnv = processingEnv;
@@ -168,10 +168,8 @@ public class UnitsRepresentationUtils {
     private void createInternalBaseUnit(Class<? extends Annotation> baseUnitClass) {
         // check to see if the annotation has already been mapped before
         AnnotationMirror baseUnitAM = AnnotationBuilder.fromClass(elements, baseUnitClass);
-        for (AnnotationMirror unit : unitsAnnotationMirrorMap.keySet()) {
-            if (AnnotationUtils.areSame(baseUnitAM, unit)) {
-                return;
-            }
+        if (unitsAnnotationMirrorMap.containsKey(baseUnitAM)) {
+            return;
         }
 
         Map<String, Integer> exponents = new TreeMap<>();
@@ -193,10 +191,8 @@ public class UnitsRepresentationUtils {
     private void createInternalAliasUnit(Class<? extends Annotation> aliasUnitClass) {
         // check to see if the annotation has already been mapped before
         AnnotationMirror aliasUnitAM = AnnotationBuilder.fromClass(elements, aliasUnitClass);
-        for (AnnotationMirror unit : unitsAnnotationMirrorMap.keySet()) {
-            if (AnnotationUtils.areSame(aliasUnitAM, unit)) {
-                return;
-            }
+        if (unitsAnnotationMirrorMap.containsKey(aliasUnitAM)) {
+            return;
         }
 
         int prefix = 0;
@@ -268,33 +264,12 @@ public class UnitsRepresentationUtils {
      */
     public AnnotationMirror getInternalAliasUnit(AnnotationMirror anno) {
         // check to see if the annotation has already been mapped before
-        for (AnnotationMirror unit : unitsAnnotationMirrorMap.keySet()) {
-            if (AnnotationUtils.areSame(anno, unit)) {
-                return unitsAnnotationMirrorMap.get(unit);
-            }
+        if (unitsAnnotationMirrorMap.containsKey(anno)) {
+            return unitsAnnotationMirrorMap.get(anno);
         }
 
         return null;
     }
-
-    // /**
-    // * creates a normalized UnitsInternal annotation for the given supported annotation (including
-    // * aliases), adds the pair to the map, and returns the normalized annotation.
-    // */
-    // public AnnotationMirror addUnitsAnnotation(AnnotationMirror anno, String originalName,
-    // boolean unknownUnits, boolean unitsBottom, int prefixExponent,
-    // Map<String, Integer> exponents) {
-    // if (unitsAnnotationMirrorMap.containsKey(anno)) {
-    // return unitsAnnotationMirrorMap.get(anno);
-    // }
-    //
-    // System.out.println(" === Adding annot to alias " + anno + " hashcode: " + anno.hashCode());
-    //
-    // AnnotationMirror internalUnit = createInternalUnit(originalName, unknownUnits, unitsBottom,
-    // prefixExponent, exponents);
-    // unitsAnnotationMirrorMap.put(anno, internalUnit);
-    // return internalUnit;
-    // }
 
     public boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
             AnnotationMirror anno) {
@@ -313,8 +288,10 @@ public class UnitsRepresentationUtils {
      * Returns an immutable map of internal units mapped to their surface units annotations
      */
     public Map<AnnotationMirror, AnnotationMirror> getUnitsAliasMapSwapped() {
-        return Collections.unmodifiableMap(unitsAnnotationMirrorMap.entrySet().stream()
+        Map<AnnotationMirror, AnnotationMirror> swappedMap = AnnotationUtils.createAnnotationMap();
+        swappedMap.putAll(unitsAnnotationMirrorMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
+        return Collections.unmodifiableMap(swappedMap);
     }
 
     private final Map<AnnotationMirror, AnnotationMirror> fillMissingBaseUnitsCache =
@@ -322,6 +299,9 @@ public class UnitsRepresentationUtils {
 
     // Builds a fresh AnnotationMirror for the given annotation with any missing base units filled
     // in
+
+    // TODO: merge with below
+    // create an uncached TypeCheckUnits as a "struct" to hold the integers etc
     public AnnotationMirror fillMissingBaseUnits(AnnotationMirror anno) {
         if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
             if (fillMissingBaseUnitsCache.containsKey(anno)) {

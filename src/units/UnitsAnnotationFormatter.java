@@ -15,23 +15,15 @@ public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
 
     @Override
     public String formatAnnotationMirror(AnnotationMirror anno) {
-        
-        System.out.println(" === formatting: " + anno.toString());
-
-        // Substitutes known annotations with their aliases so that we print them as their more
-        // understandable alias annotations
-        Map<AnnotationMirror, AnnotationMirror> unitsAliasMap =
+        // Substitutes known annotations with their surface annotations so that we print them with
+        // their more understandable surface annotation names
+        Map<AnnotationMirror, AnnotationMirror> map =
                 UnitsRepresentationUtils.getInstance().getUnitsAliasMapSwapped();
-        for (AnnotationMirror key : unitsAliasMap.keySet()) {
-            
-            if (anno.toString().startsWith("@units.qual.UnitsInternal(unknownUnits=true")) {
-                System.out.println(" === comparing to: " + key.toString());
-            }
 
-            if (anno.toString().contentEquals(key.toString())) {
-                return super.formatAnnotationMirror(unitsAliasMap.get(key));
-            }
+        if (map.containsKey(anno)) {
+            return super.formatAnnotationMirror(map.get(anno));
         }
+
         return super.formatAnnotationMirror(anno);
     }
 

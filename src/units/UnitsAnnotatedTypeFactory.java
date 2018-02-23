@@ -1,7 +1,6 @@
 package units;
 
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -36,11 +35,6 @@ import units.representation.UnitsRepresentationUtils;
 import units.util.UnitsTypecheckUtils;
 
 public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
-    // protected final AnnotationMirror TOP =
-    // AnnotationBuilder.fromClass(elements, UnknownUnits.class);
-    // protected final AnnotationMirror BOTTOM =
-    // AnnotationBuilder.fromClass(elements, UnitsBottom.class);
-
     // static reference to the singleton instance
     protected static UnitsRepresentationUtils unitsRepresentationUtils;
 
@@ -78,11 +72,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
-
-//        if (anno.toString().startsWith("@units.qual.")) {
-//            System.out.println(" === checking alias unit for " + anno.toString());
-//        }
-
         // check to see if it is an internal units annotation
         if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
             // fill in missing base units
@@ -98,34 +87,12 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)
                     || AnnotationUtils.areSameByClass(metaAnno, IsBaseUnit.class)) {
 
-               //  System.out.println("     returning prebuilt alias for " + anno.toString());
+                // System.out.println(" returning prebuilt alias for " + anno.toString());
 
                 return unitsRepresentationUtils.getInternalAliasUnit(anno);
             }
-
-            //
-            // // Check to see if it is an alias unit
-            // if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)) {
-            // Map<String, Integer> exponents = new TreeMap<>();
-            //
-            // int prefix = 0;
-            // // default all base units to exponent 0
-            // for (String bu : unitsRepresentationUtils.baseUnits()) {
-            // exponents.put(bu, 0);
-            // }
-            // // replace default base unit exponents from anno
-            // for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(metaAnno, "value",
-            // AnnotationMirror.class, true)) {
-            // exponents.put(AnnotationUtils.getElementValue(bu, "unit", String.class, false),
-            // AnnotationUtils.getElementValue(bu, "exponent", Integer.class, true));
-            // prefix += AnnotationUtils.getElementValue(bu, "prefix", Integer.class, true);
-            // }
-            //
-            // return unitsRepresentationUtils.addUnitsAnnotation(anno, "", false, false, prefix,
-            // exponents);
-            // }
         }
-        
+
         return super.aliasedAnnotation(anno);
     }
 
@@ -193,18 +160,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
-            // // replace UnknownUnits and UnitsBottom with internal versions
-            // if (AnnotationUtils.areSame(subAnno, TOP)) {
-            // subAnno = UnitsRepresentationUtils.TOP;
-            // } else if (AnnotationUtils.areSame(subAnno, BOTTOM)) {
-            // subAnno = UnitsRepresentationUtils.BOTTOM;
-            // }
-            // if (AnnotationUtils.areSame(superAnno, TOP)) {
-            // superAnno = UnitsRepresentationUtils.TOP;
-            // } else if (AnnotationUtils.areSame(superAnno, BOTTOM)) {
-            // superAnno = UnitsRepresentationUtils.BOTTOM;
-            // }
-
             // System.out.println(" === checking SUBTYPE " + subAnno + " <: " + superAnno);
 
             // replace raw UnitsInternal with Dimensionless
@@ -249,18 +204,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
             ErrorReporter.errorAbort("Uncaught subtype check case:" + "\n    subtype:   " + subAnno
                     + "\n    supertype: " + superAnno);
-
-            // // Case X <: Y
-            // Set<AnnotationMirror> supermap1 = this.supertypesMap.get(subAnno);
-            // return AnnotationUtils.containsSame(supermap1, superAnno);
-
-            // // remove values inside UnitsInternal for any other subtype checks, via super
-            // if (AnnotationUtils.areSameByClass(subAnno, UnitsInternal.class)) {
-            // subAnno = unitsRepresentationUtils.RAWUNITSINTERNAL;
-            // } else if (AnnotationUtils.areSameByClass(superAnno, UnitsInternal.class)) {
-            // superAnno = unitsRepresentationUtils.RAWUNITSINTERNAL;
-            // }
-            return super.isSubtype(subAnno, superAnno);
+            return false;
         }
     }
 

@@ -6,6 +6,7 @@ import com.microsoft.z3.Context;
 import backend.z3smt.Z3SmtFormatTranslator;
 import backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
+import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -28,7 +29,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
     // Encoding for var-var, var-const, const-var combos of add/sub, and also const-const for
     // mul/div/mod
     protected BoolExpr encode(ArithmeticOperationKind operation, Slot leftOperand,
-            Slot rightOperand, Slot result) {
+            Slot rightOperand, ArithmeticVariableSlot result) {
         switch (operation) {
             case ADDITION:
             case SUBTRACTION:
@@ -71,25 +72,25 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
 
     @Override
     public BoolExpr encodeVariable_Variable(ArithmeticOperationKind operation,
-            VariableSlot leftOperand, VariableSlot rightOperand, VariableSlot result) {
+            VariableSlot leftOperand, VariableSlot rightOperand, ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
 
     @Override
     public BoolExpr encodeVariable_Constant(ArithmeticOperationKind operation,
-            VariableSlot leftOperand, ConstantSlot rightOperand, VariableSlot result) {
+            VariableSlot leftOperand, ConstantSlot rightOperand, ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
 
     @Override
     public BoolExpr encodeConstant_Variable(ArithmeticOperationKind operation,
-            ConstantSlot leftOperand, VariableSlot rightOperand, VariableSlot result) {
+            ConstantSlot leftOperand, VariableSlot rightOperand, ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
 
     @Override
     public BoolExpr encodeConstant_Constant(ArithmeticOperationKind operation,
-            ConstantSlot leftOperand, ConstantSlot rightOperand, VariableSlot result) {
+            ConstantSlot leftOperand, ConstantSlot rightOperand, ArithmeticVariableSlot result) {
         switch (operation) {
             case ADDITION:
             case SUBTRACTION:

@@ -172,10 +172,10 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             tops.remove(unitsRepresentationUtils.RAWUNITSINTERNAL);
             tops.add(unitsRepresentationUtils.TOP);
 
-            System.out.println(" === supertypes: " + supertypes);
-            System.out.println(" === polyQualifiers: " + polyQualifiers);
-            System.out.println(" === tops: " + tops);
-            System.out.println(" === bottoms: " + bottoms);
+            // System.out.println(" === supertypes: " + supertypes);
+            // System.out.println(" === polyQualifiers: " + polyQualifiers);
+            // System.out.println(" === tops: " + tops);
+            // System.out.println(" === bottoms: " + bottoms);
         }
 
         @Override

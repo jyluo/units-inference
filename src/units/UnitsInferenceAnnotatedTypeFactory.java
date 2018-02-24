@@ -35,7 +35,7 @@ import units.representation.UnitsRepresentationUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
     // static reference to the singleton instance
-    protected static UnitsRepresentationUtils unitsRepresentationUtils;
+    protected static UnitsRepresentationUtils unitsRepUtils;
 
     public UnitsInferenceAnnotatedTypeFactory(InferenceChecker inferenceChecker,
             BaseAnnotatedTypeFactory realTypeFactory, InferrableChecker realChecker,
@@ -44,9 +44,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 constraintManager);
 
         // Should already be initialized in the real ATF
-        unitsRepresentationUtils = UnitsRepresentationUtils.getInstance();
+        unitsRepUtils = UnitsRepresentationUtils.getInstance();
         // and it should already have some base units
-        assert !unitsRepresentationUtils.baseUnits().isEmpty();
+        assert !unitsRepUtils.baseUnits().isEmpty();
 
         postInit();
     }
@@ -73,7 +73,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // create internal use annotation mirrors using the base units that have been initialized.
         // must be called here as other methods called within ATF.postInit() requires the annotation
         // mirrors
-        unitsRepresentationUtils.postInit();
+        unitsRepUtils.postInit();
 
         return qualSet;
     }
@@ -104,8 +104,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public VariableAnnotator createVariableAnnotator() {
-        return new UnitsVariableAnnotator(
-                this, realTypeFactory, realChecker, slotManager, constraintManager);
+        return new UnitsVariableAnnotator(this, realTypeFactory, realChecker, slotManager,
+                constraintManager);
     }
 
     private final class UnitsVariableAnnotator extends VariableAnnotator {
@@ -166,9 +166,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     @Override
     public TreeAnnotator createTreeAnnotator() {
         UnitsRepresentationUtils.getInstance(processingEnv, elements);
-        return new ListTreeAnnotator(
-                new ImplicitsTreeAnnotator(this), new UnitsInferenceTreeAnnotator(
-                        this, realChecker, realTypeFactory, variableAnnotator, slotManager));
+        return new ListTreeAnnotator(new ImplicitsTreeAnnotator(this),
+                new UnitsInferenceTreeAnnotator(this, realChecker, realTypeFactory,
+                        variableAnnotator, slotManager));
     }
 
     public class UnitsInferenceTreeAnnotator extends InferenceTreeAnnotator {
@@ -185,35 +185,23 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // Use super to create a varAnnot for the variable declaration
             super.visitVariable(varTree, atm);
 
-            boolean hasExplicitUnitsAnnotation = false;
             AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(varTree);
 
-            // TODO: annotations written in source do get aliased, but still show up in inference as
-            // a constant annot... how??
-
-            // on the one hand, this is okay because it won't get "inserted", and it isn't affecting
-            // inference correctness on the other hand, lots of extra constants
-            // Figure this out for @Unit?
-
             // TODO: back mapping of inference result annots to surface units
-            
-            // TODO: aliases and base unit annos used in variable declarations don't work right now
-            for (AnnotationMirror anno : realATM.getExplicitAnnotations()) {
-                if (unitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
-                    hasExplicitUnitsAnnotation = true;
-                    break;
-                }
-            }
 
-            if (hasExplicitUnitsAnnotation) {
+            // If there is a units annotation, then retrieve it, normalize it, create a constant
+            // slot for it, and an equality constraint between the constant slot and the VarAnnot
+            // generated for the ATM
+            AnnotationMirror realUnitsAnno = realATM.getAnnotationInHierarchy(unitsRepUtils.TOP);
+            if (realUnitsAnno != null) {
+                // Fill in any missing base units
+                realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
                 // Create a ConstantSlot for the explicit annotation
-                AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.TOP);
-                ConstantSlot declaredAnnoSlot = variableAnnotator.createConstant(realAnno, varTree);
+                ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, varTree);
                 // Get the VariableSlot generated for the variable
                 VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
                 // Add Equality constraint between the VariableSlot and the ConstantSlot
-                constraintManager.addEqualityConstraint(varAnnotSlot, declaredAnnoSlot);
+                constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
             }
 
             return null;
@@ -262,30 +250,26 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // }
 
         @Override
-        public Void visitTypeCast(TypeCastTree typeCast, AnnotatedTypeMirror atm) {
-            super.visitTypeCast(typeCast, atm);
+        public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror atm) {
+            super.visitTypeCast(tree, atm);
 
-            boolean hasExplicitUnitsAnnotation = false;
-            AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(typeCast);
+            AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(tree);
 
-            // TODO: aliases and base unit annos used in variable declarations don't work right now
-            for (AnnotationMirror anno : realATM.getAnnotations()) {
-                if (unitsRepresentationUtils.isUnitsAnnotation(realTypeFactory, anno)) {
-                    hasExplicitUnitsAnnotation = true;
-                    break;
-                }
-            }
+            // TODO: shared logic, put in helper
 
-            if (hasExplicitUnitsAnnotation) {
+            // If there is a units annotation, then retrieve it, normalize it, create a constant
+            // slot for it, and an equality constraint between the constant slot and the VarAnnot
+            // generated for the ATM
+            AnnotationMirror realUnitsAnno = realATM.getAnnotationInHierarchy(unitsRepUtils.TOP);
+            if (realUnitsAnno != null) {
+                // Fill in any missing base units
+                realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
                 // Create a ConstantSlot for the explicit annotation
-                AnnotationMirror realAnno =
-                        realATM.getAnnotationInHierarchy(unitsRepresentationUtils.TOP);
-                ConstantSlot declaredAnnoSlot =
-                        variableAnnotator.createConstant(realAnno, typeCast);
+                ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, tree);
                 // Get the VariableSlot generated for the variable
                 VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
                 // Add Equality constraint between the VariableSlot and the ConstantSlot
-                constraintManager.addEqualityConstraint(varAnnotSlot, declaredAnnoSlot);
+                constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
             }
 
             return null;

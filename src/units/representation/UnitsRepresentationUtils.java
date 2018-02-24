@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
-import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
@@ -121,6 +120,18 @@ public class UnitsRepresentationUtils {
         aliasUnits.add(aliasUnit);
     }
 
+    /**
+     * Creates and returns an exponent values map with all defined base units sorted alphabetically
+     * according to unit symbol name, and with the exponent values set to 0.
+     */
+    protected Map<String, Integer> createZeroFilledBaseUnitsMap() {
+        Map<String, Integer> map = new TreeMap<>();
+        for (String baseUnit : baseUnits()) {
+            map.put(baseUnit, 0);
+        }
+        return map;
+    }
+
     // public Set<Class<? extends Annotation>> aliasUnits() {
     // return aliasUnits;
     // }
@@ -130,13 +141,9 @@ public class UnitsRepresentationUtils {
     public void postInit() {
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
 
-        Map<String, Integer> zeroBaseDimensions = new TreeMap<>();
-        for (String baseUnit : baseUnits()) {
-            zeroBaseDimensions.put(baseUnit, 0);
-        }
-
         RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsInternal.class);
 
+        Map<String, Integer> zeroBaseDimensions = createZeroFilledBaseUnitsMap();
         TOP = createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
         BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
         DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, zeroBaseDimensions);
@@ -172,11 +179,8 @@ public class UnitsRepresentationUtils {
             return;
         }
 
-        Map<String, Integer> exponents = new TreeMap<>();
-        // default all base units to exponent 0
-        for (String bu : baseUnits()) {
-            exponents.put(bu, 0);
-        }
+        Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
+
         // set the exponent of the given base unit to 1
         exponents.put(baseUnitClass.getSimpleName(), 1);
         // create the internal unit and add to alias map
@@ -197,11 +201,7 @@ public class UnitsRepresentationUtils {
 
         int prefix = 0;
 
-        Map<String, Integer> exponents = new TreeMap<>();
-        // default all base units to exponent 0
-        for (String bu : baseUnits()) {
-            exponents.put(bu, 0);
-        }
+        Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
 
         // replace default base unit exponents from anno, and accumulate prefixes
         UnitsAlias aliasInfo = aliasUnitClass.getAnnotation(UnitsAlias.class);
@@ -271,11 +271,17 @@ public class UnitsRepresentationUtils {
         return null;
     }
 
-    public boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
-            AnnotationMirror anno) {
-        return unitsAnnotationMirrorMap.keySet().contains(anno)
-                || realTypeFactory.isSupportedQualifier(anno);
-    }
+    // public boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
+    // AnnotationMirror anno) {
+    // /*
+    // * It is a units annotation if we have built an alias for it in the past (this includes @m
+    // * --> @UnitsInternal(..)), or is supported by the qual hierarchy, or it is a @UnitsInternal
+    // * annotation (with possibly not all base units).
+    // */
+    // return unitsAnnotationMirrorMap.keySet().contains(anno)
+    // || realTypeFactory.isSupportedQualifier(anno)
+    // || AnnotationUtils.areSameByClass(anno, UnitsInternal.class);
+    // }
 
     /**
      * Returns an immutable map of surface units annotations mapped to their internal units
@@ -317,11 +323,8 @@ public class UnitsRepresentationUtils {
             int prefixExponent =
                     AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true);
 
-            Map<String, Integer> exponents = new HashMap<>();
-            // default all base units to exponent 0
-            for (String bu : baseUnits()) {
-                exponents.put(bu, 0);
-            }
+            Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
+
             // replace base units with values in annotation
             for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(anno, "baseUnits",
                     AnnotationMirror.class, true)) {
@@ -339,6 +342,29 @@ public class UnitsRepresentationUtils {
             // not an internal units annotation
             return null;
         }
+    }
+
+    public boolean hasAllBaseUnits(AnnotationMirror anno) {
+        if (!AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+            return false;
+        }
+
+        // add declared base units from the anno to the map, filtering out duplicate base units
+        Map<String, Integer> baseUnitsFromAnno = new HashMap<>();
+        for (AnnotationMirror buAnno : AnnotationUtils.getElementValueArray(anno, "baseUnits",
+                AnnotationMirror.class, true)) {
+            String baseUnit = AnnotationUtils.getElementValue(buAnno, "unit", String.class, false);
+            int exponent =
+                    AnnotationUtils.getElementValue(buAnno, "exponent", Integer.class, false);
+            // ensure the declared base unit is actually a supported base unit
+            if (!baseUnits().contains(baseUnit)) {
+                return false;
+            }
+            baseUnitsFromAnno.put(baseUnit, exponent);
+        }
+
+        // see if it has all of the base unit annotations
+        return baseUnitsFromAnno.size() == baseUnits().size();
     }
 
     // A 1 to 1 mapping between an annotation mirror and its unique typecheck unit.
@@ -361,7 +387,7 @@ public class UnitsRepresentationUtils {
             unit.setPrefixExponent(
                     AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true));
 
-            Map<String, Integer> exponents = new HashMap<>();
+            Map<String, Integer> exponents = new TreeMap<>();
             // default all base units to exponent 0
             for (String bu : baseUnits()) {
                 exponents.put(bu, 0);

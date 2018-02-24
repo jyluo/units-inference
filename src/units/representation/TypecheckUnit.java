@@ -1,7 +1,6 @@
 package units.representation;
 
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * A data structure class to encapsulate a set of java variables representing a unit for type
@@ -17,8 +16,6 @@ public class TypecheckUnit {
     private final Map<String, Integer> exponents;
 
     public TypecheckUnit() {
-        exponents = new TreeMap<>();
-
         // default originalName value is "default"
         originalName = "default";
         // default UU value is false
@@ -27,11 +24,8 @@ public class TypecheckUnit {
         ub = false;
         // default prefixExponent is 0
         prefixExponent = 0;
-
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
-            // default exponents are 0
-            exponents.put(baseUnit, 0);
-        }
+        // default exponents are 0
+        exponents = UnitsRepresentationUtils.getInstance().createZeroFilledBaseUnitsMap();
     }
 
     public void setOriginalName(String val) {

@@ -96,6 +96,26 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return super.aliasedAnnotation(anno);
     }
 
+    // Make sure only UnitsInternal annotations with all base units defined are considered supported
+    // any UnitsInternal annotations without all base units should go through aliasing to have the
+    // base units filled in.
+    @Override
+    public boolean isSupportedQualifier(AnnotationMirror anno) {
+        /*
+         * getQualifierHierarchy().getTypeQualifiers() contains PolyAll, PolyUnit, and the AMs of
+         * Top and Bottom. We need to check all other instances of UnitsInternal AMs that are
+         * supported qualifiers here.
+         */
+        if (!super.isSupportedQualifier(anno)) {
+            return false;
+        }
+        if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+            return unitsRepresentationUtils.hasAllBaseUnits(anno);
+        }
+        // Anno is PolyAll, PolyUnit, Top or Bottom
+        return AnnotationUtils.containsSame(this.getQualifierHierarchy().getTypeQualifiers(), anno);
+    }
+
     // programmatically set the defaults
     @Override
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {

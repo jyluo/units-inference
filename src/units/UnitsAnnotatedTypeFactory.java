@@ -179,8 +179,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
-            // System.out.println(" === checking SUBTYPE " + subAnno + "\n                   <: "
-            // + superAnno + "\n");
+            // System.out.println(" === checking SUBTYPE \n "
+            // + getAnnotationFormatter().formatAnnotationMirror(subAnno) + " <:\n"
+            // + getAnnotationFormatter().formatAnnotationMirror(superAnno) + "\n");
 
             // replace raw @UnitsInternal with Dimensionless
             // for some reason this shows up in inference mode when building the lattice
@@ -215,7 +216,17 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             if (AnnotationUtils.areSameByClass(subAnno, UnitsInternal.class)
                     && AnnotationUtils.areSameByClass(superAnno, UnitsInternal.class)
                     && AnnotationUtils.areSameIgnoringValues(subAnno, superAnno)) {
-                return UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
+
+                boolean result = UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
+
+                // if (AnnotationUtils.areSame(superAnno, unitsRepUtils.METER)) {
+                // System.out.println(" === checking SUBTYPE \n "
+                // + getAnnotationFormatter().formatAnnotationMirror(subAnno) + " <:\n"
+                // + getAnnotationFormatter().formatAnnotationMirror(superAnno) + "\n"
+                // + " result: " + result);
+                // }
+
+                return result;
             }
 
             ErrorReporter.errorAbort("Uncaught subtype check case:" + "\n    subtype:   "

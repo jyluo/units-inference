@@ -54,6 +54,8 @@ public class UnitsRepresentationUtils {
      */
     public AnnotationMirror DIMENSIONLESS;
 
+    // public AnnotationMirror METER;
+
     // Comparator used to sort annotation classes by their simple class name
     private static Comparator<Class<? extends Annotation>> annoClassComparator =
             new Comparator<Class<? extends Annotation>>() {
@@ -147,6 +149,10 @@ public class UnitsRepresentationUtils {
         TOP = createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
         BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
         DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, zeroBaseDimensions);
+
+//        Map<String, Integer> meterDimensions = createZeroFilledBaseUnitsMap();
+//        meterDimensions.put("m", 1);
+//        METER = createInternalUnit("Meter", false, false, 0, meterDimensions);
 
         unitsAnnotationMirrorMap.put(AnnotationBuilder.fromClass(elements, UnknownUnits.class),
                 TOP);

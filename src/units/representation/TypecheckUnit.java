@@ -111,20 +111,16 @@ public class TypecheckUnit {
             return false;
         }
         TypecheckUnit other = (TypecheckUnit) obj;
-        if (exponents == null) {
-            if (other.exponents != null) {
-                return false;
-            }
-        } else if (!exponents.equals(other.exponents)) {
+        if (ub != other.ub) {
+            return false;
+        }
+        if (uu != other.uu) {
             return false;
         }
         if (prefixExponent != other.prefixExponent) {
             return false;
         }
-        if (ub != other.ub) {
-            return false;
-        }
-        if (uu != other.uu) {
+        if (!exponents.equals(other.exponents)) {
             return false;
         }
         return true;

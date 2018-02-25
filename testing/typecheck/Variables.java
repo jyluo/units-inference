@@ -1,16 +1,28 @@
 import units.qual.*;
-import units.UnitsTools;
 
 class Variables {
+
+    @UnknownUnits Integer a = 10;
     // :: error: (assignment.type.incompatible)
-    @m Integer a = 10;
+    @UnitsBottom Integer b = 20;
+
+    @Dimensionless Integer c = 30;
+
     // :: error: (assignment.type.incompatible)
-    @s Integer b = 20;
+    @m Integer d = 10;
+    // :: error: (assignment.type.incompatible)
+    @s Integer e = 20;
 
     public void Main() {
+        @UnknownUnits int h = 10;
         // :: error: (assignment.type.incompatible)
-        @m int x = 10;
+        @UnitsBottom int i = 20;
+
+        @Dimensionless int j = 30;
+
         // :: error: (assignment.type.incompatible)
-        @s int y = 20;
+        @m int k = 10;
+        // :: error: (assignment.type.incompatible)
+        @s int l = 20;
     }
 }

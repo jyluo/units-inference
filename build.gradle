@@ -100,7 +100,9 @@ sourceSets {
     test {
         java {
             srcDirs = ["tests/units"]
-            include "*.java"
+            include "*.java"   // for all tests
+            // include "UnitsTypecheckTest.java"   // typecheck test only
+            // include "UnitsInferenceTest.java"   // inference test only
             compileClasspath += toPackageClasspath
             runtimeClasspath += compileClasspath
         }
@@ -111,7 +113,7 @@ task copyZ3 (type: Copy) {
     from cfInferenceDir + "/lib/com.microsoft.z3.jar" into file('lib/')
 }
 
-//Switch the Javac used to the JSR308
+// Switch the Javac used by JSR308
 tasks.compileJava {
   description = 'Compiles this project using the jsr308 compiler.'
   options.fork = true
@@ -124,6 +126,28 @@ tasks.compileJava {
   options.forkOptions.executable="$jsr308_langtoolsDir/dist/bin/javac"
 } dependsOn(copyZ3)
 
+// Exclude parts of the build directory that don't include classes from being packaged in
+// the jar file.  
+// IMPORTANT: If "libs" is packaged in the JAR file you end up with an infinitely 
+// recursive jar task that will fill up your hard drive (eventually)
+tasks.jar {
+    description = 'Makes a jar with ONLY the classes compiled for units inference and NONE of its dependencies'
+    archiveName = "units-inference.jar"
+    manifest.attributes("Main-Class":"units.UnitsChecker")
+    exclude("dependency-cache", "libs", "tmp")
+}
+
+project.ext {
+    unitsInferenceJar = file("bin/libs/units-inference.jar").getAbsolutePath()
+}
+
+task dist(type : Copy) {
+    description = "If the project is fully built, this task " +
+            "will build units-inference.jar, copy all the relevant runtime jars into " +
+            "the dist directory."
+    from files(unitsInferenceJar)
+    into file('dist')
+} dependsOn(jar)
 
 tasks.clean {
     delete += "bin"

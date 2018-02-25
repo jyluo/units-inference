@@ -9,9 +9,9 @@ import org.junit.runners.Parameterized.Parameters;
 import checkers.inference.test.CFInferenceTest;
 import units.solvers.backend.UnitsSolverEngine;
 
-public class UnitsTest extends CFInferenceTest {
+public class UnitsInferenceTest extends CFInferenceTest {
 
-    public UnitsTest(File testFile) {
+    public UnitsInferenceTest(File testFile) {
         super(testFile, units.UnitsChecker.class, "units", "-Anomsgtext", "-d",
                 "tests/build/outputdir");
     }
@@ -32,7 +32,7 @@ public class UnitsTest extends CFInferenceTest {
     @Parameters
     public static List<File> getTestFiles() {
         List<File> testfiles = new ArrayList<>();
-        testfiles.addAll(TestUtilities.getJavaFilesAsArgumentList(new File("testing")));
+        testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testing", "inference"));
         return testfiles;
     }
 

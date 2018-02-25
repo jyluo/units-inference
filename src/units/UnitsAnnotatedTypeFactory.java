@@ -36,11 +36,11 @@ import units.util.UnitsTypecheckUtils;
 
 public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     // static reference to the singleton instance
-    protected static UnitsRepresentationUtils unitsRepresentationUtils;
+    protected static UnitsRepresentationUtils unitsRepUtils;
 
     public UnitsAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker);
-        unitsRepresentationUtils = UnitsRepresentationUtils.getInstance(processingEnv, elements);
+        unitsRepUtils = UnitsRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
     }
 
@@ -65,7 +65,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // create internal use annotation mirrors using the base units that have been initialized.
         // must be called here as other methods called within ATF.postInit() requires the annotation
         // mirrors
-        unitsRepresentationUtils.postInit();
+        unitsRepUtils.postInit();
+        // and it should already have some base units
+        assert !unitsRepUtils.baseUnits().isEmpty();
 
         return qualSet;
     }
@@ -75,7 +77,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // check to see if it is an internal units annotation
         if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
             // fill in missing base units
-            return unitsRepresentationUtils.fillMissingBaseUnits(anno);
+            return unitsRepUtils.fillMissingBaseUnits(anno);
         }
 
         // check to see if it's a surface annotation such as @m or @UnknownUnits
@@ -89,7 +91,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
                 // System.out.println(" returning prebuilt alias for " + anno.toString());
 
-                return unitsRepresentationUtils.getInternalAliasUnit(anno);
+                return unitsRepUtils.getInternalAliasUnit(anno);
             }
         }
 
@@ -110,7 +112,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return false;
         }
         if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
-            return unitsRepresentationUtils.hasAllBaseUnits(anno);
+            return unitsRepUtils.hasAllBaseUnits(anno);
         }
         // Anno is PolyAll, PolyUnit, Top or Bottom
         return AnnotationUtils.containsSame(this.getQualifierHierarchy().getTypeQualifiers(), anno);
@@ -120,11 +122,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         // set DIMENSIONLESS as the default qualifier in hierarchy
-        defs.addCheckedCodeDefault(unitsRepresentationUtils.DIMENSIONLESS,
-                TypeUseLocation.OTHERWISE);
-        defs.addCheckedCodeDefault(unitsRepresentationUtils.TOP,
-                TypeUseLocation.IMPLICIT_UPPER_BOUND);
-        defs.addCheckedCodeDefault(unitsRepresentationUtils.BOTTOM, TypeUseLocation.LOWER_BOUND);
+        defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.OTHERWISE);
+        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.IMPLICIT_UPPER_BOUND);
+        defs.addCheckedCodeDefault(unitsRepUtils.BOTTOM, TypeUseLocation.LOWER_BOUND);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     private final class UnitsQualifierHierarchy extends GraphQualifierHierarchy {
         public UnitsQualifierHierarchy(MultiGraphFactory mgf) {
-            super(mgf, unitsRepresentationUtils.BOTTOM);
+            super(mgf, unitsRepUtils.BOTTOM);
         }
 
         // Programmatically set UnitsRepresentationUtils.BOTTOM as the bottom
@@ -143,13 +143,13 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {
             Set<AnnotationMirror> newBottoms = super.findBottoms(supertypes);
 
-            newBottoms.remove(unitsRepresentationUtils.RAWUNITSINTERNAL);
-            newBottoms.add(unitsRepresentationUtils.BOTTOM);
+            newBottoms.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            newBottoms.add(unitsRepUtils.BOTTOM);
 
             // set direct supertypes of bottom
             Set<AnnotationMirror> supertypesOfBottom = new LinkedHashSet<>();
-            supertypesOfBottom.add(unitsRepresentationUtils.TOP);
-            supertypes.put(unitsRepresentationUtils.BOTTOM, supertypesOfBottom);
+            supertypesOfBottom.add(unitsRepUtils.TOP);
+            supertypes.put(unitsRepUtils.BOTTOM, supertypesOfBottom);
 
             return newBottoms;
         }
@@ -162,15 +162,14 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 Set<AnnotationMirror> bottoms, Object... args) {
             super.finish(qualHierarchy, supertypes, polyQualifiers, tops, bottoms, args);
 
-            assert supertypes.containsKey(unitsRepresentationUtils.RAWUNITSINTERNAL);
+            assert supertypes.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
             // Set direct supertypes of TOP
-            supertypes.put(unitsRepresentationUtils.TOP,
-                    supertypes.get(unitsRepresentationUtils.RAWUNITSINTERNAL));
-            supertypes.remove(unitsRepresentationUtils.RAWUNITSINTERNAL);
+            supertypes.put(unitsRepUtils.TOP, supertypes.get(unitsRepUtils.RAWUNITSINTERNAL));
+            supertypes.remove(unitsRepUtils.RAWUNITSINTERNAL);
 
             // update tops
-            tops.remove(unitsRepresentationUtils.RAWUNITSINTERNAL);
-            tops.add(unitsRepresentationUtils.TOP);
+            tops.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            tops.add(unitsRepUtils.TOP);
 
             // System.out.println(" === supertypes: " + supertypes);
             // System.out.println(" === polyQualifiers: " + polyQualifiers);
@@ -180,38 +179,35 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
-            // System.out.println(" === checking SUBTYPE " + subAnno + " <: " + superAnno);
+            // System.out.println(" === checking SUBTYPE " + subAnno + "\n                   <: "
+            // + superAnno + "\n");
 
-            // replace raw UnitsInternal with Dimensionless
+            // replace raw @UnitsInternal with Dimensionless
             // for some reason this shows up in inference mode when building the lattice
-            if (AnnotationUtils.areSameByClass(subAnno, UnitsInternal.class)) {
-                subAnno = unitsRepresentationUtils.DIMENSIONLESS;
+            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.RAWUNITSINTERNAL)) {
+                subAnno = unitsRepUtils.DIMENSIONLESS;
             }
-            if (AnnotationUtils.areSameByClass(superAnno, UnitsInternal.class)) {
-                superAnno = unitsRepresentationUtils.DIMENSIONLESS;
+            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.RAWUNITSINTERNAL)) {
+                superAnno = unitsRepUtils.DIMENSIONLESS;
             }
 
-            // Case: @UnitsInternal <: Top
-            if (AnnotationUtils.areSame(superAnno, unitsRepresentationUtils.TOP)) {
+            // Case: All units <: Top
+            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.TOP)) {
                 return true;
             }
 
-            // Case: Bottom <: @UnitsInternal
-            if (AnnotationUtils.areSame(subAnno, unitsRepresentationUtils.BOTTOM)) {
+            // Case: Bottom <: All units
+            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.BOTTOM)) {
                 return true;
             }
 
             // Case: @PolyAll <: All units
             // Case: @PolyUnit <: PolyAll and All units
+            // Case: All units <: @PolyAll and @PolyUnit
             if (AnnotationUtils.areSameByClass(subAnno, PolyAll.class)
-                    || AnnotationUtils.areSameByClass(subAnno, PolyUnit.class)) {
-                return true;
-            }
-
-            // Case: Any unit except Top <: PolyAll or PolyUnit
-            if (!AnnotationUtils.areSame(subAnno, unitsRepresentationUtils.TOP)
-                    && (AnnotationUtils.areSameByClass(superAnno, PolyAll.class)
-                            || AnnotationUtils.areSameByClass(superAnno, PolyUnit.class))) {
+                    || AnnotationUtils.areSameByClass(subAnno, PolyUnit.class)
+                    || AnnotationUtils.areSameByClass(superAnno, PolyAll.class)
+                    || AnnotationUtils.areSameByClass(superAnno, PolyUnit.class)) {
                 return true;
             }
 
@@ -222,8 +218,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
             }
 
-            ErrorReporter.errorAbort("Uncaught subtype check case:" + "\n    subtype:   " + subAnno
-                    + "\n    supertype: " + superAnno);
+            ErrorReporter.errorAbort("Uncaught subtype check case:" + "\n    subtype:   "
+                    + getAnnotationFormatter().formatAnnotationMirror(subAnno) + "\n    supertype: "
+                    + getAnnotationFormatter().formatAnnotationMirror(superAnno));
             return false;
         }
     }
@@ -243,9 +240,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
             Kind kind = node.getKind();
             AnnotationMirror lhsAM = atypeFactory.getAnnotatedType(node.getLeftOperand())
-                    .getEffectiveAnnotationInHierarchy(unitsRepresentationUtils.RAWUNITSINTERNAL);
+                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
             AnnotationMirror rhsAM = atypeFactory.getAnnotatedType(node.getRightOperand())
-                    .getEffectiveAnnotationInHierarchy(unitsRepresentationUtils.RAWUNITSINTERNAL);
+                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
 
             switch (kind) {
                 case PLUS:

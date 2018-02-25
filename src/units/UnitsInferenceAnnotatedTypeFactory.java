@@ -70,11 +70,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // // copy all loaded external Units to qual set
         // qualSet.addAll(externalQualsMap.values());
 
-        // create internal use annotation mirrors using the base units that have been initialized.
-        // must be called here as other methods called within ATF.postInit() requires the annotation
-        // mirrors
-        unitsRepUtils.postInit();
-
         return qualSet;
     }
 

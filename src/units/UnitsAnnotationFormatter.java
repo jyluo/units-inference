@@ -14,17 +14,16 @@ public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
     public UnitsAnnotationFormatter(BaseTypeChecker checker) {}
 
     @Override
-    public String formatAnnotationMirror(AnnotationMirror anno) {
-        // Substitutes known annotations with their surface annotations so that we print them with
-        // their more understandable surface annotation names
+    protected void formatAnnotationMirror(AnnotationMirror anno, StringBuilder sb) {
         Map<AnnotationMirror, AnnotationMirror> map =
                 UnitsRepresentationUtils.getInstance().getUnitsAliasMapSwapped();
-
+        // Substitutes known annotations with their surface annotations so that we print them with
+        // their more understandable surface annotation names
         if (map.containsKey(anno)) {
-            return super.formatAnnotationMirror(map.get(anno));
+            super.formatAnnotationMirror(map.get(anno), sb);
+        } else {
+            super.formatAnnotationMirror(anno, sb);
         }
-
-        return super.formatAnnotationMirror(anno);
     }
 
     // Same as superclass implementation except that we recursively format nested annotations

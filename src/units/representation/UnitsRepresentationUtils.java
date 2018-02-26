@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
+import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
@@ -37,6 +38,9 @@ public class UnitsRepresentationUtils {
     private static UnitsRepresentationUtils singletonInstance;
     private static ProcessingEnvironment processingEnv;
     private static Elements elements;
+
+    /** An instance of {@link PolyAll} as an {@link AnnotationMirror} */
+    public AnnotationMirror POLYALL;
 
     /** An instance of {@link PolyUnit} as an {@link AnnotationMirror} */
     public AnnotationMirror POLYUNIT;
@@ -141,6 +145,7 @@ public class UnitsRepresentationUtils {
     // postInit() is called after performing annotation loading to obtain the full list of base
     // units
     public void postInit() {
+        POLYALL = AnnotationBuilder.fromClass(elements, PolyAll.class);
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
 
         RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsInternal.class);

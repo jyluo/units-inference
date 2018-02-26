@@ -1,4 +1,5 @@
 import units.qual.*;
+import org.checkerframework.framework.qual.PolyAll;
 
 class Subtyping {
 
@@ -36,5 +37,26 @@ class Subtyping {
         m = dim;
         // :: error: (assignment.type.incompatible)
         m = s;
+
+        m = m;
+        s = s;
+    }
+
+    @PolyAll Integer polyall;
+    @PolyUnit Integer polyunit;
+    @UnitsInternal Integer raw;
+
+    public void OddCases(){
+        // For directly testing the subtyping relations defined between poly and unit types
+        // these are not expected to be in source code
+        polyall = raw;
+        raw = polyall;
+        polyunit = raw;
+        raw = polyunit;
+
+        polyall = polyunit;
+        polyunit = polyall;
+        polyall = m;
+        m = polyall;
     }
 }

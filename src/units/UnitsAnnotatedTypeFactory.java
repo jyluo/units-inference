@@ -1,6 +1,7 @@
 package units;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -8,7 +9,6 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
-import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -28,7 +28,6 @@ import org.checkerframework.javacutil.ErrorReporter;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import units.qual.IsBaseUnit;
-import units.qual.PolyUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsInternal;
 import units.representation.UnitsRepresentationUtils;
@@ -162,12 +161,40 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 Set<AnnotationMirror> bottoms, Object... args) {
             super.finish(qualHierarchy, supertypes, polyQualifiers, tops, bottoms, args);
 
+            // swap every instance of RAWUNITSINTERNAL with TOP
             assert supertypes.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
             // Set direct supertypes of TOP
             supertypes.put(unitsRepUtils.TOP, supertypes.get(unitsRepUtils.RAWUNITSINTERNAL));
             supertypes.remove(unitsRepUtils.RAWUNITSINTERNAL);
 
-            // update tops
+            // Set direct supertypes of PolyAll
+            Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
+            polyAllSupers.addAll(supertypes.get(unitsRepUtils.POLYALL));
+            polyAllSupers.add(unitsRepUtils.TOP);
+            polyAllSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            supertypes.put(unitsRepUtils.POLYALL, Collections.unmodifiableSet(polyAllSupers));
+
+            // Set direct supertypes of PolyUnit
+            Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
+            polyUnitSupers.addAll(supertypes.get(unitsRepUtils.POLYUNIT));
+            polyUnitSupers.add(unitsRepUtils.TOP);
+            polyUnitSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            supertypes.put(unitsRepUtils.POLYUNIT, Collections.unmodifiableSet(polyUnitSupers));
+
+            // Set direct supertypes of BOTTOM
+            Set<AnnotationMirror> bottomSupers = AnnotationUtils.createAnnotationSet();
+            bottomSupers.addAll(supertypes.get(unitsRepUtils.BOTTOM));
+            // bottom already has top in its super set
+            bottomSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            supertypes.put(unitsRepUtils.BOTTOM, Collections.unmodifiableSet(bottomSupers));
+
+            // Update polyQualifiers
+            assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
+            polyQualifiers.put(unitsRepUtils.TOP,
+                    polyQualifiers.get(unitsRepUtils.RAWUNITSINTERNAL));
+            polyQualifiers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+
+            // Update tops
             tops.remove(unitsRepUtils.RAWUNITSINTERNAL);
             tops.add(unitsRepUtils.TOP);
 
@@ -205,10 +232,10 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // Case: @PolyAll <: All units
             // Case: @PolyUnit <: PolyAll and All units
             // Case: All units <: @PolyAll and @PolyUnit
-            if (AnnotationUtils.areSameByClass(subAnno, PolyAll.class)
-                    || AnnotationUtils.areSameByClass(subAnno, PolyUnit.class)
-                    || AnnotationUtils.areSameByClass(superAnno, PolyAll.class)
-                    || AnnotationUtils.areSameByClass(superAnno, PolyUnit.class)) {
+            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYALL)
+                    || AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYUNIT)
+                    || AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYALL)
+                    || AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYUNIT)) {
                 return true;
             }
 

@@ -14,6 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@UnitsAlias({@BaseUnit(prefix = -3, unit = "s", exponent = 0)})
+@UnitsAlias({@BaseUnit(prefix = -3, unit = "s", exponent = 1)})
 public @interface ms {
 }

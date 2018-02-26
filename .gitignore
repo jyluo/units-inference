@@ -12,6 +12,7 @@ lib/
 # gradle output
 dist/
 build/
+testdata/tmp
 
 # corpus
 corpus/

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -78,15 +79,37 @@ public class UnitsRepresentationUtils {
     private final Set<Class<? extends Annotation>> aliasUnits = new TreeSet<>(annoClassComparator);
 
     /**
-     * A map from supported units annotation mirrors (including aliases) to their internal units
-     * representation, keyed on the string name of the (alias) annotation mirror
+     * A map from surface units annotation mirrors to their internal units representation.
      */
     private final Map<AnnotationMirror, AnnotationMirror> unitsAnnotationMirrorMap =
             AnnotationUtils.createAnnotationMap();
 
+    /**
+     * An immutable view of {@link #unitsAnnotationMirrorMap}.
+     */
+    private final Map<AnnotationMirror, AnnotationMirror> immutableUnitsAnnotationMirrorMap;
+
+    /**
+     * A set of the surface units annotation classes added to the {@link #unitsAnnotationMirrorMap}.
+     */
+    private final Set<Class<? extends Annotation>> surfaceUnitsSet = new HashSet<>();
+
+    /**
+     * The unitsAnnotationMirrorMap with its keys and values swapped.
+     */
+    private final Map<AnnotationMirror, AnnotationMirror> swappedMap =
+            AnnotationUtils.createAnnotationMap();
+    /**
+     * An immutable view of {@link #swappedMap}.
+     */
+    private Map<AnnotationMirror, AnnotationMirror> immutableSwappedMap;
+
     private UnitsRepresentationUtils(ProcessingEnvironment processingEnv, Elements elements) {
         UnitsRepresentationUtils.processingEnv = processingEnv;
         UnitsRepresentationUtils.elements = elements;
+
+        immutableUnitsAnnotationMirrorMap = Collections.unmodifiableMap(unitsAnnotationMirrorMap);
+        immutableSwappedMap = Collections.unmodifiableMap(swappedMap);
     }
 
     public static UnitsRepresentationUtils getInstance(ProcessingEnvironment processingEnv,
@@ -123,6 +146,10 @@ public class UnitsRepresentationUtils {
         return baseUnitNames;
     }
 
+    public Set<Class<? extends Annotation>> surfaceUnitsSet() {
+        return surfaceUnitsSet;
+    }
+
     public void addAliasUnit(Class<? extends Annotation> aliasUnit) {
         aliasUnits.add(aliasUnit);
     }
@@ -156,9 +183,9 @@ public class UnitsRepresentationUtils {
         BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
         DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, zeroBaseDimensions);
 
-//        Map<String, Integer> meterDimensions = createZeroFilledBaseUnitsMap();
-//        meterDimensions.put("m", 1);
-//        METER = createInternalUnit("Meter", false, false, 0, meterDimensions);
+        // Map<String, Integer> meterDimensions = createZeroFilledBaseUnitsMap();
+        // meterDimensions.put("m", 1);
+        // METER = createInternalUnit("Meter", false, false, 0, meterDimensions);
 
         unitsAnnotationMirrorMap.put(AnnotationBuilder.fromClass(elements, UnknownUnits.class),
                 TOP);
@@ -167,13 +194,19 @@ public class UnitsRepresentationUtils {
         unitsAnnotationMirrorMap.put(AnnotationBuilder.fromClass(elements, Dimensionless.class),
                 DIMENSIONLESS);
 
+        surfaceUnitsSet.add(UnknownUnits.class);
+        surfaceUnitsSet.add(UnitsBottom.class);
+        surfaceUnitsSet.add(Dimensionless.class);
+
         for (Class<? extends Annotation> baseUnit : baseUnits) {
             createInternalBaseUnit(baseUnit);
         }
+        surfaceUnitsSet.addAll(baseUnits);
 
         for (Class<? extends Annotation> aliasUnit : aliasUnits) {
             createInternalAliasUnit(aliasUnit);
         }
+        surfaceUnitsSet.addAll(aliasUnits);
 
         // for (Entry<AnnotationMirror, AnnotationMirror> entry : unitsAnnotationMirrorMap
         // .entrySet()) {
@@ -283,6 +316,24 @@ public class UnitsRepresentationUtils {
         return null;
     }
 
+    /**
+     * Returns the surface unit representation for the given {@link UnitsInternal} annotation if
+     * available, otherwise returns the given annotation unchanged.
+     * 
+     * @param anno an {@link AnnotationMirror} of a {@link UnitsInternal} annotation
+     * @return the surface representation unit if available, otherwise the UnitsInternal annotation
+     *         unchanged
+     */
+    public AnnotationMirror getSurfaceUnit(AnnotationMirror anno) {
+        Map<AnnotationMirror, AnnotationMirror> map = getUnitsAliasMapSwapped();
+        // Substitutes known annotations with their surface annotations
+        if (map.containsKey(anno)) {
+            return map.get(anno);
+        } else {
+            return anno;
+        }
+    }
+
     /*
      * It is a units annotation if we have built an alias for it in the past (this includes @m
      * --> @UnitsInternal(..)), or is supported by the qual hierarchy, or it is a @UnitsInternal
@@ -309,17 +360,19 @@ public class UnitsRepresentationUtils {
      * Returns an immutable map of surface units annotations mapped to their internal units
      */
     public Map<AnnotationMirror, AnnotationMirror> getUnitsAliasMap() {
-        return Collections.unmodifiableMap(unitsAnnotationMirrorMap);
+        return immutableUnitsAnnotationMirrorMap;
     }
 
     /**
      * Returns an immutable map of internal units mapped to their surface units annotations
      */
     public Map<AnnotationMirror, AnnotationMirror> getUnitsAliasMapSwapped() {
-        Map<AnnotationMirror, AnnotationMirror> swappedMap = AnnotationUtils.createAnnotationMap();
-        swappedMap.putAll(unitsAnnotationMirrorMap.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
-        return Collections.unmodifiableMap(swappedMap);
+        // update swappedMap if there's differences in value set size
+        if (unitsAnnotationMirrorMap.values().size() != swappedMap.keySet().size()) {
+            swappedMap.putAll(unitsAnnotationMirrorMap.entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
+        }
+        return immutableSwappedMap;
     }
 
     public boolean hasAllBaseUnits(AnnotationMirror anno) {

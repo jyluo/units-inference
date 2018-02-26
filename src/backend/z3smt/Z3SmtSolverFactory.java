@@ -16,7 +16,7 @@ public abstract class Z3SmtSolverFactory<SlotEncodingT, SlotSolutionT>
             Collection<Constraint> constraints, Lattice lattice) {
         Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> formatTranslator =
                 createFormatTranslator(lattice);
-        return new Z3SmtSolver<SlotEncodingT, SlotSolutionT>(
-                solverEnvironment, slots, constraints, formatTranslator, lattice);
+        return new Z3SmtSolver<SlotEncodingT, SlotSolutionT>(solverEnvironment, slots, constraints,
+                formatTranslator, lattice);
     }
 }

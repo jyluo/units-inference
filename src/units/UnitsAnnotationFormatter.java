@@ -1,7 +1,6 @@
 package units;
 
 import java.util.List;
-import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.VariableElement;
@@ -15,15 +14,8 @@ public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
 
     @Override
     protected void formatAnnotationMirror(AnnotationMirror anno, StringBuilder sb) {
-        Map<AnnotationMirror, AnnotationMirror> map =
-                UnitsRepresentationUtils.getInstance().getUnitsAliasMapSwapped();
-        // Substitutes known annotations with their surface annotations so that we print them with
-        // their more understandable surface annotation names
-        if (map.containsKey(anno)) {
-            super.formatAnnotationMirror(map.get(anno), sb);
-        } else {
-            super.formatAnnotationMirror(anno, sb);
-        }
+        super.formatAnnotationMirror(UnitsRepresentationUtils.getInstance().getSurfaceUnit(anno),
+                sb);
     }
 
     // Same as superclass implementation except that we recursively format nested annotations

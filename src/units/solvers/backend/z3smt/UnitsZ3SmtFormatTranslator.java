@@ -161,16 +161,14 @@ public class UnitsZ3SmtFormatTranslator
             ProcessingEnvironment processingEnv) {
 
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
-        // TODO: further translate some of the units to the alias symbols where possible
-        // if (solutionSlot.isUnknownUnits()) {
-        // return UnitsRepresentationUtils.TOP;
-        // } else if (solutionSlot.isUnitsBottom()) {
-        // return UnitsRepresentationUtils.BOTTOM;
-        // } else {
         // TODO: infer original name somehow
-        return UnitsRepresentationUtils.getInstance().createInternalUnit("",
-                solutionSlot.isUnknownUnits(), solutionSlot.isUnitsBottom(),
+
+        AnnotationMirror solutionUnit = UnitsRepresentationUtils.getInstance().createInternalUnit(
+                "", solutionSlot.isUnknownUnits(), solutionSlot.isUnitsBottom(),
                 solutionSlot.getPrefixExponent(), solutionSlot.getExponents());
-        // }
+
+        solutionUnit = UnitsRepresentationUtils.getInstance().getSurfaceUnit(solutionUnit);
+
+        return solutionUnit;
     }
 }

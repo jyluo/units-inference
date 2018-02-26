@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
+import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -282,17 +283,27 @@ public class UnitsRepresentationUtils {
         return null;
     }
 
-    // public boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
-    // AnnotationMirror anno) {
-    // /*
-    // * It is a units annotation if we have built an alias for it in the past (this includes @m
-    // * --> @UnitsInternal(..)), or is supported by the qual hierarchy, or it is a @UnitsInternal
-    // * annotation (with possibly not all base units).
-    // */
-    // return unitsAnnotationMirrorMap.keySet().contains(anno)
-    // || realTypeFactory.isSupportedQualifier(anno)
-    // || AnnotationUtils.areSameByClass(anno, UnitsInternal.class);
-    // }
+    /*
+     * It is a units annotation if we have built an alias for it in the past (this includes @m
+     * --> @UnitsInternal(..)), or is supported by the qual hierarchy, or it is a @UnitsInternal
+     * annotation (with possibly not all base units).
+     */
+    public boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
+            AnnotationMirror anno) {
+        return unitsAnnotationMirrorMap.keySet().contains(anno)
+                || realTypeFactory.isSupportedQualifier(anno)
+                || AnnotationUtils.areSameByClass(anno, UnitsInternal.class);
+    }
+
+    public boolean hasUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
+            Iterable<? extends AnnotationMirror> annotations) {
+        for (AnnotationMirror anno : annotations) {
+            if (isUnitsAnnotation(realTypeFactory, anno)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * Returns an immutable map of surface units annotations mapped to their internal units
@@ -309,6 +320,29 @@ public class UnitsRepresentationUtils {
         swappedMap.putAll(unitsAnnotationMirrorMap.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
         return Collections.unmodifiableMap(swappedMap);
+    }
+
+    public boolean hasAllBaseUnits(AnnotationMirror anno) {
+        if (!AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+            return false;
+        }
+
+        // add declared base units from the anno to the map, filtering out duplicate base units
+        Map<String, Integer> baseUnitsFromAnno = new HashMap<>();
+        for (AnnotationMirror buAnno : AnnotationUtils.getElementValueArray(anno, "baseUnits",
+                AnnotationMirror.class, true)) {
+            String baseUnit = AnnotationUtils.getElementValue(buAnno, "unit", String.class, false);
+            int exponent =
+                    AnnotationUtils.getElementValue(buAnno, "exponent", Integer.class, false);
+            // ensure the declared base unit is actually a supported base unit
+            if (!baseUnits().contains(baseUnit)) {
+                return false;
+            }
+            baseUnitsFromAnno.put(baseUnit, exponent);
+        }
+
+        // see if it has all of the base unit annotations
+        return baseUnitsFromAnno.size() == baseUnits().size();
     }
 
     private final Map<AnnotationMirror, AnnotationMirror> fillMissingBaseUnitsCache =
@@ -353,29 +387,6 @@ public class UnitsRepresentationUtils {
             // not an internal units annotation
             return null;
         }
-    }
-
-    public boolean hasAllBaseUnits(AnnotationMirror anno) {
-        if (!AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
-            return false;
-        }
-
-        // add declared base units from the anno to the map, filtering out duplicate base units
-        Map<String, Integer> baseUnitsFromAnno = new HashMap<>();
-        for (AnnotationMirror buAnno : AnnotationUtils.getElementValueArray(anno, "baseUnits",
-                AnnotationMirror.class, true)) {
-            String baseUnit = AnnotationUtils.getElementValue(buAnno, "unit", String.class, false);
-            int exponent =
-                    AnnotationUtils.getElementValue(buAnno, "exponent", Integer.class, false);
-            // ensure the declared base unit is actually a supported base unit
-            if (!baseUnits().contains(baseUnit)) {
-                return false;
-            }
-            baseUnitsFromAnno.put(baseUnit, exponent);
-        }
-
-        // see if it has all of the base unit annotations
-        return baseUnitsFromAnno.size() == baseUnits().size();
     }
 
     // A 1 to 1 mapping between an annotation mirror and its unique typecheck unit.

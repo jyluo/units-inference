@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cp testing/* manual-tests/
+cp -r testing/* manual-tests/

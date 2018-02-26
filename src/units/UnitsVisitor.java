@@ -6,6 +6,7 @@ import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.Tree;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -22,6 +23,12 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     public UnitsVisitor(UnitsChecker checker, InferenceChecker ichecker,
             BaseAnnotatedTypeFactory factory, boolean infer) {
         super(checker, ichecker, factory, infer);
+    }
+
+    @Override
+    protected void commonAssignmentCheck(AnnotatedTypeMirror varType, AnnotatedTypeMirror valueType,
+            Tree valueTree, String errorKey) {
+        super.commonAssignmentCheck(varType, valueType, valueTree, errorKey);
     }
 
     @Override

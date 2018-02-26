@@ -28,8 +28,12 @@ public class UnitsZ3SmtFormatTranslator
     public static BoolExpr Z3TRUE;
     public static BoolExpr Z3FALSE;
 
+    // static reference to the singleton instance
+    protected static UnitsRepresentationUtils unitsRepUtils;
+
     public UnitsZ3SmtFormatTranslator(Lattice lattice) {
         super(lattice);
+        unitsRepUtils = UnitsRepresentationUtils.getInstance();
     }
 
     @Override
@@ -68,7 +72,7 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         AnnotationMirror anno = slot.getValue();
-        TypecheckUnit unit = UnitsRepresentationUtils.getInstance().createTypecheckUnit(anno);
+        TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
         // Makes a constant encoded slot with default values
         InferenceUnit encodedSlot = InferenceUnit.makeConstantSlot(ctx, slotID);
@@ -163,12 +167,17 @@ public class UnitsZ3SmtFormatTranslator
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
         // TODO: infer original name somehow
 
-        AnnotationMirror solutionUnit = UnitsRepresentationUtils.getInstance().createInternalUnit(
-                "", solutionSlot.isUnknownUnits(), solutionSlot.isUnitsBottom(),
+        AnnotationMirror solutionUnit = unitsRepUtils.createInternalUnit("",
+                solutionSlot.isUnknownUnits(), solutionSlot.isUnitsBottom(),
                 solutionSlot.getPrefixExponent(), solutionSlot.getExponents());
 
-        solutionUnit = UnitsRepresentationUtils.getInstance().getSurfaceUnit(solutionUnit);
-
-        return solutionUnit;
+        // Always return top and bottom based on the booleans, since the BU values can be arbitrary
+        if (solutionSlot.isUnknownUnits()) {
+            return unitsRepUtils.SURFACE_TOP;
+        } else if (solutionSlot.isUnitsBottom()) {
+            return unitsRepUtils.SURFACE_BOTTOM;
+        } else {
+            return unitsRepUtils.getSurfaceUnit(solutionUnit);
+        }
     }
 }

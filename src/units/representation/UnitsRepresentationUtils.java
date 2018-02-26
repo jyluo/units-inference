@@ -60,6 +60,12 @@ public class UnitsRepresentationUtils {
      */
     public AnnotationMirror DIMENSIONLESS;
 
+    /**
+     * Instances of {@link UnknownUnits} and {@link UnitsBottom} for insertion to source;
+     */
+    public AnnotationMirror SURFACE_TOP;
+    public AnnotationMirror SURFACE_BOTTOM;
+
     // public AnnotationMirror METER;
 
     // Comparator used to sort annotation classes by their simple class name
@@ -207,6 +213,9 @@ public class UnitsRepresentationUtils {
             createInternalAliasUnit(aliasUnit);
         }
         surfaceUnitsSet.addAll(aliasUnits);
+
+        SURFACE_TOP = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
+        SURFACE_BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
 
         // for (Entry<AnnotationMirror, AnnotationMirror> entry : unitsAnnotationMirrorMap
         // .entrySet()) {

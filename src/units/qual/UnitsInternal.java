@@ -17,7 +17,7 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 // TODO somehow make this not usable by users?
-@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 public @interface UnitsInternal {
 
     String originalName() default "default";

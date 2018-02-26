@@ -20,7 +20,8 @@ import org.checkerframework.framework.qual.TypeKind;
  * @checker_framework.manual #units-checker Units Checker
  * @checker_framework.manual #bottom-type the bottom type
  */
-@ImplicitFor(types = {TypeKind.VOID, TypeKind.NULL}, typeNames = Void.class,
+@ImplicitFor(types = {TypeKind.VOID, TypeKind.NULL},
+        typeNames = Void.class,
         literals = LiteralKind.NULL)
 @DefaultFor({LOWER_BOUND})
 @UnitsAlias({})

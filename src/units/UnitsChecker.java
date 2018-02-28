@@ -60,7 +60,7 @@ public class UnitsChecker extends BaseInferrableChecker {
     }
 
     @Override
-    public Set<Class<? extends Annotation>> additionalAnnotationsForJaifInsertion() {
+    public Set<Class<? extends Annotation>> additionalAnnotationsForJaifHeaderInsertion() {
         return UnitsRepresentationUtils.getInstance().surfaceUnitsSet();
     }
 }

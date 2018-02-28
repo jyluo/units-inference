@@ -2,13 +2,14 @@ package units;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedPrimitiveType;
 import org.checkerframework.framework.type.AnnotationClassLoader;
 import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
@@ -20,11 +21,8 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.ExpressionTree;
-import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.TypeCastTree;
-import com.sun.source.tree.VariableTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceQualifierHierarchy;
@@ -32,7 +30,6 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
-import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
@@ -67,7 +64,11 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         // get all the loaded annotations
         Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
-        qualSet.addAll(getBundledTypeQualifiersWithPolyAll());
+        // Super grabs all supported qualifiers from the real qualifier hierarchy
+        // and also puts in VarAnnot
+        qualSet.addAll(super.createSupportedTypeQualifiers());
+
+        // System.out.println( " --- quals = " + qualSet );
 
         // // load all the external units
         // loadAllExternalUnits();
@@ -100,6 +101,58 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         public UnitsInferenceQualifierHierarchy(MultiGraphFactory multiGraphFactory) {
             super(multiGraphFactory);
         }
+
+        // Programmatically set UnitsRepresentationUtils.BOTTOM as the bottom
+        @Override
+        protected Set<AnnotationMirror> findBottoms(
+                Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {
+            Set<AnnotationMirror> newBottoms = super.findBottoms(supertypes);
+
+            newBottoms.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            newBottoms.add(unitsRepUtils.BOTTOM);
+
+            // set direct supertypes of bottom
+            Set<AnnotationMirror> supertypesOfBottom = new LinkedHashSet<>();
+            supertypesOfBottom.add(unitsRepUtils.TOP);
+            supertypes.put(unitsRepUtils.BOTTOM, supertypesOfBottom);
+
+            return newBottoms;
+        }
+
+        // Programmatically set UnitsRepresentationUtils.TOP as the top
+        @Override
+        protected void finish(QualifierHierarchy qualHierarchy,
+                Map<AnnotationMirror, Set<AnnotationMirror>> supertypes,
+                Map<AnnotationMirror, AnnotationMirror> polyQualifiers, Set<AnnotationMirror> tops,
+                Set<AnnotationMirror> bottoms, Object... args) {
+            super.finish(qualHierarchy, supertypes, polyQualifiers, tops, bottoms, args);
+
+            // System.out.println(" === Inference ATF ");
+            // System.out.println(" fullMap " + supertypes);
+            // System.out.println(" polyQualifiers " + polyQualifiers);
+            // System.out.println(" tops " + tops);
+            // System.out.println(" bottoms " + bottoms);
+
+            // TODO: see what needs to be here in Inference finish
+
+            /// in Ontology, there's varannot, ontology raw, bottom, poly ontology, poly all, ...
+
+            /*
+             * --- full map:
+             * {@checkers.inference.qual.VarAnnot=[@org.checkerframework.framework.qual.PolyAll]
+             * , @ontology.qual.Ontology=[], @ontology.qual.Ontology(values={ontology.qual.
+             * OntologyValue.BOTTOM})=[@ontology.qual.Ontology(values={ontology.qual.OntologyValue.
+             * TOP}), @ontology.qual.PolyOntology, @org.checkerframework.framework.qual.PolyAll]
+             * , @ontology.qual.PolyOntology=[@ontology.qual.Ontology, @org.checkerframework.
+             * framework.qual.PolyAll], @org.checkerframework.framework.qual.PolyAll=[@checkers.
+             * inference.qual.VarAnnot, @ontology.qual.Ontology]}
+             */
+
+            // System.out.println(" === supertypes: " + supertypes);
+            // System.out.println(" === polyQualifiers: " + polyQualifiers);
+            // System.out.println(" === tops: " + tops);
+            // System.out.println(" === bottoms: " + bottoms);
+        }
     }
 
     @Override
@@ -116,38 +169,32 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             super(typeFactory, realTypeFactory, realChecker, slotManager, constraintManager);
         }
 
-        // Necessary to support UnitsTools primitive constants
         @Override
-        public Void visitPrimitive(AnnotatedPrimitiveType primitiveType, Tree tree) {
-            System.out.println(
-                    " === VarAnnotator visitPrimitive " + tree + " type: " + primitiveType);
-            return super.visitPrimitive(primitiveType, tree);
-        }
-
-        @Override
-        public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree node) {
+        public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree binaryTree) {
             // Super creates an LUB constraint by default, we create an VariableSlot here instead
             // for the result of the binary op and create LUB constraint in units visitor.
-            if (treeToVarAnnoPair.containsKey(node)) {
-                atm.replaceAnnotations(treeToVarAnnoPair.get(node).second);
+            if (treeToVarAnnoPair.containsKey(binaryTree)) {
+                atm.replaceAnnotations(treeToVarAnnoPair.get(binaryTree).second);
             } else {
                 // grab slots for the component (only for lub slot)
                 AnnotatedTypeMirror lhsATM =
-                        inferenceTypeFactory.getAnnotatedType(node.getLeftOperand());
+                        inferenceTypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
                 AnnotatedTypeMirror rhsATM =
-                        inferenceTypeFactory.getAnnotatedType(node.getRightOperand());
+                        inferenceTypeFactory.getAnnotatedType(binaryTree.getRightOperand());
                 VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
                 VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
 
                 // create varslot for the result of the binary tree computation
                 VariableSlot result;
-                switch (node.getKind()) {
+                switch (binaryTree.getKind()) {
                     case PLUS:
                     case MINUS:
                     case MULTIPLY:
                     case DIVIDE:
                     case REMAINDER:
-                        result = slotManager.createArithmeticVariableSlot(treeToLocation(node));
+                        result = slotManager.createArithmeticVariableSlot(
+                                VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
+                        // ArithmeticOperationKind.fromTreeKind(binaryTree.getKind()), lhs, rhs);
                         break;
                     default:
                         // TODO: replace with LUBSlot pending mier's PR
@@ -164,16 +211,14 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Set<AnnotationMirror> resultSet = AnnotationUtils.createAnnotationSet();
                 resultSet.add(resultAM);
                 final Pair<VariableSlot, Set<? extends AnnotationMirror>> varATMPair =
-                        Pair.<VariableSlot, Set<? extends AnnotationMirror>>of(
-                                slotManager.getVariableSlot(atm), resultSet);
-                treeToVarAnnoPair.put(node, varATMPair);
+                        Pair.of(slotManager.getVariableSlot(atm), resultSet);
+                treeToVarAnnoPair.put(binaryTree, varATMPair);
             }
         }
     }
 
     @Override
     public TreeAnnotator createTreeAnnotator() {
-        UnitsRepresentationUtils.getInstance(processingEnv, elements);
         return new ListTreeAnnotator(new ImplicitsTreeAnnotator(this),
                 new UnitsInferenceTreeAnnotator(this, realChecker, realTypeFactory,
                         variableAnnotator, slotManager));
@@ -188,114 +233,14 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     slotManager);
         }
 
-        private AnnotationLocation treeToLocation(Tree tree) {
-            return VariableAnnotator.treeToLocation(atypeFactory, tree);
-        }
-
-        @Override
-        public Void visitVariable(VariableTree tree, AnnotatedTypeMirror atm) {
-            // Use super to create a varAnnot for the variable declaration
-            super.visitVariable(tree, atm);
-
-            applyUnitsAnnotationsFromSource(tree, atm);
-
-            return null;
-        }
-
-        @Override
-        public Void visitMemberSelect(MemberSelectTree tree, AnnotatedTypeMirror atm) {
-            // member select corresponds to a ref.member syntax form
-            // Class or reference
-            ExpressionTree ref = tree.getExpression();
-            // // field or method
-            // Name member = node.getIdentifier();
-
-            // System.out.println("\n === Member selecting " + tree + " type: " + atm.getKind() + "
-            // "
-            // + atm.getClass());
-
-            // Match full reference name to UnitsTools's simple or canonical names
-            String fullRefName = ref.toString();
-            if (fullRefName.contentEquals(UnitsTools.class.getSimpleName())
-                    || fullRefName.contentEquals(UnitsTools.class.getCanonicalName())) {
-
-                if (slotManager.getVariableSlot(atm) == null) {
-                    VariableSlot slot = slotManager.createVariableSlot(treeToLocation(tree));
-                    atm.addAnnotation(slotManager.getAnnotation(slot));
-                }
-
-                applyUnitsAnnotationsFromSourceAsConstant(tree, atm);
-                // System.out
-                // .println(" atm " + atm + " ref " + ref + " ref kind " + ref.getKind());
-
-            }
-
-            return super.visitMemberSelect(tree, atm);
-        }
-
-        // @Override
-        // public Void visitLiteral(LiteralTree literalTree, AnnotatedTypeMirror atm) {
-        // // NOTE: generally inference should not apply defaults, and instead create slots.
-        // // In units, this results in literals being casted into a unit type.
-        // // TODO: Should create a post-inference code-fix tool to replace casts with UnitsTools
-        // multiplication.
-        //
-        // // The code here applies the default type for literals, which is not what we want
-        // AnnotatedTypeMirror realATM = realTypeFactory.getAnnotatedType(literalTree);
-        // AnnotationMirror realAnno =
-        // realATM.getAnnotationInHierarchy(UnitsRepresentationUtils.TOP);
-        // ConstantSlot cs = variableAnnotator.createConstant(realAnno, literalTree);
-        // atm.replaceAnnotation(cs.getValue());
-        // variableAnnotator.visit(atm, literalTree);
-        // return null;
-        // }
-
-        // @Override
-        // public Void visitBinary(BinaryTree node, AnnotatedTypeMirror atm) {
-        // // From super:
-        // // Unary trees and compound assignments (x++ or x +=y) get desugared
-        // // by dataflow to be x = x + 1 and x = x + y.
-        // // Dataflow will then look up the types of the binary operations (x + 1) and (y + 1)
-        // //
-        // // InferenceTransfer currently sets the value of a compound assignment or unary
-        // // to be the just the type of the variable.
-        // // So, the type returned from this for desugared trees is not used.
-        // // We don't create a constraint to reduce confusion
-        // if (realTypeFactory.getPath(node) == null) {
-        // // Desugared tree's don't have paths.
-        // // There currently is some case that we are missing that requires us to annotate
-        // // these.
-        // return null;
-        // }
-        //
-        // // visit via variableAnnotator to create a ArithmeticVariableSlot or LUBSlot for the
-        // // result atm
-        // variableAnnotator.visit(atm, node);
-        //
-        // return null;
-        // }
-
         @Override
         public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror atm) {
             super.visitTypeCast(tree, atm);
 
-            applyUnitsAnnotationsFromSource(tree, atm);
+            // applyUnitsAnnotationsFromSource(tree, atm);
 
             return null;
         }
-
-        //
-        // private VariableSlot getOrCreateSlot(AnnotatedTypeMirror atm, Tree tree) {
-        // // create a var slot from scratch if the atm doesn't have one.
-        // VariableSlot slot = slotManager.getVariableSlot(atm);
-        // if (slot == null) {
-        // slot = slotManager.createVariableSlot(VariableAnnotator.treeToLocation(atypeFactory,
-        // tree));
-        // // slot = slotManager.getVariableSlot(atm);
-        // assert slot != null;
-        // }
-        // return slot;
-        // }
 
         private void applyUnitsAnnotationsFromSourceAsConstant(Tree tree, AnnotatedTypeMirror atm) {
             // If there is a units annotation present on the tree, then retrieve it, normalize it,

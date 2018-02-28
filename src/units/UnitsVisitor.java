@@ -7,11 +7,11 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.Tree.Kind;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
 import checkers.inference.SlotManager;
-import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstraintManager;
@@ -40,23 +40,38 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
             AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(node.getLeftOperand());
             AnnotatedTypeMirror rhsATM = atypeFactory.getAnnotatedType(node.getRightOperand());
+            // Note: lhs and rhs either contains constant slots or var slots, resolved
             VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
             VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
+
+            Kind kind = node.getKind();
             switch (node.getKind()) {
                 case PLUS:
                 case MINUS:
                 case MULTIPLY:
                 case DIVIDE:
                 case REMAINDER:
-                    // use "create" to grab the already created slot
-                    ArithmeticVariableSlot result = slotManager.createArithmeticVariableSlot(
-                            VariableAnnotator.treeToLocation(atypeFactory, node));
-                    constraintManager.addArithmeticConstraint(
-                            ArithmeticOperationKind.fromTreeKind(node.getKind()), lhs, rhs, result);
+                    ArithmeticOperationKind opKind = ArithmeticOperationKind.fromTreeKind(kind);
+
+                    VariableSlot res =
+                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
+                    assert res instanceof ArithmeticVariableSlot;
+
+                    ArithmeticVariableSlot avsRes = (ArithmeticVariableSlot) res;
+
+                    // System.out.println(
+                    // "\n=== units visitor " + avsRes + " = " + lhs + " " + opKind + " " + rhs);
+                    // System.out.println(" " + lhs.getClass() + " " + rhs.getClass());
+                    // System.out.println(
+                    // " slot vals: " + avsRes.leftOperand + " " + avsRes.rightOperand);
+                    // System.out.println(" " + avsRes.leftOperand.getClass() + " " +
+                    // avsRes.leftOperand.getClass());
+                    constraintManager.addArithmeticConstraint(opKind, lhs, rhs, avsRes);
                     break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
-                    VariableSlot lubSlot = slotManager.createCombVariableSlot(lhs, rhs);
+                    VariableSlot lubSlot =
+                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
                     // Create LUB constraint by default
                     constraintManager.addSubtypeConstraint(lhs, lubSlot);
                     constraintManager.addSubtypeConstraint(rhs, lubSlot);
@@ -94,24 +109,10 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         return super.visitBinary(node, p);
     }
 
-    // @Override
-    // public Void visitVariable(VariableTree node, Void p) {
-    // System.out.println(" UnitsVisitor visitVariable: " + node);
-    // return super.visitVariable(node, p);
-    // }
-    //
-    // @Override
-    // public Void visitAssignment(AssignmentTree node, Void p) {
-    // System.out.println(" UnitsVisitor visitAssignment: " + node);
-    // return super.visitAssignment(node, p);
-    // }
-
     // Slots created in ATF
 
     // Constraints created in Visitor
 
     // see
     // https://github.com/topnessman/immutability/blob/master/src/main/java/pico/inference/PICOInferenceVisitor.java
-
-
 }

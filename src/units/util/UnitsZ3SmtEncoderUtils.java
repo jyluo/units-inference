@@ -1,5 +1,7 @@
 package units.util;
 
+import java.util.Arrays;
+import java.util.List;
 import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -57,10 +59,32 @@ public class UnitsZ3SmtEncoderUtils {
         return equalityEncoding;
     }
 
+    // xor is commutative and associative
+    private static BoolExpr mkChainXor(Context ctx, BoolExpr arg0, BoolExpr arg1,
+            BoolExpr... remainingArgs) {
+        List<BoolExpr> argsList = Arrays.asList(remainingArgs);
+        BoolExpr result = ctx.mkXor(arg0, arg1);
+
+        for (BoolExpr arg : argsList) {
+            result = ctx.mkXor(result, arg);
+        }
+
+        return result;
+    }
+
     // sub <: super has 3 cases:
     // not (super = top or super = bottom) --> sub = super xor sub = bottom
     // super = top --> no constraints on sub
     // super = bottom --> sub = bottom
+
+    // sub = bottom -> no constraints on super
+    // sub != top and sub != bottom --> super = unit xor super = top
+    // sub = top --> super = top
+
+    // super = bottom -> sub = bottom
+    // super != top and super != bottom -> sub = super xor sub = bottom
+    // super = top -> no constraints on sub
+
     public static BoolExpr subtype(Context ctx, InferenceUnit subT, InferenceUnit superT) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr subtypeEncoding =

@@ -3,9 +3,9 @@ import units.UnitsTools;
 
 class UnitsToolsConstants {
 
-    public void Main() {
-        @UnknownUnits Integer top = 10;
+    @UnknownUnits Integer top;
 
+    public void Main() {
         // :: fixable-error: (assignment.type.incompatible)
         Integer uu = UnitsTools.m;
         // :: fixable-error: (assignment.type.incompatible)
@@ -17,11 +17,11 @@ class UnitsToolsConstants {
 
         // :: fixable-error: (assignment.type.incompatible)
         Integer m = UnitsTools.m;
-
         // :: fixable-error: (assignment.type.incompatible)
         Integer s = UnitsTools.s;
-
         // :: fixable-error: (assignment.type.incompatible)
         Integer ms = UnitsTools.ms;
+
+        @m Integer mBounded = UnitsTools.m;
     }
 }

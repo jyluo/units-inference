@@ -2,35 +2,30 @@ import units.qual.*;
 import units.UnitsTools;
 
 class Arithmetics {
-
-    @m int m = 5 * UnitsTools.m;
-    @s int s = 10 * UnitsTools.s;
+    @m int m = UnitsTools.m;
+    @s int s = UnitsTools.s;
 
     public void Main() {
-        int mInferred = m + m;
-        @m int mInferredUpperBound = mInferred;
+        @m int mInferred = m + m;
 
-        int sInferred = s - s;
-        @s int sInferredUpperBound = sInferred;
+        @s int sInferred = s - s;
 
-        int m2 = m * m;
-        @m2 int m2UpperBound = m2;
+        @m2 int m2 = m * m;
 
-        int mPERs = m / s;
-        @mPERs int mPERsUpperBound = mPERs;
+        @mPERs int mPERs = m / s;
+
+        @mPERs int mPERsSecond = mPERs % UnitsTools.m;
     }
 
     private void BoxedTypes() {
-        Integer mInferred = m + m;
-        @m Integer mInferredUpperBound = mInferred;
+        @m Integer mInferred = m + m;
 
-        Integer sInferred = s - s;
-        @s Integer sInferredUpperBound = sInferred;
+        @s Integer sInferred = s - s;
 
-        Integer m2 = m * m;
-        @m2 Integer m2UpperBound = m2;
+        @m2 Integer m2 = m * m;
 
-        Integer mPERs = m / s;
-        @mPERs Integer mPERsUpperBound = mPERs;
+        @mPERs Integer mPERs = m / s;
+
+        @mPERs Integer mPERsSecond = mPERs % UnitsTools.m;
     }
 }

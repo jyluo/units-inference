@@ -39,7 +39,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected static UnitsRepresentationUtils unitsRepUtils;
 
     public UnitsAnnotatedTypeFactory(BaseTypeChecker checker) {
-        super(checker);
+        super(checker, true);
         unitsRepUtils = UnitsRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
     }

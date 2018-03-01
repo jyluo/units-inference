@@ -17,5 +17,9 @@ class TypeCasts {
 
         // :: fixable-error: (assignment.type.incompatible)
         @s int m = l;
+
+        Integer x = 20;
+
+        @m Integer y = (@m Integer) x;
     }
 }

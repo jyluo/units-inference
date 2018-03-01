@@ -8,7 +8,6 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.LiteralKind;
-import org.checkerframework.framework.qual.TypeUseLocation;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
@@ -20,7 +19,6 @@ import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
-import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import com.sun.source.tree.BinaryTree;
@@ -254,48 +252,49 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             return null;
         }
 
-//        private void applyUnitsAnnotationsFromSourceAsConstant(Tree tree, AnnotatedTypeMirror atm) {
-//            // If there is a units annotation present on the tree, then retrieve it, normalize it,
-//            // create a constant slot for it replace the varAnnot in the ATM
-//            AnnotationMirror realUnitsAnno = realTypeFactory.getAnnotatedType(tree)
-//                    .getAnnotationInHierarchy(unitsRepUtils.TOP);
-//            if (realUnitsAnno != null) {
-//                // Fill in any missing base units
-//                realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
-//                // Create a ConstantSlot for the explicit annotation
-//                ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, tree);
-//                // // Replace annotation in the slot
-//                // atm.replaceAnnotation(slotManager.getAnnotation(constSlot));
-//
-//                // Get the VariableSlot generated for the variable
-//                VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
-//                // Add Equality constraint between the VariableSlot and the ConstantSlot
-//                constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
-//            }
-//        }
-//
-//        private void applyUnitsAnnotationsFromSource(Tree tree, AnnotatedTypeMirror atm) {
-//            // If there's a units annotation present on the tree, then retrieve it, normalize it,
-//            // create a constant slot for it, and an equality constraint between the constant slot
-//            // and the VarAnnot generated for the ATM
-//            if (unitsRepUtils.hasUnitsAnnotation(realTypeFactory,
-//                    atm.getUnderlyingType().getAnnotationMirrors())) {
-//                AnnotationMirror realUnitsAnno = realTypeFactory.getAnnotatedType(tree)
-//                        .getAnnotationInHierarchy(unitsRepUtils.TOP);
-//                // Fill in any missing base units
-//                realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
-//                // Create a ConstantSlot for the explicit annotation
-//                ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, tree);
-//
-//                // // Replace annotation in the slot
-//                // atm.replaceAnnotation(slotManager.getAnnotation(constSlot));
-//
-//                // Get the VariableSlot generated for the variable
-//                VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
-//                // Add Equality constraint between the VariableSlot and the ConstantSlot
-//                constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
-//            }
-//        }
+        // private void applyUnitsAnnotationsFromSourceAsConstant(Tree tree, AnnotatedTypeMirror
+        // atm) {
+        // // If there is a units annotation present on the tree, then retrieve it, normalize it,
+        // // create a constant slot for it replace the varAnnot in the ATM
+        // AnnotationMirror realUnitsAnno = realTypeFactory.getAnnotatedType(tree)
+        // .getAnnotationInHierarchy(unitsRepUtils.TOP);
+        // if (realUnitsAnno != null) {
+        // // Fill in any missing base units
+        // realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
+        // // Create a ConstantSlot for the explicit annotation
+        // ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, tree);
+        // // // Replace annotation in the slot
+        // // atm.replaceAnnotation(slotManager.getAnnotation(constSlot));
+        //
+        // // Get the VariableSlot generated for the variable
+        // VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
+        // // Add Equality constraint between the VariableSlot and the ConstantSlot
+        // constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
+        // }
+        // }
+        //
+        // private void applyUnitsAnnotationsFromSource(Tree tree, AnnotatedTypeMirror atm) {
+        // // If there's a units annotation present on the tree, then retrieve it, normalize it,
+        // // create a constant slot for it, and an equality constraint between the constant slot
+        // // and the VarAnnot generated for the ATM
+        // if (unitsRepUtils.hasUnitsAnnotation(realTypeFactory,
+        // atm.getUnderlyingType().getAnnotationMirrors())) {
+        // AnnotationMirror realUnitsAnno = realTypeFactory.getAnnotatedType(tree)
+        // .getAnnotationInHierarchy(unitsRepUtils.TOP);
+        // // Fill in any missing base units
+        // realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
+        // // Create a ConstantSlot for the explicit annotation
+        // ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, tree);
+        //
+        // // // Replace annotation in the slot
+        // // atm.replaceAnnotation(slotManager.getAnnotation(constSlot));
+        //
+        // // Get the VariableSlot generated for the variable
+        // VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
+        // // Add Equality constraint between the VariableSlot and the ConstantSlot
+        // constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
+        // }
+        // }
     }
 
     // for use in AnnotatedTypeMirror.toString()

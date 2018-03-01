@@ -14,4 +14,4 @@ export REPO_SITE=$SLUGOWNER
 
 . ./pascali-setup.sh
 
-. ./test-ontology.sh
+. ./test-units-inference.sh

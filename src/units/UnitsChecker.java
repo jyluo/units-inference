@@ -51,7 +51,7 @@ public class UnitsChecker extends BaseInferrableChecker {
     //
     @Override
     public boolean isInsertMainModOfLocalVar() {
-        return false;
+        return true;
     }
 
     @Override

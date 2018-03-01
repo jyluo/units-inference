@@ -105,7 +105,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
     // permit casts from dimensionless to a unit
     // cast to top are redundant but permitted
-    // cast to bottom are forbidden
+    // cast to bottom is usually nonsense, but can appear in inference results... so permitted
     @Override
     public Void visitTypeCast(TypeCastTree node, Void p) {
         // TODO: infer mode
@@ -118,13 +118,12 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         if (valid) {
             UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
 
-            AnnotationMirror castType =
-                    atypeFactory.getAnnotatedType(node).getAnnotationInHierarchy(unitsRepUtils.TOP);
+            // AnnotationMirror castType =
+            // atypeFactory.getAnnotatedType(node).getAnnotationInHierarchy(unitsRepUtils.TOP);
             AnnotationMirror exprType = atypeFactory.getAnnotatedType(node.getExpression())
                     .getAnnotationInHierarchy(unitsRepUtils.TOP);
 
-            if (UnitsTypecheckUtils.unitsEqual(exprType, unitsRepUtils.DIMENSIONLESS)
-                    && !UnitsTypecheckUtils.unitsEqual(castType, unitsRepUtils.BOTTOM)) {
+            if (UnitsTypecheckUtils.unitsEqual(exprType, unitsRepUtils.DIMENSIONLESS)) {
                 if (atypeFactory.getDependentTypesHelper() != null) {
                     AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
                     atypeFactory.getDependentTypesHelper().checkType(type, node.getType());

@@ -1,4 +1,8 @@
-import units.qual.*;
+import units.qual.s;
+import units.qual.m;
+import units.qual.Dimensionless;
+import units.qual.UnitsBottom;
+import units.qual.UnknownUnits;
 
 class Variables {
 

@@ -5,8 +5,8 @@ def env         = System.getenv()
 
 def javaHome    = env["JAVA_HOME"]
 
-//TODO: copy from CF Inference, need refactor later on
-//determined based on the the version of the currently running JVM
+// TODO: copy from CF Inference, need refactor later on
+// determined based on the the version of the currently running JVM
 def jreVersion  = {
     def envJreVersion = env["CFI_JRE_VERSION"];
     if(envJreVersion == null) {
@@ -40,17 +40,17 @@ def cfInferenceDir = jsr308Dir + "/checker-framework-inference"
 def unitsDir = jsr308Dir + "/units-inference"
 
 /************************ util functions ************************/
-//Closure that creates a file from a base directory and a name of the file in that directory
+// Closure that creates a file from a base directory and a name of the file in that directory
 def fromBaseDir   = { baseDir, child -> baseDir ? new File(baseDir, child) : new File(child)  }
 
-//A function that, given a file name, creates a file object of that name with 
-//checkersDir as its parent
+// A function that, given a file name, creates a file object of that name with 
+// checkersDir as its parent
 def checkerFrameworkChild = fromBaseDir.curry(checkerFrameworkDir)
 
 def cfInferenceChild = fromBaseDir.curry(cfInferenceDir)
 
 /************************ build variables ************************/
-//JarsToPackage contains both all members that should be on the classpath for this build
+// JarsToPackage contains both all members that should be on the classpath for this build
 // should use `+` operation at the end of a line which would means "append" in groovy
 // http://stackoverflow.com/questions/31044673/groovy-postgres-no-signature-of-method-java-lang-string-positive
 def jarsToPackage = [
@@ -109,6 +109,8 @@ sourceSets {
     }
 }
 
+buildDir = "bin"
+
 task copyZ3 (type: Copy) {
     from cfInferenceDir + "/lib/com.microsoft.z3.jar" into file('lib/')
 }
@@ -117,13 +119,15 @@ task copyZ3 (type: Copy) {
 tasks.compileJava {
   description = 'Compiles this project using the jsr308 compiler.'
   options.fork = true
+  options.forkOptions.executable="$jsr308_langtoolsDir/dist/bin/javac"
   options.compilerArgs = [
       '-implicit:class',
-      '-Awarns', '-Xmaxwarns', '10000']
+      '-Awarns',
+      '-Xmaxwarns', '10000'
+      ]
   if(jreVersion == 1.7) {
     options.compilerArgs += ['-source' , '7', '-target', '7']
   }
-  options.forkOptions.executable="$jsr308_langtoolsDir/dist/bin/javac"
 } dependsOn(copyZ3)
 
 // Exclude parts of the build directory that don't include classes from being packaged in
@@ -145,20 +149,21 @@ task dist(type : Copy) {
     description = "If the project is fully built, this task " +
             "will build units-inference.jar, copy all the relevant runtime jars into " +
             "the dist directory."
-    from files(unitsInferenceJar)
-    into file('dist')
+    // from files(unitsInferenceJar)
+    // into file('dist')
 } dependsOn(jar)
 
 tasks.clean {
-    delete += "bin"
+    delete += buildDir
+    // delete += "bin"
     delete += "dist"
-    delete += "testdata/tmp"
+    delete += "testdata"
 }
 
 test {
     systemProperty "path.afu.scripts", "$annotationToolsDir/annotation-file-utilities/scripts"
     systemProperty "path.inference.script", "$cfInferenceDir/scripts/inference"
-    environment "external_checker_classpath", "$unitsDir/bin"
+    environment "external_checker_classpath", "$buildDir"
     testLogging {
         events "PASSED", "FAILED", "SKIPPED"
         exceptionFormat = 'full'

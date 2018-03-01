@@ -112,7 +112,8 @@ sourceSets {
 buildDir = "bin"
 
 task copyZ3 (type: Copy) {
-    from cfInferenceDir + "/lib/com.microsoft.z3.jar" into file('lib/')
+    from cfInferenceDir + "/lib/com.microsoft.z3.jar"
+    into file('lib/')
 }
 
 // Switch the Javac used by JSR308

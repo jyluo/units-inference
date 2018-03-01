@@ -18,8 +18,8 @@ IS_HACK=true
 # SOLVER="$DEBUG_SOLVER"
 # IS_HACK=false
 
-export CLASSPATH="$ROOT"/units-inference/bin:.
-export external_checker_classpath="$ROOT"/units-inference/bin
+export CLASSPATH="$ROOT"/units-inference/src/units:"$ROOT"/units-inference/bin:.
+export external_checker_classpath="$ROOT"/units-inference/src/units:"$ROOT"/units-inference/bin
 
 # Inference
 # $CFI/scripts/inference-dev --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistic=true,solver=Z3Int" --hacks="$IS_HACK" -m ROUNDTRIP -afud ./annotated "$@"

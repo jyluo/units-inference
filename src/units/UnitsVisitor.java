@@ -6,8 +6,8 @@ import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.TypeCastTree;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -17,18 +17,13 @@ import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
 import units.representation.UnitsRepresentationUtils;
+import units.util.UnitsTypecheckUtils;
 
 public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTypeFactory> {
 
     public UnitsVisitor(UnitsChecker checker, InferenceChecker ichecker,
             BaseAnnotatedTypeFactory factory, boolean infer) {
         super(checker, ichecker, factory, infer);
-    }
-
-    @Override
-    protected void commonAssignmentCheck(AnnotatedTypeMirror varType, AnnotatedTypeMirror valueType,
-            Tree valueTree, String errorKey) {
-        super.commonAssignmentCheck(varType, valueType, valueTree, errorKey);
     }
 
     @Override
@@ -80,13 +75,12 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
         } else { // if (atypeFactory instanceof UnitsAnnotatedTypeFactory)
             UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
+            UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
 
-            AnnotationMirror lhsAM =
-                    atf.getAnnotatedType(node.getLeftOperand()).getEffectiveAnnotationInHierarchy(
-                            UnitsRepresentationUtils.getInstance().RAWUNITSINTERNAL);
-            AnnotationMirror rhsAM =
-                    atf.getAnnotatedType(node.getRightOperand()).getEffectiveAnnotationInHierarchy(
-                            UnitsRepresentationUtils.getInstance().RAWUNITSINTERNAL);
+            AnnotationMirror lhsAM = atf.getAnnotatedType(node.getLeftOperand())
+                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
+            AnnotationMirror rhsAM = atf.getAnnotatedType(node.getRightOperand())
+                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
 
             switch (node.getKind()) {
                 case PLUS:
@@ -107,6 +101,42 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         }
 
         return super.visitBinary(node, p);
+    }
+
+    // permit casts from dimensionless to a unit
+    // cast to top are redundant but permitted
+    // cast to bottom are forbidden
+    @Override
+    public Void visitTypeCast(TypeCastTree node, Void p) {
+        // TODO: infer mode
+        if (infer) {
+            return super.visitTypeCast(node, p);
+        }
+
+        // validate "node" instead of "node.getType()" to prevent duplicate errors.
+        boolean valid = validateTypeOf(node) && validateTypeOf(node.getExpression());
+        if (valid) {
+            UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+
+            AnnotationMirror castType =
+                    atypeFactory.getAnnotatedType(node).getAnnotationInHierarchy(unitsRepUtils.TOP);
+            AnnotationMirror exprType = atypeFactory.getAnnotatedType(node.getExpression())
+                    .getAnnotationInHierarchy(unitsRepUtils.TOP);
+
+            if (UnitsTypecheckUtils.unitsEqual(exprType, unitsRepUtils.DIMENSIONLESS)
+                    && !UnitsTypecheckUtils.unitsEqual(castType, unitsRepUtils.BOTTOM)) {
+                if (atypeFactory.getDependentTypesHelper() != null) {
+                    AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
+                    atypeFactory.getDependentTypesHelper().checkType(type, node.getType());
+                }
+
+                // perform scan and reduce as per super.super.visitTypeCast()
+                Void r = scan(node.getType(), p);
+                r = reduce(scan(node.getExpression(), p), r);
+                return r;
+            }
+        }
+        return super.visitTypeCast(node, p);
     }
 
     // Slots created in ATF

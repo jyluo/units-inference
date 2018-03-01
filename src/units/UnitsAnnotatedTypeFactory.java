@@ -9,7 +9,9 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
+import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.qual.TypeUseLocation;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotationClassLoader;
@@ -117,7 +119,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return AnnotationUtils.containsSame(this.getQualifierHierarchy().getTypeQualifiers(), anno);
     }
 
-    // programmatically set the defaults
+    // Programmatically set the qualifier defaults
     @Override
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         // set DIMENSIONLESS as the default qualifier in hierarchy
@@ -271,11 +273,25 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     public TreeAnnotator createTreeAnnotator() {
-        return new ListTreeAnnotator(new UnitsPropagationTreeAnnotator(),
-                new ImplicitsTreeAnnotator(this));
+        return new ListTreeAnnotator(new UnitsImplicitsTreeAnnotator(),
+                new UnitsPropagationTreeAnnotator());
     }
 
-    public class UnitsPropagationTreeAnnotator extends PropagationTreeAnnotator {
+    private final class UnitsImplicitsTreeAnnotator extends ImplicitsTreeAnnotator {
+        // Programmatically set the qualifier implicits
+        public UnitsImplicitsTreeAnnotator() {
+            super(UnitsAnnotatedTypeFactory.this);
+            // set BOTTOM as the implicit qualifier for null literals
+            addLiteralKind(LiteralKind.NULL, unitsRepUtils.BOTTOM);
+
+            addLiteralKind(LiteralKind.INT, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.LONG, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.FLOAT, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.DOUBLE, unitsRepUtils.DIMENSIONLESS);
+        }
+    }
+
+    private final class UnitsPropagationTreeAnnotator extends PropagationTreeAnnotator {
         public UnitsPropagationTreeAnnotator() {
             super(UnitsAnnotatedTypeFactory.this);
         }

@@ -13,9 +13,9 @@ class TypeCasts {
         // @m int k = (@m int) ((@m float) (10.0f));
         // it seems a cast is always injected for each number literal
 
-        // :: fixable-error: (assignment.type.incompatible)
         int l = (int) 20.0f;
 
+        // :: fixable-error: (assignment.type.incompatible)
         @s int m = l;
     }
 }

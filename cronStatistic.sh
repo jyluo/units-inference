@@ -1,13 +1,13 @@
 #!/bin/bash
-ONTOLOGY_DIR=$(cd $(dirname "$0") && pwd)
+UNITS_INFERENCE_DIR=$(cd $(dirname "$0") && pwd)
 
 #setup env variables
-. $ONTOLOGY_DIR/env-setup.sh
+. $UNITS_INFERENCE_DIR/env-setup.sh
 
 export REPO_SITE=opprop 
 
-### building checker framework stuffs and ontology
-. $ONTOLOGY_DIR/pascali-setup.sh
+### building checker framework stuffs and units-inference
+. $UNITS_INFERENCE_DIR/dependency-setup.sh
 
 ### downloading do-like-javac if needs
 if [ -d $JSR308/do-like-javac ] ; then
@@ -20,7 +20,7 @@ fi
 ### fetching annotated projects
 
 PROJECTS_DIR=$JSR308/annotatedProjects
-PROJECTS_DATA=$JSR308/ontology/projects.data
+PROJECTS_DATA=$JSR308/units-inference/projects.data
 
 ##
 #$1: project_info, format is "project_gitUrl branch" or "project_url" which the master branch will be apply
@@ -57,7 +57,7 @@ function runOntologyOnProject() {
     fi
 
     echo "$1 $build_cmd"
-    $JSR308/ontology/run-dljc.sh $build_cmd 1> ontology.log 2> ontology-error.log
+    $JSR308/units-inference/run-dljc.sh $build_cmd 1> units-inference.log 2> units-inference-error.log
 }
 
 # remove legacy projects

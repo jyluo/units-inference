@@ -12,7 +12,7 @@ IFS=$OIFS
 
 export REPO_SITE=$SLUGOWNER
 
-. ./pascali-setup.sh
+. ./dependency-setup.sh
 
 . ./test-units-inference.sh
 

@@ -1,8 +1,16 @@
 # Units Inference
-[![Build Status](https://travis-ci.org/jyluo/units-inference.svg?branch=master)](https://travis-ci.org/jyluo/units-inference)
+[![Build Status](https://travis-ci.org/opprop/units-inference.svg?branch=master)](https://travis-ci.org/opprop/units-inference)
 
 Units Inference System
 
-# Travis test command
+# Test command
 
-gradle build -x test && ./test-unit-inference.sh
+gradle test
+
+# Benchmark command
+
+./run-benchmarks.sh
+
+# Analyze benchmark outputs command
+
+./analyze-corpus.sh

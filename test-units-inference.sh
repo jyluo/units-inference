@@ -7,4 +7,5 @@ set -e
 gradle test
 
 # Running Units Inference on working benchmarks
-python run-units-on-corpus.py --corpus-file worked-benchmarks.yml
+# python run-units-on-corpus.py --corpus-file worked-benchmarks.yml
+./run-benchmarks.sh

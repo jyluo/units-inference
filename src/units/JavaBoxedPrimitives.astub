@@ -73,12 +73,12 @@ class Short { // extends Number implements Comparable<Short>
 }
 
 class Integer { // extends Number implements Comparable<Integer>
-    static @PolyUnit Integer valueOf(@PolyUnit int arg0);
+    static @PolyUnit Integer valueOf(@PolyUnit int arg0);       // auto boxing
     @PolyUnit Integer(@PolyUnit int arg0);
 
     @PolyUnit byte byteValue(@PolyUnit Integer this);
     @PolyUnit short shortValue(@PolyUnit Integer this);
-    @PolyUnit int intValue(@PolyUnit Integer this);
+    @PolyUnit int intValue(@PolyUnit Integer this);     // auto unboxing
     @PolyUnit long longValue(@PolyUnit Integer this);
     @PolyUnit float floatValue(@PolyUnit Integer this);
     @PolyUnit double doubleValue(@PolyUnit Integer this);

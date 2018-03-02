@@ -191,6 +191,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     case MULTIPLY:
                     case DIVIDE:
                     case REMAINDER:
+                        
+                        System.out.println(" == creating arith slot, lhs: " + lhs + " rhs: " + rhs);
+                        
                         result = slotManager.createArithmeticVariableSlot(
                                 VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
                         // ArithmeticOperationKind.fromTreeKind(binaryTree.getKind()), lhs, rhs);

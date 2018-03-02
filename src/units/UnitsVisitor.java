@@ -12,6 +12,7 @@ import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
 import checkers.inference.SlotManager;
+import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstraintManager;
@@ -48,11 +49,15 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 case REMAINDER:
                     ArithmeticOperationKind opKind = ArithmeticOperationKind.fromTreeKind(kind);
 
-                    VariableSlot res =
-                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
-                    assert res instanceof ArithmeticVariableSlot;
-
-                    ArithmeticVariableSlot avsRes = (ArithmeticVariableSlot) res;
+                    ArithmeticVariableSlot avsRes = slotManager.getArithmeticVariableSlot(
+                            VariableAnnotator.treeToLocation(atypeFactory, node));
+//                    
+//                    
+//                    VariableSlot res =
+//                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
+//                    assert res instanceof ArithmeticVariableSlot;
+//
+//                    ArithmeticVariableSlot avsRes = (ArithmeticVariableSlot) res;
 
                     // System.out.println(
                     // "\n=== units visitor " + avsRes + " = " + lhs + " " + opKind + " " + rhs);

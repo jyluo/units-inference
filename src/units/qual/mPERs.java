@@ -14,6 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-@UnitsAlias({@BaseUnit(unit="m", exponent=1), @BaseUnit(unit="s", exponent=-1)})
+@UnitsAlias({@BaseUnit(unit = "m", exponent = 1), @BaseUnit(unit = "s", exponent = -1)})
 public @interface mPERs {
 }

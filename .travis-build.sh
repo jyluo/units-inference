@@ -15,3 +15,5 @@ export REPO_SITE=$SLUGOWNER
 . ./pascali-setup.sh
 
 . ./test-units-inference.sh
+
+. ./analyze-corpus.sh

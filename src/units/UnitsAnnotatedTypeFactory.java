@@ -26,7 +26,7 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
-import org.checkerframework.javacutil.TypesUtils;
+import org.checkerframework.javacutil.TreeUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import units.qual.IsBaseUnit;
@@ -283,8 +283,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             super(UnitsAnnotatedTypeFactory.this);
             // set BOTTOM as the implicit qualifier for null literals
             addLiteralKind(LiteralKind.NULL, unitsRepUtils.BOTTOM);
-
             addLiteralKind(LiteralKind.STRING, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.CHAR, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.BOOLEAN, unitsRepUtils.DIMENSIONLESS);
 
             addLiteralKind(LiteralKind.INT, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.LONG, unitsRepUtils.DIMENSIONLESS);
@@ -299,19 +300,19 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
 
         @Override
-        public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
-            Kind kind = node.getKind();
-            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(node.getLeftOperand());
-            AnnotatedTypeMirror rhsATM = atypeFactory.getAnnotatedType(node.getRightOperand());
+        public Void visitBinary(BinaryTree binaryTree, AnnotatedTypeMirror type) {
+            Kind kind = binaryTree.getKind();
+            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
+            AnnotatedTypeMirror rhsATM =
+                    atypeFactory.getAnnotatedType(binaryTree.getRightOperand());
             AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
             AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
             switch (kind) {
                 case PLUS:
-                    // if either are string arguments, result is LUB
-                    if (TypesUtils.isString(lhsATM.getUnderlyingType())
-                            || TypesUtils.isString(rhsATM.getUnderlyingType())) {
-                        return super.visitBinary(node, type);
+                    // if it is a string concatenation, result is LUB
+                    if (TreeUtils.isStringConcatenation(binaryTree)) {
+                        return super.visitBinary(binaryTree, type);
                     } else if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         type.replaceAnnotation(lhsAM);
                     } else {
@@ -336,7 +337,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     break;
                 default:
                     // Check LUB by default
-                    return super.visitBinary(node, type);
+                    return super.visitBinary(binaryTree, type);
             }
 
             return null;

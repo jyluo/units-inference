@@ -21,7 +21,7 @@ import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
-import org.checkerframework.javacutil.TypesUtils;
+import org.checkerframework.javacutil.TreeUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.TypeCastTree;
 import checkers.inference.InferenceAnnotatedTypeFactory;
@@ -188,9 +188,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 VariableSlot result;
                 switch (binaryTree.getKind()) {
                     case PLUS:
-                        // if either are string arguments, result is LUB
-                        if (TypesUtils.isString(lhsATM.getUnderlyingType())
-                                || TypesUtils.isString(rhsATM.getUnderlyingType())) {
+                        // if it is a string concatenation, result is LUB
+                        if (TreeUtils.isStringConcatenation(binaryTree)) {
                             result = slotManager.createCombVariableSlot(lhs, rhs);
                             break;
                         } // else create arithmetic slot
@@ -236,8 +235,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             super(UnitsInferenceAnnotatedTypeFactory.this);
             // set BOTTOM as the implicit qualifier for null literals
             addLiteralKind(LiteralKind.NULL, unitsRepUtils.BOTTOM);
-
             addLiteralKind(LiteralKind.STRING, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.CHAR, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.BOOLEAN, unitsRepUtils.DIMENSIONLESS);
 
             // we do not implictly set dimensionless for the number literals as we want to infer
             // casts

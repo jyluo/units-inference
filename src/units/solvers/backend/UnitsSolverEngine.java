@@ -9,7 +9,7 @@ public class UnitsSolverEngine extends SolverEngine {
     protected SolverFactory createSolverFactory() {
         return new UnitsZ3SmtSolverFactory();
     }
-    
+
     // TODO: would be nice to be able to override recordSlotConstraintSize() in super
     // to track # of custom slots and constraints
 }

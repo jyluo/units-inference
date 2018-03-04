@@ -5,7 +5,7 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.TypesUtils;
+import org.checkerframework.javacutil.TreeUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
@@ -29,27 +29,27 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     }
 
     @Override
-    public Void visitBinary(BinaryTree node, Void p) {
+    public Void visitBinary(BinaryTree binaryTree, Void p) {
         if (infer) {
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
             ConstraintManager constraintManager =
                     InferenceMain.getInstance().getConstraintManager();
 
-            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(node.getLeftOperand());
-            AnnotatedTypeMirror rhsATM = atypeFactory.getAnnotatedType(node.getRightOperand());
+            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
+            AnnotatedTypeMirror rhsATM =
+                    atypeFactory.getAnnotatedType(binaryTree.getRightOperand());
             // Note: lhs and rhs either contains constant slots or var slots, resolved
             VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
             VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
 
-            Kind kind = node.getKind();
-            switch (node.getKind()) {
+            Kind kind = binaryTree.getKind();
+            switch (binaryTree.getKind()) {
                 case PLUS:
                     // if either are string arguments, result is LUB
-                    if (TypesUtils.isString(lhsATM.getUnderlyingType())
-                            || TypesUtils.isString(rhsATM.getUnderlyingType())) {
+                    if (TreeUtils.isStringConcatenation(binaryTree)) {
                         // TODO: replace with LUBSlot pending mier's PR
-                        VariableSlot lubSlot =
-                                slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
+                        VariableSlot lubSlot = slotManager
+                                .getVariableSlot(atypeFactory.getAnnotatedType(binaryTree));
                         // Create LUB constraint by default
                         constraintManager.addSubtypeConstraint(lhs, lubSlot);
                         constraintManager.addSubtypeConstraint(rhs, lubSlot);
@@ -61,13 +61,13 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 case REMAINDER:
                     ArithmeticOperationKind opKind = ArithmeticOperationKind.fromTreeKind(kind);
                     ArithmeticVariableSlot avsRes = slotManager.getArithmeticVariableSlot(
-                            VariableAnnotator.treeToLocation(atypeFactory, node));
+                            VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
                     constraintManager.addArithmeticConstraint(opKind, lhs, rhs, avsRes);
                     break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
                     VariableSlot lubSlot =
-                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
+                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(binaryTree));
                     // Create LUB constraint by default
                     constraintManager.addSubtypeConstraint(lhs, lubSlot);
                     constraintManager.addSubtypeConstraint(rhs, lubSlot);
@@ -78,25 +78,24 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
             UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
 
-            AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(node.getLeftOperand());
-            AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(node.getRightOperand());
+            AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(binaryTree.getLeftOperand());
+            AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(binaryTree.getRightOperand());
             AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
             AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
-            switch (node.getKind()) {
+            switch (binaryTree.getKind()) {
                 case PLUS:
-                    // if neither are string arguments, and the units don't match, issue warning
-                    if (!TypesUtils.isString(lhsATM.getUnderlyingType())
-                            && !TypesUtils.isString(rhsATM.getUnderlyingType())
+                    // if it is not a string concatenation and the units don't match, issue warning
+                    if (!TreeUtils.isStringConcatenation(binaryTree)
                             && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
-                                rhsAM.toString()), node);
+                                rhsAM.toString()), binaryTree);
                     }
                     break;
                 case MINUS:
                     if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         checker.report(Result.failure("subtraction.unit.mismatch", lhsAM.toString(),
-                                rhsAM.toString()), node);
+                                rhsAM.toString()), binaryTree);
                     }
                     break;
                 default:
@@ -104,7 +103,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             }
         }
 
-        return super.visitBinary(node, p);
+        return super.visitBinary(binaryTree, p);
     }
 
     // permit casts from dimensionless to a unit

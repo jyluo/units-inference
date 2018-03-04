@@ -33,27 +33,24 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     // Main entry point
     @Override
     public Map<Integer, AnnotationMirror> solve() {
-        Map<Integer, AnnotationMirror> result = new HashMap<>();
+        Map<Integer, AnnotationMirror> result;
 
         encodeAllConstraints();
 
         switch (solver.check()) {
-            case SATISFIABLE: {
+            case SATISFIABLE:
                 result = formatTranslator.decodeSolution(solver.getModel(),
                         solverEnvironment.processingEnvironment);
                 break;
-            }
-
-            case UNSATISFIABLE: {
+            case UNSATISFIABLE:
                 System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
+                result = new HashMap<>();
                 break;
-            }
-
             case UNKNOWN:
-            default: {
+            default:
                 System.out.println("\n\n!!! Solver failed to solve due to Unknown reason! !!!");
+                result = new HashMap<>();
                 break;
-            }
         }
         return result;
     }

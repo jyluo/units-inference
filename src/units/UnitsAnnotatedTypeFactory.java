@@ -26,6 +26,7 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
+import org.checkerframework.javacutil.TypesUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import units.qual.IsBaseUnit;
@@ -283,6 +284,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // set BOTTOM as the implicit qualifier for null literals
             addLiteralKind(LiteralKind.NULL, unitsRepUtils.BOTTOM);
 
+            addLiteralKind(LiteralKind.STRING, unitsRepUtils.DIMENSIONLESS);
+
             addLiteralKind(LiteralKind.INT, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.LONG, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.FLOAT, unitsRepUtils.DIMENSIONLESS);
@@ -298,20 +301,28 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         @Override
         public Void visitBinary(BinaryTree node, AnnotatedTypeMirror type) {
             Kind kind = node.getKind();
-            AnnotationMirror lhsAM = atypeFactory.getAnnotatedType(node.getLeftOperand())
-                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
-            AnnotationMirror rhsAM = atypeFactory.getAnnotatedType(node.getRightOperand())
-                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
+            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(node.getLeftOperand());
+            AnnotatedTypeMirror rhsATM = atypeFactory.getAnnotatedType(node.getRightOperand());
+            AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+            AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
             switch (kind) {
                 case PLUS:
-                    if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    // if either are string arguments, result is LUB
+                    if (TypesUtils.isString(lhsATM.getUnderlyingType())
+                            || TypesUtils.isString(rhsATM.getUnderlyingType())) {
+                        return super.visitBinary(node, type);
+                    } else if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         type.replaceAnnotation(lhsAM);
+                    } else {
+                        type.replaceAnnotation(unitsRepUtils.TOP);
                     }
                     break;
                 case MINUS:
                     if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         type.replaceAnnotation(lhsAM);
+                    } else {
+                        type.replaceAnnotation(unitsRepUtils.TOP);
                     }
                     break;
                 case MULTIPLY:

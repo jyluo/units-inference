@@ -12,11 +12,10 @@ DLJC="$JSR308"/do-like-javac
 export AFU="$JSR308"/annotation-tools/annotation-file-utilities
 export PATH="$PATH":"$AFU"/scripts
 
-export CLASSPATH="$JSR308"/units-inference/bin
+export CLASSPATH="$JSR308"/units-inference/dist/units-inference.jar:"$JSR308"/units-inference/bin
 
 export DYLD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
 export LD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
-
 
 CHECKER=units.UnitsChecker
 SOLVER=units.solvers.backend.UnitsSolverEngine
@@ -33,11 +32,11 @@ done
 
 cd "$WORKING_DIR"
 
-infer_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs --mode=\"INFER\" -afud $WORKING_DIR/annotated -- $build_cmd "
+infer_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true\" -o logs --mode=\"INFER\" -afud $WORKING_DIR/annotated -- $build_cmd "
 
 # debug_onlyCompile="--onlyCompileBytecodeBase true"
 # debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $JSR308/units-inference/bin $debug_onlyCompile --expectOutputRegex 'Unsatisfiable' --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
-debug_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $DEBUG_SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs --mode=\"ROUNDTRIP\" -afud $WORKING_DIR/annotated -- $build_cmd "
+debug_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $DEBUG_SOLVER --solverArgs=\"collectStatistic=true\" -o logs --mode=\"ROUNDTRIP\" -afud $WORKING_DIR/annotated -- $build_cmd "
 
 #running_cmd=$infer_cmd
 running_cmd=$infer_cmd

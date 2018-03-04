@@ -5,6 +5,7 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.TypesUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
@@ -43,29 +44,24 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             Kind kind = node.getKind();
             switch (node.getKind()) {
                 case PLUS:
+                    // if either are string arguments, result is LUB
+                    if (TypesUtils.isString(lhsATM.getUnderlyingType())
+                            || TypesUtils.isString(rhsATM.getUnderlyingType())) {
+                        // TODO: replace with LUBSlot pending mier's PR
+                        VariableSlot lubSlot =
+                                slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
+                        // Create LUB constraint by default
+                        constraintManager.addSubtypeConstraint(lhs, lubSlot);
+                        constraintManager.addSubtypeConstraint(rhs, lubSlot);
+                        break;
+                    } // else create arithmetic constraint
                 case MINUS:
                 case MULTIPLY:
                 case DIVIDE:
                 case REMAINDER:
                     ArithmeticOperationKind opKind = ArithmeticOperationKind.fromTreeKind(kind);
-
                     ArithmeticVariableSlot avsRes = slotManager.getArithmeticVariableSlot(
                             VariableAnnotator.treeToLocation(atypeFactory, node));
-//                    
-//                    
-//                    VariableSlot res =
-//                            slotManager.getVariableSlot(atypeFactory.getAnnotatedType(node));
-//                    assert res instanceof ArithmeticVariableSlot;
-//
-//                    ArithmeticVariableSlot avsRes = (ArithmeticVariableSlot) res;
-
-                    // System.out.println(
-                    // "\n=== units visitor " + avsRes + " = " + lhs + " " + opKind + " " + rhs);
-                    // System.out.println(" " + lhs.getClass() + " " + rhs.getClass());
-                    // System.out.println(
-                    // " slot vals: " + avsRes.leftOperand + " " + avsRes.rightOperand);
-                    // System.out.println(" " + avsRes.leftOperand.getClass() + " " +
-                    // avsRes.leftOperand.getClass());
                     constraintManager.addArithmeticConstraint(opKind, lhs, rhs, avsRes);
                     break;
                 default:
@@ -82,14 +78,17 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
             UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
 
-            AnnotationMirror lhsAM = atf.getAnnotatedType(node.getLeftOperand())
-                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
-            AnnotationMirror rhsAM = atf.getAnnotatedType(node.getRightOperand())
-                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.RAWUNITSINTERNAL);
+            AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(node.getLeftOperand());
+            AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(node.getRightOperand());
+            AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+            AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
             switch (node.getKind()) {
                 case PLUS:
-                    if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    // if neither are string arguments, and the units don't match, issue warning
+                    if (!TypesUtils.isString(lhsATM.getUnderlyingType())
+                            && !TypesUtils.isString(rhsATM.getUnderlyingType())
+                            && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
                                 rhsAM.toString()), node);
                     }

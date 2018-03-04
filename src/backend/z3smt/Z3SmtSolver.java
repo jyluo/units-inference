@@ -72,15 +72,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 continue;
             }
 
-            // System.out.println(" === serialized constraint " + constraint.toString() + " : "
-            // + System.lineSeparator() + serializedConstraint.toString()
-            // + System.lineSeparator() + " = skipped: " + serializedConstraint.isTrue());
-
             if (serializedConstraint.simplify().isTrue()) {
                 // This only works if the BoolExpr is directly the value Z3True. Still a good
                 // filter, but doesn't filter enough.
                 // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0 0))
-
                 // Skip tautology.
                 continue;
             }

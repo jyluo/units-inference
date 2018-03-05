@@ -3,3 +3,8 @@ projects:
   giturl: https://github.com/opprop-benchmarks/exp4j.git
   build: mvn install
   clean: mvn clean
+
+- name: jblas
+  giturl: https://github.com/opprop-benchmarks/jblas.git
+  build: mvn install
+  clean: mvn clean

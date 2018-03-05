@@ -1,5 +1,5 @@
 projects:
-- name: jblas
-  giturl: https://github.com/opprop-benchmarks/jblas.git
+- name: JLargeArrays
+  giturl: https://github.com/opprop-benchmarks/JLargeArrays.git
   build: mvn install
   clean: mvn clean

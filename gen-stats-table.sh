@@ -11,25 +11,29 @@ declare -a projects=($(ls -d */))
 pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
+# Print header row
+printf 'Project\tbuild-subtargets\t'
+for key in "${statsKeys[@]}"; do
+    printf '%s\t' "$key"
+done
+printf '\n'
+
+# Print each project
 for project in "${projects[@]}"; do
     # print project name without trailing slash
-    printf '\n%*.*s\n' 0 $((${#project} - 1)) "$project"
+    printf '%*.*s\t' 0 $((${#project} - 1)) "$project"
 
     # number of sub-projects
-    countKey="  build-subtargets"
-    padding=$(printf '%*.*s' 0 $((padlength - ${#countKey})) "$pad")
     count=$(grep "Statistic start" "$project/logs/infer.log" | wc -l)
-    echo -e "$countKey$padding\t$count"
+    printf '%s\t' "$count"
 
     for key in "${statsKeys[@]}"; do
-        # string consisting of the stats key and the count
-        keyArg="  ${key}"
-        # string consisting of the stats key, count, and space padding to 30 total characters
-        padding=$(printf '%*.*s' 0 $((padlength - ${#keyArg})) "$pad")
         # sift through the log files to find all the statistics values, sum them up and print it
         grep "$key" "$project/logs/infer.log" | cut -d ',' -f 2 | \
-            awk -v p="${keyArg}${padding}\t" '{sum += $1} END {print p sum}'
+            awk -v tab="\t" '{sum += $1} END {printf sum tab}'
     done
+
+    printf '\n'
 done
 
 printf '\n'

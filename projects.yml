@@ -1,4 +1,29 @@
 projects:
+
+# Confirmed to work:
+
+- name: exp4j
+  giturl: https://github.com/opprop-benchmarks/exp4j.git
+  build: mvn install
+  clean: mvn clean
+
+- name: jblas
+  giturl: https://github.com/opprop-benchmarks/jblas.git
+  build: mvn install
+  clean: mvn clean
+
+- name: JLargeArrays
+  giturl: https://github.com/opprop-benchmarks/JLargeArrays.git
+  build: mvn install
+  clean: mvn clean
+
+- name: jReactPhysics3D
+  giturl: https://github.com/opprop-benchmarks/jReactPhysics3D.git
+  build: mvn install
+  clean: mvn clean
+
+# Remains to be tested:
+
 - name: nd4j
   giturl: https://github.com/opprop-benchmarks/nd4j.git
   build: mvn install
@@ -15,11 +40,6 @@ projects:
 #   build: mvn install
 #   clean: mvn clean
 
-- name: jblas
-  giturl: https://github.com/opprop-benchmarks/jblas.git
-  build: mvn install
-  clean: mvn clean
-
 # - name: matrix-toolkits-java
 #   giturl: https://github.com/opprop-benchmarks/matrix-toolkits-java.git
 #   build: mvn install
@@ -27,16 +47,6 @@ projects:
 
 - name: ojAlgo
   giturl: https://github.com/opprop-benchmarks/ojAlgo.git
-  build: mvn install
-  clean: mvn clean
-
-- name: exp4j
-  giturl: https://github.com/opprop-benchmarks/exp4j.git
-  build: mvn install
-  clean: mvn clean
-
-- name: JLargeArrays
-  giturl: https://github.com/opprop-benchmarks/JLargeArrays.git
   build: mvn install
   clean: mvn clean
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# currently only test ontology on integration setups for pascali
+# builds & test units-inference, runs it on the corpus, and grabs the results
 
 # Split $TRAVIS_REPO_SLUG into the owner and repository parts
 OIFS=$IFS
@@ -17,3 +17,7 @@ export REPO_SITE=$SLUGOWNER
 . ./test-units-inference.sh
 
 . ./analyze-corpus.sh
+
+echo -e "\nStatistics:"
+
+. ./gen-stats-table.sh

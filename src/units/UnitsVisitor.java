@@ -45,14 +45,9 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             Kind kind = binaryTree.getKind();
             switch (binaryTree.getKind()) {
                 case PLUS:
-                    // if either are string arguments, result is LUB
+                    // if either are string arguments, result is already a constant slot of
+                    // dimensionless
                     if (TreeUtils.isStringConcatenation(binaryTree)) {
-                        // TODO: replace with LUBSlot pending mier's PR
-                        VariableSlot lubSlot = slotManager
-                                .getVariableSlot(atypeFactory.getAnnotatedType(binaryTree));
-                        // Create LUB constraint by default
-                        constraintManager.addSubtypeConstraint(lhs, lubSlot);
-                        constraintManager.addSubtypeConstraint(rhs, lubSlot);
                         break;
                     } // else create arithmetic constraint
                 case MINUS:

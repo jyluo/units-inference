@@ -310,9 +310,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
             switch (kind) {
                 case PLUS:
-                    // if it is a string concatenation, result is LUB
+                    // if it is a string concatenation, result is dimensionless
                     if (TreeUtils.isStringConcatenation(binaryTree)) {
-                        return super.visitBinary(binaryTree, type);
+                        type.replaceAnnotation(unitsRepUtils.DIMENSIONLESS);
                     } else if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         type.replaceAnnotation(lhsAM);
                     } else {

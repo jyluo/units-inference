@@ -5,7 +5,7 @@ import units.qual.*;
 *
 * @param <T>
 */
-public static class QRDecomposition<T> {
+class QRDecomposition<T> {
     public T q;
     public T r;
 

@@ -188,9 +188,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 VariableSlot result;
                 switch (binaryTree.getKind()) {
                     case PLUS:
-                        // if it is a string concatenation, result is LUB
+                        // if it is a string concatenation, result is dimensionless
                         if (TreeUtils.isStringConcatenation(binaryTree)) {
-                            result = slotManager.createCombVariableSlot(lhs, rhs);
+                            result = slotManager.createConstantSlot(unitsRepUtils.DIMENSIONLESS);
                             break;
                         } // else create arithmetic slot
                     case MINUS:

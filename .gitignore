@@ -24,4 +24,9 @@ testing/default.jaif
 testing/statistic.txt
 
 # manual tests
-manual-tests/
+manual-tests/default.jaif
+manual-tests/statistic.txt
+manual-tests/annotated
+manual-tests/inference
+manual-tests/typecheck
+manual-tests/insertionTest

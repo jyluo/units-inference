@@ -2,7 +2,7 @@ import units.qual.*;
 
 class GenericMethods {
 
-    public <T> T ID(T param){
+    public <T> T IDOne(T param){
         return param;
     }
 
@@ -10,7 +10,11 @@ class GenericMethods {
         return param;
     }
 
-    public <T> String mObject(T param){
+    public <T> String mStringCatOne(T param){
+        return param.toString() + param;
+    }
+
+    public <T extends Object> String mStringCatTwo(T param){
         return param.toString() + param;
     }
 

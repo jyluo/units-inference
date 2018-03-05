@@ -1,15 +1,25 @@
 import units.qual.*;
 
-/**
-* Class to represent a QR decomposition.
-*
-* @param <T>
-*/
-class QRDecomposition<T> {
-    public T q;
-    public T r;
+class ClassTypeParam<T> {
+    T q;
+    T r;
 
-    QRDecomposition(T q, T r) {
+    ClassTypeParam(T q, T r) {
+        this.q = q;
+        this.r = r;
+    }
+
+    @Override
+    public String toString() {
+        return "<Q=" + q + " R=" + r + ">";
+    }
+}
+
+class ClassTypeParamTwo<T extends Number> {
+    T q;
+    T r;
+
+    ClassTypeParamTwo(T q, T r) {
         this.q = q;
         this.r = r;
     }

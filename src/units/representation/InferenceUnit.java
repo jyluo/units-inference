@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
+import com.microsoft.z3.IntNum;
 import units.util.UnitsZ3SmtEncoderUtils;
 
 /**
@@ -20,10 +21,14 @@ public class InferenceUnit {
     // Tree map maintaining sorted order on base unit names
     private final Map<String, IntExpr> exponents;
 
+    // helper constant
+    private final IntNum intZero;
+
     private InferenceUnit(Context ctx, int slotID) {
         this.ctx = ctx;
         this.slotID = slotID;
         exponents = new TreeMap<>();
+        intZero = ctx.mkInt(0);
     }
 
     public static InferenceUnit makeConstantSlot(Context ctx, int slotID) {
@@ -34,11 +39,11 @@ public class InferenceUnit {
         // default UU value is false
         slot.ub = ctx.mkBool(false);
         // default prefixExponent is 0
-        slot.prefixExponent = ctx.mkInt(0);
+        slot.prefixExponent = slot.intZero;
 
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             // default exponents are 0
-            slot.exponents.put(baseUnit, ctx.mkInt(0));
+            slot.exponents.put(baseUnit, slot.intZero);
         }
 
         return slot;
@@ -60,6 +65,31 @@ public class InferenceUnit {
         }
 
         return slot;
+    }
+
+    /**
+     * Well-formness constraint: that either uu = true, ub = true, or uu == ub = false
+     */
+    public BoolExpr getWellformnessConstraint() {
+        BoolExpr dimensionlessConstraint = constraintUnitToBeDimensionless();
+        /* @formatter:off // this is for eclipse formatter */
+        return UnitsZ3SmtEncoderUtils.mkChainXor(ctx,
+                ctx.mkAnd(ctx.mkNot(uu), ctx.mkNot(ub)),
+                ctx.mkAnd(uu, dimensionlessConstraint),
+                ctx.mkAnd(ub, dimensionlessConstraint));
+        /* @formatter:on // this is for eclipse formatter */
+    }
+
+    private BoolExpr constraintUnitToBeDimensionless() {
+        BoolExpr result = ctx.mkEq(prefixExponent, ctx.mkInt(0));
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            /* @formatter:off // this is for eclipse formatter */
+            result = ctx.mkAnd(result,
+                ctx.mkEq(getExponent(baseUnit), intZero)
+            );
+            /* @formatter:on // this is for eclipse formatter */
+        }
+        return result;
     }
 
     public void setUnknownUnits(boolean val) {

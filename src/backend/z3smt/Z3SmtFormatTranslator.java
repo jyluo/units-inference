@@ -24,6 +24,9 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
 
     protected Solver solver;
 
+    /**
+     * Cache of all serialized slots, keyed on slot ID.
+     */
     protected final Map<Integer, SlotEncodingT> serializedSlots;
 
     public Z3SmtFormatTranslator(Lattice lattice) {
@@ -31,24 +34,10 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
         serializedSlots = new HashMap<>();
     }
 
-    public final void initContext(Context ctx) {
+    public final void init(Context ctx, Solver solver) {
         this.ctx = ctx;
         finishInitializingEncoders();
-    }
-
-    public final void initSolver(Solver solver) {
         this.solver = solver;
-    }
-
-    /**
-     * Add a soft constraint to underlying solver.
-     * 
-     * @param constraint the soft constraint
-     * @param weight the weight of this soft constraint
-     * @param group the group of this soft constraint
-     */
-    protected final void addConstraint(BoolExpr constraint) {
-        solver.add(constraint);
     }
 
     protected abstract SlotEncodingT serializeVarSlot(VariableSlot slot);
@@ -79,6 +68,8 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
     public SlotEncodingT serialize(CombVariableSlot slot) {
         return serializeVarSlot(slot);
     }
+
+    public abstract BoolExpr encodeWellformnessConstraint(VariableSlot slot);
 
     public abstract Map<Integer, AnnotationMirror> decodeSolution(Model model,
             ProcessingEnvironment processingEnv);

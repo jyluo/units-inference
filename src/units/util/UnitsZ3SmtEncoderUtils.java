@@ -40,6 +40,19 @@ public class UnitsZ3SmtEncoderUtils {
         return Pair.of(slotID, component);
     }
 
+    // xor is commutative and associative
+    public static BoolExpr mkChainXor(Context ctx, BoolExpr arg0, BoolExpr arg1,
+            BoolExpr... remainingArgs) {
+        List<BoolExpr> argsList = Arrays.asList(remainingArgs);
+        BoolExpr result = ctx.mkXor(arg0, arg1);
+
+        for (BoolExpr arg : argsList) {
+            result = ctx.mkXor(result, arg);
+        }
+
+        return result;
+    }
+
     // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
     public static BoolExpr equality(Context ctx, InferenceUnit fst, InferenceUnit snd) {
@@ -57,19 +70,6 @@ public class UnitsZ3SmtEncoderUtils {
         }
         /* @formatter:on // this is for eclipse formatter */
         return equalityEncoding;
-    }
-
-    // xor is commutative and associative
-    private static BoolExpr mkChainXor(Context ctx, BoolExpr arg0, BoolExpr arg1,
-            BoolExpr... remainingArgs) {
-        List<BoolExpr> argsList = Arrays.asList(remainingArgs);
-        BoolExpr result = ctx.mkXor(arg0, arg1);
-
-        for (BoolExpr arg : argsList) {
-            result = ctx.mkXor(result, arg);
-        }
-
-        return result;
     }
 
     // sub <: super has 3 cases:

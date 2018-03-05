@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
@@ -72,6 +73,9 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         AnnotationMirror anno = slot.getValue();
+
+        // System.out.println(" ==== creating constant slot for " + anno);
+
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
         // Makes a constant encoded slot with default values
@@ -92,6 +96,22 @@ public class UnitsZ3SmtFormatTranslator
 
         serializedSlots.put(slotID, encodedSlot);
         return encodedSlot;
+    }
+
+    @Override
+    public BoolExpr encodeWellformnessConstraint(VariableSlot slot) {
+        if (slot instanceof ConstantSlot) {
+            ConstantSlot cs = (ConstantSlot) slot;
+            AnnotationMirror anno = cs.getValue();
+            // encode PolyAll and PolyUnit as constant trues
+            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
+                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
+                return ctx.mkTrue();
+            }
+        }
+
+        InferenceUnit serializedSlot = slot.serialize(this);
+        return serializedSlot.getWellformnessConstraint();
     }
 
     // Decode overall solutions from Z3

@@ -9,6 +9,7 @@ import com.microsoft.z3.Context;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
+import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
@@ -26,8 +27,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         super(solverEnvironment, slots, constraints, z3SmtFormatTranslator, lattice);
         ctx = new Context();
         solver = ctx.mkSolver();
-        z3SmtFormatTranslator.initContext(ctx);
-        z3SmtFormatTranslator.initSolver(solver);
+        z3SmtFormatTranslator.init(ctx, solver);
     }
 
     // Main entry point
@@ -35,6 +35,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
+        encodeAllSlots();
         encodeAllConstraints();
 
         switch (solver.check()) {
@@ -53,6 +54,15 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 break;
         }
         return result;
+    }
+
+    protected void encodeAllSlots() {
+        for (Slot slot : slots) {
+            if (slot instanceof VariableSlot) {
+                VariableSlot varSlot = (VariableSlot) slot;
+                solver.add(formatTranslator.encodeWellformnessConstraint(varSlot));
+            }
+        }
     }
 
     @Override

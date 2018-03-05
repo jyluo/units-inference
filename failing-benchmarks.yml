@@ -1,0 +1,5 @@
+projects:
+- name: nd4j
+  giturl: https://github.com/opprop-benchmarks/nd4j.git
+  build: mvn install
+  clean: mvn clean

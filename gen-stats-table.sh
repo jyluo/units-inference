@@ -6,13 +6,13 @@ declare -a statsKeys=("slots_size" "constraint_size" \
 
 cd ./corpus
 
-declare -a projects=($(ls -d */))
+declare -a projects=($(ls -d */ | sort))
 
 pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
 # Print header row
-printf 'Project\tbuild-subtargets\t'
+printf 'Project\texpected-subtargets\tsuccessful-subtargets\t'
 for key in "${statsKeys[@]}"; do
     printf '%s\t' "$key"
 done
@@ -24,6 +24,9 @@ for project in "${projects[@]}"; do
     printf '%*.*s\t' 0 $((${#project} - 1)) "$project"
 
     # number of sub-projects
+    count=$(grep "Running java" "$project/logs/infer.log" | wc -l)
+    printf '%s\t' "$count"
+    # number of successful sub-projects
     count=$(grep "Statistic start" "$project/logs/infer.log" | wc -l)
     printf '%s\t' "$count"
 
@@ -37,3 +40,5 @@ for project in "${projects[@]}"; do
 done
 
 printf '\n'
+
+# TODO: LOCs

@@ -14,6 +14,6 @@ export REPO_SITE=$SLUGOWNER
 
 . ./dependency-setup.sh
 
-. ./test-units-inference.sh
+. ./travis-CI-test.sh
 
 . ./analyze-corpus.sh

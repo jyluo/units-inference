@@ -6,10 +6,11 @@ projects:
 #   clean: mvn clean
 
 # size: ~22500 slots ~28000 constraints
-- name: jblas
-  giturl: https://github.com/opprop-benchmarks/jblas.git
-  build: mvn install
-  clean: mvn clean
+# seems to time out a lot
+# - name: jblas
+#   giturl: https://github.com/opprop-benchmarks/jblas.git
+#   build: mvn install
+#   clean: mvn clean
 
 # size: ~17500 slots ~20000 constraints
 # - name: JLargeArrays
@@ -18,7 +19,7 @@ projects:
 #   clean: mvn clean
 
 # size: ~12500 slots ~19000 constraints
-# - name: jReactPhysics3D
-#   giturl: https://github.com/opprop-benchmarks/jReactPhysics3D.git
-#   build: mvn install
-#   clean: mvn clean
+- name: jReactPhysics3D
+  giturl: https://github.com/opprop-benchmarks/jReactPhysics3D.git
+  build: mvn install
+  clean: mvn clean

@@ -17,7 +17,3 @@ export REPO_SITE=$SLUGOWNER
 . ./test-units-inference.sh
 
 . ./analyze-corpus.sh
-
-echo -e "\nStatistics:"
-
-. ./gen-stats-table.sh

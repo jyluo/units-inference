@@ -80,33 +80,38 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                     break;
             }
 
-        } else { // if (atypeFactory instanceof UnitsAnnotatedTypeFactory)
-            UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
-            UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+            return super.visitBinary(binaryTree, p);
+        }
+        // typecheck mode
 
-            AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(binaryTree.getLeftOperand());
-            AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(binaryTree.getRightOperand());
-            AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-            AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+        // Note to self: in typecheck mode, always use getEffectiveAnnotationInHierarchy
 
-            switch (binaryTree.getKind()) {
-                case PLUS:
-                    // if it is not a string concatenation and the units don't match, issue warning
-                    if (!TreeUtils.isStringConcatenation(binaryTree)
-                            && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                        checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
-                                rhsAM.toString()), binaryTree);
-                    }
-                    break;
-                case MINUS:
-                    if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                        checker.report(Result.failure("subtraction.unit.mismatch", lhsAM.toString(),
-                                rhsAM.toString()), binaryTree);
-                    }
-                    break;
-                default:
-                    break;
-            }
+        // if (atypeFactory instanceof UnitsAnnotatedTypeFactory)
+        UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
+        UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+
+        AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(binaryTree.getLeftOperand());
+        AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(binaryTree.getRightOperand());
+        AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+        AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+
+        switch (binaryTree.getKind()) {
+            case PLUS:
+                // if it is not a string concatenation and the units don't match, issue warning
+                if (!TreeUtils.isStringConcatenation(binaryTree)
+                        && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
+                            rhsAM.toString()), binaryTree);
+                }
+                break;
+            case MINUS:
+                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    checker.report(Result.failure("subtraction.unit.mismatch", lhsAM.toString(),
+                            rhsAM.toString()), binaryTree);
+                }
+                break;
+            default:
+                break;
         }
 
         return super.visitBinary(binaryTree, p);
@@ -118,9 +123,10 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     @Override
     public Void visitTypeCast(TypeCastTree node, Void p) {
         // TODO: infer mode
-        if (infer) {
+        if (!infer) {
             return super.visitTypeCast(node, p);
         }
+        // typecheck mode
 
         // validate "node" instead of "node.getType()" to prevent duplicate errors.
         boolean valid = validateTypeOf(node) && validateTypeOf(node.getExpression());
@@ -130,7 +136,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             // AnnotationMirror castType =
             // atypeFactory.getAnnotatedType(node).getAnnotationInHierarchy(unitsRepUtils.TOP);
             AnnotationMirror exprType = atypeFactory.getAnnotatedType(node.getExpression())
-                    .getAnnotationInHierarchy(unitsRepUtils.TOP);
+                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
             if (UnitsTypecheckUtils.unitsEqual(exprType, unitsRepUtils.DIMENSIONLESS)) {
                 if (atypeFactory.getDependentTypesHelper() != null) {

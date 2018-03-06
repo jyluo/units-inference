@@ -124,7 +124,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     @Override
     public Void visitTypeCast(TypeCastTree node, Void p) {
         // TODO: infer mode
-        if (!infer) {
+        if (infer) {
             return super.visitTypeCast(node, p);
         }
         // typecheck mode

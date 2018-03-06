@@ -47,6 +47,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // add implicits for exceptions
         addTypeNameImplicit(java.lang.Exception.class, unitsRepUtils.DIMENSIONLESS);
         addTypeNameImplicit(java.lang.Throwable.class, unitsRepUtils.DIMENSIONLESS);
+        addTypeNameImplicit(java.lang.Void.class, unitsRepUtils.BOTTOM);
     }
 
     @Override
@@ -128,9 +129,12 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected void addCheckedCodeDefaults(QualifierDefaults defs) {
         // set DIMENSIONLESS as the default qualifier in hierarchy
         defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.OTHERWISE);
-        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.IMPLICIT_UPPER_BOUND);
-        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.RECEIVER);
+        // defaults for upper bounds is DIMENSIONLESS, individual bounds can be manually set to
+        // UnknownUnits if they want to use units
+        defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.UPPER_BOUND);
+        // defaults for lower bounds is BOTTOM, individual bounds can be manually set
         defs.addCheckedCodeDefault(unitsRepUtils.BOTTOM, TypeUseLocation.LOWER_BOUND);
+        // exceptions are always dimensionless
         defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS,
                 TypeUseLocation.EXCEPTION_PARAMETER);
 

@@ -201,6 +201,17 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
                         // ArithmeticOperationKind.fromTreeKind(binaryTree.getKind()), lhs, rhs);
                         break;
+                    case CONDITIONAL_AND: // &&
+                    case CONDITIONAL_OR: // ||
+                    case LOGICAL_COMPLEMENT: // !
+                    case EQUAL_TO: // ==
+                    case NOT_EQUAL_TO: // !=
+                    case GREATER_THAN: // >
+                    case GREATER_THAN_EQUAL: // >=
+                    case LESS_THAN: // <
+                    case LESS_THAN_EQUAL: // <=
+                        result = slotManager.createConstantSlot(unitsRepUtils.DIMENSIONLESS);
+                        break;
                     default:
                         // TODO: replace with LUBSlot pending mier's PR
                         result = slotManager.createCombVariableSlot(lhs, rhs);

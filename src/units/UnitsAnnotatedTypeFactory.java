@@ -336,6 +336,17 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 case REMAINDER:
                     type.replaceAnnotation(lhsAM);
                     break;
+                case CONDITIONAL_AND: // &&
+                case CONDITIONAL_OR: // ||
+                case LOGICAL_COMPLEMENT: // !
+                case EQUAL_TO: // ==
+                case NOT_EQUAL_TO: // !=
+                case GREATER_THAN: // >
+                case GREATER_THAN_EQUAL: // >=
+                case LESS_THAN: // <
+                case LESS_THAN_EQUAL: // <=
+                    type.replaceAnnotation(unitsRepUtils.DIMENSIONLESS);
+                    break;
                 default:
                     // Check LUB by default
                     return super.visitBinary(binaryTree, type);

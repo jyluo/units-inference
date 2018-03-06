@@ -59,6 +59,17 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                             VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
                     constraintManager.addArithmeticConstraint(opKind, lhs, rhs, avsRes);
                     break;
+                case CONDITIONAL_AND: // &&
+                case CONDITIONAL_OR: // ||
+                case LOGICAL_COMPLEMENT: // !
+                case EQUAL_TO: // ==
+                case NOT_EQUAL_TO: // !=
+                case GREATER_THAN: // >
+                case GREATER_THAN_EQUAL: // >=
+                case LESS_THAN: // <
+                case LESS_THAN_EQUAL: // <=
+                    // result is already dimensionless for bools
+                    break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
                     VariableSlot lubSlot =

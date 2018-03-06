@@ -43,6 +43,10 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         super(checker, true);
         unitsRepUtils = UnitsRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
+
+        // add implicits for exceptions
+        addTypeNameImplicit(java.lang.Exception.class, unitsRepUtils.DIMENSIONLESS);
+        addTypeNameImplicit(java.lang.Throwable.class, unitsRepUtils.DIMENSIONLESS);
     }
 
     @Override
@@ -127,6 +131,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.IMPLICIT_UPPER_BOUND);
         defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.RECEIVER);
         defs.addCheckedCodeDefault(unitsRepUtils.BOTTOM, TypeUseLocation.LOWER_BOUND);
+        defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS,
+                TypeUseLocation.EXCEPTION_PARAMETER);
 
         // // TEST USE:
         // defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.LOCAL_VARIABLE);

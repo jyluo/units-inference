@@ -1,5 +1,6 @@
 package units;
 
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.Result;
@@ -151,6 +152,16 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             }
         }
         return super.visitTypeCast(node, p);
+    }
+
+    // We implicitly set DIMENSIONLESS as the type of all throwable and exceptions
+    // We update the lower bounds here
+    @Override
+    protected Set<? extends AnnotationMirror> getExceptionParameterLowerBoundAnnotations() {
+        // default returns the top annotations, we return @Dimensionless
+        Set<AnnotationMirror> lowerBounds = AnnotationUtils.createAnnotationSet();
+        lowerBounds.add(UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
+        return lowerBounds;
     }
 
     // Slots created in ATF

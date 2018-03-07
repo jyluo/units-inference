@@ -1,29 +1,21 @@
 package units;
 
-import units.qual.BaseUnit;
-import units.qual.Dimensionless;
-import units.qual.UnitsBottom;
-import units.qual.UnitsInternal;
-import units.qual.UnknownUnits;
+import units.qual.*;
 
 @SuppressWarnings("units")
 public class UnitsTools {
-    public static final @UnitsInternal(unknownUnits = false,
-            unitsBottom = false,
-            prefixExponent = 0,
-            baseUnits = {@BaseUnit(unit = "m", exponent = 1)}) int m = 1;
-    public static final @UnitsInternal(unknownUnits = false,
-            unitsBottom = false,
-            prefixExponent = 0,
-            baseUnits = {@BaseUnit(unit = "s", exponent = 1)}) int s = 1;
-    public static final @UnitsInternal(unknownUnits = false,
-            unitsBottom = false,
-            prefixExponent = -3,
-            baseUnits = {@BaseUnit(unit = "s", exponent = 1)}) Integer ms = 1;
+    // Static Constants
+    public static final @m int m = 1;
+    public static final @s int s = 1;
+    public static final @ms Integer ms = 1;
 
     // Testing use only
     public static final @UnknownUnits int top = 1;
     public static final @UnitsBottom int bottom = 1;
     public static final @Dimensionless int dimensionless = 1;
 
+    // Conversion Functions
+    public static final @ms int secondsToMilliSeconds(@s int seconds) {
+        return seconds * 1000;
+    }
 }

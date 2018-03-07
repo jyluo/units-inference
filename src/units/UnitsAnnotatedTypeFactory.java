@@ -137,9 +137,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // exceptions are always dimensionless
         defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS,
                 TypeUseLocation.EXCEPTION_PARAMETER);
-
-        // // TEST USE:
-        // defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.LOCAL_VARIABLE);
     }
 
     @Override

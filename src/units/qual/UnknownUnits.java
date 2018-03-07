@@ -1,12 +1,10 @@
 package units.qual;
 
-import static org.checkerframework.framework.qual.TypeUseLocation.IMPLICIT_UPPER_BOUND;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.checkerframework.framework.qual.DefaultFor;
 
 /**
  * UnknownUnits is the top type of the type hierarchy.
@@ -15,11 +13,11 @@ import org.checkerframework.framework.qual.DefaultFor;
  */
 // @DefaultQualifierInHierarchyInUncheckedCode()
 // @DefaultInUncheckedCodeFor({TypeUseLocation.PARAMETER, TypeUseLocation.UPPER_BOUND})
-@DefaultFor({
-        // LOCAL_VARIABLE, // for flow based type refinement in the body of methods
-        // EXCEPTION_PARAMETER, // exceptions are always top
-        IMPLICIT_UPPER_BOUND, // <T>, so that T can take on any type in usage
-})
+// @DefaultFor({
+// // LOCAL_VARIABLE, // for flow based type refinement in the body of methods
+// // EXCEPTION_PARAMETER, // exceptions are always top
+// IMPLICIT_UPPER_BOUND, // <T>, so that T can take on any type in usage
+// })
 @UnitsAlias({})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

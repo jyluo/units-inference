@@ -74,9 +74,10 @@ public class InferenceUnit {
         BoolExpr dimensionlessConstraint = constraintUnitToBeDimensionless();
         /* @formatter:off // this is for eclipse formatter */
         return UnitsZ3SmtEncoderUtils.mkChainXor(ctx,
-                ctx.mkAnd(ctx.mkNot(uu), ctx.mkNot(ub)),
-                ctx.mkAnd(uu, dimensionlessConstraint),
-                ctx.mkAnd(ub, dimensionlessConstraint));
+                 ctx.mkAnd(ctx.mkNot(uu), ctx.mkNot(ub)),
+                 ctx.mkAnd(uu, dimensionlessConstraint),
+                 ctx.mkAnd(ub, dimensionlessConstraint)
+               );
         /* @formatter:on // this is for eclipse formatter */
     }
 

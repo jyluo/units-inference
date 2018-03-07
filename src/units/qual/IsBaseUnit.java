@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * Meta annotation used to declare that a unit is a base unit.
  */
 @Documented
-@Target({ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.ANNOTATION_TYPE})
 public @interface IsBaseUnit {
 }

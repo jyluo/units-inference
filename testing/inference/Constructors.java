@@ -39,5 +39,7 @@ class Constructors {
         @m MeterClass mc1 = new MeterClass(5);
         // :: fixable-error: (argument.type.incompatible)
         @m MeterClass mc2 = new @m MeterClass(5);
+
+        @Dimensionless NoAnnotClass na1 = new NoAnnotClass(5);
     }
 }

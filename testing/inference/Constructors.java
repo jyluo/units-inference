@@ -2,23 +2,28 @@ import org.checkerframework.framework.qual.PolyAll;
 import units.qual.*;
 import units.UnitsTools;
 
-class Constructors {
-    class PolyAllClass {
-        @PolyAll PolyAllClass(@PolyAll int x) {}
-    }
+class PolyAllClass {
+    @PolyAll PolyAllClass(@PolyAll int x) {}
+}
 
-    class PolyUnitClass {
-        @PolyUnit PolyUnitClass(@PolyUnit int x) {}
-    }
-    
-    class MeterClass {
-        @m MeterClass(@m int x) {}
-    }
-    
-    class NoAnnotClass {
-        NoAnnotClass(int x) {}
-    }
-    
+class PolyUnitClass {
+    @PolyUnit PolyUnitClass(@PolyUnit int x) {}
+}
+
+class MeterClass {
+    @m MeterClass(@m int x) {}
+}
+
+class NoAnnotClass {
+    NoAnnotClass(int x) {}
+}
+
+class Constructors {
+    // TODO: return check isn't quite correct for inner declared classes
+    // class PolyAllClass {
+    //     @PolyAll PolyAllClass(@PolyAll int x) {}
+    // }
+
     void callTest() {
         // :: fixable-error: (assignment.type.incompatible)
         @m PolyAllClass pac1 = new PolyAllClass(5);

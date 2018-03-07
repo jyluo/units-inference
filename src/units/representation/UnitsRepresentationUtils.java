@@ -21,6 +21,7 @@ import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
+import checkers.inference.qual.VarAnnot;
 import units.qual.BaseUnit;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
@@ -65,6 +66,11 @@ public class UnitsRepresentationUtils {
      */
     public AnnotationMirror SURFACE_TOP;
     public AnnotationMirror SURFACE_BOTTOM;
+
+    /**
+     * Instance of {@link VarAnnot} for use in UnitsVisitor in infer mode.
+     */
+    public AnnotationMirror VARANNOT;
 
     // public AnnotationMirror METER;
 

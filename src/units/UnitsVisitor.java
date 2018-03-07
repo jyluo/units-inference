@@ -28,49 +28,43 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             BaseAnnotatedTypeFactory factory, boolean infer) {
         super(checker, ichecker, factory, infer);
     }
-    //
+
     // @Override
     // public Void visitVariable(VariableTree node, Void p) {
+    // super.visitVariable(node, p);
+    //
     // if (infer) {
     // // For boxed primitive classes, we stub the constructors to be PolyUnit, thus there will
     // // be a VarAnnot created for each instance of PolyUnit.
     //
     // // An additional subtype constraint is generated here to ensure the VarAnnot is a
     // // subtype of the variable's VarAnnot.
-    //
-    // AnnotationMirror varAnnot =
-    // ((InferenceAnnotatedTypeFactory) atypeFactory).getVarAnnot();
-    //
-    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node);
-    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(node.getInitializer());
-    //
-    // System.out.println(" === var: " + node);
-    // System.out.println(" == node initializer kind " + node.getInitializer().getKind());
-    //
     // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
     //
-    // AnnotationMirror varAM = varATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node);
     //
-    // AnnotationMirror expAM = expATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-    // AnnotationMirror expAnnotAM = expATM.getEffectiveAnnotationInHierarchy(varAnnot);
+    // ExpressionTree expr = node.getInitializer();
+    // if (expr != null) {
+    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(expr);
     //
-    // VariableSlot expPolyAnnotSlot = InferenceMain.getInstance().getSlotManager()
-    // .createVariableSlot(VariableAnnotator.treeToLocation(atypeFactory, node));
+    // System.out.println(" === var: " + node);
+    // System.out.println(" == node initializer kind " + expr.getKind());
     //
+    // AnnotationMirror varAM = varATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
+    // AnnotationMirror expAM = expATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
     //
     // System.out.println(" === varATM " + varATM);
     // System.out.println(" === varAM " + varAM);
     //
     // System.out.println(" === expATM " + expATM);
     // System.out.println(" === expAM " + expAM);
-    // System.out.println(" === expAnnotAM " + expAnnotAM);
-    //
-    // System.out.println(" === expPolyAnnotSlot " + expPolyAnnotSlot);
     //
     // System.out.println("");
     // }
     //
-    // return super.visitVariable(node, p);
+    // }
+    //
+    // return null;
     // }
 
     // @Override

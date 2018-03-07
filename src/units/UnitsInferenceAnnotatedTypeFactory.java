@@ -54,6 +54,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // and it should already have some base units
         assert !unitsRepUtils.baseUnits().isEmpty();
 
+        unitsRepUtils.VARANNOT = getVarAnnot();
+
         postInit();
     }
 
@@ -314,9 +316,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             // Replace the annotation in the atm (callSiteReturnType) with the declaredReturnType
             atm.replaceAnnotation(declaredReturnType.getAnnotationInHierarchy(getVarAnnot()));
-
-            // System.out.println(" === post poly atm " +
-            // atm.getAnnotationInHierarchy(getVarAnnot()));
 
             return null;
         }

@@ -28,6 +28,74 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             BaseAnnotatedTypeFactory factory, boolean infer) {
         super(checker, ichecker, factory, infer);
     }
+    //
+    // @Override
+    // public Void visitVariable(VariableTree node, Void p) {
+    // if (infer) {
+    // // For boxed primitive classes, we stub the constructors to be PolyUnit, thus there will
+    // // be a VarAnnot created for each instance of PolyUnit.
+    //
+    // // An additional subtype constraint is generated here to ensure the VarAnnot is a
+    // // subtype of the variable's VarAnnot.
+    //
+    // AnnotationMirror varAnnot =
+    // ((InferenceAnnotatedTypeFactory) atypeFactory).getVarAnnot();
+    //
+    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node);
+    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(node.getInitializer());
+    //
+    // System.out.println(" === var: " + node);
+    // System.out.println(" == node initializer kind " + node.getInitializer().getKind());
+    //
+    // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+    //
+    // AnnotationMirror varAM = varATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+    //
+    // AnnotationMirror expAM = expATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+    // AnnotationMirror expAnnotAM = expATM.getEffectiveAnnotationInHierarchy(varAnnot);
+    //
+    // VariableSlot expPolyAnnotSlot = InferenceMain.getInstance().getSlotManager()
+    // .createVariableSlot(VariableAnnotator.treeToLocation(atypeFactory, node));
+    //
+    //
+    // System.out.println(" === varATM " + varATM);
+    // System.out.println(" === varAM " + varAM);
+    //
+    // System.out.println(" === expATM " + expATM);
+    // System.out.println(" === expAM " + expAM);
+    // System.out.println(" === expAnnotAM " + expAnnotAM);
+    //
+    // System.out.println(" === expPolyAnnotSlot " + expPolyAnnotSlot);
+    //
+    // System.out.println("");
+    // }
+    //
+    // return super.visitVariable(node, p);
+    // }
+
+    // @Override
+    // public Void visitAssignment(AssignmentTree node, Void p) {
+    // if (infer) {
+    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node.getVariable());
+    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(node.getExpression());
+    // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+    //
+    // AnnotationMirror varAM = varATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+    // AnnotationMirror expAM = expATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+    //
+    // System.out.println(" === assign: " + node);
+    //
+    // System.out.println(" === varATM " + varATM);
+    // System.out.println(" === varAM " + varAM);
+    //
+    // System.out.println(" === expATM " + expATM);
+    // System.out.println(" === expAM " + expAM);
+    //
+    // System.out.println("");
+    // }
+    //
+    // return super.visitAssignment(node, p);
+    // }
 
     @Override
     public Void visitBinary(BinaryTree binaryTree, Void p) {

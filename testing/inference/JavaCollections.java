@@ -9,7 +9,7 @@ class JavaCollections {
         List<@m Integer> y = new ArrayList<>();
 
         @m Integer meterOne = new @m Integer(5 * UnitsTools.m);
-        
+
         // :: fixable-error: (constructor.invocation.invalid)
         @m Integer meterTwo = new @m Integer(5);
 

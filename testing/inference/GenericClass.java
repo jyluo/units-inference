@@ -45,12 +45,3 @@ class GenericClassTwo<T extends Number> {
         return "<Q=" + q + " R=" + r + ">";
     }
 }
-
-class GenericClassThree<T extends @UnknownUnits Number> {
-
-}
-
-class Use{
-    GenericClassTwo<Integer> two = new GenericClassTwo<>(5, 8);
-    GenericClassThree<@m Integer> three = new GenericClassThree<>();
-}

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-find . -name *.class | xargs rm
+find ../testing/ -name *.class | xargs rm

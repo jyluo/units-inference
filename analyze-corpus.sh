@@ -4,7 +4,7 @@ declare -a statsKeys=("slots_size" "constraint_size" \
     "constantslot" "variableslot" \
     "subtypeconstraint" "arithmeticconstraint" "equalityconstraint" "existentialconstraint" "preferenceconstraint")
 
-cd ./corpus
+cd ./$1
 
 declare -a projects=($(ls -d */ | sort))
 

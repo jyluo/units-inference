@@ -16,4 +16,4 @@ export REPO_SITE=$SLUGOWNER
 
 . ./travis-CI-test.sh
 
-. ./analyze-corpus.sh
+. ./analyze-corpus.sh travis-benchmarks

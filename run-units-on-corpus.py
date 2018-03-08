@@ -5,14 +5,18 @@ import shlex
 import argparse
 
 UNITS_INFERENCE_DIR = os.path.dirname(os.path.realpath(__file__))
-BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, "corpus")
 
 def main(argv):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--corpus-file', dest='corpus_file')
+    parser.add_argument('--corpus-file', dest='corpus_file', required=True)
+    parser.add_argument('--corpus', dest='corpus')
     args = parser.parse_args()
 
     tool_excutable = os.path.join(UNITS_INFERENCE_DIR, "run-dljc.sh")
+
+    corpus_name = args.corpus if not args.corpus == None else os.path.splitext(args.corpus_file)[0]
+
+    BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, corpus_name)
 
     print "----- Fetching corpus... -----"
     if not os.path.exists(BENCHMARK_DIR):
@@ -23,40 +27,47 @@ def main(argv):
     print "Enter corpus dir {}.".format(BENCHMARK_DIR)
     os.chdir(BENCHMARK_DIR)
 
-    with open (os.path.join(UNITS_INFERENCE_DIR, args.corpus_file)) as projects:
-        for project in yaml.load(projects)["projects"]:
-            project_dir = os.path.join(BENCHMARK_DIR, project["name"])
-            if not os.path.exists(project_dir):
-                git("clone", project["giturl"], "--depth", "1")
+    projects = None
+    with open (os.path.join(UNITS_INFERENCE_DIR, args.corpus_file)) as projects_file:
+        projects = yaml.load(projects_file)["projects"]
+
+    for project_name, project_attrs in projects.iteritems():
+        project_dir = os.path.join(BENCHMARK_DIR, project_name)
+        if not os.path.exists(project_dir):
+            git("clone", project_attrs["giturl"], "--depth", "1")
 
     print "----- Fetching corpus done. -----"
 
-    print "----- Runnning Units Inference on corpus... -----"
+    print "----- Running Units Inference on corpus... -----"
 
+    successful_projects = list()
     failed_projects = list()
-    with open (os.path.join(UNITS_INFERENCE_DIR, args.corpus_file)) as projects:
-        for project in yaml.load(projects)["projects"]:
-            project_dir = os.path.join(BENCHMARK_DIR, project["name"])
-            project_dir = os.path.join(BENCHMARK_DIR, project["name"])
-            os.chdir(project_dir)
-            print "Enter directory: {}".format(project_dir)
-            if project["clean"] == '' or project["build"] == '':
-                print "Skip project {}, as there were no build/clean cmd.".format(project["name"])
-            print "Cleaning project..."
-            subprocess.call(shlex.split(project["clean"]))
-            print "Cleaning done."
-            print "Running command: {}".format(tool_excutable + " " + project["build"])
-            rtn_code = subprocess.call([tool_excutable, project["build"]])
-            print "Return code is {}.".format(rtn_code)
-            if not rtn_code == 0:
-                failed_projects.append(project["name"])
+
+    for project_name, project_attrs in projects.iteritems():
+        project_dir = os.path.join(BENCHMARK_DIR, project_name)
+        os.chdir(project_dir)
+        print "Enter directory: {}".format(project_dir)
+        if project_attrs["clean"] == '' or project_attrs["build"] == '':
+            print "Skip project {}, as there were no build/clean cmd.".format(project_name)
+        print "Cleaning project..."
+        subprocess.call(shlex.split(project_attrs["clean"]))
+        print "Cleaning done."
+        print "Running command: {}".format(tool_excutable + " " + project_attrs["build"])
+        rtn_code = subprocess.call([tool_excutable, project_attrs["build"]])
+        print "Return code is {}.".format(rtn_code)
+        if not rtn_code == 0:
+            failed_projects.append(project_name)
+        else:
+            successful_projects.append(project_name)
 
     if len(failed_projects) > 0:
-        print "----- Inference failed on projects: {} -----".format(failed_projects)
+        print "----- Inference failed on {} out of {} projects. -----".format(len(failed_projects), len(projects))
+        print "  Successful projects are: {}.".format(successful_projects)
+        print "  Failed projects are: {}.".format(failed_projects)
     else:
-        print "----- Inference succeed infer all projects. -----"
+        print "----- Inference succeed infer all {} projects. -----".format(len(projects))
 
-    print "----- Runnning Units Inference on corpus done. -----"
+    print "----- Running Units Inference on corpus done. -----"
 
     rtn_code = 1 if len(failed_projects) > 0 else 0
 

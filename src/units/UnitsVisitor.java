@@ -17,6 +17,7 @@ import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
+import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
 import units.representation.UnitsRepresentationUtils;
@@ -220,12 +221,17 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     // We update the lower bounds here
     @Override
     protected Set<? extends AnnotationMirror> getExceptionParameterLowerBoundAnnotations() {
-        if (infer) {
-            return super.getExceptionParameterLowerBoundAnnotations();
-        }
-        // default returns the top annotations, we return @Dimensionless
         Set<AnnotationMirror> lowerBounds = AnnotationUtils.createAnnotationSet();
-        lowerBounds.add(UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
+        if (infer) {
+            // In inference mode, the lower bound is the constant slot for @Dimensionless
+            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+            ConstantSlot cs = slotManager
+                    .createConstantSlot(UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
+            lowerBounds.add(slotManager.getAnnotation(cs));
+        } else {
+            // In type check mode, the lower bound is @Dimensionless
+            lowerBounds.add(UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
+        }
         return lowerBounds;
     }
 

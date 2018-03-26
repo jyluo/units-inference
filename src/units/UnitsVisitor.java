@@ -220,6 +220,9 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     // We update the lower bounds here
     @Override
     protected Set<? extends AnnotationMirror> getExceptionParameterLowerBoundAnnotations() {
+        if (infer) {
+            return super.getExceptionParameterLowerBoundAnnotations();
+        }
         // default returns the top annotations, we return @Dimensionless
         Set<AnnotationMirror> lowerBounds = AnnotationUtils.createAnnotationSet();
         lowerBounds.add(UnitsRepresentationUtils.getInstance().DIMENSIONLESS);

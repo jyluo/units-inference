@@ -16,6 +16,7 @@ testdata/tmp
 
 # corpus
 corpus/
+worked-benchmarks/
 
 # example classes and annotated output
 testing/**/*.class

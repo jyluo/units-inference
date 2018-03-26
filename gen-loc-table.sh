@@ -10,11 +10,7 @@ padlength=30
 tab=$(printf '%s\t' "")
 
 # Print header row
-printf 'Project\tfiles\tlanguage\tblank\tcomment\tcode\t'
-for key in "${statsKeys[@]}"; do
-    printf '%s\t' "$key"
-done
-printf '\n'
+printf 'Project\tfiles\tlanguage\tblank\tcomment\tcode\n'
 
 # Print each project
 for project in "${projects[@]}"; do

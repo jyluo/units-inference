@@ -5,7 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 // @skip-test
 // unable to insert inferred annotations for resource variables in try blocks
-// TODO: try variable defaulting?
+// TODO: try variable defaulting? implicits?
 
 class TryWithResources {
     static String readFirstLineFromFile(String path) throws IOException {

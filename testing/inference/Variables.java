@@ -58,4 +58,9 @@ class Variables {
         // :: fixable-error: (assignment.type.incompatible)
         @m Long staticPolyUnitMethod = Integer.toUnsignedLong(10);
     }
+
+    void customUnitForInsertion() {
+        // :: fixable-error: (assignment.type.incompatible)
+        @UnitsInternal(unknownUnits=false, unitsBottom=false, prefixExponent=4, baseUnits={@BaseUnit(unit="m", exponent=12), @BaseUnit(unit="s", exponent=-34)}) Integer x = 50;
+    }
 }

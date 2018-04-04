@@ -1,0 +1,5 @@
+projects:
+  siddhi-execution-unitconversion:
+    giturl: https://github.com/jyluo-benchmarks/siddhi-execution-unitconversion.git
+    build: mvn install
+    clean: mvn clean

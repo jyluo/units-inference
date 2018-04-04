@@ -17,6 +17,8 @@ testdata/tmp
 # corpus
 corpus/
 worked-benchmarks/
+projects/
+uomo-swap-benchmarks/
 
 # example classes and annotated output
 testing/**/*.class

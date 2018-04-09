@@ -47,19 +47,6 @@ Proof.
   rewrite H in H0. apply H0.
 Qed.
 
-(*
-Theorem Map_Add_Eq :
-  forall {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) (v : V),
-  Map_Get key_eq (Map_Add key_eq m k v) k = Some v.
-Proof.
-  intros.
-  unfold Map_Get. unfold Map_Add.
-  induction m; subst.
-    destruct (key_eq_dec key_eq k k).
-      rewrite -> e. reflexivity.
-Qed.
-*)
-
 Definition Map_Contains {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) : bool :=
   match Map_Get key_eq m k with
   | None => false

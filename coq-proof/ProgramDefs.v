@@ -129,14 +129,14 @@ Definition Gamma_Extend_Prog (g : Gamma) (p : Program) : Gamma :=
   end.
 
 (* ======================================================= *)
-Theorem prog_preservation : forall (post_gamma : Gamma) (h' : Heap) (p p' : Program),
-  prog: empty_gamma |- p in post_gamma ->
-  gh: post_gamma |- empty_heap OK ->
-  (empty_heap, p) prog==> (h', p') ->
-  gh: post_gamma |- h' OK /\ prog: (Gamma_Extend_Prog empty_gamma p) |- p' in post_gamma.
+Theorem prog_preservation : forall (g post_gamma : Gamma) (h h' : Heap) (p p' : Program),
+  prog: g |- p in post_gamma ->
+  gh: post_gamma |- h OK ->
+  (h, p) prog==> (h', p') ->
+  gh: post_gamma |- h' OK /\ prog: (Gamma_Extend_Prog g p) |- p' in post_gamma.
 Proof.
   (* by induction on typing of program *)
-  intros post_gamma h' p p' HT HGH HS.
+  intros g post_gamma h h' p p' HT HGH HS.
   (* we prove for programs typed starting from empty gamma, rather than all possible gamma *)
   remember empty_gamma as Gamma.
   generalize dependent p'. generalize dependent h'.
@@ -146,14 +146,15 @@ Proof.
     prog_small_step_cases (inversion HS) SCase; subst.
     SCase "ST_PROG_FieldDefs_Step".
       inversion H2; subst.
-      unfold Gamma_Extend_Prog.
+      unfold Gamma_Extend_Prog. simpl.
       eapply fd_preservation in H.
+      destruct H.
         split.
         (* first prove that post_gamma |- h' OK *)
           apply H.
         (* then prove that prog: (Gamma_Extend_Prog empty_gamma p) |- p' in post_gamma. *)
           simpl. apply T_Program.
-            apply H.
+            apply H1.
             apply H0.
         apply HGH.
         apply H2.

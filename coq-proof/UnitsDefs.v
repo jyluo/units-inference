@@ -11,7 +11,11 @@ Require Import Lists.ListSet.
 Inductive BaseUnit : Type :=
   | meter : BaseUnit
   | second : BaseUnit
-  | gram : BaseUnit.
+  | gram : BaseUnit
+  | ampere : BaseUnit
+  | kelvin : BaseUnit
+  | candela : BaseUnit
+  | mole : BaseUnit.
 
 Inductive BaseComponent : Type :=
   | bc : BaseUnit -> nat -> BaseComponent.
@@ -53,7 +57,7 @@ Proof.
   intros.
   induction bu1, bu2; subst;
     try (left; reflexivity);
-    try (right; intros contra; inversion contra).
+    try (right; discriminate).
 Qed.
 
 Theorem baseUnit_eq_dec_true :

@@ -247,11 +247,12 @@ Proof.
   Case "T_Field_Lookup".
     inversion HS; subst.
     inversion HGH; subst.
-    destruct H1 with f Tf. destruct H3. destruct H4 as [Tv']. destruct H4 as [z'].
-      destruct H4. destruct H5.
+    destruct H1 with f. destruct H3 as [Tf']. destruct H3 as [Tv']. destruct H3 as [z']. destruct H3. destruct H4. destruct H5.
+    assert (Tf = Tf').
+      eapply Gamma_Get_Content_Eq. apply H0. apply H3. subst.
     exists Tv'. split.
-      apply H6.
-      rewrite -> H5. apply T_Value.
+      apply H5.
+      rewrite -> H6. apply T_Value.
   Case "T_Arith".
     inversion HS; subst. (* e1 op e2 ==> e' in one of 3 ways *)
     SCase "ST_Arith_Values". (* v1 op v2 ==> v *)
@@ -263,23 +264,24 @@ Proof.
         apply T_Value.
     SCase "ST_Arith_Left_Reduce". (* e1 op e2 ==> e1' op e2 *)
       apply IHHT1 with e1' in HGH.
-        destruct HGH.
+        destruct HGH as [T1'].
         destruct H.
-        exists (computeUnit op x T2).
+        exists (computeUnit op T1' T2).
         split.
-          eapply CU_Left_ST_Consistent in H. apply H.
+          apply CU_Left_ST_Consistent. apply H.
           apply T_Arith.
-            apply H0. apply HT2.
+            apply H0.
+            apply HT2.
         apply H4.
     SCase "ST_Arith_Right_Reduce". (* v1 op e2 ==> v1 op e2' *)
       apply IHHT2 with e2' in HGH.
-        destruct HGH.
+        destruct HGH as [T2'].
         destruct H.
-        exists (computeUnit op T1 x).
+        exists (computeUnit op T1 T2').
         split.
-          eapply CU_Right_ST_Consistent in H. apply H.
+          apply CU_Right_ST_Consistent. apply H.
           apply T_Arith.
-            apply HT1. apply H0.
+            apply HT1.
+            apply H0.
         apply H4.
 Qed.
-

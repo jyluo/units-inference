@@ -143,95 +143,6 @@ Proof.
 Qed.
 
 (* ======================================================= *)
-
-(* TODO: split into proper subproofs *)
-
-Theorem CU_Left_ST_Consistent:
-  forall op T1 T1' T2,
-  T1' <: T1 = true ->
-  (computeUnit op T1' T2) <: (computeUnit op T1 T2) = true.
-Proof.
-  intros. unfold computeUnit.
-  induction T1', T1; subst.
-    apply subtype_reflexive.
-    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
-    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
-    induction op; subst.
-      rewrite -> addUnit_top_T_is_top. apply top_is_always_supertype.
-      simpl. apply top_is_always_supertype.
-      simpl. reflexivity.
-    apply subtype_reflexive.
-    induction op; subst.
-      rewrite -> addUnit_bottom_T_is_T. unfold addUnit. unfold LUB. induction T2.
-          simpl. rewrite -> unit_eq_dec_true. reflexivity.
-          simpl. rewrite -> unit_eq_dec_false. reflexivity. discriminate.
-          destruct (unit_eq_dec (declaredUnit n0) (declaredUnit n)).
-            inversion e; subst. rewrite -> subtype_reflexive. rewrite -> subtype_reflexive. reflexivity.
-            simpl. rewrite -> unit_eq_dec_false. rewrite -> unit_eq_dec_false. reflexivity. apply n1. intros contra. apply n1. symmetry. apply contra.
-      simpl. induction T2.
-        apply subtype_reflexive.
-        apply subtype_reflexive.
-        apply bottom_is_always_subtype.
-      simpl. reflexivity.
-    induction op; subst.
-      rewrite -> addUnit_top_T_is_top. apply top_is_always_supertype.
-      simpl. apply top_is_always_supertype.
-      simpl. reflexivity.
-    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
-    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
-      inversion e; subst. apply subtype_reflexive.
-      inversion H1.
-Qed.
-
-(* TODO: split into proper subproofs *)
-
-Theorem CU_Right_ST_Consistent:
-  forall op T1 T2 T2',
-  T2' <: T2 = true ->
-  (computeUnit op T1 T2') <: (computeUnit op T1 T2) = true.
-Proof.
-  intros. unfold computeUnit.
-  induction T2', T2; subst.
-    apply subtype_reflexive.
-    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
-    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
-    induction op; subst.
-      rewrite -> addUnit_T_top_is_top. apply top_is_always_supertype.
-      induction T1; subst; simpl.
-        rewrite -> unit_eq_dec_true. reflexivity.
-        reflexivity.
-        reflexivity.
-      unfold modUnit. apply subtype_reflexive.
-    apply subtype_reflexive.
-    induction op; subst.
-      rewrite -> addUnit_T_bottom_is_T. induction T1; subst.
-        rewrite -> addUnit_top_T_is_top. apply subtype_reflexive.
-        apply bottom_is_always_subtype.
-        destruct (unit_eq_dec (declaredUnit n0) (declaredUnit n)).
-          destruct e; subst. rewrite -> addUnit_reflexive. apply subtype_reflexive.
-          unfold addUnit. unfold LUB. simpl. rewrite -> unit_eq_dec_false. rewrite -> unit_eq_dec_false.
-            reflexivity.
-            intros contra. apply n1. symmetry. apply contra.
-            apply n1.
-      unfold mulUnit. induction T1; subst.
-        apply subtype_reflexive.
-        apply subtype_reflexive.
-        apply bottom_is_always_subtype.
-      unfold modUnit. apply subtype_reflexive.
-    induction op; subst.
-      rewrite -> addUnit_T_top_is_top. apply top_is_always_supertype.
-      unfold mulUnit. induction T1; subst.
-        apply subtype_reflexive.
-        apply top_is_always_supertype.
-        apply top_is_always_supertype.
-      unfold modUnit. apply subtype_reflexive.
-    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
-    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
-      inversion e; subst. apply subtype_reflexive.
-      inversion H1.
-Qed.
-
-(* ======================================================= *)
 Theorem expr_preservation : forall (g : Gamma) (h : Heap) (e e' : Expression) (T : Unit),
   expr: g |- e in T ->
   gh: g |- h OK ->
@@ -268,7 +179,7 @@ Proof.
         destruct H.
         exists (computeUnit op T1' T2).
         split.
-          apply CU_Left_ST_Consistent. apply H.
+          apply computeUnit_Left_ST_Consistent. apply H.
           apply T_Arith.
             apply H0.
             apply HT2.
@@ -279,7 +190,7 @@ Proof.
         destruct H.
         exists (computeUnit op T1 T2').
         split.
-          apply CU_Right_ST_Consistent. apply H.
+          apply computeUnit_Right_ST_Consistent. apply H.
           apply T_Arith.
             apply HT1.
             apply H0.

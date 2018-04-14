@@ -68,10 +68,6 @@ Proof.
 Qed.
 
 (* ======================================================= *)
-Definition modUnit(u1 u2 : Unit) : Unit :=
-  u1.
-
-(* ======================================================= *)
 (* assuming Coq's set is unordered *)
 Fixpoint mulSetBCElem(bc1 : BaseComponent)(s : set BaseComponent) : BaseComponent :=
   match s with
@@ -189,6 +185,153 @@ Example example10: mulUnit bottom top = top.
 Proof. simpl. reflexivity. Qed.
 End MulUnit_Test.
 
+
+(* ======================================================= *)
+Definition modUnit(u1 u2 : Unit) : Unit :=
+  u1.
+
+(* ======================================================= *)
+
+Theorem addUnit_Left_ST_Consistent:
+  forall T1 T1' T2,
+  T1' <: T1 = true ->
+  (addUnit T1' T2) <: (addUnit T1 T2) = true.
+Proof.
+  intros. induction T1', T1; subst.
+    apply subtype_reflexive.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    rewrite -> addUnit_top_T_is_top. apply top_is_always_supertype.
+    apply subtype_reflexive.
+    rewrite -> addUnit_bottom_T_is_T. unfold addUnit. unfold LUB. induction T2; subst.
+      simpl. rewrite -> unit_eq_dec_true. reflexivity.
+      simpl. rewrite -> unit_eq_dec_false. reflexivity. discriminate.
+      destruct (unit_eq_dec (declaredUnit n0) (declaredUnit n)).
+        inversion e; subst. rewrite -> subtype_reflexive. apply subtype_reflexive.
+        simpl. rewrite -> unit_eq_dec_false. rewrite -> unit_eq_dec_false. reflexivity.
+          apply n1.
+          intros contra. apply n1. symmetry. apply contra.
+    rewrite -> addUnit_top_T_is_top. apply top_is_always_supertype.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
+      inversion e; subst. apply subtype_reflexive.
+      inversion H1.
+Qed.
+
+Theorem addUnit_Right_ST_Consistent:
+  forall T1 T2 T2',
+  T2' <: T2 = true ->
+  (addUnit T1 T2') <: (addUnit T1 T2) = true.
+Proof.
+  intros. induction T2', T2; subst.
+    apply subtype_reflexive.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    rewrite -> addUnit_T_top_is_top. apply top_is_always_supertype.
+    apply subtype_reflexive.
+    rewrite -> addUnit_T_bottom_is_T. induction T1; subst.
+      rewrite -> addUnit_top_T_is_top. apply subtype_reflexive.
+      rewrite -> addUnit_bottom_T_is_T. apply bottom_is_always_subtype.
+      destruct (unit_eq_dec (declaredUnit n0) (declaredUnit n)).
+        inversion e; subst. rewrite -> addUnit_reflexive. apply subtype_reflexive.
+        unfold addUnit. unfold LUB. simpl. rewrite -> unit_eq_dec_false. rewrite -> unit_eq_dec_false. reflexivity.
+          intros contra. apply n1. symmetry. apply contra.
+          apply n1.
+    rewrite -> addUnit_T_top_is_top. apply top_is_always_supertype.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
+      inversion e; subst. apply subtype_reflexive.
+      inversion H1.
+Qed.
+
+Theorem mulUnit_Left_ST_Consistent:
+  forall T1 T1' T2,
+  T1' <: T1 = true ->
+  (mulUnit T1' T2) <: (mulUnit T1 T2) = true.
+Proof.
+  intros. induction T1', T1; subst.
+    apply subtype_reflexive.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    simpl. apply top_is_always_supertype.
+    apply subtype_reflexive.
+    simpl. induction T2.
+      apply subtype_reflexive.
+      apply subtype_reflexive.
+      apply bottom_is_always_subtype.
+    simpl. apply top_is_always_supertype.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
+      inversion e; subst. apply subtype_reflexive.
+      inversion H1.
+Qed.
+
+Theorem mulUnit_Right_ST_Consistent:
+  forall T1 T2 T2',
+  T2' <: T2 = true ->
+  (mulUnit T1 T2') <: (mulUnit T1 T2) = true.
+Proof.
+  intros. induction T2', T2; subst.
+    apply subtype_reflexive.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    induction T1; subst; simpl.
+      rewrite -> unit_eq_dec_true. reflexivity.
+      reflexivity.
+      reflexivity.
+    apply subtype_reflexive.
+    unfold mulUnit. induction T1; subst.
+      apply subtype_reflexive.
+      apply subtype_reflexive.
+      apply bottom_is_always_subtype.
+    unfold mulUnit. induction T1; subst.
+      apply subtype_reflexive.
+      apply top_is_always_supertype.
+      apply top_is_always_supertype.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
+      inversion e; subst. apply subtype_reflexive.
+      inversion H1.
+Qed.
+
+Theorem modUnit_Left_ST_Consistent:
+  forall T1 T1' T2,
+  T1' <: T1 = true ->
+  (modUnit T1' T2) <: (modUnit T1 T2) = true.
+Proof.
+  intros. induction T1', T1; subst.
+    apply subtype_reflexive.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    simpl. reflexivity.
+    apply subtype_reflexive.
+    simpl. reflexivity.
+    simpl. reflexivity.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
+      inversion e; subst. apply subtype_reflexive.
+      inversion H1.
+Qed.
+
+Theorem modUnit_Right_ST_Consistent:
+  forall T1 T2 T2',
+  T2' <: T2 = true ->
+  (modUnit T1 T2') <: (modUnit T1 T2) = true.
+Proof.
+  intros. induction T2', T2; subst.
+    apply subtype_reflexive.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    unfold modUnit. apply subtype_reflexive.
+    apply subtype_reflexive.
+    unfold modUnit. apply subtype_reflexive.
+    unfold modUnit. apply subtype_reflexive.
+    inversion H. rewrite -> unit_eq_dec_false in H1. inversion H1. discriminate.
+    inversion H; subst. destruct (unit_eq_dec (declaredUnit n) (declaredUnit n0)).
+      inversion e; subst. apply subtype_reflexive.
+      inversion H1.
+Qed.
+
 (* ======================================================= *)
 
 Definition computeUnit (op : OpKind) (u1 u2 : Unit) : Unit :=
@@ -220,3 +363,30 @@ Definition computeValue (op : OpKind) (v1 v2 : Value) : Value :=
   match v1, v2 with
   | Val u1 z1, Val u2 z2 => Val (computeUnit op u1 u2) (computeNat op z1 z2)
   end.
+
+(* ======================================================= *)
+
+Theorem computeUnit_Left_ST_Consistent:
+  forall op T1 T1' T2,
+  T1' <: T1 = true ->
+  (computeUnit op T1' T2) <: (computeUnit op T1 T2) = true.
+Proof.
+  intros. unfold computeUnit.
+  induction op; subst.
+    apply addUnit_Left_ST_Consistent. apply H.
+    apply mulUnit_Left_ST_Consistent. apply H.
+    apply modUnit_Left_ST_Consistent. apply H.
+Qed.
+
+Theorem computeUnit_Right_ST_Consistent:
+  forall op T1 T2 T2',
+  T2' <: T2 = true ->
+  (computeUnit op T1 T2') <: (computeUnit op T1 T2) = true.
+Proof.
+  intros. unfold computeUnit.
+  induction op; subst.
+    apply addUnit_Right_ST_Consistent. apply H.
+    apply mulUnit_Right_ST_Consistent. apply H.
+    apply modUnit_Right_ST_Consistent. apply H.
+Qed.
+

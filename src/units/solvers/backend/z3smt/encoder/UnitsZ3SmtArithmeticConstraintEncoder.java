@@ -35,16 +35,16 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
             case MINUS:
                 // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
                 // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
-                return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
-                        leftOperand.serialize(z3SmtFormatTranslator),
-                        rightOperand.serialize(z3SmtFormatTranslator),
-                        result.serialize(z3SmtFormatTranslator));
-//                InferenceUnit resultUnit = result.serialize(z3SmtFormatTranslator);
-//                return ctx.mkAnd(
-//                        UnitsZ3SmtEncoderUtils.subtype(ctx,
-//                                leftOperand.serialize(z3SmtFormatTranslator), resultUnit),
-//                        UnitsZ3SmtEncoderUtils.subtype(ctx,
-//                                rightOperand.serialize(z3SmtFormatTranslator), resultUnit));
+                // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
+                // leftOperand.serialize(z3SmtFormatTranslator),
+                // rightOperand.serialize(z3SmtFormatTranslator),
+                // result.serialize(z3SmtFormatTranslator));
+                InferenceUnit resultUnit = result.serialize(z3SmtFormatTranslator);
+                return ctx.mkAnd(
+                        UnitsZ3SmtEncoderUtils.subtype(ctx,
+                                leftOperand.serialize(z3SmtFormatTranslator), resultUnit),
+                        UnitsZ3SmtEncoderUtils.subtype(ctx,
+                                rightOperand.serialize(z3SmtFormatTranslator), resultUnit));
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
@@ -102,14 +102,15 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
             case MINUS:
                 // TODO: do constant constant checks inside encode() ?
 
-                // if leftOperand == rightOperand, then encode equality between rightOperand and
-                // result
-                return UnitsTypecheckUtils.unitsEqual(leftOperand.getValue(),
-                        rightOperand.getValue())
-                                ? UnitsZ3SmtEncoderUtils.equality(ctx,
-                                        rightOperand.serialize(z3SmtFormatTranslator),
-                                        result.serialize(z3SmtFormatTranslator))
-                                : contradictoryValue;
+//                // if leftOperand == rightOperand, then encode equality between rightOperand and
+//                // result
+//                return UnitsTypecheckUtils.unitsEqual(leftOperand.getValue(),
+//                        rightOperand.getValue())
+//                                ? UnitsZ3SmtEncoderUtils.equality(ctx,
+//                                        rightOperand.serialize(z3SmtFormatTranslator),
+//                                        result.serialize(z3SmtFormatTranslator))
+//                                : contradictoryValue;
+                return encode(operation, leftOperand, rightOperand, result);
             case MULTIPLY:
                 // It is more efficient to encode an equality between the result of leftOperand *
                 // rightOperand and result, but to do that requires access to slotManager here to

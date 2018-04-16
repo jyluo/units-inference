@@ -29,8 +29,8 @@ package java.lang;
  */
 class Math {
     // Scalar Constants
-    static final double E;
-    static final double PI;
+    static final @Dimensionless double E;
+    static final @Dimensionless double PI;
 
     // Methods ========
 
@@ -40,47 +40,9 @@ class Math {
     static @PolyUnit int abs(@PolyUnit int a);
     static @PolyUnit long abs(@PolyUnit long a);
 
-    // Trigonometry
-    static double sin(@rad double a);
-    static double cos(@rad double a);
-    static double tan(@rad double a);
     // both x & y must be same unit and if so returns that unit, else returns
     // the LUB of the units
     static @PolyUnit double hypot(@PolyUnit double x, @PolyUnit double y);
-
-    // Inverse Trigonometry
-    static @rad double asin(double a);
-    static @rad double acos(double a);
-    static @rad double atan(double a);
-
-    // x and y should be the same unit, returns the angle theta (in radians)
-    // from the conversion of rectangular coordinates [x, y] to polar
-    // coordinates [r, theta]
-    // atan2(y, x) == atan(y / x) except the sign of both arguments are used to
-    // determine the quadrant of the result
-    // Units ATF ensures that y and x have the same units
-    static @rad double atan2(@UnknownUnits double y, @UnknownUnits double x);
-    // Inverse Trigonometry identities in terms of units (value is subject to
-    // domain)
-    // sin(asin(x)) == x
-    // asin(sin(y)) == y
-    // cos(acos(x)) == x
-    // acos(cos(y)) == y
-    // tan(atan(x)) == x
-    // atan(tan(y)) == y
-    // let z = y / x
-    // z == tan(atan(z)) == tan(atan2(y, x))
-
-    // Hyperbolic Trigonometry
-    // takes as input a hyperbolic angle which is also in radians for Math lib
-    // implementation
-    static double sinh(@rad double x);
-    static double cosh(@rad double x);
-    static double tanh(@rad double x);
-
-    // Angle Conversion
-    static @deg double toDegrees(@rad double angrad);
-    static @rad double toRadians(@deg double angdeg);
 
     // Exact operations
     // returns a++ or exception if it overflows, same unit as a

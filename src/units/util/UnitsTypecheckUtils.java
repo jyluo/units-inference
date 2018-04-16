@@ -1,6 +1,8 @@
 package units.util;
 
 import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.javacutil.AnnotationUtils;
+import com.microsoft.z3.BoolExpr;
 import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
 
@@ -63,5 +65,15 @@ public class UnitsTypecheckUtils {
         TypecheckUnit lhs = UnitsRepresentationUtils.getInstance().createTypecheckUnit(lhsAM);
         TypecheckUnit rhs = UnitsRepresentationUtils.getInstance().createTypecheckUnit(rhsAM);
         return lhs.equals(rhs);
+    }
+
+    public static boolean unitsSubtype(AnnotationMirror lhsAM, AnnotationMirror rhsAM) {
+        UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+        if (AnnotationUtils.areSame(lhsAM, unitsRepUtils.BOTTOM)
+                || AnnotationUtils.areSame(rhsAM, unitsRepUtils.TOP)) {
+            return true;
+        } else {
+            return unitsEqual(lhsAM, rhsAM);
+        }
     }
 }

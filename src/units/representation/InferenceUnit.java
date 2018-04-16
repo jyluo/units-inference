@@ -81,8 +81,22 @@ public class InferenceUnit {
         /* @formatter:on // this is for eclipse formatter */
     }
 
+    /**
+     * Preference constraint: that uu == ub = false, prefix and all the exponents = 0
+     */
+    public BoolExpr getPreferenceConstraint() {
+        BoolExpr dimensionlessConstraint = constraintUnitToBeDimensionless();
+        /* @formatter:off // this is for eclipse formatter */
+        return ctx.mkAnd(
+                 ctx.mkNot(uu),
+                 ctx.mkNot(ub),
+                 dimensionlessConstraint
+               );
+        /* @formatter:on // this is for eclipse formatter */
+    }
+
     private BoolExpr constraintUnitToBeDimensionless() {
-        BoolExpr result = ctx.mkEq(prefixExponent, ctx.mkInt(0));
+        BoolExpr result = ctx.mkEq(prefixExponent, intZero);    // 10^0 = 1
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             /* @formatter:off // this is for eclipse formatter */
             result = ctx.mkAnd(result,

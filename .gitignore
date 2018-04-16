@@ -19,6 +19,7 @@ corpus/
 worked-benchmarks/
 projects/
 uomo-swap-benchmarks/
+giant-projects/
 
 # example classes and annotated output
 testing/**/*.class

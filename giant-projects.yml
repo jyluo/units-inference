@@ -1,0 +1,12 @@
+projects:
+  # 460k SLOC, crashes in inference, unknown reason aside from null slot for equality constraint
+  #tomee:
+  #  giturl: https://github.com/apache/tomee.git
+  #  build: mvn -Pquick -Dsurefire.useFile=false -DdisableXmlReport=true -DuniqueVersion=false -ff -Dassemble -DskipTests -DfailIfNoTests=false clean install
+  #  clean: mvn clean
+  
+  # https://github.com/apache/sis.git
+  sis: # apache sis
+    giturl: https://github.com/jyluo-benchmarks/sis.git
+    build: mvn install -DskipTests
+    clean: mvn clean

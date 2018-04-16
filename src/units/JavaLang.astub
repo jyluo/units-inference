@@ -14,7 +14,7 @@ class System {
     static void setSecurityManager(SecurityManager arg0);
     static SecurityManager getSecurityManager();
     static @ms long currentTimeMillis();
-    static long nanoTime();
+    static @ns long nanoTime();
     static void arraycopy(Object arg0, int arg1, Object arg2, int arg3, int arg4);
     static int identityHashCode(Object arg0);
     static Properties getProperties();
@@ -35,3 +35,66 @@ class System {
     static String mapLibraryName(String arg0);
 }
 
+interface Runnable {
+    void run();
+}
+
+class Thread implements Runnable {
+    static final int MIN_PRIORITY;
+    static final int NORM_PRIORITY;
+    static final int MAX_PRIORITY;
+    static Thread currentThread();
+    static void yield();
+    static void sleep(@ms long millis) throws InterruptedException;
+    static void sleep(@ms long millis, @ns int nanos) throws InterruptedException;
+    protected Object clone() throws CloneNotSupportedException;
+    Thread();
+    Thread(Runnable arg0);
+    Thread(ThreadGroup arg0, Runnable arg1);
+    Thread(String arg0);
+    Thread(ThreadGroup arg0, String arg1);
+    Thread(Runnable arg0, String arg1);
+    Thread(ThreadGroup arg0, Runnable arg1, String arg2);
+    Thread(ThreadGroup arg0, Runnable arg1, String arg2, long stackSize);
+    void start();
+    void run();
+    void stop();
+    void stop(Throwable arg0);
+    void interrupt();
+    static boolean interrupted();
+    boolean isInterrupted();
+    void destroy();
+    boolean isAlive();
+    void suspend();
+    void resume();
+    void setPriority(int arg0);
+    int getPriority();
+    void setName(String arg0);
+    String getName();
+    ThreadGroup getThreadGroup();
+    static int activeCount();
+    static int enumerate(Thread[] arg0);
+    int countStackFrames();
+    void join(@ms long millis) throws InterruptedException;
+    void join(@ms long millis, @ns int nanos) throws InterruptedException;
+    void join() throws InterruptedException;
+    static void dumpStack();
+    void setDaemon(boolean arg0);
+    boolean isDaemon();
+    void checkAccess();
+    String toString();
+    ClassLoader getContextClassLoader();
+    void setContextClassLoader(ClassLoader arg0);
+    static boolean holdsLock(Object arg0);
+    StackTraceElement[] getStackTrace();
+    static Map<Thread,StackTraceElement[]> getAllStackTraces();
+    long getId();
+    State getState();
+    static void setDefaultUncaughtExceptionHandler(UncaughtExceptionHandler arg0);
+    static UncaughtExceptionHandler getDefaultUncaughtExceptionHandler();
+    UncaughtExceptionHandler getUncaughtExceptionHandler();
+    void setUncaughtExceptionHandler(UncaughtExceptionHandler arg0);
+}
+interface Thread$UncaughtExceptionHandler {
+    void uncaughtException(Thread arg0, Throwable arg1);
+}

@@ -74,6 +74,12 @@ public class UnitsZ3SmtFormatTranslator
 
         AnnotationMirror anno = slot.getValue();
 
+        // Temp Hack: forcefully encode constant slot for poly qualifiers as dimensionless
+        if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)
+                || AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)) {
+            anno = unitsRepUtils.DIMENSIONLESS;
+        }
+
         // System.out.println(" ==== creating constant slot for " + anno);
 
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);

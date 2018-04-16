@@ -7,13 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A millisecond.
+ * Pixel per second.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-@UnitsAlias({@BaseUnit(prefix = -3, unit = "s", exponent = 1)})
+@UnitsAlias({@BaseUnit(unit = "px", exponent = 1), @BaseUnit(unit = "s", exponent = -1)})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface ms {
+public @interface pxPERs {
 }

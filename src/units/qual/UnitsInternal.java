@@ -20,7 +20,6 @@ import org.checkerframework.framework.qual.SubtypeOf;
 // TODO somehow make this not usable by users?
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 public @interface UnitsInternal {
-
     String originalName() default "default";
 
     boolean unknownUnits() default false;

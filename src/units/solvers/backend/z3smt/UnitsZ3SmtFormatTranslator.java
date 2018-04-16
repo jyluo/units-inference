@@ -105,7 +105,7 @@ public class UnitsZ3SmtFormatTranslator
     }
 
     @Override
-    public BoolExpr encodeWellformnessConstraint(VariableSlot slot) {
+    public BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot) {
         if (slot instanceof ConstantSlot) {
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();

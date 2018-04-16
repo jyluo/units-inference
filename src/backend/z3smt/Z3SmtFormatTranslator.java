@@ -70,7 +70,7 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
         return serializeVarSlot(slot);
     }
 
-    public abstract BoolExpr encodeWellformnessConstraint(VariableSlot slot);
+    public abstract BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot);
 
     public abstract Map<Integer, AnnotationMirror> decodeSolution(Model model,
             ProcessingEnvironment processingEnv);

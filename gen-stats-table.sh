@@ -4,10 +4,10 @@ declare -a statsKeys=("slots_size" "constraint_size" \
     "constantslot" "variableslot" \
     "subtypeconstraint" "arithmeticconstraint" "equalityconstraint" "existentialconstraint" "preferenceconstraint")
 
-declare -a constantSlotsNameKeys=("Top" "Dimensionless" "Bottom" "ms" "ns" "deg" "rad")
+declare -a constantSlotsNameKeys=("Top" "Dimensionless" "Bottom" "m" "m2" "s" "ms" "ns" "mPERs" "deg" "rad" "other")
 
-declare -a constantSlotsOutputKeys=("Annotation: @UnknownUnits" "Annotation: @Dimensionless" "Annotation: @UnitsBottom" \
-    "Annotation: @ms" "Annotation: @ns" "deg" "rad")
+declare -a constantSlotsOutputKeys=("@UnknownUnits" "@Dimensionless" "@UnitsBottom" \
+    "@m" "@m2" "@s" "@ms" "@ns" "@mPERs" "@deg" "@rad" "@UnitsInternal(")
 
 cd ./$1
 

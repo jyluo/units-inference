@@ -7,9 +7,12 @@ import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TreeUtils;
+import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.VariableTree;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -19,6 +22,7 @@ import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import units.representation.UnitsRepresentationUtils;
 import units.util.UnitsTypecheckUtils;
@@ -29,68 +33,95 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             BaseAnnotatedTypeFactory factory, boolean infer) {
         super(checker, ichecker, factory, infer);
     }
-
-    // @Override
-    // public Void visitVariable(VariableTree node, Void p) {
-    // super.visitVariable(node, p);
-    //
-    // if (infer) {
-    // // For boxed primitive classes, we stub the constructors to be PolyUnit, thus there will
-    // // be a VarAnnot created for each instance of PolyUnit.
-    //
-    // // An additional subtype constraint is generated here to ensure the VarAnnot is a
-    // // subtype of the variable's VarAnnot.
-    // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
-    //
-    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node);
-    //
-    // ExpressionTree expr = node.getInitializer();
-    // if (expr != null) {
-    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(expr);
-    //
-    // System.out.println(" === var: " + node);
-    // System.out.println(" == node initializer kind " + expr.getKind());
-    //
-    // AnnotationMirror varAM = varATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
-    // AnnotationMirror expAM = expATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
-    //
-    // System.out.println(" === varATM " + varATM);
-    // System.out.println(" === varAM " + varAM);
-    //
-    // System.out.println(" === expATM " + expATM);
-    // System.out.println(" === expAM " + expAM);
-    //
-    // System.out.println("");
-    // }
-    //
-    // }
-    //
-    // return null;
-    // }
-
-    // @Override
-    // public Void visitAssignment(AssignmentTree node, Void p) {
-    // if (infer) {
-    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node.getVariable());
-    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(node.getExpression());
-    // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
-    //
-    // AnnotationMirror varAM = varATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-    // AnnotationMirror expAM = expATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-    //
-    // System.out.println(" === assign: " + node);
-    //
-    // System.out.println(" === varATM " + varATM);
-    // System.out.println(" === varAM " + varAM);
-    //
-    // System.out.println(" === expATM " + expATM);
-    // System.out.println(" === expAM " + expAM);
-    //
-    // System.out.println("");
-    // }
-    //
-    // return super.visitAssignment(node, p);
-    // }
+//
+//    // For any type varName = value; or type varName;
+//    @Override
+//    public Void visitVariable(VariableTree node, Void p) {
+//        super.visitVariable(node, p);
+//
+//        if (infer) {
+//            // For boxed primitive classes, we stub the constructors to be PolyUnit, thus there will
+//            // be a VarAnnot created for each instance of PolyUnit.
+//
+//            // // An additional subtype constraint is generated here to ensure the VarAnnot is a
+//            // // subtype of the variable's VarAnnot.
+//            UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+//
+//            AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node);
+//
+//            ExpressionTree expr = node.getInitializer();
+//            if (expr != null) {
+//                AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(expr);
+//
+//                // System.out.println(" === var: " + node);
+//                // System.out.println(" == node initializer kind " + expr.getKind());
+//                //
+//                AnnotationMirror varAM = varATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
+//                AnnotationMirror expAM = expATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
+//
+//                // System.out.println(" === varATM " + varATM);
+//                // System.out.println(" === varAM " + varAM);
+//                //
+//                // System.out.println(" === expATM " + expATM);
+//                // System.out.println(" === expAM " + expAM);
+//                //
+//                // System.out.println("");
+//
+//                SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+//                ConstraintManager constraintManager =
+//                        InferenceMain.getInstance().getConstraintManager();
+//
+//                // Note: lhs and rhs either contains constant slots or var slots, resolved
+//                Slot var = slotManager.getSlot(varAM);
+//                Slot exp = slotManager.getSlot(expAM);
+//
+//                constraintManager.addEqualityConstraint(var, exp, true);
+//            }
+//        }
+//
+//        // System.out.println(" == visiting var: " + node);
+//
+//        return null;
+//    }
+//
+//    // For any varName = value;
+//    @Override
+//    public Void visitAssignment(AssignmentTree node, Void p) {
+//        if (infer) {
+//            AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node.getVariable());
+//            AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(node.getExpression());
+//            UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
+//
+//            AnnotationMirror varAM =
+//                    varATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.VARANNOT);
+//            AnnotationMirror expAM =
+//                    expATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.VARANNOT);
+//
+//            // System.out.println(" === assign: " + node);
+//            //
+//            // System.out.println(" === varATM " + varATM);
+//            // System.out.println(" === varAM " + varAM);
+//            //
+//            // System.out.println(" === expATM " + expATM);
+//            // System.out.println(" === expAM " + expAM);
+//            //
+//            // System.out.println("");
+//
+//            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+//            ConstraintManager constraintManager =
+//                    InferenceMain.getInstance().getConstraintManager();
+//
+//            // Note: lhs and rhs either contains constant slots or var slots, resolved
+//            Slot var = slotManager.getSlot(varAM);
+//            Slot exp = slotManager.getSlot(expAM);
+//
+//            constraintManager.addEqualityConstraint(var, exp, true);
+//        }
+//
+//        // System.out.println(" == visiting assign: " + node);
+//
+//        return super.visitAssignment(node, p);
+//    }
 
     @Override
     public Void visitBinary(BinaryTree binaryTree, Void p) {
@@ -133,7 +164,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL: // <=
                     // result is already dimensionless for bools, ensure arguments have same type
-                    constraintManager.addEqualityConstraint(lhs, rhs);
+                    constraintManager.addEqualityConstraint(lhs, rhs, false);
                     break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
@@ -162,22 +193,22 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
         switch (binaryTree.getKind()) {
             case PLUS:
-                // if it is not a string concatenation and the units don't match, issue warning
-                if (!TreeUtils.isStringConcatenation(binaryTree)
-                        && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("addition.unit.mismatch",
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-                            binaryTree);
-                }
+                // // if it is not a string concatenation and the units don't match, issue warning
+                // if (!TreeUtils.isStringConcatenation(binaryTree)
+                // && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                // checker.report(Result.failure("addition.unit.mismatch",
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                // binaryTree);
+                // }
                 break;
             case MINUS:
-                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("subtraction.unit.mismatch",
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-                            binaryTree);
-                }
+                // if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                // checker.report(Result.failure("subtraction.unit.mismatch",
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                // binaryTree);
+                // }
                 break;
             case CONDITIONAL_AND: // &&
             case CONDITIONAL_OR: // ||

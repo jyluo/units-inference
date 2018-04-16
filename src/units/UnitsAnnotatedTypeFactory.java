@@ -323,18 +323,24 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     // if it is a string concatenation, result is dimensionless
                     if (TreeUtils.isStringConcatenation(binaryTree)) {
                         type.replaceAnnotation(unitsRepUtils.DIMENSIONLESS);
-                    } else if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                        type.replaceAnnotation(lhsAM);
                     } else {
-                        type.replaceAnnotation(unitsRepUtils.TOP);
+                        type.replaceAnnotation(qualHierarchy.leastUpperBound(lhsAM, rhsAM));
                     }
+                    // else if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    // type.replaceAnnotation(lhsAM);
+                    // } else {
+                    // type.replaceAnnotation(unitsRepUtils.TOP);
+                    // }
                     break;
                 case MINUS:
                     if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
                         type.replaceAnnotation(lhsAM);
                     } else {
-                        type.replaceAnnotation(unitsRepUtils.TOP);
+                        type.replaceAnnotation(qualHierarchy.leastUpperBound(lhsAM, rhsAM));
                     }
+                    // else {
+                    // type.replaceAnnotation(unitsRepUtils.TOP);
+                    // }
                     break;
                 case MULTIPLY:
                     type.replaceAnnotation(UnitsTypecheckUtils.multiplication(lhsAM, rhsAM));

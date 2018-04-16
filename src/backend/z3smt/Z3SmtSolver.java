@@ -8,6 +8,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.Constraint;
+import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.Solver;
@@ -67,6 +68,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         }
     }
 
+    protected String getSoftConstraintGroup() {
+        return Double.toString(Math.random());
+    }
+
     @Override
     protected void encodeAllConstraints() {
         for (Constraint constraint : constraints) {
@@ -91,6 +96,18 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // Skip tautology.
                 continue;
             }
+
+//            // Hack: encode soft equality constraints as soft constraints
+//            // TODO: move to more precise locations
+//            if (constraint instanceof EqualityConstraint) {
+//                EqualityConstraint etc = (EqualityConstraint) constraint;
+//
+//                if (etc.isSoftConstraint()) {
+//                    // System.out.println( " === inserting soft EQ constraint " + constraint);
+//                    solver.AssertSoft(serializedConstraint, 1, getSoftConstraintGroup());
+//                    continue;
+//                }
+//            }
 
             solver.Add(serializedConstraint);
         }

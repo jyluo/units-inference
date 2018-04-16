@@ -164,14 +164,18 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 // if it is not a string concatenation and the units don't match, issue warning
                 if (!TreeUtils.isStringConcatenation(binaryTree)
                         && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("addition.unit.mismatch", lhsAM.toString(),
-                            rhsAM.toString()), binaryTree);
+                    checker.report(Result.failure("addition.unit.mismatch",
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                            binaryTree);
                 }
                 break;
             case MINUS:
                 if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("subtraction.unit.mismatch", lhsAM.toString(),
-                            rhsAM.toString()), binaryTree);
+                    checker.report(Result.failure("subtraction.unit.mismatch",
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                            binaryTree);
                 }
                 break;
             default:

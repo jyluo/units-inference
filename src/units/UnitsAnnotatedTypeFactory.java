@@ -137,6 +137,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // exceptions are always dimensionless
         defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS,
                 TypeUseLocation.EXCEPTION_PARAMETER);
+//        // set TOP as the default qualifier for local variables, for dataflow refinement
+//        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.LOCAL_VARIABLE);
     }
 
     @Override

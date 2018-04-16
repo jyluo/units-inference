@@ -16,7 +16,7 @@ import units.representation.UnitsRepresentationUtils;
     "JavaLang.astub",
     "JavaMath.astub",
     "JavaThread.astub",
-    })
+})
 public class UnitsChecker extends BaseInferrableChecker {
 
     @Override

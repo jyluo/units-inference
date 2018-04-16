@@ -66,26 +66,26 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             if (slot instanceof VariableSlot) {
                 VariableSlot varSlot = (VariableSlot) slot;
                 solver.add(formatTranslator.encodeWellformnessConstraint(varSlot));
-//                solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
-//                        "default-constraint-group");
+                // solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
+                // "default-constraint-group");
             }
         }
     }
 
-    private String getSoftConstraintGroup() {
-        return Double.toString(Math.random());
-    }
+    // private String getSoftConstraintGroup() {
+    // return Double.toString(Math.random());
+    // }
 
     @Override
     protected void encodeAllConstraints() {
-        int total = constraints.size();
-        int current = 1;
+        // int total = constraints.size();
+        // int current = 1;
 
         for (Constraint constraint : constraints) {
 
             // InferenceMain.getInstance().logger.info(
-            System.out.println(
-                    "== serializing constraint " + current + "/" + total + " : " + constraint);
+            // System.out.println(
+            // "== serializing constraint " + current + "/" + total + " : " + constraint);
 
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
 
@@ -127,7 +127,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             // if (current % 100 == 0) {
             // System.out.println("== adding constraint " + current + "/" + total);
             // InferenceMain.getInstance().logger.info(
-            System.out.println("== adding constraint " + current + "/" + total);
+            // System.out.println("== adding constraint " + current + "/" + total);
             // }
 
             solver.add(serializedConstraint);
@@ -135,9 +135,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             // if (current % 100 == 0) {
             // System.out.println("== adding constraint " + current + "/" + total);
             // InferenceMain.getInstance().logger.info(
-            System.out.println("== ADDED constraint " + current + "/" + total);
+            // System.out.println("== ADDED constraint " + current + "/" + total);
             // }
-            current++;
+            // current++;
         }
     }
 

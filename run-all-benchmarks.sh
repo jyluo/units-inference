@@ -1,6 +1,6 @@
 #!/bin/bash
 
-find . -name "infer\.log" | xargs rm
+./clean-up-projects.sh projects
 
 gradle jar
 

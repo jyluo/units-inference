@@ -8,6 +8,7 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Model;
 import com.microsoft.z3.Optimize;
+import com.microsoft.z3.Solver;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
@@ -22,7 +23,7 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
 
     protected Context ctx;
 
-    protected Optimize solver;
+    protected Solver solver;
 
     /**
      * Cache of all serialized slots, keyed on slot ID.
@@ -34,7 +35,7 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
         serializedSlots = new HashMap<>();
     }
 
-    public final void init(Context ctx, Optimize solver) {
+    public final void init(Context ctx, Solver solver) {
         this.ctx = ctx;
         finishInitializingEncoders();
         this.solver = solver;

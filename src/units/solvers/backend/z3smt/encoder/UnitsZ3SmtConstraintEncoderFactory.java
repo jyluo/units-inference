@@ -45,7 +45,8 @@ public class UnitsZ3SmtConstraintEncoderFactory
 
     @Override
     public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
-        return new UnitsZ3SmtComparableConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
+        // return new UnitsZ3SmtComparableConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
+        return null;
     }
 
     @Override

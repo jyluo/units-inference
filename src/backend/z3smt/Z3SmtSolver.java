@@ -8,7 +8,6 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.Constraint;
-import checkers.inference.model.EqualityConstraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.Solver;
@@ -19,7 +18,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
 
     protected final Context ctx;
-    protected final com.microsoft.z3.Optimize solver;
+    protected final com.microsoft.z3.Solver solver;
 
     public Z3SmtSolver(SolverEnvironment solverEnvironment, Collection<Slot> slots,
             Collection<Constraint> constraints,
@@ -27,7 +26,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             Lattice lattice) {
         super(solverEnvironment, slots, constraints, z3SmtFormatTranslator, lattice);
         ctx = new Context();
-        solver = ctx.mkOptimize();
+        solver = ctx.mkSolver();
         z3SmtFormatTranslator.init(ctx, solver);
     }
 
@@ -39,7 +38,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         encodeAllSlots();
         encodeAllConstraints();
 
-        switch (solver.Check()) {
+        System.out.println("== BEGINNING SOLVER ==");
+
+        switch (solver.check()) {
             case SATISFIABLE:
                 result = formatTranslator.decodeSolution(solver.getModel(),
                         solverEnvironment.processingEnvironment);
@@ -54,6 +55,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 result = new HashMap<>();
                 break;
         }
+
+        System.out.println("== SOLVER FINISHED ==");
+
         return result;
     }
 
@@ -61,20 +65,28 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         for (Slot slot : slots) {
             if (slot instanceof VariableSlot) {
                 VariableSlot varSlot = (VariableSlot) slot;
-                solver.Add(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
-                solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
-                        "default-constraint-group");
+                solver.add(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
+//                solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
+//                        "default-constraint-group");
             }
         }
     }
 
-    protected String getSoftConstraintGroup() {
+    private String getSoftConstraintGroup() {
         return Double.toString(Math.random());
     }
 
     @Override
     protected void encodeAllConstraints() {
+        int total = constraints.size();
+        int current = 1;
+
         for (Constraint constraint : constraints) {
+
+            // InferenceMain.getInstance().logger.info(
+            System.out.println(
+                    "== serializing constraint " + current + "/" + total + " : " + constraint);
+
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
 
             if (serializedConstraint == null) {
@@ -89,6 +101,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 continue;
             }
 
+            // InferenceMain.getInstance().logger
+            // .info("== constraint is true? " + serializedConstraint.simplify().isTrue());
+
             if (serializedConstraint.simplify().isTrue()) {
                 // This only works if the BoolExpr is directly the value Z3True. Still a good
                 // filter, but doesn't filter enough.
@@ -97,19 +112,32 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 continue;
             }
 
-//            // Hack: encode soft equality constraints as soft constraints
-//            // TODO: move to more precise locations
-//            if (constraint instanceof EqualityConstraint) {
-//                EqualityConstraint etc = (EqualityConstraint) constraint;
-//
-//                if (etc.isSoftConstraint()) {
-//                    // System.out.println( " === inserting soft EQ constraint " + constraint);
-//                    solver.AssertSoft(serializedConstraint, 1, getSoftConstraintGroup());
-//                    continue;
-//                }
-//            }
+            // // Hack: encode soft equality constraints as soft constraints
+            // // TODO: move to more precise locations
+            // if (constraint instanceof EqualityConstraint) {
+            // EqualityConstraint etc = (EqualityConstraint) constraint;
+            //
+            // if (etc.isSoftConstraint()) {
+            // // System.out.println( " === inserting soft EQ constraint " + constraint);
+            // solver.AssertSoft(serializedConstraint, 1, getSoftConstraintGroup());
+            // continue;
+            // }
+            // }
 
-            solver.Add(serializedConstraint);
+            // if (current % 100 == 0) {
+            // System.out.println("== adding constraint " + current + "/" + total);
+            // InferenceMain.getInstance().logger.info(
+            System.out.println("== adding constraint " + current + "/" + total);
+            // }
+
+            solver.add(serializedConstraint);
+
+            // if (current % 100 == 0) {
+            // System.out.println("== adding constraint " + current + "/" + total);
+            // InferenceMain.getInstance().logger.info(
+            System.out.println("== ADDED constraint " + current + "/" + total);
+            // }
+            current++;
         }
     }
 

@@ -33,18 +33,18 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
         switch (operation) {
             case PLUS:
             case MINUS:
-//                // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
-//                // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
-//                return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
-//                        leftOperand.serialize(z3SmtFormatTranslator),
-//                        rightOperand.serialize(z3SmtFormatTranslator),
-//                        result.serialize(z3SmtFormatTranslator));
-                InferenceUnit resultUnit = result.serialize(z3SmtFormatTranslator);
-                return ctx.mkAnd(
-                        UnitsZ3SmtEncoderUtils.subtype(ctx,
-                                leftOperand.serialize(z3SmtFormatTranslator), resultUnit),
-                        UnitsZ3SmtEncoderUtils.subtype(ctx,
-                                rightOperand.serialize(z3SmtFormatTranslator), resultUnit));
+                // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
+                // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
+                return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
+                        leftOperand.serialize(z3SmtFormatTranslator),
+                        rightOperand.serialize(z3SmtFormatTranslator),
+                        result.serialize(z3SmtFormatTranslator));
+//                InferenceUnit resultUnit = result.serialize(z3SmtFormatTranslator);
+//                return ctx.mkAnd(
+//                        UnitsZ3SmtEncoderUtils.subtype(ctx,
+//                                leftOperand.serialize(z3SmtFormatTranslator), resultUnit),
+//                        UnitsZ3SmtEncoderUtils.subtype(ctx,
+//                                rightOperand.serialize(z3SmtFormatTranslator), resultUnit));
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or

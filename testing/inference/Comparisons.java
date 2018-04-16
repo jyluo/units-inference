@@ -7,8 +7,14 @@ class Comparisons {
 
     void Compare() {
         int mInferred = 10;
+
+        // :: fixable-error: (comparison.unit.mismatch)
         if( m < mInferred ) {}
+
+        // :: fixable-error: (comparison.unit.mismatch)
         if( mInferred >= m ) {}
+
+        // :: fixable-error: (comparison.unit.mismatch)
         m = m == mInferred ? m : m;
     }
 }

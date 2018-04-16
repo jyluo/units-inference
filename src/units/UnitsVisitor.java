@@ -133,7 +133,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL: // <=
                     // result is already dimensionless for bools, ensure arguments have same type
-                    constraintManager.addComparableConstraint(lhs, rhs);
+                    constraintManager.addEqualityConstraint(lhs, rhs);
                     break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
@@ -191,7 +191,8 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 // result is already dimensionless for bools, ensure arguments have same type
                 // TODO: implement comparable constraint check here, x comparable with y if either
                 // is a subtype of the other
-                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                if (!(atypeFactory.getQualifierHierarchy().isSubtype(lhsAM, rhsAM)
+                        || atypeFactory.getQualifierHierarchy().isSubtype(rhsAM, lhsAM))) {
                     checker.report(Result.failure("comparison.unit.mismatch",
                             atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
                             atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),

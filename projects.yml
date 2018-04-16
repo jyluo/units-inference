@@ -63,18 +63,18 @@ projects:
   # fails due to subclassing java.lang.Number which requires constant slots for PolyUnit / PolyAll
   # not adding this use case to inference atm, can manually annotate if necessary
 
-  # matrix-toolkits-java:
-  #   giturl: https://github.com/hwinkler/matrix-toolkits-java.git
-  #   git-ref: f2594128eee45a188957c854acede3d6a511d717
-  #   build: mvn compile
-  #   clean: mvn clean
+  matrix-toolkits-java:
+    giturl: https://github.com/hwinkler/matrix-toolkits-java.git
+    git-ref: f2594128eee45a188957c854acede3d6a511d717
+    build: mvn compile
+    clean: mvn clean
 
-  # jump:
-  #   giturl: https://github.com/jyluo-benchmarks/jump.git
-  #   # giturl: https://github.com/aas-integration/jump.git
-  #   # git-ref: e05cac7b1b584a493978d6861cbc7fa762816f34
-  #   build: ant jar
-  #   clean: ant clean
+  jump:
+    giturl: https://github.com/jyluo-benchmarks/jump.git
+    # giturl: https://github.com/aas-integration/jump.git
+    # git-ref: e05cac7b1b584a493978d6861cbc7fa762816f34
+    build: ant jar
+    clean: ant clean
 
 # Remains to be tested:
 

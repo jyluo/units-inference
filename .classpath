@@ -10,5 +10,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/framework"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jsr308-langtools"/>
 	<classpathentry kind="lib" path="/checker-framework-inference/dist/com.microsoft.z3.jar"/>
+	<classpathentry kind="lib" path="/home/jeff/jsr308/z3/build/com.microsoft.z3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

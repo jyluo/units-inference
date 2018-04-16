@@ -14,7 +14,7 @@ class System {
     static void setSecurityManager(SecurityManager arg0);
     static SecurityManager getSecurityManager();
     static @ms long currentTimeMillis();
-    static long nanoTime();
+    static @ns long nanoTime();
     static void arraycopy(Object arg0, int arg1, Object arg2, int arg3, int arg4);
     static int identityHashCode(Object arg0);
     static Properties getProperties();
@@ -34,4 +34,3 @@ class System {
     static void loadLibrary(String arg0);
     static String mapLibraryName(String arg0);
 }
-

@@ -18,7 +18,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
 
     protected final Context ctx;
-    protected final com.microsoft.z3.Solver solver;
+    protected final com.microsoft.z3.Optimize solver;
 
     public Z3SmtSolver(SolverEnvironment solverEnvironment, Collection<Slot> slots,
             Collection<Constraint> constraints,
@@ -26,7 +26,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             Lattice lattice) {
         super(solverEnvironment, slots, constraints, z3SmtFormatTranslator, lattice);
         ctx = new Context();
-        solver = ctx.mkSolver();
+        solver = ctx.mkOptimize();
         z3SmtFormatTranslator.init(ctx, solver);
     }
 
@@ -38,7 +38,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         encodeAllSlots();
         encodeAllConstraints();
 
-        switch (solver.check()) {
+        switch (solver.Check()) {
             case SATISFIABLE:
                 result = formatTranslator.decodeSolution(solver.getModel(),
                         solverEnvironment.processingEnvironment);
@@ -60,7 +60,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         for (Slot slot : slots) {
             if (slot instanceof VariableSlot) {
                 VariableSlot varSlot = (VariableSlot) slot;
-                solver.add(formatTranslator.encodeWellformnessConstraint(varSlot));
+                solver.Assert(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
+                solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
+                        "default-group");
             }
         }
     }
@@ -90,7 +92,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 continue;
             }
 
-            solver.add(serializedConstraint);
+            solver.Assert(serializedConstraint);
         }
     }
 

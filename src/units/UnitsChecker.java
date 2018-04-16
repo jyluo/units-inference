@@ -11,7 +11,12 @@ import checkers.inference.SlotManager;
 import checkers.inference.model.ConstraintManager;
 import units.representation.UnitsRepresentationUtils;
 
-@StubFiles({"JavaBoxedPrimitives.astub", "JavaLang.astub"})
+@StubFiles({
+    "JavaBoxedPrimitives.astub", 
+    "JavaLang.astub",
+    "JavaMath.astub",
+    "JavaThread.astub",
+    })
 public class UnitsChecker extends BaseInferrableChecker {
 
     @Override

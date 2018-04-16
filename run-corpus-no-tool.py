@@ -56,7 +56,7 @@ def main(argv):
         rtn_code = subprocess.call(shlex.split(project_attrs["build"]))
         end = time.time()
         print "Return code is {}.".format(rtn_code)
-        print "Time taken: {} seconds".format(end - start)
+        print "Time taken by {}: \t{}\t seconds".format(project_name, end - start)
         if not rtn_code == 0:
             failed_projects.append(project_name)
         else:

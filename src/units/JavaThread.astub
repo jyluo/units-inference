@@ -1,0 +1,10 @@
+import units.qual.*;
+
+package java.lang;
+
+class Thread implements Runnable {
+    static void sleep(@ms long millis) throws InterruptedException;
+    static void sleep(@ms long millis, @ns int nanos) throws InterruptedException;
+    void join(@ms long millis) throws InterruptedException;
+    void join(@ms long millis, @ns int nanos) throws InterruptedException;
+}

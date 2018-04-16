@@ -105,7 +105,7 @@ public class UnitsZ3SmtFormatTranslator
     }
 
     @Override
-    public BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot) {
+    public BoolExpr encodeWellformnessConstraint(VariableSlot slot) {
         if (slot instanceof ConstantSlot) {
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
@@ -119,22 +119,22 @@ public class UnitsZ3SmtFormatTranslator
         InferenceUnit serializedSlot = slot.serialize(this);
         return serializedSlot.getWellformnessConstraint();
     }
-
-    @Override
-    public BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot) {
-        if (slot instanceof ConstantSlot) {
-            ConstantSlot cs = (ConstantSlot) slot;
-            AnnotationMirror anno = cs.getValue();
-            // encode PolyAll and PolyUnit as constant trues
-            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
-                return ctx.mkTrue();
-            }
-        }
-
-        InferenceUnit serializedSlot = slot.serialize(this);
-        return serializedSlot.getPreferenceConstraint();
-    }
+//
+//    @Override
+//    public BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot) {
+//        if (slot instanceof ConstantSlot) {
+//            ConstantSlot cs = (ConstantSlot) slot;
+//            AnnotationMirror anno = cs.getValue();
+//            // encode PolyAll and PolyUnit as constant trues
+//            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
+//                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
+//                return ctx.mkTrue();
+//            }
+//        }
+//
+//        InferenceUnit serializedSlot = slot.serialize(this);
+//        return serializedSlot.getPreferenceConstraint();
+//    }
     
     // Decode overall solutions from Z3
     @Override

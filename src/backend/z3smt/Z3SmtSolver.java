@@ -65,7 +65,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         for (Slot slot : slots) {
             if (slot instanceof VariableSlot) {
                 VariableSlot varSlot = (VariableSlot) slot;
-                solver.add(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
+                solver.add(formatTranslator.encodeWellformnessConstraint(varSlot));
 //                solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
 //                        "default-constraint-group");
             }

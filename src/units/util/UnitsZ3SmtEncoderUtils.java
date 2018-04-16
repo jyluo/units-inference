@@ -72,6 +72,17 @@ public class UnitsZ3SmtEncoderUtils {
         return equalityEncoding;
     }
 
+    // fst <> snd iff fst <: snd or snd <: fst
+    public static BoolExpr comparable(Context ctx, InferenceUnit fst, InferenceUnit snd) {
+        /* @formatter:off // this is for eclipse formatter */
+        BoolExpr comparableEncoding =
+            ctx.mkOr(subtype(ctx, fst, snd),
+                     subtype(ctx, fst, snd)
+            );
+        /* @formatter:on // this is for eclipse formatter */
+        return comparableEncoding;
+    }
+
     // sub <: super has 3 cases:
     // not (super = top or super = bottom) --> sub = super xor sub = bottom
     // super = top --> no constraints on sub

@@ -95,6 +95,3 @@ class Thread implements Runnable {
     UncaughtExceptionHandler getUncaughtExceptionHandler();
     void setUncaughtExceptionHandler(UncaughtExceptionHandler arg0);
 }
-interface Thread$UncaughtExceptionHandler {
-    void uncaughtException(Thread arg0, Throwable arg1);
-}

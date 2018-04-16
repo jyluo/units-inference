@@ -123,18 +123,18 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                             VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
                     constraintManager.addArithmeticConstraint(opKind, lhs, rhs, avsRes);
                     break;
-//                case CONDITIONAL_AND: // &&
-//                case CONDITIONAL_OR: // ||
-//                case LOGICAL_COMPLEMENT: // !
-//                case EQUAL_TO: // ==
-//                case NOT_EQUAL_TO: // !=
-//                case GREATER_THAN: // >
-//                case GREATER_THAN_EQUAL: // >=
-//                case LESS_THAN: // <
-//                case LESS_THAN_EQUAL: // <=
-//                    // result is already dimensionless for bools, ensure arguments have same type
-//                    constraintManager.addEqualityConstraint(lhs, rhs);
-//                    break;
+                case CONDITIONAL_AND: // &&
+                case CONDITIONAL_OR: // ||
+                case LOGICAL_COMPLEMENT: // !
+                case EQUAL_TO: // ==
+                case NOT_EQUAL_TO: // !=
+                case GREATER_THAN: // >
+                case GREATER_THAN_EQUAL: // >=
+                case LESS_THAN: // <
+                case LESS_THAN_EQUAL: // <=
+                    // result is already dimensionless for bools, ensure arguments have same type
+                    constraintManager.addComparableConstraint(lhs, rhs);
+                    break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
                     VariableSlot lubSlot =
@@ -179,23 +179,25 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                             binaryTree);
                 }
                 break;
-//            case CONDITIONAL_AND: // &&
-//            case CONDITIONAL_OR: // ||
-//            case LOGICAL_COMPLEMENT: // !
-//            case EQUAL_TO: // ==
-//            case NOT_EQUAL_TO: // !=
-//            case GREATER_THAN: // >
-//            case GREATER_THAN_EQUAL: // >=
-//            case LESS_THAN: // <
-//            case LESS_THAN_EQUAL: // <=
-//                // result is already dimensionless for bools, ensure arguments have same type
-//                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-//                    checker.report(Result.failure("comparison.unit.mismatch",
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-//                            binaryTree);
-//                }
-//                break;
+            case CONDITIONAL_AND: // &&
+            case CONDITIONAL_OR: // ||
+            case LOGICAL_COMPLEMENT: // !
+            case EQUAL_TO: // ==
+            case NOT_EQUAL_TO: // !=
+            case GREATER_THAN: // >
+            case GREATER_THAN_EQUAL: // >=
+            case LESS_THAN: // <
+            case LESS_THAN_EQUAL: // <=
+                // result is already dimensionless for bools, ensure arguments have same type
+                // TODO: implement comparable constraint check here, x comparable with y if either
+                // is a subtype of the other
+                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    checker.report(Result.failure("comparison.unit.mismatch",
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                            binaryTree);
+                }
+                break;
             default:
                 break;
         }

@@ -35,8 +35,13 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
-        encodeAllSlots();
         encodeAllConstraints();
+
+        InferenceMain.getInstance().logger.warning("Now encoding slots with soft constraints");
+
+        encodeAllSlots();
+
+        InferenceMain.getInstance().logger.warning("Starting the solving");
 
         switch (solver.Check()) {
             case SATISFIABLE:
@@ -69,6 +74,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
     @Override
     protected void encodeAllConstraints() {
+        int total = constraints.size();
+
+        int current = 1;
+
         for (Constraint constraint : constraints) {
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
 
@@ -91,8 +100,13 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // Skip tautology.
                 continue;
             }
+            InferenceMain.getInstance().logger.warning(" Adding hard constraint " + constraint);
 
             solver.Assert(serializedConstraint);
+
+            InferenceMain.getInstance().logger
+                    .warning(" Encoded constraint " + current + " / " + total);
+            current++;
         }
     }
 

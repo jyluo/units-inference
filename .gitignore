@@ -19,6 +19,11 @@ corpus/
 worked-benchmarks/
 projects/
 uomo-swap-benchmarks/
+giant-projects/
+
+# output logs
+compilationLog/
+inferenceLog/
 
 # example classes and annotated output
 testing/**/*.class
@@ -33,3 +38,6 @@ manual-tests/annotated
 manual-tests/inference
 manual-tests/typecheck
 manual-tests/insertionTest
+
+# temp files
+manual-tests/unused*

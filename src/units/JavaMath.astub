@@ -55,25 +55,25 @@ class Math {
     static @PolyUnit int negateExact(@PolyUnit int a);
     static @PolyUnit long negateExact(@PolyUnit long a);
 
-    // The following uses Units Relations
-    // same as addition, throws exception if it overflows
-    static int addExact(@UnknownUnits int x, @UnknownUnits int y);
-    static long addExact(@UnknownUnits long x, @UnknownUnits long y);
-    // same as subtraction, throws exception if it overflows
-    static int subtractExact(@UnknownUnits int x, @UnknownUnits int y);
-    static long subtractExact(@UnknownUnits long x, @UnknownUnits long y);
-    // same as multiplication, throws exception if it overflows
-    static int multiplyExact(@UnknownUnits int x, @UnknownUnits int y);
-    static long multiplyExact(@UnknownUnits long x, @UnknownUnits long y);
+//    // The following uses Units Relations
+//    // same as addition, throws exception if it overflows
+//    static int addExact(@UnknownUnits int x, @UnknownUnits int y);
+//    static long addExact(@UnknownUnits long x, @UnknownUnits long y);
+//    // same as subtraction, throws exception if it overflows
+//    static int subtractExact(@UnknownUnits int x, @UnknownUnits int y);
+//    static long subtractExact(@UnknownUnits long x, @UnknownUnits long y);
+//    // same as multiplication, throws exception if it overflows
+//    static int multiplyExact(@UnknownUnits int x, @UnknownUnits int y);
+//    static long multiplyExact(@UnknownUnits long x, @UnknownUnits long y);
 
-    // The following uses Units Relations as well
-    // returns largest value Q such that Q <= [x / y] in integer division, the
-    // returned unit is the same as the unit resulting from x / y
-    static int floorDiv(@UnknownUnits int x, @UnknownUnits int y);
-    static long floorDiv(@UnknownUnits long x, @UnknownUnits long y);
-    // returns the IEEE spec remainder of f1 / f2; ie the exact value of
-    // f1 – [round[f1 / f2] * f2]. same unit as f1
-    static double IEEEremainder(@UnknownUnits double f1, @UnknownUnits double f2);
+//    // The following uses Units Relations as well
+//    // returns largest value Q such that Q <= [x / y] in integer division, the
+//    // returned unit is the same as the unit resulting from x / y
+//    static int floorDiv(@UnknownUnits int x, @UnknownUnits int y);
+//    static long floorDiv(@UnknownUnits long x, @UnknownUnits long y);
+//    // returns the IEEE spec remainder of f1 / f2; ie the exact value of
+//    // f1 – [round[f1 / f2] * f2]. same unit as f1
+//    static double IEEEremainder(@UnknownUnits double f1, @UnknownUnits double f2);
 
     // similar to modulus, returns [x - [floorDiv[x, y] * y]], ie unit of x
     static @PolyUnit int floorMod(@PolyUnit int x, @UnknownUnits int y);

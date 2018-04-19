@@ -29,23 +29,23 @@ package java.lang;
  */
 class Math {
     // Trigonometry
-    static double sin(@rad double a);
-    static double cos(@rad double a);
-    static double tan(@rad double a);
+    static @Dimensionless double sin(@rad double a);
+    static @Dimensionless double cos(@rad double a);
+    static @Dimensionless double tan(@rad double a);
 
     // Inverse Trigonometry
-    static @rad double asin(double a);
-    static @rad double acos(double a);
-    static @rad double atan(double a);
+    static @rad double asin(@Dimensionless double a);
+    static @rad double acos(@Dimensionless double a);
+    static @rad double atan(@Dimensionless double a);
 
     static @rad double atan2(@UnknownUnits double y, @UnknownUnits double x);
 
     // Hyperbolic Trigonometry
     // takes as input a hyperbolic angle which is also in radians for Math lib
     // implementation
-    static double sinh(@rad double x);
-    static double cosh(@rad double x);
-    static double tanh(@rad double x);
+    static @Dimensionless double sinh(@rad double x);
+    static @Dimensionless double cosh(@rad double x);
+    static @Dimensionless double tanh(@rad double x);
 
     // Angle Conversion
     static @deg double toDegrees(@rad double angrad);

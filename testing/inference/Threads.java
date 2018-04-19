@@ -13,9 +13,6 @@ class Threads {
         // :: fixable-error: (argument.type.incompatible)
         Thread.sleep(msInferred);
 
-        // :: fixable-error: (argument.type.incompatible)
-        Thread.sleep(Math.max(sleepTime - delta, 0));
-
         int msInferred2 = 30;
 
         Thread t = new Thread();

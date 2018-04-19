@@ -261,22 +261,22 @@ public class UnitsZ3SmtEncoderUtils {
             );
         }
         BoolExpr divideEncoding =
-                // res component = lhs component + rhs component
-                ctx.mkAnd(
-                    ctx.mkEq(
-                        res.getUnknownUnits(),
-                        ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())
-                    ),
-                    ctx.mkEq(
-                        res.getUnitsBottom(),
-                        ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())
-                    ),
-                    ctx.mkEq(
-                        res.getPrefixExponent(),
-                        ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent())
-                    ),
-                    exponents
-                );
+            // res component = lhs component + rhs component
+            ctx.mkAnd(
+                ctx.mkEq(
+                    res.getUnknownUnits(),
+                    ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())
+                ),
+                ctx.mkEq(
+                    res.getUnitsBottom(),
+                    ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())
+                ),
+                ctx.mkEq(
+                    res.getPrefixExponent(),
+                    ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent())
+                ),
+                exponents
+            );
         /* @formatter:on // this is for eclipse formatter */
         return divideEncoding;
     }

@@ -12,10 +12,15 @@ public class UnitsTypecheckUtils {
     public static TypecheckUnit multiplication(TypecheckUnit lhs, TypecheckUnit rhs) {
         TypecheckUnit result = new TypecheckUnit();
 
-        // if either lhs or rhs is UnknownUnits or UnitsBottom, then result is UnknownUnits
-        if (lhs.isUnknownUnits() || lhs.isUnitsBottom() || rhs.isUnknownUnits()
-                || rhs.isUnitsBottom()) {
+        // if either lhs or rhs is UnknownUnits, then result is UnknownUnits
+        if (lhs.isUnknownUnits() || rhs.isUnknownUnits()) {
             result.setUnknownUnits(true);
+            return result;
+        }
+
+        // if either lhs or rhs is UnitsBottom, then result is UnitsBottom
+        if (lhs.isUnitsBottom() || rhs.isUnitsBottom()) {
+            result.setUnitsBottom(true);
             return result;
         }
 
@@ -37,10 +42,15 @@ public class UnitsTypecheckUtils {
     public static TypecheckUnit division(TypecheckUnit lhs, TypecheckUnit rhs) {
         TypecheckUnit result = new TypecheckUnit();
 
-        // if either lhs or rhs is UnknownUnits or UnitsBottom, then result is UnknownUnits
-        if (lhs.isUnknownUnits() || lhs.isUnitsBottom() || rhs.isUnknownUnits()
-                || rhs.isUnitsBottom()) {
+        // if either lhs or rhs is UnknownUnits, then result is UnknownUnits
+        if (lhs.isUnknownUnits() || rhs.isUnknownUnits()) {
             result.setUnknownUnits(true);
+            return result;
+        }
+
+        // if either lhs or rhs is UnitsBottom, then result is UnitsBottom
+        if (lhs.isUnitsBottom() || rhs.isUnitsBottom()) {
+            result.setUnitsBottom(true);
             return result;
         }
 

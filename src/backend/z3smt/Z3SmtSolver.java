@@ -105,7 +105,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         Iterator<Constraint> iter = constraints.iterator();
 
         while (iter.hasNext()) {
-            System.out.println("Getting next item.");
+            // System.out.println("Getting next item.");
 
             Constraint constraint = iter.next();
 
@@ -119,7 +119,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
 
-            System.out.println("  Constraint serialized. ");
+            // System.out.println(" Constraint serialized. ");
 
             if (serializedConstraint == null) {
                 // TODO: Should error abort if unsupported constraint detected.
@@ -142,17 +142,17 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // filter, but doesn't filter enough.
                 // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0 0))
                 // Skip tautology.
-                System.out.println("  simplified to tautology.");
+                // System.out.println(" simplified to tautology.");
                 current++;
                 continue;
             }
 
-            System.out.println("  Adding hard constraint ");
+            // System.out.println(" Adding hard constraint ");
 
             solver.Assert(serializedConstraint);
 
             current++;
-            System.out.println("  Added constraint. HasNext? " + iter.hasNext());
+            // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
         }
     }
 

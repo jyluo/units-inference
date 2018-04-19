@@ -4,7 +4,6 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import backend.z3smt.Z3SmtFormatTranslator;
 import backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
-import checkers.inference.InferenceMain;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -26,17 +25,6 @@ public class UnitsZ3SmtSubtypeConstraintEncoder
     protected BoolExpr encode(Slot subtype, Slot supertype) {
         return UnitsZ3SmtEncoderUtils.subtype(ctx, subtype.serialize(z3SmtFormatTranslator),
                 supertype.serialize(z3SmtFormatTranslator));
-//        InferenceUnit subT = subtype.serialize(z3SmtFormatTranslator);
-////      InferenceMain.getInstance().logger.warning("Encoded subtype slot " + subtype);
-//
-//      InferenceUnit superT = supertype.serialize(z3SmtFormatTranslator);
-////      InferenceMain.getInstance().logger.warning("Encoded supertype slot " + supertype);
-//
-//      BoolExpr stConstraint = UnitsZ3SmtEncoderUtils.subtype(ctx, subT, superT);
-////      InferenceMain.getInstance().logger
-////              .warning("Encoded subtype constraint " + subtype + " <: " + supertype);
-//
-//      return stConstraint;
     }
 
     @Override

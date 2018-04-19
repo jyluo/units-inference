@@ -1,8 +1,6 @@
 #!/bin/bash
 
-find . -name "infer\.log" | xargs rm
-find . -name "statistic\.txt" | xargs rm
-find . -name "solutions\.txt" | xargs rm
+./clean-up-projects.sh projects
 
 gradle jar
 

@@ -13,8 +13,6 @@ def main(argv):
     parser.add_argument('--corpus', dest='corpus')
     args = parser.parse_args()
 
-    tool_excutable = os.path.join(UNITS_INFERENCE_DIR, "run-dljc.sh")
-
     corpus_name = args.corpus if not args.corpus == None else os.path.splitext(args.corpus_file)[0]
 
     BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, corpus_name)
@@ -39,7 +37,7 @@ def main(argv):
 
     print "----- Fetching corpus done. -----"
 
-    print "----- Running Units Inference on corpus... -----"
+    print "----- Compiling corpus... -----"
 
     successful_projects = list()
     failed_projects = list()
@@ -53,9 +51,9 @@ def main(argv):
         print "Cleaning project..."
         subprocess.call(shlex.split(project_attrs["clean"]))
         print "Cleaning done."
-        print "Running command: {}".format(tool_excutable + " " + project_attrs["build"])
+        print "Running command: {}".format(project_attrs["build"])
         start = time.time()
-        rtn_code = subprocess.call([tool_excutable, project_attrs["build"]])
+        rtn_code = subprocess.call(shlex.split(project_attrs["build"]))
         end = time.time()
         print "Return code is {}.".format(rtn_code)
         print "Time taken by {}: \t{}\t seconds".format(project_name, end - start)
@@ -65,13 +63,13 @@ def main(argv):
             successful_projects.append(project_name)
 
     if len(failed_projects) > 0:
-        print "----- Inference failed on {} out of {} projects. -----".format(len(failed_projects), len(projects))
+        print "----- Compilation failed on {} out of {} projects. -----".format(len(failed_projects), len(projects))
         print "  Successful projects are: {}.".format(successful_projects)
         print "  Failed projects are: {}.".format(failed_projects)
     else:
-        print "----- Inference successfully inferred all {} projects. -----".format(len(projects))
+        print "----- Compilation succeeded on all {} projects. -----".format(len(projects))
 
-    print "----- Running Units Inference on corpus done. -----"
+    print "----- Compiling corpus done. -----"
 
     rtn_code = 1 if len(failed_projects) > 0 else 0
 

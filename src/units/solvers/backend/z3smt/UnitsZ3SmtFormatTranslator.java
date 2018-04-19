@@ -117,7 +117,7 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         InferenceUnit serializedSlot = slot.serialize(this);
-        return serializedSlot.getWellformnessConstraint();
+        return UnitsZ3SmtEncoderUtils.slotWellformedness(ctx, serializedSlot);
     }
 
     @Override
@@ -133,9 +133,9 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         InferenceUnit serializedSlot = slot.serialize(this);
-        return serializedSlot.getPreferenceConstraint();
+        return UnitsZ3SmtEncoderUtils.slotPreference(ctx, serializedSlot);
     }
-    
+
     // Decode overall solutions from Z3
     @Override
     public Map<Integer, AnnotationMirror> decodeSolution(Model model,

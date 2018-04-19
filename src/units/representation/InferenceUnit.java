@@ -67,42 +67,6 @@ public class InferenceUnit {
         return slot;
     }
 
-    /**
-     * Well-formness constraint: that either uu = true, ub = true, or uu == ub = false
-     */
-    public BoolExpr getWellformnessConstraint() {
-        BoolExpr dimensionlessConstraint = constraintUnitToBeDimensionless();
-        /* @formatter:off // this is for eclipse formatter */
-        return UnitsZ3SmtEncoderUtils.mkChainXor(ctx,
-                 ctx.mkAnd(ctx.mkNot(uu), ctx.mkNot(ub)),
-                 ctx.mkAnd(uu, dimensionlessConstraint),
-                 ctx.mkAnd(ub, dimensionlessConstraint)
-               );
-        /* @formatter:on // this is for eclipse formatter */
-    }
-
-    /**
-     * Well-formness constraint: that either uu = true, ub = true, or uu == ub = false
-     */
-    public BoolExpr getPreferenceConstraint() {
-        BoolExpr dimensionlessConstraint = constraintUnitToBeDimensionless();
-        /* @formatter:off // this is for eclipse formatter */
-        return ctx.mkAnd(ctx.mkNot(uu), ctx.mkNot(ub), dimensionlessConstraint);
-        /* @formatter:on // this is for eclipse formatter */
-    }
-
-    private BoolExpr constraintUnitToBeDimensionless() {
-        BoolExpr result = ctx.mkEq(prefixExponent, ctx.mkInt(0));
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
-            /* @formatter:off // this is for eclipse formatter */
-            result = ctx.mkAnd(result,
-                ctx.mkEq(getExponent(baseUnit), intZero)
-            );
-            /* @formatter:on // this is for eclipse formatter */
-        }
-        return result;
-    }
-
     public void setUnknownUnits(boolean val) {
         uu = ctx.mkBool(val);
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
+import com.microsoft.z3.IntNum;
 import units.representation.InferenceUnit;
 import units.representation.UnitsRepresentationUtils;
 
@@ -15,9 +16,9 @@ import units.representation.UnitsRepresentationUtils;
 public class UnitsZ3SmtEncoderUtils {
 
     private static final char idComponentSeparator = '-';
-    public static final String uuSlotName = "UnknownUnits";
-    public static final String ubSlotName = "UnitsBottom";
-    public static final String prefixSlotName = "Prefix";
+    public static final String uuSlotName = "TOP";
+    public static final String ubSlotName = "BOT";
+    public static final String prefixSlotName = "PREFIX";
 
     public static String z3VarName(int slotID, String component) {
         return slotID + String.valueOf(idComponentSeparator) + component;
@@ -39,6 +40,75 @@ public class UnitsZ3SmtEncoderUtils {
 
         return Pair.of(slotID, component);
     }
+
+    /**
+     * Slot well-formedness constraint: that either uu = true, ub = true, or uu == ub = false
+     */
+    public static BoolExpr slotWellformedness(Context ctx, InferenceUnit unit) {
+        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
+        /* @formatter:off // this is for eclipse formatter */
+        return UnitsZ3SmtEncoderUtils.mkChainXor(ctx,
+                 ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom())),
+                 ctx.mkAnd(unit.getUnknownUnits(), allPrefixesAreZero),
+                 ctx.mkAnd(unit.getUnitsBottom(), allPrefixesAreZero)
+               );
+        /* @formatter:on // this is for eclipse formatter */
+    }
+
+    /**
+     * Slot preference constraint: that the slot == dimensionless
+     */
+    public static BoolExpr slotPreference(Context ctx, InferenceUnit unit) {
+        return mustBeDimensionless(ctx, unit);
+    }
+
+    private static BoolExpr allPrefixesAreZero(Context ctx, InferenceUnit unit) {
+        IntNum zero = ctx.mkInt(0);
+        BoolExpr result = ctx.mkEq(unit.getPrefixExponent(), zero);
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            /* @formatter:off // this is for eclipse formatter */
+            result = ctx.mkAnd(result,
+                ctx.mkEq(unit.getExponent(baseUnit), zero)
+            );
+            /* @formatter:on // this is for eclipse formatter */
+        }
+        return result;
+    }
+
+    private static BoolExpr mustBeDimensionless(Context ctx, InferenceUnit unit) {
+        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
+        /* @formatter:off // this is for eclipse formatter */
+        return ctx.mkAnd(
+                 ctx.mkNot(unit.getUnknownUnits()),
+                 ctx.mkNot(unit.getUnitsBottom()),
+                 allPrefixesAreZero
+               );
+        /* @formatter:on // this is for eclipse formatter */
+    }
+//
+//    private static BoolExpr mustBeUnknownUnits(Context ctx, InferenceUnit unit) {
+//        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
+//        /* @formatter:off // this is for eclipse formatter */
+//        return ctx.mkAnd(
+//                 unit.getUnknownUnits(),
+//                 ctx.mkNot(unit.getUnitsBottom()),
+//                 allPrefixesAreZero
+//               );
+//        /* @formatter:on // this is for eclipse formatter */
+//    }
+//
+//    private static BoolExpr mustBeUnitsBottom(Context ctx, InferenceUnit unit) {
+//        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
+//        /* @formatter:off // this is for eclipse formatter */
+//        return ctx.mkAnd(
+//                 ctx.mkNot(unit.getUnknownUnits()),
+//                 unit.getUnitsBottom(),
+//                 allPrefixesAreZero
+//               );
+//        /* @formatter:on // this is for eclipse formatter */
+//    }
+
+    // =========================================================================================
 
     // xor is commutative and associative
     public static BoolExpr mkChainXor(Context ctx, BoolExpr arg0, BoolExpr arg1,
@@ -72,40 +142,66 @@ public class UnitsZ3SmtEncoderUtils {
         return equalityEncoding;
     }
 
-    // sub <: super has 3 cases:
-    // not (super = top or super = bottom) --> sub = super xor sub = bottom
-    // super = top --> no constraints on sub
-    // super = bottom --> sub = bottom
-
-    // sub = bottom -> no constraints on super
-    // sub != top and sub != bottom --> super = unit xor super = top
-    // sub = top --> super = top
-
-    // super = bottom -> sub = bottom
-    // super != top and super != bottom -> sub = super xor sub = bottom
-    // super = top -> no constraints on sub
-
+    // sub <: super has 5 cases:
+    // sub = bot, or
+    // super = top, or
+    // sub = super
     public static BoolExpr subtype(Context ctx, InferenceUnit subT, InferenceUnit superT) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr subtypeEncoding =
-            ctx.mkAnd(
-                //ctx.mkImplies(arg0, arg1)
-                // not (super = top or super = bottom) --> sub = super xor sub = bottom
-                ctx.mkOr(
-                    ctx.mkOr(
-                        superT.getUnknownUnits(),
-                        superT.getUnitsBottom()
-                    ),
-                    ctx.mkXor(equality(ctx, subT, superT), subT.getUnitsBottom()) 
-                ),
-                // super = bottom --> sub = bottom
-                ctx.mkOr(
-                    ctx.mkNot(
-                        superT.getUnitsBottom()
-                    ),
-                    subT.getUnitsBottom()
-                )
+            ctx.mkOr(
+                // sub = bot
+                subT.getUnitsBottom(),
+                // super = top
+                superT.getUnknownUnits(),
+                // sub = super
+                equality(ctx, subT, superT)
             );
+
+//            ctx.mkOr(
+//                // sub = top --> super = top
+//                ctx.mkAnd(subT.getUnknownUnits(), superT.getUnknownUnits()),
+//                // sub = bot
+//                subT.getUnitsBottom(),
+//                // super = top
+//                superT.getUnknownUnits(),
+//                // super = bot --> sub = bot
+//                ctx.mkAnd(superT.getUnitsBottom(), subT.getUnitsBottom()),
+//                // sub = super
+//                equality(ctx, subT, superT)
+//            );
+        
+//            ctx.mkOr(
+//                // sub = top --> super = top
+//                ctx.mkAnd(mustBeUnknownUnits(ctx, subT), mustBeUnknownUnits(ctx, superT)),
+//                // sub = bot
+//                mustBeUnitsBottom(ctx, subT),
+//                // super = top
+//                mustBeUnknownUnits(ctx, superT),
+//                // super = bot --> sub = bot
+//                ctx.mkAnd(mustBeUnitsBottom(ctx, superT), mustBeUnitsBottom(ctx, subT)),
+//                // sub = super
+//                equality(ctx, subT, superT)
+//            );
+        
+//            ctx.mkAnd(
+//                //ctx.mkImplies(arg0, arg1)
+//                // not (super = top or super = bottom) --> sub = super xor sub = bottom
+//                ctx.mkOr(
+//                    ctx.mkOr(
+//                        superT.getUnknownUnits(),
+//                        superT.getUnitsBottom()
+//                    ),
+//                    ctx.mkXor(equality(ctx, subT, superT), subT.getUnitsBottom()) 
+//                ),
+//                // super = bottom --> sub = bottom
+//                ctx.mkOr(
+//                    ctx.mkNot(
+//                        superT.getUnitsBottom()
+//                    ),
+//                    subT.getUnitsBottom()
+//                )
+//            );
         /* @formatter:on // this is for eclipse formatter */
         return subtypeEncoding;
     }

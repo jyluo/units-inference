@@ -3,34 +3,6 @@ import units.qual.*;
 package java.lang;
 
 class System {
-    static final InputStream in;
-    static final PrintStream out;
-    static final PrintStream err;
-    static void setIn(InputStream arg0);
-    static void setOut(PrintStream arg0);
-    static void setErr(PrintStream arg0);
-    static Console console();
-    static Channel inheritedChannel() throws IOException;
-    static void setSecurityManager(SecurityManager arg0);
-    static SecurityManager getSecurityManager();
     static @ms long currentTimeMillis();
     static @ns long nanoTime();
-    static void arraycopy(Object arg0, int arg1, Object arg2, int arg3, int arg4);
-    static int identityHashCode(Object arg0);
-    static Properties getProperties();
-    static String lineSeparator();
-    static void setProperties(Properties arg0);
-    static String getProperty(String arg0);
-    static String getProperty(String arg0, String arg1);
-    static String setProperty(String arg0, String arg1);
-    static String clearProperty(String arg0);
-    static String getenv(String arg0);
-    static Map<String,String> getenv();
-    static void exit(int arg0);
-    static void gc();
-    static void runFinalization();
-    static void runFinalizersOnExit(boolean arg0);
-    static void load(String arg0);
-    static void loadLibrary(String arg0);
-    static String mapLibraryName(String arg0);
 }

@@ -15,7 +15,7 @@ import units.representation.UnitsRepresentationUtils;
     "JavaBoxedPrimitives.astub",
     "JavaLang.astub",
     "JavaMath.astub",
-    "JavaMathTrig.astub",
+    // "JavaMathTrig.astub",
     "JavaThread.astub"
     })
 public class UnitsChecker extends BaseInferrableChecker {

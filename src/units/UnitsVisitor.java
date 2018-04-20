@@ -126,7 +126,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL: // <=
                     // result is already dimensionless for bools
-                    // constraintManager.addEqualityConstraint(lhs, rhs);
+                    constraintManager.addComparableConstraint(lhs, rhs);
                     break;
                 case PLUS:
                     // if either are string arguments, result is already a constant slot of
@@ -163,21 +163,21 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         switch (binaryTree.getKind()) {
             case PLUS:
                 // if it is not a string concatenation and the units don't match, issue warning
-//                if (!TreeUtils.isStringConcatenation(binaryTree)
-//                        && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
-//                    checker.report(Result.failure("addition.unit.mismatch",
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-//                            binaryTree);
-//                }
+                // if (!TreeUtils.isStringConcatenation(binaryTree)
+                // && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                // checker.report(Result.failure("addition.unit.mismatch",
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                // binaryTree);
+                // }
                 break;
             case MINUS:
-//                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-//                    checker.report(Result.failure("subtraction.unit.mismatch",
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-//                            binaryTree);
-//                }
+                // if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                // checker.report(Result.failure("subtraction.unit.mismatch",
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                // atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                // binaryTree);
+                // }
                 break;
             case CONDITIONAL_AND: // &&
             case CONDITIONAL_OR: // ||
@@ -188,12 +188,16 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             case GREATER_THAN_EQUAL: // >=
             case LESS_THAN: // <
             case LESS_THAN_EQUAL: // <=
-//                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-//                    checker.report(Result.failure("comparison.unit.mismatch",
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-//                            binaryTree);
-//                }
+                // comparable constraint: lhs <: rhs, or rhs <: lhs
+                if (!(atypeFactory.getQualifierHierarchy().isSubtype(lhsAM, rhsAM)
+                        || atypeFactory.getQualifierHierarchy().isSubtype(rhsAM, lhsAM))) {
+                    checker.report(Result.failure("comparison.unit.mismatch",
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                            binaryTree);
+                }
+                // if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                // }
             default:
                 break;
         }

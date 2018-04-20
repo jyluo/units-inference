@@ -15,6 +15,6 @@ class Comparisons {
         if( mInferred >= m ) {}
 
         // :: fixable-error: (comparison.unit.mismatch)
-        m = m == mInferred ? m : m;
+        @m int y = m == mInferred ? m : m;
     }
 }

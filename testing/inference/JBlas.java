@@ -34,7 +34,6 @@ class Timer {
     }
 
     boolean ranFor(double seconds) {
-        // :: fixable-error: (comparison.unit.mismatch) :: fixable-error: (subtraction.unit.mismatch)
         return (System.nanoTime() - startTime) / 1e9 >= seconds;
     }
 

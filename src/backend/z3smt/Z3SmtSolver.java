@@ -9,8 +9,10 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Statistics;
 import checkers.inference.InferenceMain;
+import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
+import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
@@ -91,7 +93,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 VariableSlot varSlot = (VariableSlot) slot;
                 solver.Assert(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
                 solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
-                        Double.toString(Math.random()));
+                        "g1");
             }
         }
     }
@@ -115,6 +117,34 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             if (current % 100 == 0) {
                 System.out.println("=== Running GC ===");
                 Runtime.getRuntime().gc(); // trigger garbage collector
+            }
+
+            // generate soft constraint for comparisons that their args are equal
+            if (constraint instanceof ComparableConstraint) {
+                ComparableConstraint compC = (ComparableConstraint) constraint;
+
+                Constraint eqC = InferenceMain.getInstance().getConstraintManager()
+                        .createEqualityConstraint(compC.getFirst(), compC.getSecond());
+
+                BoolExpr serializedEqC = eqC.serialize(formatTranslator);
+
+                if (!serializedEqC.simplify().isTrue()) {
+                    solver.AssertSoft(serializedEqC, 1, "g1");
+                }
+            }
+
+            // generate soft constraint for subtype that they are equal
+            if (constraint instanceof SubtypeConstraint) {
+                SubtypeConstraint stC = (SubtypeConstraint) constraint;
+
+                Constraint eqC = InferenceMain.getInstance().getConstraintManager()
+                        .createEqualityConstraint(stC.getSubtype(), stC.getSupertype());
+
+                BoolExpr serializedEqC = eqC.serialize(formatTranslator);
+
+                if (!serializedEqC.simplify().isTrue()) {
+                    solver.AssertSoft(serializedEqC, 1, "g1");
+                }
             }
 
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);

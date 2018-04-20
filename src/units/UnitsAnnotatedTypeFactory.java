@@ -137,8 +137,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // exceptions are always dimensionless
         defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS,
                 TypeUseLocation.EXCEPTION_PARAMETER);
-//        // set TOP as the default qualifier for local variables, for dataflow refinement
-//        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.LOCAL_VARIABLE);
+        // set TOP as the default qualifier for local variables, for dataflow refinement
+        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.LOCAL_VARIABLE);
     }
 
     @Override
@@ -323,18 +323,25 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                     // if it is a string concatenation, result is dimensionless
                     if (TreeUtils.isStringConcatenation(binaryTree)) {
                         type.replaceAnnotation(unitsRepUtils.DIMENSIONLESS);
-                    } else if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                        type.replaceAnnotation(lhsAM);
                     } else {
-                        type.replaceAnnotation(unitsRepUtils.TOP);
+                        type.replaceAnnotation(
+                                atypeFactory.getQualifierHierarchy().leastUpperBound(lhsAM, rhsAM));
                     }
+                    //
+                    // else if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    // type.replaceAnnotation(lhsAM);
+                    // } else {
+                    // type.replaceAnnotation(unitsRepUtils.TOP);
+                    // }
                     break;
                 case MINUS:
-                    if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                        type.replaceAnnotation(lhsAM);
-                    } else {
-                        type.replaceAnnotation(unitsRepUtils.TOP);
-                    }
+                    // if (AnnotationUtils.areSame(lhsAM, rhsAM)) {
+                    // type.replaceAnnotation(lhsAM);
+                    // } else {
+                    // type.replaceAnnotation(unitsRepUtils.TOP);
+                    // }
+                    type.replaceAnnotation(
+                            atypeFactory.getQualifierHierarchy().leastUpperBound(lhsAM, rhsAM));
                     break;
                 case MULTIPLY:
                     type.replaceAnnotation(UnitsTypecheckUtils.multiplication(lhsAM, rhsAM));
@@ -354,6 +361,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 case GREATER_THAN_EQUAL: // >=
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL: // <=
+                    // output of comparisons is a dimensionless binary
                     type.replaceAnnotation(unitsRepUtils.DIMENSIONLESS);
                     break;
                 default:

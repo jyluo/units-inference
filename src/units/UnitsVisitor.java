@@ -108,13 +108,6 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
             Kind kind = binaryTree.getKind();
             switch (binaryTree.getKind()) {
-                case PLUS:
-                    // if either are string arguments, result is already a constant slot of
-                    // dimensionless
-                    if (TreeUtils.isStringConcatenation(binaryTree)) {
-                        break;
-                    } // else create arithmetic constraint
-                case MINUS:
                 case MULTIPLY:
                 case DIVIDE:
                 case REMAINDER:
@@ -135,6 +128,13 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                     // result is already dimensionless for bools
                     // constraintManager.addEqualityConstraint(lhs, rhs);
                     break;
+                case PLUS:
+                    // if either are string arguments, result is already a constant slot of
+                    // dimensionless
+                    if (TreeUtils.isStringConcatenation(binaryTree)) {
+                        break;
+                    } // else create arithmetic constraint
+                case MINUS:
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
                     VariableSlot lubSlot =
@@ -163,21 +163,21 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         switch (binaryTree.getKind()) {
             case PLUS:
                 // if it is not a string concatenation and the units don't match, issue warning
-                if (!TreeUtils.isStringConcatenation(binaryTree)
-                        && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("addition.unit.mismatch",
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-                            binaryTree);
-                }
+//                if (!TreeUtils.isStringConcatenation(binaryTree)
+//                        && !AnnotationUtils.areSame(lhsAM, rhsAM)) {
+//                    checker.report(Result.failure("addition.unit.mismatch",
+//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+//                            binaryTree);
+//                }
                 break;
             case MINUS:
-                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("subtraction.unit.mismatch",
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-                            binaryTree);
-                }
+//                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+//                    checker.report(Result.failure("subtraction.unit.mismatch",
+//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+//                            binaryTree);
+//                }
                 break;
             case CONDITIONAL_AND: // &&
             case CONDITIONAL_OR: // ||

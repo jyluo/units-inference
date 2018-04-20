@@ -133,7 +133,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 case LESS_THAN: // <
                 case LESS_THAN_EQUAL: // <=
                     // result is already dimensionless for bools
-                    constraintManager.addEqualityConstraint(lhs, rhs);
+                    // constraintManager.addEqualityConstraint(lhs, rhs);
                     break;
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
@@ -188,12 +188,12 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             case GREATER_THAN_EQUAL: // >=
             case LESS_THAN: // <
             case LESS_THAN_EQUAL: // <=
-                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                    checker.report(Result.failure("comparison.unit.mismatch",
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
-                            binaryTree);
-                }
+//                if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
+//                    checker.report(Result.failure("comparison.unit.mismatch",
+//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
+//                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+//                            binaryTree);
+//                }
             default:
                 break;
         }

@@ -1,5 +1,9 @@
 package backend.z3smt;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,6 +56,18 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         encodeAllSlots();
 
+        // Write Slots to file
+        String writePath = new File(new File("").getAbsolutePath()).toString() + "/slots.smt";
+        try {
+            FileWriter fw = new FileWriter(writePath, true); // appends to slots.txt
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter pw = new PrintWriter(bw);
+            pw.write(solver.toString());
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         Runtime.getRuntime().gc(); // trigger garbage collector
 
         encodeAllConstraints();
@@ -91,7 +107,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 VariableSlot varSlot = (VariableSlot) slot;
                 solver.Assert(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
                 solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
-                        Double.toString(Math.random()));
+                        "g1");
             }
         }
     }
@@ -104,55 +120,72 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         Iterator<Constraint> iter = constraints.iterator();
 
-        while (iter.hasNext()) {
-            // System.out.println("Getting next item.");
+        // Write Slots to file
+        String writePath = new File(new File("").getAbsolutePath()).toString() + "/constraints.smt";
+        try {
+            FileWriter fw = new FileWriter(writePath, true); // appends to constraints.txt
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter pw = new PrintWriter(bw);
 
-            Constraint constraint = iter.next();
+            while (iter.hasNext()) {
+                // System.out.println("Getting next item.");
 
-            System.out.println(
-                    "  Serializing Constraint " + current + " / " + total + " : " + constraint);
+                Constraint constraint = iter.next();
 
-            if (current % 100 == 0) {
-                System.out.println("=== Running GC ===");
-                Runtime.getRuntime().gc(); // trigger garbage collector
+                System.out.println(
+                        "  Serializing Constraint " + current + " / " + total + " : " + constraint);
+
+//                if (current % 100 == 0) {
+//                    System.out.println("=== Running GC ===");
+//                    Runtime.getRuntime().gc(); // trigger garbage collector
+//                }
+
+                BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
+
+                // System.out.println(" Constraint serialized. ");
+
+                if (serializedConstraint == null) {
+                    // TODO: Should error abort if unsupported constraint detected.
+                    // Currently warning is a workaround for making ontology working, as in some
+                    // cases
+                    // existential constraints generated.
+                    // Should investigate on this, and change this to ErrorAbort when eliminated
+                    // unsupported constraints.
+                    InferenceMain.getInstance().logger
+                            .warning("Unsupported constraint detected! Constraint type: "
+                                    + constraint.getClass());
+                    current++;
+                    continue;
+                }
+
+                // System.out.println(" Constraint \n" + serializedConstraint
+                // + "\n simplified :\n " + serializedConstraint.simplify());
+
+                if (serializedConstraint.simplify().isTrue()) {
+                    // This only works if the BoolExpr is directly the value Z3True. Still a good
+                    // filter, but doesn't filter enough.
+                    // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0 0))
+                    // Skip tautology.
+                    // System.out.println(" simplified to tautology.");
+                    current++;
+                    continue;
+                }
+
+                pw.write("(assert ");
+                pw.write(serializedConstraint.simplify().toString());
+                pw.write(")\n");
+
+                // // System.out.println(" Adding hard constraint ");
+                //
+                // solver.Assert(serializedConstraint);
+                //
+                // current++;
+                // // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
             }
 
-            BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
-
-            // System.out.println(" Constraint serialized. ");
-
-            if (serializedConstraint == null) {
-                // TODO: Should error abort if unsupported constraint detected.
-                // Currently warning is a workaround for making ontology working, as in some cases
-                // existential constraints generated.
-                // Should investigate on this, and change this to ErrorAbort when eliminated
-                // unsupported constraints.
-                InferenceMain.getInstance().logger
-                        .warning("Unsupported constraint detected! Constraint type: "
-                                + constraint.getClass());
-                current++;
-                continue;
-            }
-
-            // System.out.println(" Constraint \n" + serializedConstraint
-            // + "\n simplified :\n " + serializedConstraint.simplify());
-
-            if (serializedConstraint.simplify().isTrue()) {
-                // This only works if the BoolExpr is directly the value Z3True. Still a good
-                // filter, but doesn't filter enough.
-                // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0 0))
-                // Skip tautology.
-                // System.out.println(" simplified to tautology.");
-                current++;
-                continue;
-            }
-
-            // System.out.println(" Adding hard constraint ");
-
-            solver.Assert(serializedConstraint);
-
-            current++;
-            // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

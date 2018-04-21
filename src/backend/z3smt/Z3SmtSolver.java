@@ -69,6 +69,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         }
 
         System.out.println("Starting the solving");
+        System.out.flush();
+
         switch (solver.Check()) {
             case SATISFIABLE:
                 result = formatTranslator.decodeSolution(solver.getModel(),

@@ -1,17 +1,13 @@
 package units.solvers.backend.z3smt;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ErrorReporter;
 import org.checkerframework.javacutil.Pair;
 import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Expr;
-import com.microsoft.z3.FuncDecl;
-import com.microsoft.z3.IntNum;
-import com.microsoft.z3.Model;
 import backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.VariableSlot;
@@ -138,32 +134,20 @@ public class UnitsZ3SmtFormatTranslator
 
     // Decode overall solutions from Z3
     @Override
-    public Map<Integer, AnnotationMirror> decodeSolution(Model model,
+    public Map<Integer, AnnotationMirror> decodeSolution(List<String> model,
             ProcessingEnvironment processingEnv) {
 
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
 
-        // Model maps slotID-component to IntNum or BoolExpr
-        // We collect all components for a given slotID, creating a solution slot for each slotID
-        // and filling it in.
-        // Each funcDecl is a z3 variable (internally declared as a z3 function with name =
-        // slotID-component, and value = results of inference)
-        // eg: (declare-fun 10-m () Int) := 21 // meter of varAnnot(10) has a solution of 21
-        for (FuncDecl funcDecl : model.getDecls()) {
-            // Get the result value from inference
-            Expr constInterp = model.getConstInterp(funcDecl);
-
-            if (!(constInterp instanceof IntNum || constInterp instanceof BoolExpr)) {
-                ErrorReporter.errorAbort(
-                        "Wrong solution type detected for z3Var " + funcDecl.getName().toString()
-                                + ": All solution must be type of IntNum or BoolExpr, but got "
-                                + constInterp.getClass() + " instead.");
-            }
+        for (String line : model) {
+            // each line is "varName value"
+            String[] parts = line.split(" ");
+            String varName = parts[0];
+            String value = parts[1];
 
             // Get slotID and component name
-            Pair<Integer, String> slot =
-                    UnitsZ3SmtEncoderUtils.slotFromZ3VarName(funcDecl.getName().toString());
+            Pair<Integer, String> slot = UnitsZ3SmtEncoderUtils.slotFromZ3VarName(varName);
             int slotID = slot.first;
             String component = slot.second;
 
@@ -174,18 +158,18 @@ public class UnitsZ3SmtFormatTranslator
 
             TypecheckUnit z3Slot = solutionSlots.get(slotID);
             if (component.contentEquals(UnitsZ3SmtEncoderUtils.uuSlotName)) {
-                z3Slot.setUnknownUnits(constInterp.isTrue());
+                z3Slot.setUnknownUnits(Boolean.parseBoolean(value));
             } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.ubSlotName)) {
-                z3Slot.setUnitsBottom(constInterp.isTrue());
+                z3Slot.setUnitsBottom(Boolean.parseBoolean(value));
             } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.prefixSlotName)) {
-                z3Slot.setPrefixExponent(Integer.valueOf(constInterp.toString()));
+                z3Slot.setPrefixExponent(Integer.parseInt(value));
             } else {
                 // assumes it is a base unit exponent
-                z3Slot.setExponent(component, Integer.valueOf(constInterp.toString()));
+                z3Slot.setExponent(component, Integer.parseInt(value));
             }
 
             // DEBUG:
-            // System.out.println(" " + funcDecl.getName().toString() + " => " + constInterp);
+            // System.out.println(" " + varName + " => " + value);
             // 10-s => -3
             // 10-m => 1
             // 10-Prefix => 0

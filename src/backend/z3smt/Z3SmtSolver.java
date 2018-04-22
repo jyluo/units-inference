@@ -1,17 +1,21 @@
 package backend.z3smt;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.microsoft.z3.Statistics;
+import com.microsoft.z3.Expr;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
@@ -19,12 +23,29 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
+import checkers.inference.solver.util.StatisticRecorder;
 
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
 
     protected final Context ctx;
     protected final com.microsoft.z3.Optimize solver;
+    protected StringBuffer smtFileContents;
+
+    protected final String z3Program = "z3";
+    protected final boolean optimizingMode = false;
+
+    // file is written at projectRootFolder/constraints.smt
+    protected final String constraintsFile =
+            new File(new File("").getAbsolutePath()).toString() + "/z3Constraints.smt";
+
+    // timing statistics variables
+    protected long serializationStart;
+    protected long serializationEnd;
+    protected long solvingStart;
+    protected long solvingEnd;
+    protected long decodingStart;
+    protected long decodingEnd;
 
     public Z3SmtSolver(SolverEnvironment solverEnvironment, Collection<Slot> slots,
             Collection<Constraint> constraints,
@@ -50,55 +71,73 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
-        Runtime.getRuntime().gc(); // trigger garbage collector
+        // Runtime.getRuntime().gc(); // trigger garbage collector
 
         System.out.println("Now encoding slots with soft constraints");
 
-        encodeAllSlots();
+        smtFileContents = new StringBuffer();
 
-        // Write Slots to file
-        String writePath = new File(new File("").getAbsolutePath()).toString() + "/slots.smt";
+        // only enable in non-optimizing mode
+        if (!optimizingMode) {
+            smtFileContents.append("(set-option :produce-unsat-cores true)\n");
+        }
+
+        serializationStart = System.currentTimeMillis();
+        encodeAllSlots();
+        encodeAllConstraints();
+        serializationEnd = System.currentTimeMillis();
+
+        System.out.println("Encoding constraints done!");
+
+        smtFileContents.append("(check-sat)\n");
+        smtFileContents.append("(get-model)\n");
+        if (!optimizingMode) {
+            smtFileContents.append("(get-unsat-core)\n");
+        }
+
+        System.out.println("Writing constraints to file: " + constraintsFile);
+
+        writeConstraintsToSMTFile();
+
+        System.out.println("Starting the solving");
+        solvingStart = System.currentTimeMillis();
+        // in Units, if the status is SAT then there must be output in the model
+        List<String> results = runZ3Solver();
+        solvingEnd = System.currentTimeMillis();
+
+        System.out.println("Solving Complete");
+
+        long serializationTime = serializationEnd - serializationStart;
+        long solvingTime = solvingEnd - solvingStart;
+        StatisticRecorder.recordSingleSerializationTime(serializationTime);
+        StatisticRecorder.recordSingleSolvingTime(solvingTime);
+
+        // System.out.println("=== Solutions: ===");
+        // for (String r : results) {
+        // System.out.println(r);
+        // }
+
+        if (!results.isEmpty()) {
+            result = formatTranslator.decodeSolution(results,
+                    solverEnvironment.processingEnvironment);
+        } else {
+            System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
+            result = new HashMap<>();
+        }
+
+        return result;
+    }
+
+    private void writeConstraintsToSMTFile() {
         try {
-            FileWriter fw = new FileWriter(writePath, true); // appends to slots.txt
+            FileWriter fw = new FileWriter(constraintsFile, false);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter pw = new PrintWriter(bw);
-            pw.write(solver.toString());
+            pw.write(smtFileContents.toString());
             pw.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        Runtime.getRuntime().gc(); // trigger garbage collector
-
-        encodeAllConstraints();
-
-        System.out.println("Encoding constraints done!");
-
-        Runtime.getRuntime().gc(); // trigger garbage collector
-
-        System.out.println("=== Solver statistics ===");
-        Statistics stats = solver.getStatistics();
-        for (String key : stats.getKeys()) {
-            System.out.println("  " + key + " => " + stats.get(key));
-        }
-
-        System.out.println("Starting the solving");
-        switch (solver.Check()) {
-            case SATISFIABLE:
-                result = formatTranslator.decodeSolution(solver.getModel(),
-                        solverEnvironment.processingEnvironment);
-                break;
-            case UNSATISFIABLE:
-                System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
-                result = new HashMap<>();
-                break;
-            case UNKNOWN:
-            default:
-                System.out.println("\n\n!!! Solver failed to solve due to Unknown reason! !!!");
-                result = new HashMap<>();
-                break;
-        }
-        return result;
     }
 
     protected void encodeAllSlots() {
@@ -106,9 +145,32 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             if (slot instanceof VariableSlot) {
                 VariableSlot varSlot = (VariableSlot) slot;
                 solver.Assert(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
-                solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
-                        "g1");
+                if (optimizingMode) {
+                    // empty string means no optimization group
+                    solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
+                            "");
+                }
             }
+        }
+
+        // solver.toString() also includes "(check-sat)" as the last line, remove it
+        String slotDefinitionsAndConstraints = solver.toString();
+        int truncateIndex = slotDefinitionsAndConstraints.lastIndexOf("(check-sat)");
+        assert truncateIndex != -1;
+
+        smtFileContents.append(slotDefinitionsAndConstraints.substring(0, truncateIndex));
+
+        // debug use:
+        // Write Slots to file
+        String writePath = new File(new File("").getAbsolutePath()).toString() + "/slots.smt";
+        try {
+            FileWriter fw = new FileWriter(writePath, false); // appends to slots.smt
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter pw = new PrintWriter(bw);
+            pw.write(solver.toString());
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -118,75 +180,211 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         int current = 1;
 
-        Iterator<Constraint> iter = constraints.iterator();
+        List<String> constraintClauses = new ArrayList<>();
 
+        for (Constraint constraint : constraints) {
+            // System.out.println("Getting next item.");
+
+            System.out.println(
+                    "  Serializing Constraint " + current + " / " + total + " : " + constraint);
+
+            // if (current % 100 == 0) {
+            // System.out.println("=== Running GC ===");
+            // Runtime.getRuntime().gc(); // trigger garbage collector
+            // }
+
+            BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
+
+            // System.out.println(" Constraint serialized. ");
+
+            if (serializedConstraint == null) {
+                // TODO: Should error abort if unsupported constraint detected.
+                // Currently warning is a workaround for making ontology working, as in some
+                // cases
+                // existential constraints generated.
+                // Should investigate on this, and change this to ErrorAbort when eliminated
+                // unsupported constraints.
+                InferenceMain.getInstance().logger
+                        .warning("Unsupported constraint detected! Constraint type: "
+                                + constraint.getClass());
+                current++;
+                continue;
+            }
+
+            // System.out.println(" Constraint \n" + serializedConstraint
+            // + "\n simplified :\n " + serializedConstraint.simplify());
+
+            Expr simplifiedConstraint = serializedConstraint.simplify();
+
+            if (simplifiedConstraint.isTrue()) {
+                // This only works if the BoolExpr is directly the value Z3True. Still a good
+                // filter, but doesn't filter enough.
+                // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0 0))
+                // Skip tautology.
+                // System.out.println(" simplified to tautology.");
+                current++;
+                continue;
+            }
+
+            constraintClauses.add(simplifiedConstraint.toString());
+
+            // // System.out.println(" Adding hard constraint ");
+            //
+            // solver.Assert(serializedConstraint);
+            //
+            current++;
+            // // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
+        }
+
+        for (String clause : constraintClauses) {
+            smtFileContents.append("(assert ");
+            smtFileContents.append(clause);
+            smtFileContents.append(")\n");
+        }
+
+        // debug use
         // Write Slots to file
         String writePath = new File(new File("").getAbsolutePath()).toString() + "/constraints.smt";
         try {
-            FileWriter fw = new FileWriter(writePath, true); // appends to constraints.txt
+            FileWriter fw = new FileWriter(writePath, false); // appends to constraints.smt
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter pw = new PrintWriter(bw);
 
-            while (iter.hasNext()) {
-                // System.out.println("Getting next item.");
-
-                Constraint constraint = iter.next();
-
-                System.out.println(
-                        "  Serializing Constraint " + current + " / " + total + " : " + constraint);
-
-//                if (current % 100 == 0) {
-//                    System.out.println("=== Running GC ===");
-//                    Runtime.getRuntime().gc(); // trigger garbage collector
-//                }
-
-                BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
-
-                // System.out.println(" Constraint serialized. ");
-
-                if (serializedConstraint == null) {
-                    // TODO: Should error abort if unsupported constraint detected.
-                    // Currently warning is a workaround for making ontology working, as in some
-                    // cases
-                    // existential constraints generated.
-                    // Should investigate on this, and change this to ErrorAbort when eliminated
-                    // unsupported constraints.
-                    InferenceMain.getInstance().logger
-                            .warning("Unsupported constraint detected! Constraint type: "
-                                    + constraint.getClass());
-                    current++;
-                    continue;
-                }
-
-                // System.out.println(" Constraint \n" + serializedConstraint
-                // + "\n simplified :\n " + serializedConstraint.simplify());
-
-                if (serializedConstraint.simplify().isTrue()) {
-                    // This only works if the BoolExpr is directly the value Z3True. Still a good
-                    // filter, but doesn't filter enough.
-                    // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0 0))
-                    // Skip tautology.
-                    // System.out.println(" simplified to tautology.");
-                    current++;
-                    continue;
-                }
-
+            for (String clause : constraintClauses) {
                 pw.write("(assert ");
-                pw.write(serializedConstraint.simplify().toString());
+                pw.write(clause);
                 pw.write(")\n");
-
-                // // System.out.println(" Adding hard constraint ");
-                //
-                // solver.Assert(serializedConstraint);
-                //
-                // current++;
-                // // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
             }
 
             pw.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // Sample satisfying output format:
+    /* @formatter:off // this is for eclipse formatter */
+    /*
+    sat
+    (model 
+      (define-fun |338-BOT| () Bool
+        false)
+      (define-fun |509-TOP| () Bool
+        false)
+      (define-fun |750-m| () Int
+        (- 9))
+      (define-fun |355-s| () Int
+        0)
+      (define-fun |790-PREFIX| () Int
+        0)
+      (define-fun |503-m| () Int
+        0)
+    )
+    */
+    /* @formatter:on // this is for eclipse formatter */
+
+    private List<String> runZ3Solver() {
+        // TODO: add z3 stats?
+        String command = z3Program + " " + constraintsFile;
+
+        // TODO: build TCU here?
+        // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
+
+        // stores results from z3 program output
+        final List<String> results = new ArrayList<>();
+
+        // spin up subprocess to execute z3
+        try {
+            final Process z3Process = Runtime.getRuntime().exec(command);
+
+            // spin up 2 threads at the same time to analyze z3 std output and catch std errors
+            Thread handleZ3Output = new Thread() {
+                @Override
+                public void run() {
+                    String line = "";
+                    BufferedReader stdInput =
+                            new BufferedReader(new InputStreamReader(z3Process.getInputStream()));
+
+                    boolean declarationLine = true;
+                    // each result line is "varName value"
+                    String resultsLine = "";
+
+                    try {
+                        while ((line = stdInput.readLine().trim()) != null) {
+                            if (line.contentEquals("unsat")) {
+                                break; // TODO: parse unsat core
+                            }
+                            // processing define-fun lines
+                            if (declarationLine && line.startsWith("(define-fun")) {
+                                declarationLine = false;
+
+                                int firstBar = line.indexOf('|');
+                                int lastBar = line.lastIndexOf('|');
+
+                                assert firstBar != -1;
+                                assert lastBar != -1;
+                                assert firstBar < lastBar;
+                                assert line.contains("Bool") || line.contains("Int");
+
+                                // copy z3 variable name into results line
+                                resultsLine += line.substring(firstBar + 1, lastBar);;
+                                continue;
+                            }
+                            // processing lines immediately following define-fun lines
+                            if (!declarationLine) {
+                                declarationLine = true;
+                                String value = line.substring(0, line.lastIndexOf(')'));
+
+                                if (value.contains("-")) { // negative number
+                                    // remove brackets surrounding negative numbers
+                                    value = value.substring(1, value.length() - 1);
+                                    // remove space between - and the number itself
+                                    value = String.join("", value.split(" "));
+                                }
+
+                                resultsLine += " " + value;
+                                results.add(resultsLine);
+                                resultsLine = "";
+                                continue;
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            handleZ3Output.start();
+
+            Thread handleZ3Error = new Thread() {
+                @Override
+                public void run() {
+                    String errorLine = "";
+                    StringBuilder sb = new StringBuilder();
+                    BufferedReader stdError =
+                            new BufferedReader(new InputStreamReader(z3Process.getErrorStream()));
+                    try {
+                        while ((errorLine = stdError.readLine()) != null) {
+                            sb.append(errorLine); // need + "\n" ?
+                        }
+                        System.err.println(sb.toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            handleZ3Error.start();
+
+            // wait for threads to die
+            handleZ3Output.join();
+            handleZ3Error.join();
+            // tell Java's thread to wait for z3 process to finish
+            z3Process.waitFor();
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return results;
     }
 
     @Override

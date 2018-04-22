@@ -24,6 +24,7 @@ giant-projects/
 # output logs
 compilationLog/
 inferenceLog/
+typecheckLog/
 
 # example classes and annotated output
 testing/**/*.class

@@ -292,7 +292,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
                 if (!simplifiedEQC.isTrue()) {
                     smtFileContents.append("(assert-soft ");
-                    smtFileContents.append(clause);
+                    smtFileContents.append(simplifiedEQC.toString());
                     smtFileContents.append(" :weight 1)\n");
                 }
             }

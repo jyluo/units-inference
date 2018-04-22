@@ -7,7 +7,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.microsoft.z3.Model;
 import com.microsoft.z3.Optimize;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;

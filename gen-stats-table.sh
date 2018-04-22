@@ -17,7 +17,7 @@ pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
 # Print header row
-printf 'Project\tinference failed\texpected-subtargets\tsuccessful-subtargets\t'
+printf 'Project\tinference failed\texpected-subtargets\tsuccessful-subtargets\tserialization-time\tsolving-time\t'
 for key in "${statsKeys[@]}"; do
     printf '%s\t' "$key"
 done
@@ -41,8 +41,16 @@ for project in "${projects[@]}"; do
         # number of successful sub-projects
         count=$(grep -w "Statistic start" "$project/logs/infer.log" | wc -l)
         printf '%s\t' "$count"
+        # serialization time
+        grep -w "SMT Serialization Time" "$project/logs/infer.log" | cut -d ':' -f 2 | \
+                awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
+        # solving time
+        grep -w "SMT Solving Time" "$project/logs/infer.log" | cut -d ':' -f 2 | \
+                awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
     else
         printf '%s\t' "1"
+        printf '%s\t' "0"
+        printf '%s\t' "0"
         printf '%s\t' "0"
         printf '%s\t' "0"
     fi

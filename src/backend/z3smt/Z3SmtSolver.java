@@ -300,11 +300,12 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     /* @formatter:off // this is for eclipse formatter */
     /*
     unsat
-    Z3(10, 10): ERROR: model is not available
+    (error "line yyy column 10: model is not available")
     (SubtypeConstraint58 ArithmeticConstraint73 EqualityConstraint188 SubtypeConstraint553)
     */
     /* @formatter:on // this is for eclipse formatter */
 
+    // A thread which handles the STD output from the z3 process, parsing SAT and UNSAT outputs
     private class Z3OutputHandler extends Thread {
         private final Process z3Process;
         private final List<String> results;
@@ -435,7 +436,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             handleZ3Output.join();
             handleZ3Error.join();
             // tell Java's thread to wait for z3 process to finish
-            z3Process.waitFor();
+            int exitStatus = z3Process.waitFor();
+
+            // TODO: handle exit status for z3 process crashes, out of memory, etc
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

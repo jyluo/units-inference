@@ -305,11 +305,11 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 Constraint eqc = InferenceMain.getInstance().getConstraintManager()
                         .createEqualityConstraint(cc.getFirst(), cc.getSecond());
 
-                Expr serializedEqC = eqc.serialize(formatTranslator).simplify();
+                Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
 
-                if (!serializedEqC.isTrue()) {
+                if (!simplifiedEQC.isTrue()) {
                     smtFileContents.append("(assert-soft ");
-                    smtFileContents.append(serializedEqC);
+                    smtFileContents.append(simplifiedEQC);
                     smtFileContents.append(" :weight 1)\n");
                 }
             }

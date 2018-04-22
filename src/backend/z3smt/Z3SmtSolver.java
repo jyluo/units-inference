@@ -120,8 +120,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         StatisticRecorder.record(StatisticKey.SMT_SERIALIZATION_TIME, serializationTime);
         StatisticRecorder.record(StatisticKey.SMT_SOLVING_TIME, solvingTime);
 
-        System.out.println("SMT Serialization Time (sec): " + serializationTime);
-        System.out.println("SMT Solving Time (sec): " + solvingTime);
+        System.out.println("SMT Serialization Time (millisec): " + serializationTime);
+        System.out.println("SMT Solving Time (millisec): " + solvingTime);
 
         // System.out.println("=== Solutions: ===");
         // for (String r : results) {

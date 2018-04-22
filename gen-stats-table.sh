@@ -17,7 +17,7 @@ pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
 # Print header row
-printf 'Project\tinference failed\texpected-subtargets\tsuccessful-subtargets\t'
+printf 'Project\tinference failed\texpected-subtargets\tsuccessful-subtargets\tserialization-time\tsolving-time\tz3-bools\tz3-ints\tz3-asserts\tz3-assert-softs\t'
 for key in "${statsKeys[@]}"; do
     printf '%s\t' "$key"
 done
@@ -41,8 +41,36 @@ for project in "${projects[@]}"; do
         # number of successful sub-projects
         count=$(grep -w "Statistic start" "$project/logs/infer.log" | wc -l)
         printf '%s\t' "$count"
+        # serialization time
+        grep -w "SMT Serialization Time" "$project/logs/infer.log" | cut -d ':' -f 2 | \
+                awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
+        # solving time
+        grep -w "SMT Solving Time" "$project/logs/infer.log" | cut -d ':' -f 2 | \
+                awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
     else
         printf '%s\t' "1"
+        printf '%s\t' "0"
+        printf '%s\t' "0"
+        printf '%s\t' "0"
+        printf '%s\t' "0"
+    fi
+
+    if [ -f $project/z3ConstraintStats.smt ]; then
+        # number of z3 bools
+        count=$(grep "declare-fun.*Bool" "$project/z3ConstraintStats.smt" | wc -l)
+        printf '%s\t' "$count"
+        # number of z3 ints
+        count=$(grep "declare-fun.*Int" "$project/z3ConstraintStats.smt" | wc -l)
+        printf '%s\t' "$count"
+        # number of z3 asserts
+        count=$(grep -w "assert" "$project/z3ConstraintStats.smt" | wc -l)
+        printf '%s\t' "$count"
+        # number of z3 assert-softs
+        count=$(grep -w "assert-soft" "$project/z3ConstraintStats.smt" | wc -l)
+        printf '%s\t' "$count"
+    else
+        printf '%s\t' "0"
+        printf '%s\t' "0"
         printf '%s\t' "0"
         printf '%s\t' "0"
     fi

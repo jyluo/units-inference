@@ -1,12 +1,12 @@
 package backend.z3smt;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.microsoft.z3.Model;
 import com.microsoft.z3.Optimize;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
@@ -73,6 +73,6 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
     
     public abstract BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot);
 
-    public abstract Map<Integer, AnnotationMirror> decodeSolution(Model model,
+    public abstract Map<Integer, AnnotationMirror> decodeSolution(List<String> model,
             ProcessingEnvironment processingEnv);
 }

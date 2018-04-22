@@ -34,7 +34,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected StringBuffer smtFileContents;
 
     protected final String z3Program = "z3";
-    protected final boolean optimizingMode = false;
+    protected final boolean optimizingMode = true;
     protected final boolean getUnsatCore = false;
 
     // used in non-optimizing mode to find unsat constraints
@@ -116,8 +116,12 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         long serializationTime = serializationEnd - serializationStart;
         long solvingTime = solvingEnd - solvingStart;
+        // add -solverArgs collectStatistic to print?
         StatisticRecorder.record(StatisticKey.SMT_SERIALIZATION_TIME, serializationTime);
         StatisticRecorder.record(StatisticKey.SMT_SOLVING_TIME, solvingTime);
+
+        System.out.println("SMT Serialization Time (sec): " + serializationTime);
+        System.out.println("SMT Solving Time (sec): " + solvingTime);
 
         // System.out.println("=== Solutions: ===");
         // for (String r : results) {

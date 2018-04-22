@@ -19,6 +19,7 @@ import com.microsoft.z3.Expr;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
+import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
@@ -42,8 +43,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected final List<String> unsatConstraintIDs = new ArrayList<>();
 
     // file is written at projectRootFolder/constraints.smt
-    protected final String constraintsFile =
-            new File(new File("").getAbsolutePath()).toString() + "/z3Constraints.smt";
+    protected final String pathToProject = new File(new File("").getAbsolutePath()).toString();
+    protected final String constraintsFile = pathToProject + "/z3Constraints.smt";
+    protected final String constraintsStatsFile = pathToProject + "/z3ConstraintStats.smt";
 
     // timing statistics variables
     protected long serializationStart;
@@ -148,11 +150,24 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     }
 
     private void writeConstraintsToSMTFile() {
+        String fileContents = smtFileContents.toString();
+
         try {
             FileWriter fw = new FileWriter(constraintsFile, false);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter pw = new PrintWriter(bw);
-            pw.write(smtFileContents.toString());
+            pw.write(fileContents);
+            pw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // write a copy in append mode to stats file for later bulk analysis
+        try {
+            FileWriter fw = new FileWriter(constraintsStatsFile, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter pw = new PrintWriter(bw);
+            pw.write(fileContents);
             pw.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -183,7 +198,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         // debug use:
         // Write Slots to file
-        String writePath = new File(new File("").getAbsolutePath()).toString() + "/slots.smt";
+        String writePath = pathToProject + "/slots.smt";
         try {
             FileWriter fw = new FileWriter(writePath, false); // appends to slots.smt
             BufferedWriter bw = new BufferedWriter(fw);
@@ -265,13 +280,30 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             }
 
             constraintClauses.add(simplifiedConstraint.toString());
+
+            // add a soft constraint that we prefer equality for subtype
+            if (optimizingMode && constraint instanceof SubtypeConstraint) {
+                SubtypeConstraint stc = (SubtypeConstraint) constraint;
+
+                Constraint eqc = InferenceMain.getInstance().getConstraintManager()
+                        .createEqualityConstraint(stc.getSubtype(), stc.getSupertype());
+
+                Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
+
+                if (!simplifiedEQC.isTrue()) {
+                    smtFileContents.append("(assert-soft ");
+                    smtFileContents.append(clause);
+                    smtFileContents.append(" :weight 1)\n");
+                }
+            }
+
             current++;
             // // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
         }
 
         // debug use
         // Write Slots to file
-        String writePath = new File(new File("").getAbsolutePath()).toString() + "/constraints.smt";
+        String writePath = pathToProject + "/constraints.smt";
         try {
             FileWriter fw = new FileWriter(writePath, false); // appends to constraints.smt
             BufferedWriter bw = new BufferedWriter(fw);

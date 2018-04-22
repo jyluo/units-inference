@@ -24,6 +24,7 @@ import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
 import checkers.inference.solver.util.StatisticRecorder;
+import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
@@ -34,6 +35,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
     protected final String z3Program = "z3";
     protected final boolean optimizingMode = false;
+    protected final boolean getUnsatCore = false;
+
     // used in non-optimizing mode to find unsat constraints
     protected final Map<String, String> serializedConstraints = new HashMap<>();
     protected final List<String> unsatConstraintIDs = new ArrayList<>();
@@ -70,6 +73,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     }
 
     // Main entry point
+    @SuppressWarnings("unused")
     @Override
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
@@ -81,7 +85,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         smtFileContents = new StringBuffer();
 
         // only enable in non-optimizing mode
-        if (!optimizingMode) {
+        if (!optimizingMode && getUnsatCore) {
             smtFileContents.append("(set-option :produce-unsat-cores true)\n");
         }
 
@@ -94,7 +98,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         smtFileContents.append("(check-sat)\n");
         smtFileContents.append("(get-model)\n");
-        if (!optimizingMode) {
+        if (!optimizingMode && getUnsatCore) {
             smtFileContents.append("(get-unsat-core)\n");
         }
 
@@ -112,8 +116,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         long serializationTime = serializationEnd - serializationStart;
         long solvingTime = solvingEnd - solvingStart;
-        StatisticRecorder.recordSingleSerializationTime(serializationTime);
-        StatisticRecorder.recordSingleSolvingTime(solvingTime);
+        StatisticRecorder.record(StatisticKey.SMT_SERIALIZATION_TIME, serializationTime);
+        StatisticRecorder.record(StatisticKey.SMT_SOLVING_TIME, solvingTime);
 
         // System.out.println("=== Solutions: ===");
         // for (String r : results) {
@@ -126,9 +130,11 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         } else {
             System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
 
-            for (String constraintID : unsatConstraintIDs) {
-                System.out.println(constraintID + " :");
-                System.out.println(serializedConstraints.get(constraintID));
+            if (getUnsatCore) {
+                for (String constraintID : unsatConstraintIDs) {
+                    System.out.println(constraintID + " :");
+                    System.out.println(serializedConstraints.get(constraintID));
+                }
             }
 
             result = new HashMap<>();
@@ -185,6 +191,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         }
     }
 
+    @SuppressWarnings("unused")
     @Override
     protected void encodeAllConstraints() {
         int total = constraints.size();
@@ -238,7 +245,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
             String clause = simplifiedConstraint.toString();
 
-            if (!optimizingMode) {
+            if (!optimizingMode && getUnsatCore) {
                 // add assertions with names, for unsat core dump
                 String constraintName = constraint.getClass().getSimpleName() + current;
 

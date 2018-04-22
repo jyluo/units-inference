@@ -230,20 +230,6 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             // Runtime.getRuntime().gc(); // trigger garbage collector
             // }
 
-            // generate soft constraint for comparisons that their args are equal
-            if (constraint instanceof ComparableConstraint) {
-                ComparableConstraint compC = (ComparableConstraint) constraint;
-
-                Constraint eqC = InferenceMain.getInstance().getConstraintManager()
-                        .createEqualityConstraint(compC.getFirst(), compC.getSecond());
-
-                BoolExpr serializedEqC = eqC.serialize(formatTranslator);
-
-                if (!serializedEqC.simplify().isTrue()) {
-                    solver.AssertSoft(serializedEqC, 1, "g1");
-                }
-            }
-
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
 
             // System.out.println(" Constraint serialized. ");
@@ -296,7 +282,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
             constraintClauses.add(simplifiedConstraint.toString());
 
-            // add a soft constraint that we prefer equality for subtype
+            // generate a soft constraint that we prefer equality for subtype
             if (optimizingMode && constraint instanceof SubtypeConstraint) {
                 SubtypeConstraint stc = (SubtypeConstraint) constraint;
 
@@ -307,7 +293,23 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
                 if (!simplifiedEQC.isTrue()) {
                     smtFileContents.append("(assert-soft ");
-                    smtFileContents.append(clause);
+                    smtFileContents.append(simplifiedEQC);
+                    smtFileContents.append(" :weight 1)\n");
+                }
+            }
+
+            // generate soft constraint for comparisons that their args are equal
+            if (optimizingMode && constraint instanceof ComparableConstraint) {
+                ComparableConstraint cc = (ComparableConstraint) constraint;
+
+                Constraint eqc = InferenceMain.getInstance().getConstraintManager()
+                        .createEqualityConstraint(cc.getFirst(), cc.getSecond());
+
+                Expr serializedEqC = eqc.serialize(formatTranslator).simplify();
+
+                if (!serializedEqC.isTrue()) {
+                    smtFileContents.append("(assert-soft ");
+                    smtFileContents.append(serializedEqC);
                     smtFileContents.append(" :weight 1)\n");
                 }
             }

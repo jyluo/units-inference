@@ -14,7 +14,7 @@ projects:
 
   JLargeArrays:
     giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
-    build: mvn install
+    build: mvn compile
     clean: mvn clean
 
   jReactPhysics3D:
@@ -75,16 +75,17 @@ projects:
     build: ant jar
     clean: ant clean
 
-# Typechecking only:
-  jscience:
-    giturl: https://github.com/jyluo-benchmarks/jscience.git
-    build: mvn compile
-    clean: mvn clean
+# # Typechecking only:
+#   sis:
+#     giturl: https://github.com/jyluo-benchmarks/sis.git
+#     build: mvn install -Dmaven.test.skip=true
+#     clean: mvn clean
 
-  sis:
-    giturl: https://github.com/jyluo-benchmarks/sis.git
-    build: mvn compile
-    clean: mvn clean
+# Future test:
+  # jscience: # does not build on its own
+  #   giturl: https://github.com/jyluo-benchmarks/jscience.git
+  #   build: mvn compile
+  #   clean: mvn clean
 
 # Current total time:
 # 32 min

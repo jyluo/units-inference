@@ -18,7 +18,8 @@ import units.representation.UnitsRepresentationUtils;
     "JavaMath.astub",
     "JavaMathTrig.astub",
     "JavaThread.astub",
-    "JavaAwtGeomAffineTransform.astub", // for imgscalr experiment
+    "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
+    "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays
     })
 public class UnitsChecker extends BaseInferrableChecker {
 

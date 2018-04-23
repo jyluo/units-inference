@@ -131,7 +131,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.OTHERWISE);
         // defaults for upper bounds is DIMENSIONLESS, individual bounds can be manually set to
         // UnknownUnits if they want to use units
-        defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.UPPER_BOUND);
+        // defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.UPPER_BOUND);
+        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.EXPLICIT_UPPER_BOUND);
+        defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.IMPLICIT_UPPER_BOUND);
         // defaults for lower bounds is BOTTOM, individual bounds can be manually set
         defs.addCheckedCodeDefault(unitsRepUtils.BOTTOM, TypeUseLocation.LOWER_BOUND);
         // exceptions are always dimensionless

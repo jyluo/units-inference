@@ -14,9 +14,11 @@ import units.representation.UnitsRepresentationUtils;
 @StubFiles({
     "JavaBoxedPrimitives.astub",
     "JavaLang.astub",
+    "JavaIOPrintstream.astub",
     "JavaMath.astub",
     "JavaMathTrig.astub",
-    "JavaThread.astub"
+    "JavaThread.astub",
+    "JavaAwtGeomAffineTransform.astub", // for imgscalr experiment
     })
 public class UnitsChecker extends BaseInferrableChecker {
 

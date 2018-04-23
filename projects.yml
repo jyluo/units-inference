@@ -3,58 +3,58 @@ projects:
 # Confirmed to work:
 
   exp4j:
-    giturl: https://github.com/opprop-benchmarks/exp4j.git
+    giturl: https://github.com/jyluo-benchmarks/exp4j.git
     build: mvn install
     clean: mvn clean
 
   jblas:
-    giturl: https://github.com/opprop-benchmarks/jblas.git
+    giturl: https://github.com/jyluo-benchmarks/jblas.git
     build: mvn install
     clean: mvn clean
 
   JLargeArrays:
-    giturl: https://github.com/opprop-benchmarks/JLargeArrays.git
+    giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
     build: mvn install
     clean: mvn clean
 
   jReactPhysics3D:
-    giturl: https://github.com/opprop-benchmarks/jReactPhysics3D.git
+    giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
     build: mvn install
     clean: mvn clean
 
   imgscalr:
-    giturl: https://github.com/thebuzzmedia/imgscalr.git
-    git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
+    giturl: https://github.com/jyluo-benchmarks/imgscalr.git # try using latest from source?
+    # git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
     build: mvn compile
     clean: mvn clean
 
   react:
-    giturl: https://github.com/flow/react.git
-    git-ref: e8f7ee5ec666d2d1783c8a16b9cbd49bc11f037c
+    giturl: https://github.com/jyluo-benchmarks/react.git
+    # git-ref: e8f7ee5ec666d2d1783c8a16b9cbd49bc11f037c
     build: mvn compile
     clean: mvn clean
 
   FaceDetection:
-    giturl: https://github.com/azeevg/FaceDetection.git
-    git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
+    giturl: https://github.com/jyluo-benchmarks/FaceDetection.git
+    # git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
     build: mvn compile
     clean: mvn clean
 
   Facer:
-    giturl: https://github.com/bharathk005/Facer.git
-    git-ref: 6ce45ce52310fc820173a12b72b29261acdf3181
+    giturl: https://github.com/jyluo-benchmarks/Facer.git
+    # git-ref: 6ce45ce52310fc820173a12b72b29261acdf3181
     build: ant
     clean: ant clean
 
   jama:
-    giturl: https://github.com/cstroe/jama.git
-    git-ref: d6b3e3d192bb901aec5e16a084c824d8db336d74
+    giturl: https://github.com/jyluo-benchmarks/jama.git
+    # git-ref: d6b3e3d192bb901aec5e16a084c824d8db336d74
     build: mvn compile
     clean: mvn clean
 
   la4j:
-    giturl: https://github.com/vkostyukov/la4j.git
-    git-ref: db204167aa6161cd2104ce845e62518cae451d70
+    giturl: https://github.com/jyluo-benchmarks/la4j.git
+    # git-ref: db204167aa6161cd2104ce845e62518cae451d70
     build: mvn compile
     clean: mvn clean
 
@@ -64,8 +64,7 @@ projects:
   # not adding this use case to inference atm, can manually annotate if necessary
 
   matrix-toolkits-java:
-    giturl: https://github.com/hwinkler/matrix-toolkits-java.git
-    git-ref: f2594128eee45a188957c854acede3d6a511d717
+    giturl: https://github.com/jyluo-benchmarks/matrix-toolkits-java.git
     build: mvn compile
     clean: mvn clean
 
@@ -75,6 +74,17 @@ projects:
     # git-ref: e05cac7b1b584a493978d6861cbc7fa762816f34
     build: ant jar
     clean: ant clean
+
+# Typechecking only:
+  jscience:
+    giturl: https://github.com/jyluo-benchmarks/jscience.git
+    build: mvn compile
+    clean: mvn clean
+
+  sis:
+    giturl: https://github.com/jyluo-benchmarks/sis.git
+    build: mvn compile
+    clean: mvn clean
 
 # Current total time:
 # 32 min

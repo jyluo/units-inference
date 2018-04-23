@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#./clean-up-projects.sh projects
+./clean-up-projects.sh projects
 
 gradle jar
 

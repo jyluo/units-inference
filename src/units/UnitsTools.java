@@ -8,6 +8,10 @@ public class UnitsTools {
     public static final @m int m = 1;
     public static final @s int s = 1;
     public static final @ms Integer ms = 1;
+    public static final @ns Integer ns = 1;
+
+    public static final @rad int rad = 1;
+    public static final @deg int deg = 1;
 
     // Testing use only
     public static final @UnknownUnits int top = 1;

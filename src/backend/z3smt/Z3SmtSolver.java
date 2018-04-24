@@ -118,8 +118,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             optimizingMode = false;
             getUnsatCore = true;
 
-            System.out.println("Now encoding for unsat core dump. Opt: " + optimizingMode
-                    + " unsatCore " + getUnsatCore);
+            System.out.println("Now encoding for unsat core dump.");
             serializeSMTFileContents();
 
             System.out.println("Starting the solving");
@@ -271,7 +270,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // Should investigate on this, and change this to ErrorAbort when eliminated
                 // unsupported constraints.
                 System.out.println("Unsupported constraint detected! Constraint type: "
-                        + constraint.getClass());
+                        + constraint.getClass().getSimpleName());
                 current++;
                 continue;
             }

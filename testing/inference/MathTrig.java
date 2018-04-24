@@ -3,14 +3,12 @@ import units.UnitsTools;
 
 class MathTrig {
     void Trig() {
-        // x should be inferred to be rad
+        // x should be inferred to be dimensionless
         double x = 10;
-        // :: fixable-error: (argument.type.incompatible)
-        double expected = Math.acos(x / UnitsTools.rad) * Math.expm1(Math.asin(x / UnitsTools.rad)) -
-            // :: fixable-error: (argument.type.incompatible)
-            Math.exp(Math.atan(x / UnitsTools.rad)) +
-            // :: fixable-error: (argument.type.incompatible)
-            Math.floor(x) + Math.cosh(x) - 
+        // expected should be inferred to be radians
+        @Dimensionless double expected = Math.acos(x) / UnitsTools.rad * Math.expm1(Math.asin(x) / UnitsTools.rad) -
+            Math.exp(Math.atan(x) / UnitsTools.rad) +
+            Math.floor(x) + Math.cosh(x * UnitsTools.rad) - 
             Math.sinh(Math.cbrt(x) * UnitsTools.rad);
     }
 }

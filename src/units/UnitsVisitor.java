@@ -10,6 +10,7 @@ import org.checkerframework.javacutil.TreeUtils;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.UnaryTree;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -91,6 +92,19 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     //
     // return super.visitAssignment(node, p);
     // }
+
+    @Override
+    public Void visitUnary(UnaryTree node, Void p) {
+        // Note i++ in a for loop generates a subtype constraint that the type variable for i is a
+        // supertype of raw units internal, this subtype doesn't need to be generated
+        if ((node.getKind() == Kind.PREFIX_DECREMENT) || (node.getKind() == Kind.PREFIX_INCREMENT)
+                || (node.getKind() == Kind.POSTFIX_DECREMENT)
+                || (node.getKind() == Kind.POSTFIX_INCREMENT)) {
+            return null;
+        } else {
+            return super.visitUnary(node, p);
+        }
+    }
 
     @Override
     public Void visitBinary(BinaryTree binaryTree, Void p) {

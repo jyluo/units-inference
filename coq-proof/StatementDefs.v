@@ -33,10 +33,11 @@ Reserved Notation "'stmt:' g '|-' s " (at level 40).
 Inductive stmt_has_type : Gamma -> Statement -> Prop :=
   | T_STMT_Empty : forall (g : Gamma),
     stmt: g |- STMT_Empty
-  | T_STMT_Assign : forall (g : Gamma) (f : ID) (Tf : Unit) (e : Expression) (s2 : Statement),
+  | T_STMT_Assign : forall (g : Gamma) (f : ID) (Tf Te : Unit) (e : Expression) (s2 : Statement),
     Gamma_Contains g f = true ->
     Gamma_Get g f = Some Tf ->
-    (exists (Te : Unit), Te <: Tf = true /\ expr: g |- e in Te) ->
+    Te <: Tf = true ->
+    expr: g |- e in Te ->
     stmt: g |- s2 ->
     stmt: g |- STMT_Assign f e s2
 where "'stmt:' g '|-' s "  := (stmt_has_type g s).
@@ -105,24 +106,22 @@ Proof.
     left. apply V_STMT_Value.
   Case "T_STMT_Assign".
     right.
-    inversion H1 as [Te].
-    destruct H2.
     inversion HGH; subst.
-    destruct H4 with f. destruct H6 as [Tf']. destruct H6 as [Tv']. destruct H6 as [z'].
-      destruct H6. destruct H7. destruct H8.
+    destruct H3 with f. destruct H5 as [Tf']. destruct H5 as [Tv']. destruct H5 as [z'].
+      destruct H5. destruct H6. destruct H7.
     assert (Tf = Tf').
-      eapply Gamma_Get_Content_Eq. apply H0. apply H6. subst.
+      eapply Gamma_Get_Content_Eq. apply H0. apply H5. subst.
     assert (expr_normal_form e \/ exists e', (h, e) expr==> e').
       apply expr_progress with g Te.
-        apply H3. apply HGH.
-    inversion H7; subst.
+        apply H2. apply HGH.
+    inversion H6; subst.
     (* Case : e is normal form -> step by ST_STMT_Assign_Val *)
-      destruct H10; subst. inversion H3; subst. exists (Heap_Update h f (FieldType h f) Te z). exists s2.
+      destruct H9; subst. inversion H2; subst. exists (Heap_Update h f (FieldType h f) Te z). exists s2.
       eapply ST_STMT_Assign_Val.
         reflexivity.
-        apply H2.
+        apply H1.
     (* Case : e can take a step -> step by ST_STMT_Assign_Exp *)
-      destruct H10 as [e']; subst. exists h. exists (STMT_Assign f e' s2). apply ST_STMT_Assign_Exp. apply H10.
+      destruct H9 as [e']; subst. exists h. exists (STMT_Assign f e' s2). apply ST_STMT_Assign_Exp. apply H9.
 Qed.
 
 (* ======================================================= *)
@@ -143,7 +142,7 @@ Proof.
     SCase "ST_STMT_Assign_Val". (* f = v ; s2 *)
       split.
       (* first prove that g |- h' OK *)
-        destruct H1 as [Te]. destruct H1. inversion H2; subst.
+        inversion H2; subst.
         apply GH_Correspondence.
         intros f'.
         inversion HGH; subst.
@@ -169,16 +168,15 @@ Proof.
     SCase "ST_STMT_Assign_Exp". (* f = e ; s2 , e --> e' *)
       split.
         apply HGH.
-        destruct H1 as [Te]. destruct H1.
+        eapply expr_preservation in H2.
+          destruct H2 as [T']. destruct H2.
           eapply T_STMT_Assign.
             apply H.
             apply H0.
-            eapply expr_preservation in H2.
-              destruct H2 as [T']. destruct H2. exists T'. split.
-                apply subtype_transitive with Te.
-                  apply H2. apply H1.
-                apply H4.
-              apply HGH.
-              apply H3.
+            apply subtype_transitive with Te.
+              apply H2. apply H1.
+            apply H3.
             apply HT.
+          apply HGH.
+          apply H4.
 Qed.

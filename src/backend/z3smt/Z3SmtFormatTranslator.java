@@ -22,8 +22,6 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
 
     protected Context ctx;
 
-    protected Optimize solver;
-
     /**
      * Cache of all serialized slots, keyed on slot ID.
      */
@@ -34,10 +32,9 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
         serializedSlots = new HashMap<>();
     }
 
-    public final void init(Context ctx, Optimize solver) {
+    public final void init(Context ctx) {
         this.ctx = ctx;
         finishInitializingEncoders();
-        this.solver = solver;
     }
 
     protected abstract SlotEncodingT serializeVarSlot(VariableSlot slot);

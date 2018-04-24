@@ -11,6 +11,7 @@ class GenericMethods {
     }
 
     public <T> String mStringCatOne(T param){
+        // :: fixable-error: (method.invocation.invalid)
         return param.toString() + param;
     }
 

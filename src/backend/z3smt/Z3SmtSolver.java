@@ -36,11 +36,11 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected StringBuffer smtFileContents;
 
     protected final String z3Program = "z3";
-    protected final boolean optimizingMode = true;
-    protected final boolean getUnsatCore = false;
+    protected final boolean optimizingMode = false;
+    protected final boolean getUnsatCore = true;
 
     // used in non-optimizing mode to find unsat constraints
-    protected final Map<String, String> serializedConstraints = new HashMap<>();
+    protected final Map<String, Constraint> serializedConstraints = new HashMap<>();
     protected final List<String> unsatConstraintIDs = new ArrayList<>();
 
     // file is written at projectRootFolder/constraints.smt
@@ -139,8 +139,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
             if (getUnsatCore) {
                 for (String constraintID : unsatConstraintIDs) {
+                    Constraint c = serializedConstraints.get(constraintID);
                     System.out.println(constraintID + " :");
-                    System.out.println(serializedConstraints.get(constraintID));
+                    System.out.println(c + " @ " + c.getLocation());
                 }
             }
 
@@ -273,7 +274,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 smtFileContents.append(clause);
                 smtFileContents.append(" :named " + constraintName + "))\n");
 
-                serializedConstraints.put(constraintName, clause);
+                serializedConstraints.put(constraintName, constraint);
             } else {
                 smtFileContents.append("(assert ");
                 smtFileContents.append(clause);

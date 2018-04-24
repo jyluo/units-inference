@@ -8,7 +8,6 @@ class jBlasCases {
         double seconds = (double) (System.currentTimeMillis() - savedTime) / 1e3;
 
         double t = System.nanoTime();
-        // :: fixable-error: (argument.type.incompatible)
         System.out.printf("%.1fs\n", (System.nanoTime() - t) / 1e9);
     }
 

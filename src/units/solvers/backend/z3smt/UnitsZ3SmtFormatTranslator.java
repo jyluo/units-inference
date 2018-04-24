@@ -76,6 +76,12 @@ public class UnitsZ3SmtFormatTranslator
             anno = unitsRepUtils.TOP;
         }
 
+        // if for some reason a raw internal appears, then treat it as dimensionless
+        if (AnnotationUtils.areSame(anno, unitsRepUtils.RAWUNITSINTERNAL)) {
+            // TODO: maybe raise error?
+            anno = unitsRepUtils.DIMENSIONLESS;
+        }
+
         // System.out.println(" ==== creating constant slot for " + anno);
 
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);

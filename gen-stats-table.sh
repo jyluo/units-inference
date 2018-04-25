@@ -2,12 +2,12 @@
 
 declare -a statsKeys=("slots_size" "constraint_size" \
     "constantslot" "variableslot" \
-    "subtypeconstraint" "arithmeticconstraint" "equalityconstraint" "existentialconstraint" "preferenceconstraint")
+    "subtypeconstraint" "equalityconstraint" "arithmeticconstraint" "comparableconstraint" "existentialconstraint" "preferenceconstraint")
 
 declare -a constantSlotsNameKeys=("Top" "Dimensionless" "Bottom" "m" "m2" "s" "ms" "ns" "mPERs" "deg" "rad" "other")
 
 declare -a constantSlotsOutputKeys=("Annotation: @UnknownUnits" "Annotation: @Dimensionless" "Annotation: @UnitsBottom" \
-    "Annotation: @m" "Annotation: @m2" "Annotation: @s" "Annotation: @ms" "Annotation: @ns" "Annotation: @mPERs" "Annotation: @deg" "Annotation: @rad" "Annotation: @UnitsInternal(")
+    "Annotation: @m" "Annotation: @m2" "Annotation: @s" "Annotation: @ms" "Annotation: @ns" "Annotation: @mPERs" "Annotation: @deg" "Annotation: @rad")
 
 cd ./$1
 
@@ -93,10 +93,15 @@ for project in "${projects[@]}"; do
             grep -w "$key" "$project/solutions.txt" | wc -l | \
                 awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
         done
+
+        grep "Annotation: @UnitsInternal(" "$project/solutions.txt" | wc -l | \
+            awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
     else
         for key in "${constantSlotsOutputKeys[@]}"; do
             printf '%s\t' "0"
         done
+
+        printf '%s\t' "0"
     fi
 
     printf '\n'

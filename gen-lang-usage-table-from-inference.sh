@@ -27,7 +27,7 @@ declare -a methodKeys=(
     )
 
 declare -a headers=(
-    "+" \
+    " +" \
     "-" \
     "*" \
     "/" \

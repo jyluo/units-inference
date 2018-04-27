@@ -124,6 +124,13 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
             Kind kind = binaryTree.getKind();
             switch (binaryTree.getKind()) {
+                case PLUS:
+                    // if either are string arguments, result is already a constant slot of
+                    // dimensionless
+                    if (TreeUtils.isStringConcatenation(binaryTree)) {
+                        break;
+                    } // else create arithmetic constraint
+                case MINUS:
                 case MULTIPLY:
                 case DIVIDE:
                 case REMAINDER:
@@ -141,13 +148,6 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                     // result is already dimensionless for bools
                     constraintManager.addComparableConstraint(lhs, rhs);
                     break;
-                case PLUS:
-                    // if either are string arguments, result is already a constant slot of
-                    // dimensionless
-                    if (TreeUtils.isStringConcatenation(binaryTree)) {
-                        break;
-                    } // else create arithmetic constraint
-                case MINUS:
                 default:
                     // TODO: replace with LUBSlot pending mier's PR
                     VariableSlot lubSlot =

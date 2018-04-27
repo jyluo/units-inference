@@ -34,11 +34,18 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
             case PLUS:
             case MINUS:
                 // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
-                // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
-                return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
-                        leftOperand.serialize(z3SmtFormatTranslator),
-                        rightOperand.serialize(z3SmtFormatTranslator),
-                        result.serialize(z3SmtFormatTranslator));
+                // pair of subtype constraints
+                InferenceUnit left = leftOperand.serialize(z3SmtFormatTranslator);
+                InferenceUnit right = rightOperand.serialize(z3SmtFormatTranslator);
+                InferenceUnit res = result.serialize(z3SmtFormatTranslator);
+                return ctx.mkAnd(UnitsZ3SmtEncoderUtils.subtype(ctx, left, res),
+                        UnitsZ3SmtEncoderUtils.subtype(ctx, right, res));
+
+            // // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
+            // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
+            // leftOperand.serialize(z3SmtFormatTranslator),
+            // rightOperand.serialize(z3SmtFormatTranslator),
+            // result.serialize(z3SmtFormatTranslator));
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or

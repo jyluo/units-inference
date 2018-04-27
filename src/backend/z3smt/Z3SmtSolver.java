@@ -17,6 +17,8 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
 import checkers.inference.InferenceMain;
+import checkers.inference.model.ArithmeticConstraint;
+import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
@@ -104,6 +106,37 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));
         System.out.println("SMT Solving Time (millisec): " + (solvingEnd - solvingStart));
 
+
+
+        // Debug use, finds out number of calls to each instrumented method
+        System.out.println("=== Arithmetic Constraints Printout ===");
+        Map<ArithmeticOperationKind, Integer> arithmeticConstraintCounters = new HashMap<>();
+        for (ArithmeticOperationKind kind : ArithmeticOperationKind.values()) {
+            arithmeticConstraintCounters.put(kind, 0);
+        }
+        for (Constraint constraint : constraints) {
+            if (constraint instanceof ArithmeticConstraint) {
+                ArithmeticConstraint arithmeticConstraint = (ArithmeticConstraint) constraint;
+                ArithmeticOperationKind kind = arithmeticConstraint.getOperation();
+                arithmeticConstraintCounters.put(kind, arithmeticConstraintCounters.get(kind) + 1);
+            }
+        }
+        for (ArithmeticOperationKind kind : ArithmeticOperationKind.values()) {
+            System.out.println(" Made arithmetic " + kind.getSymbol() + " constraint: "
+                    + arithmeticConstraintCounters.get(kind));
+        }
+
+        System.out.println("=== Comparison Constraints Printout ===");
+        int comparableConstraints = 0;
+        for (Constraint constraint : constraints) {
+            if (constraint instanceof ComparableConstraint) {
+                comparableConstraints++;
+            }
+        }
+        System.out.println(" Made comparison constraint: " + comparableConstraints);
+
+
+
         // System.out.println("=== Solutions: ===");
         // for (String r : results) {
         // System.out.println(r);
@@ -133,7 +166,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             System.out.println("SMT UNSAT Solving Time (millisec): " + (solvingEnd - solvingStart));
 
             System.out.println();
-            System.out.println("Conflicting constraints: " + String.join(" ", unsatConstraintIDs));
+            System.out
+                    .println("Unsatisfiable constraints: " + String.join(" ", unsatConstraintIDs));
             System.out.println();
 
             for (String constraintID : unsatConstraintIDs) {

@@ -2,12 +2,14 @@ package units;
 
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.TreeUtils;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
@@ -130,9 +132,6 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                             VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
                     constraintManager.addArithmeticConstraint(opKind, lhs, rhs, avsRes);
                     break;
-                case CONDITIONAL_AND: // &&
-                case CONDITIONAL_OR: // ||
-                case LOGICAL_COMPLEMENT: // !
                 case EQUAL_TO: // ==
                 case NOT_EQUAL_TO: // !=
                 case GREATER_THAN: // >
@@ -193,9 +192,6 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 // binaryTree);
                 // }
                 break;
-            case CONDITIONAL_AND: // &&
-            case CONDITIONAL_OR: // ||
-            case LOGICAL_COMPLEMENT: // !
             case EQUAL_TO: // ==
             case NOT_EQUAL_TO: // !=
             case GREATER_THAN: // >
@@ -272,6 +268,56 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         }
         return lowerBounds;
     }
+
+    // Debug use, finds out number of calls to each instrumented method
+    @Override
+    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+        String methodName = TreeUtils.methodName(node).toString().intern();
+
+        ExecutableElement element = TreeUtils.elementFromUse(node);
+        String classOfMethod = element.getEnclosingElement().toString().intern();
+
+        if (classOfMethod.contentEquals("java.lang.Math")) {
+            switch (methodName) {
+                case "cos":
+                case "sin":
+                case "tan":
+                case "asin":
+                case "acos":
+                case "atan":
+                case "atan2":
+                case "sinh":
+                case "cosh":
+                case "tanh":
+                case "toDegrees":
+                case "toRadians":
+                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+                    break;
+                default:
+                    break;
+            }
+        } else if (classOfMethod.contentEquals("java.lang.System")) {
+            switch (methodName) {
+                case "currentTimeMillis":
+                case "nanoTime":
+                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+                    break;
+                default:
+                    break;
+            }
+        } else if (classOfMethod.contentEquals("java.lang.Thread")) {
+            switch (methodName) {
+                case "sleep":
+                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return super.visitMethodInvocation(node, p);
+    }
+
 
     // Slots created in ATF
 

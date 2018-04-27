@@ -7,20 +7,20 @@ projects:
     build: mvn install
     clean: mvn clean
 
-  # jblas:
-  #   giturl: https://github.com/jyluo-benchmarks/jblas.git
-  #   build: mvn install
-  #   clean: mvn clean
+  jblas:
+    giturl: https://github.com/jyluo-benchmarks/jblas.git
+    build: mvn install
+    clean: mvn clean
 
-  # JLargeArrays:
-  #   giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
-  #   build: mvn compile
-  #   clean: mvn clean
+  JLargeArrays:
+    giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
+    build: mvn compile
+    clean: mvn clean
 
-  # jReactPhysics3D:
-  #   giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
-  #   build: mvn install
-  #   clean: mvn clean
+  jReactPhysics3D:
+    giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
+    build: mvn install
+    clean: mvn clean
 
   imgscalr:
     giturl: https://github.com/jyluo-benchmarks/imgscalr.git # try using latest from source?

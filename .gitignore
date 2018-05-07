@@ -1,4 +1,10 @@
+# gedit backups
 *~
+
+# eclipse project
+.project
+.classpath
+.settings
 
 # eclipse output
 bin/

@@ -94,8 +94,8 @@ sourceSets {
 
     test {
         java {
-            srcDirs = ["tests/units"]
-            include "*.java"   // for all tests
+            srcDirs = ["tests"]
+            include "**/*.java"   // for all tests
             // include "UnitsTypecheckTest.java"   // typecheck test only
             // include "UnitsInferenceTest.java"   // inference test only
             compileClasspath += toPackageClasspath

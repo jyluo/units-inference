@@ -269,54 +269,54 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         return lowerBounds;
     }
 
-    // Debug use, finds out number of calls to each instrumented method
-    @Override
-    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
-        String methodName = TreeUtils.methodName(node).toString().intern();
-
-        ExecutableElement element = TreeUtils.elementFromUse(node);
-        String classOfMethod = element.getEnclosingElement().toString().intern();
-
-        if (classOfMethod.contentEquals("java.lang.Math")) {
-            switch (methodName) {
-                case "cos":
-                case "sin":
-                case "tan":
-                case "asin":
-                case "acos":
-                case "atan":
-                case "atan2":
-                case "sinh":
-                case "cosh":
-                case "tanh":
-                case "toDegrees":
-                case "toRadians":
-                    System.out.println(" visited: " + classOfMethod + "." + methodName);
-                    break;
-                default:
-                    break;
-            }
-        } else if (classOfMethod.contentEquals("java.lang.System")) {
-            switch (methodName) {
-                case "currentTimeMillis":
-                case "nanoTime":
-                    System.out.println(" visited: " + classOfMethod + "." + methodName);
-                    break;
-                default:
-                    break;
-            }
-        } else if (classOfMethod.contentEquals("java.lang.Thread")) {
-            switch (methodName) {
-                case "sleep":
-                    System.out.println(" visited: " + classOfMethod + "." + methodName);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        return super.visitMethodInvocation(node, p);
-    }
+//    // Debug use, finds out number of calls to each instrumented method
+//    @Override
+//    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+//        String methodName = TreeUtils.methodName(node).toString().intern();
+//
+//        ExecutableElement element = TreeUtils.elementFromUse(node);
+//        String classOfMethod = element.getEnclosingElement().toString().intern();
+//
+//        if (classOfMethod.contentEquals("java.lang.Math")) {
+//            switch (methodName) {
+//                case "cos":
+//                case "sin":
+//                case "tan":
+//                case "asin":
+//                case "acos":
+//                case "atan":
+//                case "atan2":
+//                case "sinh":
+//                case "cosh":
+//                case "tanh":
+//                case "toDegrees":
+//                case "toRadians":
+//                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        } else if (classOfMethod.contentEquals("java.lang.System")) {
+//            switch (methodName) {
+//                case "currentTimeMillis":
+//                case "nanoTime":
+//                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        } else if (classOfMethod.contentEquals("java.lang.Thread")) {
+//            switch (methodName) {
+//                case "sleep":
+//                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//
+//        return super.visitMethodInvocation(node, p);
+//    }
 
 
     // Slots created in ATF

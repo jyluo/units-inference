@@ -38,7 +38,6 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected StringBuffer smtFileContents;
 
     protected final String z3Program = "z3";
-    protected final String sleepDuration = "1"; // seconds
     protected boolean optimizingMode;
     protected boolean getUnsatCore;
 

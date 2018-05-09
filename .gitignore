@@ -48,3 +48,7 @@ manual-tests/insertionTest
 
 # temp files
 manual-tests/unused*
+
+# coq files
+coq-proof/coq-source
+coq-proof/V8.8.0.tar.gz

@@ -20,6 +20,15 @@ dist/
 build/
 testdata/tmp
 
+# coq source files
+coq-proof/coq-source
+coq-proof/V8.8.0.tar.gz
+
+# coq proof output files
+coq-proof/*.aux
+coq-proof/*.vo
+coq-proof/*.glob
+
 # corpus
 corpus/
 worked-benchmarks/
@@ -48,7 +57,3 @@ manual-tests/insertionTest
 
 # temp files
 manual-tests/unused*
-
-# coq files
-coq-proof/coq-source
-coq-proof/V8.8.0.tar.gz

@@ -48,6 +48,5 @@ $COQC FieldsDefs.v
 $COQC ExpressionsDefs.v
 $COQC StatementDefs.v
 $COQC ProgramDefs.v
-$COQC UnitsSoundness.v
 
 echo "Compilation complete."

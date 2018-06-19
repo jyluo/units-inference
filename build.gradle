@@ -153,16 +153,20 @@ googleJavaFormat {
 tasks.googleJavaFormat {
     group 'Formatting'
     description = "Reformat Java source code with Google-Java-format"
-    exclude 'testing/**'
-    exclude 'manual-tests/CF-Tests/**'
+    exclude 'testing'
+    exclude 'manual-tests/typecheck'
+    exclude 'manual-tests/inference'
+    exclude 'manual-tests/CF-Tests'
     exclude 'testdata'
     exclude 'projects'
 }
 tasks.verifyGoogleJavaFormat {
     group 'Formatting'
     description = "Check Java source code is in Google-Java-format"
-    exclude 'testing/**'
-    exclude 'manual-tests/CF-Tests/**'
+    exclude 'testing'
+    exclude 'manual-tests/typecheck'
+    exclude 'manual-tests/inference'
+    exclude 'manual-tests/CF-Tests'
     exclude 'testdata'
     exclude 'projects'
 }

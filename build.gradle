@@ -46,7 +46,6 @@ dependencies {
     // CF test lib dependency
     testCompile fileTree(dir: "${cfPath}/util/build/libs", include: "testlib-*.jar")
     testCompile 'junit:junit:4.12'
-    testCompile fileTree(dir: "src", include: "**/*.astub")
 }
 
 sourceSets {
@@ -93,7 +92,7 @@ afterEvaluate {
                 'path.inference.script': "${cfiPath}/scripts/inference",
                 JDK_JAR: "${cfPath}/checker/dist/jdk8.jar"
 
-        environment "external_checker_classpath", "${unitsPath}/build/classes/java/main:${unitsPath}/build/resources/main"
+        environment "external_checker_classpath", "${unitsPath}/build/classes/java/main:${unitsPath}/build/resources/main:${unitsPath}/build/libs/units-inference.jar"
 
         jvmArgs "-Xbootclasspath/p:${cfiPath}/dist/javac.jar"
 
@@ -144,14 +143,13 @@ tasks.clean {
 //   group 'Formatting'
 //   description = "Reformat Java source code with Google-Java-format"
 //   exclude 'testing'
+//   exclude 'testdata'
 //   exclude 'projects'
 // }
 // tasks.verifyGoogleJavaFormat {
 //   group 'Formatting'
 //   description = "Check Java source code is in Google-Java-format"
 //   exclude 'testing'
+//   exclude 'testdata'
 //   exclude 'projects'
 // }
-// task checkFormat(dependsOn: verifyGoogleJavaFormat) {}
-// task reformat(dependsOn: googleJavaFormat) {}
-

@@ -1,4 +1,3 @@
-
 class Exceptions {
 
     public void Main() {

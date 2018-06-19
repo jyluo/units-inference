@@ -1,24 +1,13 @@
 # gedit backups
 *~
 
-# eclipse project
-.project
-.classpath
-.settings
-
-# eclipse output
-bin/
-
-# lib dependencies
-lib/
-
 # gradle config
 .gradle/
 
 # gradle output
 dist/
 build/
-testdata/tmp
+testdata/
 
 # coq source files
 coq-proof/coq-source

@@ -6,6 +6,7 @@ install:
 script: ./.travis-build.sh
 
 sudo: false
+dist: trusty
 
 jdk:
   - oraclejdk8

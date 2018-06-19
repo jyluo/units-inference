@@ -8,49 +8,10 @@ WORKING_DIR=$(cd $(dirname "$0") && pwd)
 
 # export SHELLOPTS
 
-#default value is pascaliUWat. REPO_SITE may be set to other value for travis test purpose.
-# export REPO_SITE="${REPO_SITE:-pascaliUWat}"
+#default value is opprop. REPO_SITE may be set to other value for travis test purpose.
 export REPO_SITE="${REPO_SITE:-opprop}"
 
 echo "------ Downloading everthing from REPO_SITE: $REPO_SITE ------"
-
-##### Fetching checker-framework
-if [ -d $JSR308/checker-framework ] ; then
-    (cd $JSR308/checker-framework && git pull)
-else
-    (cd $JSR308 && git clone --depth 1 https://github.com/"$REPO_SITE"/checker-framework.git)
-fi
-
-## Fetching annotation-tools (Annotation File Utilities)
-if [ -d $JSR308/annotation-tools ] ; then
-    # Older versions of git don't support the -C command-line option
-    (cd $JSR308/annotation-tools && git pull)
-else
-    (cd $JSR308 && git clone --depth 1 https://github.com/typetools/annotation-tools.git)
-fi
-
-# Build annotation tools, this also builds jsr308-langtools
-(cd $JSR308/annotation-tools/ && ./.travis-build-without-test.sh)
-
-## Fetching stubparser
-if [ -d $JSR308/stubparser ] ; then
-    (cd $JSR308/stubparser && git pull)
-else
-    (cd $JSR308 && git clone --depth 1 https://github.com/typetools/stubparser.git)
-fi
-
-## Fetching DLJC
-if [ -d $JSR308/do-like-javac ] ; then
-    (cd $JSR308/do-like-javac && git pull)
-else
-    (cd $JSR308 && git clone --depth 1 https://github.com/"$REPO_SITE"/do-like-javac.git)
-fi
-
-## Fast-build stubparser without testing.
-(cd $JSR308/stubparser && mvn -Dmaven.test.skip=true install)
-
-## build checker-framework, with pre-built jdk
-(cd $JSR308/checker-framework && gradle assemble)
 
 ##### build checker-framework-inference
 if [ -d $JSR308/checker-framework-inference ] ; then
@@ -59,7 +20,14 @@ else
     (cd $JSR308 && git clone --depth 1 https://github.com/"$REPO_SITE"/checker-framework-inference.git)
 fi
 
-(cd $JSR308/checker-framework-inference && gradle dist)
+(cd $JSR308/checker-framework-inference && ./.travis-build-without-test.sh)
+
+## Fetching DLJC
+if [ -d $JSR308/do-like-javac ] ; then
+    (cd $JSR308/do-like-javac && git pull)
+else
+    (cd $JSR308 && git clone --depth 1 https://github.com/"$REPO_SITE"/do-like-javac.git)
+fi
 
 ##### build units-inference without testing
 (cd $JSR308/units-inference && gradle build -x test)

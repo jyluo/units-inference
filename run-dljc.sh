@@ -4,18 +4,24 @@ set -e
 
 WORKING_DIR=$(pwd)
 
+ROOT=$(cd $(dirname "$0")/.. && pwd)
+
 if [ -z "${JSR308}" ] ; then
-    export JSR308=$(cd $(dirname "$0")/.. && pwd)
+    export JSR308=$(cd ${ROOT}/.. && pwd)
 fi
 
-DLJC="$JSR308"/do-like-javac
-export AFU="$JSR308"/annotation-tools/annotation-file-utilities
-export PATH="$PATH":"$AFU"/scripts
+DLJC="${JSR308}/do-like-javac"
+export AFU="${JSR308}/annotation-tools/annotation-file-utilities"
+export PATH="${PATH}:${AFU}/scripts"
 
-export CLASSPATH="$JSR308"/units-inference/dist/units-inference.jar:"$JSR308"/units-inference/bin
+CFI="${ROOT}/checker-framework-inference"
+UI="${ROOT}/units-inference"
+libDir="${CFI}/lib"
 
-export DYLD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
-export LD_LIBRARY_PATH="$JSR308"/checker-framework-inference/lib
+export CLASSPATH="${UI}/build/classes/java/main:${UI}/build/libs/units-inference.jar:."
+
+export DYLD_LIBRARY_PATH="${libDir}"
+export LD_LIBRARY_PATH="${libDir}"
 
 CHECKER=units.UnitsChecker
 SOLVER=units.solvers.backend.UnitsSolverEngine

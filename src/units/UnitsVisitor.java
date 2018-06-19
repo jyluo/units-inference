@@ -1,18 +1,5 @@
 package units;
 
-import java.util.Set;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
-import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import org.checkerframework.framework.source.Result;
-import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.TreeUtils;
-import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.MethodInvocationTree;
-import com.sun.source.tree.Tree.Kind;
-import com.sun.source.tree.TypeCastTree;
-import com.sun.source.tree.UnaryTree;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -23,13 +10,27 @@ import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.Tree.Kind;
+import com.sun.source.tree.TypeCastTree;
+import com.sun.source.tree.UnaryTree;
+import java.util.Set;
+import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import org.checkerframework.framework.source.Result;
+import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.TreeUtils;
 import units.representation.UnitsRepresentationUtils;
 import units.util.UnitsTypecheckUtils;
 
 public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTypeFactory> {
 
-    public UnitsVisitor(UnitsChecker checker, InferenceChecker ichecker,
-            BaseAnnotatedTypeFactory factory, boolean infer) {
+    public UnitsVisitor(
+            UnitsChecker checker,
+            InferenceChecker ichecker,
+            BaseAnnotatedTypeFactory factory,
+            boolean infer) {
         super(checker, ichecker, factory, infer);
     }
 
@@ -99,7 +100,8 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     public Void visitUnary(UnaryTree node, Void p) {
         // Note i++ in a for loop generates a subtype constraint that the type variable for i is a
         // supertype of raw units internal, this subtype doesn't need to be generated
-        if ((node.getKind() == Kind.PREFIX_DECREMENT) || (node.getKind() == Kind.PREFIX_INCREMENT)
+        if ((node.getKind() == Kind.PREFIX_DECREMENT)
+                || (node.getKind() == Kind.PREFIX_INCREMENT)
                 || (node.getKind() == Kind.POSTFIX_DECREMENT)
                 || (node.getKind() == Kind.POSTFIX_INCREMENT)) {
             return null;
@@ -135,8 +137,9 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 case DIVIDE:
                 case REMAINDER:
                     ArithmeticOperationKind opKind = ArithmeticOperationKind.fromTreeKind(kind);
-                    ArithmeticVariableSlot avsRes = slotManager.getArithmeticVariableSlot(
-                            VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
+                    ArithmeticVariableSlot avsRes =
+                            slotManager.getArithmeticVariableSlot(
+                                    VariableAnnotator.treeToLocation(atypeFactory, binaryTree));
                     constraintManager.addArithmeticConstraint(opKind, lhs, rhs, avsRes);
                     break;
                 case EQUAL_TO: // ==
@@ -201,9 +204,15 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                 // comparable constraint: lhs <: rhs, or rhs <: lhs
                 if (!(atypeFactory.getQualifierHierarchy().isSubtype(lhsAM, rhsAM)
                         || atypeFactory.getQualifierHierarchy().isSubtype(rhsAM, lhsAM))) {
-                    checker.report(Result.failure("comparison.unit.mismatch",
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(lhsAM),
-                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(rhsAM)),
+                    checker.report(
+                            Result.failure(
+                                    "comparison.unit.mismatch",
+                                    atypeFactory
+                                            .getAnnotationFormatter()
+                                            .formatAnnotationMirror(lhsAM),
+                                    atypeFactory
+                                            .getAnnotationFormatter()
+                                            .formatAnnotationMirror(rhsAM)),
                             binaryTree);
                 }
                 // if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
@@ -233,8 +242,10 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
             // AnnotationMirror castType =
             // atypeFactory.getAnnotatedType(node).getAnnotationInHierarchy(unitsRepUtils.TOP);
-            AnnotationMirror exprType = atypeFactory.getAnnotatedType(node.getExpression())
-                    .getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+            AnnotationMirror exprType =
+                    atypeFactory
+                            .getAnnotatedType(node.getExpression())
+                            .getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
             if (UnitsTypecheckUtils.unitsEqual(exprType, unitsRepUtils.DIMENSIONLESS)) {
                 if (atypeFactory.getDependentTypesHelper() != null) {
@@ -259,8 +270,9 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         if (infer) {
             // In inference mode, the lower bound is the constant slot for @Dimensionless
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            ConstantSlot cs = slotManager
-                    .createConstantSlot(UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
+            ConstantSlot cs =
+                    slotManager.createConstantSlot(
+                            UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
             lowerBounds.add(slotManager.getAnnotation(cs));
         } else {
             // In type check mode, the lower bound is @Dimensionless
@@ -269,55 +281,54 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         return lowerBounds;
     }
 
-//    // Debug use, finds out number of calls to each instrumented method
-//    @Override
-//    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
-//        String methodName = TreeUtils.methodName(node).toString().intern();
-//
-//        ExecutableElement element = TreeUtils.elementFromUse(node);
-//        String classOfMethod = element.getEnclosingElement().toString().intern();
-//
-//        if (classOfMethod.contentEquals("java.lang.Math")) {
-//            switch (methodName) {
-//                case "cos":
-//                case "sin":
-//                case "tan":
-//                case "asin":
-//                case "acos":
-//                case "atan":
-//                case "atan2":
-//                case "sinh":
-//                case "cosh":
-//                case "tanh":
-//                case "toDegrees":
-//                case "toRadians":
-//                    System.out.println(" visited: " + classOfMethod + "." + methodName);
-//                    break;
-//                default:
-//                    break;
-//            }
-//        } else if (classOfMethod.contentEquals("java.lang.System")) {
-//            switch (methodName) {
-//                case "currentTimeMillis":
-//                case "nanoTime":
-//                    System.out.println(" visited: " + classOfMethod + "." + methodName);
-//                    break;
-//                default:
-//                    break;
-//            }
-//        } else if (classOfMethod.contentEquals("java.lang.Thread")) {
-//            switch (methodName) {
-//                case "sleep":
-//                    System.out.println(" visited: " + classOfMethod + "." + methodName);
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//
-//        return super.visitMethodInvocation(node, p);
-//    }
-
+    //    // Debug use, finds out number of calls to each instrumented method
+    //    @Override
+    //    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+    //        String methodName = TreeUtils.methodName(node).toString().intern();
+    //
+    //        ExecutableElement element = TreeUtils.elementFromUse(node);
+    //        String classOfMethod = element.getEnclosingElement().toString().intern();
+    //
+    //        if (classOfMethod.contentEquals("java.lang.Math")) {
+    //            switch (methodName) {
+    //                case "cos":
+    //                case "sin":
+    //                case "tan":
+    //                case "asin":
+    //                case "acos":
+    //                case "atan":
+    //                case "atan2":
+    //                case "sinh":
+    //                case "cosh":
+    //                case "tanh":
+    //                case "toDegrees":
+    //                case "toRadians":
+    //                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+    //                    break;
+    //                default:
+    //                    break;
+    //            }
+    //        } else if (classOfMethod.contentEquals("java.lang.System")) {
+    //            switch (methodName) {
+    //                case "currentTimeMillis":
+    //                case "nanoTime":
+    //                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+    //                    break;
+    //                default:
+    //                    break;
+    //            }
+    //        } else if (classOfMethod.contentEquals("java.lang.Thread")) {
+    //            switch (methodName) {
+    //                case "sleep":
+    //                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+    //                    break;
+    //                default:
+    //                    break;
+    //            }
+    //        }
+    //
+    //        return super.visitMethodInvocation(node, p);
+    //    }
 
     // Slots created in ATF
 

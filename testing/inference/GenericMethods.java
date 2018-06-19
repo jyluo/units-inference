@@ -2,20 +2,20 @@ import units.qual.*;
 
 class GenericMethods {
 
-    public <T> T IDOne(T param){
+    public <T> T IDOne(T param) {
         return param;
     }
 
-    public <T extends Number> T IDTwo(T param){
+    public <T extends Number> T IDTwo(T param) {
         return param;
     }
 
-    public <T> String mStringCatOne(T param){
+    public <T> String mStringCatOne(T param) {
         // :: fixable-error: (method.invocation.invalid)
         return param.toString() + param;
     }
 
-    public <T extends Object> String mStringCatTwo(T param){
+    public <T extends Object> String mStringCatTwo(T param) {
         return param.toString() + param;
     }
 

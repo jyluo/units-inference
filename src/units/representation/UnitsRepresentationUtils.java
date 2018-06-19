@@ -1,5 +1,6 @@
 package units.representation;
 
+import checkers.inference.qual.VarAnnot;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +22,6 @@ import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
-import checkers.inference.qual.VarAnnot;
 import units.qual.BaseUnit;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
@@ -32,10 +32,10 @@ import units.qual.UnknownUnits;
 
 /**
  * Utility class containing logic for creating and converting internal representations of units
- * between its 3 primary forms: {@link UnitsInternal} as annotation mirrors and
- * {@link TypecheckUnit}.
+ * between its 3 primary forms: {@link UnitsInternal} as annotation mirrors and {@link
+ * TypecheckUnit}.
  *
- * TODO: {@code @Unit}, and alias forms.
+ * <p>TODO: {@code @Unit}, and alias forms.
  */
 public class UnitsRepresentationUtils {
     private static UnitsRepresentationUtils singletonInstance;
@@ -53,6 +53,7 @@ public class UnitsRepresentationUtils {
 
     /** Instances of {@link UnitsInternal} with values to represent UnknownUnits and UnitsBottom */
     public AnnotationMirror TOP;
+
     public AnnotationMirror BOTTOM;
 
     /**
@@ -61,15 +62,12 @@ public class UnitsRepresentationUtils {
      */
     public AnnotationMirror DIMENSIONLESS;
 
-    /**
-     * Instances of {@link UnknownUnits} and {@link UnitsBottom} for insertion to source;
-     */
+    /** Instances of {@link UnknownUnits} and {@link UnitsBottom} for insertion to source; */
     public AnnotationMirror SURFACE_TOP;
+
     public AnnotationMirror SURFACE_BOTTOM;
 
-    /**
-     * Instance of {@link VarAnnot} for use in UnitsVisitor in infer mode.
-     */
+    /** Instance of {@link VarAnnot} for use in UnitsVisitor in infer mode. */
     public AnnotationMirror VARANNOT;
 
     // public AnnotationMirror METER;
@@ -85,20 +83,17 @@ public class UnitsRepresentationUtils {
 
     /** The set of base units */
     private final Set<Class<? extends Annotation>> baseUnits = new TreeSet<>(annoClassComparator);
+
     private Set<String> baseUnitNames;
 
     /** The set of alias units defined as qualifiers */
     private final Set<Class<? extends Annotation>> aliasUnits = new TreeSet<>(annoClassComparator);
 
-    /**
-     * A map from surface units annotation mirrors to their internal units representation.
-     */
+    /** A map from surface units annotation mirrors to their internal units representation. */
     private final Map<AnnotationMirror, AnnotationMirror> unitsAnnotationMirrorMap =
             AnnotationUtils.createAnnotationMap();
 
-    /**
-     * An immutable view of {@link #unitsAnnotationMirrorMap}.
-     */
+    /** An immutable view of {@link #unitsAnnotationMirrorMap}. */
     private final Map<AnnotationMirror, AnnotationMirror> immutableUnitsAnnotationMirrorMap;
 
     /**
@@ -106,14 +101,10 @@ public class UnitsRepresentationUtils {
      */
     private final Set<Class<? extends Annotation>> surfaceUnitsSet = new HashSet<>();
 
-    /**
-     * The unitsAnnotationMirrorMap with its keys and values swapped.
-     */
+    /** The unitsAnnotationMirrorMap with its keys and values swapped. */
     private final Map<AnnotationMirror, AnnotationMirror> swappedMap =
             AnnotationUtils.createAnnotationMap();
-    /**
-     * An immutable view of {@link #swappedMap}.
-     */
+    /** An immutable view of {@link #swappedMap}. */
     private Map<AnnotationMirror, AnnotationMirror> immutableSwappedMap;
 
     private UnitsRepresentationUtils(ProcessingEnvironment processingEnv, Elements elements) {
@@ -124,8 +115,8 @@ public class UnitsRepresentationUtils {
         immutableSwappedMap = Collections.unmodifiableMap(swappedMap);
     }
 
-    public static UnitsRepresentationUtils getInstance(ProcessingEnvironment processingEnv,
-            Elements elements) {
+    public static UnitsRepresentationUtils getInstance(
+            ProcessingEnvironment processingEnv, Elements elements) {
         if (singletonInstance == null) {
             singletonInstance = new UnitsRepresentationUtils(processingEnv, elements);
         }
@@ -199,12 +190,12 @@ public class UnitsRepresentationUtils {
         // meterDimensions.put("m", 1);
         // METER = createInternalUnit("Meter", false, false, 0, meterDimensions);
 
-        unitsAnnotationMirrorMap.put(AnnotationBuilder.fromClass(elements, UnknownUnits.class),
-                TOP);
-        unitsAnnotationMirrorMap.put(AnnotationBuilder.fromClass(elements, UnitsBottom.class),
-                BOTTOM);
-        unitsAnnotationMirrorMap.put(AnnotationBuilder.fromClass(elements, Dimensionless.class),
-                DIMENSIONLESS);
+        unitsAnnotationMirrorMap.put(
+                AnnotationBuilder.fromClass(elements, UnknownUnits.class), TOP);
+        unitsAnnotationMirrorMap.put(
+                AnnotationBuilder.fromClass(elements, UnitsBottom.class), BOTTOM);
+        unitsAnnotationMirrorMap.put(
+                AnnotationBuilder.fromClass(elements, Dimensionless.class), DIMENSIONLESS);
 
         surfaceUnitsSet.add(UnknownUnits.class);
         surfaceUnitsSet.add(UnitsBottom.class);
@@ -244,7 +235,8 @@ public class UnitsRepresentationUtils {
         // set the exponent of the given base unit to 1
         exponents.put(baseUnitClass.getSimpleName(), 1);
         // create the internal unit and add to alias map
-        unitsAnnotationMirrorMap.put(baseUnitAM,
+        unitsAnnotationMirrorMap.put(
+                baseUnitAM,
                 createInternalUnit(baseUnitClass.getCanonicalName(), false, false, 0, exponents));
     }
 
@@ -270,8 +262,10 @@ public class UnitsRepresentationUtils {
             prefix += bu.prefix();
         }
 
-        unitsAnnotationMirrorMap.put(aliasUnitAM, createInternalUnit(
-                aliasUnitClass.getCanonicalName(), false, false, prefix, exponents));
+        unitsAnnotationMirrorMap.put(
+                aliasUnitAM,
+                createInternalUnit(
+                        aliasUnitClass.getCanonicalName(), false, false, prefix, exponents));
     }
     //
     // /**
@@ -334,10 +328,10 @@ public class UnitsRepresentationUtils {
     /**
      * Returns the surface unit representation for the given {@link UnitsInternal} annotation if
      * available, otherwise returns the given annotation unchanged.
-     * 
+     *
      * @param anno an {@link AnnotationMirror} of a {@link UnitsInternal} annotation
      * @return the surface representation unit if available, otherwise the UnitsInternal annotation
-     *         unchanged
+     *     unchanged
      */
     public AnnotationMirror getSurfaceUnit(AnnotationMirror anno) {
         Map<AnnotationMirror, AnnotationMirror> map = getUnitsAliasMapSwapped();
@@ -354,14 +348,15 @@ public class UnitsRepresentationUtils {
      * --> @UnitsInternal(..)), or is supported by the qual hierarchy, or it is a @UnitsInternal
      * annotation (with possibly not all base units).
      */
-    public boolean isUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
-            AnnotationMirror anno) {
+    public boolean isUnitsAnnotation(
+            BaseAnnotatedTypeFactory realTypeFactory, AnnotationMirror anno) {
         return unitsAnnotationMirrorMap.keySet().contains(anno)
                 || realTypeFactory.isSupportedQualifier(anno)
                 || AnnotationUtils.areSameByClass(anno, UnitsInternal.class);
     }
 
-    public boolean hasUnitsAnnotation(BaseAnnotatedTypeFactory realTypeFactory,
+    public boolean hasUnitsAnnotation(
+            BaseAnnotatedTypeFactory realTypeFactory,
             Iterable<? extends AnnotationMirror> annotations) {
         for (AnnotationMirror anno : annotations) {
             if (isUnitsAnnotation(realTypeFactory, anno)) {
@@ -371,21 +366,20 @@ public class UnitsRepresentationUtils {
         return false;
     }
 
-    /**
-     * Returns an immutable map of surface units annotations mapped to their internal units
-     */
+    /** Returns an immutable map of surface units annotations mapped to their internal units */
     public Map<AnnotationMirror, AnnotationMirror> getUnitsAliasMap() {
         return immutableUnitsAnnotationMirrorMap;
     }
 
-    /**
-     * Returns an immutable map of internal units mapped to their surface units annotations
-     */
+    /** Returns an immutable map of internal units mapped to their surface units annotations */
     public Map<AnnotationMirror, AnnotationMirror> getUnitsAliasMapSwapped() {
         // update swappedMap if there's differences in value set size
         if (unitsAnnotationMirrorMap.values().size() != swappedMap.keySet().size()) {
-            swappedMap.putAll(unitsAnnotationMirrorMap.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
+            swappedMap.putAll(
+                    unitsAnnotationMirrorMap
+                            .entrySet()
+                            .stream()
+                            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
         }
         return immutableSwappedMap;
     }
@@ -397,8 +391,9 @@ public class UnitsRepresentationUtils {
 
         // add declared base units from the anno to the map, filtering out duplicate base units
         Map<String, Integer> baseUnitsFromAnno = new HashMap<>();
-        for (AnnotationMirror buAnno : AnnotationUtils.getElementValueArray(anno, "baseUnits",
-                AnnotationMirror.class, true)) {
+        for (AnnotationMirror buAnno :
+                AnnotationUtils.getElementValueArray(
+                        anno, "baseUnits", AnnotationMirror.class, true)) {
             String baseUnit = AnnotationUtils.getElementValue(buAnno, "unit", String.class, false);
             int exponent =
                     AnnotationUtils.getElementValue(buAnno, "exponent", Integer.class, false);
@@ -439,14 +434,17 @@ public class UnitsRepresentationUtils {
             Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
 
             // replace base units with values in annotation
-            for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(anno, "baseUnits",
-                    AnnotationMirror.class, true)) {
-                exponents.put(AnnotationUtils.getElementValue(bu, "unit", String.class, false),
+            for (AnnotationMirror bu :
+                    AnnotationUtils.getElementValueArray(
+                            anno, "baseUnits", AnnotationMirror.class, true)) {
+                exponents.put(
+                        AnnotationUtils.getElementValue(bu, "unit", String.class, false),
                         AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
             }
 
-            AnnotationMirror filledInAM = createInternalUnit(originalName, unknownUnits,
-                    unitsBottom, prefixExponent, exponents);
+            AnnotationMirror filledInAM =
+                    createInternalUnit(
+                            originalName, unknownUnits, unitsBottom, prefixExponent, exponents);
 
             fillMissingBaseUnitsCache.put(anno, filledInAM);
 
@@ -483,9 +481,11 @@ public class UnitsRepresentationUtils {
                 exponents.put(bu, 0);
             }
             // replace base units with values in annotation
-            for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(anno, "baseUnits",
-                    AnnotationMirror.class, true)) {
-                exponents.put(AnnotationUtils.getElementValue(bu, "unit", String.class, false),
+            for (AnnotationMirror bu :
+                    AnnotationUtils.getElementValueArray(
+                            anno, "baseUnits", AnnotationMirror.class, true)) {
+                exponents.put(
+                        AnnotationUtils.getElementValue(bu, "unit", String.class, false),
                         AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
             }
 
@@ -510,15 +510,24 @@ public class UnitsRepresentationUtils {
         }
 
         // otherwise create an internal unit for the typecheck unit and add to cache
-        AnnotationMirror anno = createInternalUnit(unit.getOriginalName(), unit.isUnknownUnits(),
-                unit.isUnitsBottom(), unit.getPrefixExponent(), unit.getExponents());
+        AnnotationMirror anno =
+                createInternalUnit(
+                        unit.getOriginalName(),
+                        unit.isUnknownUnits(),
+                        unit.isUnitsBottom(),
+                        unit.getPrefixExponent(),
+                        unit.getExponents());
 
         typecheckUnitCache.put(anno, unit);
         return anno;
     }
 
-    public AnnotationMirror createInternalUnit(String originalName, boolean unknownUnits,
-            boolean unitsBottom, int prefixExponent, Map<String, Integer> exponents) {
+    public AnnotationMirror createInternalUnit(
+            String originalName,
+            boolean unknownUnits,
+            boolean unitsBottom,
+            int prefixExponent,
+            Map<String, Integer> exponents) {
         // not allowed to set both a UU and UB to true on the same annotation
         assert !(unknownUnits && unitsBottom);
 

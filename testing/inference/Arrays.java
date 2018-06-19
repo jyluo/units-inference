@@ -1,8 +1,7 @@
+import units.UnitsTools;
+import units.qual.Dimensionless;
 import units.qual.UnknownUnits;
 import units.qual.m;
-import units.qual.UnitsBottom;
-import units.qual.Dimensionless;
-import units.UnitsTools;
 // @skip-test
 // need to be able to set default array component qualifier, and fix some crazy bug
 
@@ -19,6 +18,6 @@ class Arrays {
 
         @m int[] arrayOfMeters5 = new @m int @Dimensionless [] {UnitsTools.m, UnitsTools.m};
 
-//         @m int[] arrayOfMeters6 = {UnitsTools.m, UnitsTools.m};
+        //         @m int[] arrayOfMeters6 = {UnitsTools.m, UnitsTools.m};
     }
 }

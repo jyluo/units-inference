@@ -1,5 +1,5 @@
-import units.qual.*;
 import units.UnitsTools;
+import units.qual.*;
 
 class Unsat {
     // this method is deliberately unsat

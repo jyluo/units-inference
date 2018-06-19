@@ -1,6 +1,5 @@
 import org.checkerframework.framework.qual.PolyAll;
 import units.qual.*;
-import units.UnitsTools;
 
 class PolyAllClass {
     @PolyAll PolyAllClass(@PolyAll int x) {}
@@ -34,7 +33,7 @@ class Constructors {
         @m PolyUnitClass puc1 = new PolyUnitClass(5);
         // :: fixable-error: (constructor.invocation.invalid)
         @m PolyUnitClass puc2 = new @m PolyUnitClass(5);
-        
+
         // :: fixable-error: (argument.type.incompatible) :: fixable-error: (constructor.invocation.invalid) :: fixable-error: (assignment.type.incompatible)
         @m MeterClass mc1 = new MeterClass(5);
         // :: fixable-error: (argument.type.incompatible)

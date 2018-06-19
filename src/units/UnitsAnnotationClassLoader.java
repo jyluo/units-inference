@@ -17,13 +17,12 @@ public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
     /**
      * Custom filter for units annotations:
      *
-     * <p>
-     * This filter will ignore (by returning false) any units annotation which is an alias of
+     * <p>This filter will ignore (by returning false) any units annotation which is an alias of
      * another base unit annotation. Alias annotations can still be used in source code; they are
-     * converted into a base annotation by
-     * {@link UnitsAnnotatedTypeFactory#aliasedAnnotation(AnnotationMirror)}. This filter simply
-     * makes sure that the alias annotations themselves don't become part of the type hierarchy as
-     * their base annotations already are in the hierarchy.
+     * converted into a base annotation by {@link
+     * UnitsAnnotatedTypeFactory#aliasedAnnotation(AnnotationMirror)}. This filter simply makes sure
+     * that the alias annotations themselves don't become part of the type hierarchy as their base
+     * annotations already are in the hierarchy.
      */
     @Override
     protected boolean isSupportedAnnotationClass(Class<? extends Annotation> annoClass) {

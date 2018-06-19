@@ -1,5 +1,11 @@
 package units.solvers.backend.z3smt;
 
+import backend.z3smt.Z3SmtFormatTranslator;
+import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.VariableSlot;
+import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
+import checkers.inference.solver.frontend.Lattice;
+import com.microsoft.z3.BoolExpr;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,12 +13,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
-import com.microsoft.z3.BoolExpr;
-import backend.z3smt.Z3SmtFormatTranslator;
-import checkers.inference.model.ConstantSlot;
-import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
-import checkers.inference.solver.frontend.Lattice;
 import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
@@ -140,8 +140,8 @@ public class UnitsZ3SmtFormatTranslator
 
     // Decode overall solutions from Z3
     @Override
-    public Map<Integer, AnnotationMirror> decodeSolution(List<String> model,
-            ProcessingEnvironment processingEnv) {
+    public Map<Integer, AnnotationMirror> decodeSolution(
+            List<String> model, ProcessingEnvironment processingEnv) {
 
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
@@ -193,15 +193,19 @@ public class UnitsZ3SmtFormatTranslator
 
     // Convert a UnitsZ3EncodedSlot to an AnnotationMirror
     @Override
-    public AnnotationMirror decodeSolution(TypecheckUnit solutionSlot,
-            ProcessingEnvironment processingEnv) {
+    public AnnotationMirror decodeSolution(
+            TypecheckUnit solutionSlot, ProcessingEnvironment processingEnv) {
 
         // TODO: translate @UnitsInternal annotations to string from @Units annotations
         // TODO: infer original name somehow
 
-        AnnotationMirror solutionUnit = unitsRepUtils.createInternalUnit("",
-                solutionSlot.isUnknownUnits(), solutionSlot.isUnitsBottom(),
-                solutionSlot.getPrefixExponent(), solutionSlot.getExponents());
+        AnnotationMirror solutionUnit =
+                unitsRepUtils.createInternalUnit(
+                        "",
+                        solutionSlot.isUnknownUnits(),
+                        solutionSlot.isUnitsBottom(),
+                        solutionSlot.getPrefixExponent(),
+                        solutionSlot.getExponents());
 
         // Always return top and bottom based on the booleans, since the BU values can be arbitrary
         if (solutionSlot.isUnknownUnits()) {

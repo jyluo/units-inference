@@ -2,6 +2,7 @@ package units.qual;
 
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_LOWER_BOUND;
 import static org.checkerframework.framework.qual.TypeUseLocation.EXPLICIT_UPPER_BOUND;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -24,5 +25,4 @@ import org.checkerframework.framework.qual.TargetLocations;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @TargetLocations({EXPLICIT_LOWER_BOUND, EXPLICIT_UPPER_BOUND})
-public @interface UnitsBottom {
-}
+public @interface UnitsBottom {}

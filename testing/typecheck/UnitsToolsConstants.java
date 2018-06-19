@@ -1,5 +1,5 @@
-import units.qual.*;
 import units.UnitsTools;
+import units.qual.*;
 
 class UnitsToolsConstants {
 
@@ -31,7 +31,7 @@ class UnitsToolsConstants {
         s = UnitsTools.ms;
     }
 
-    public void TestingOnly(){
+    public void TestingOnly() {
         uu = UnitsTools.top;
         bot = UnitsTools.bottom;
         dim = UnitsTools.dimensionless;

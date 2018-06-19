@@ -1,6 +1,4 @@
-import org.checkerframework.framework.qual.PolyAll;
 import units.qual.*;
-import units.UnitsTools;
 
 class jBlasCases {
     void system() {
@@ -40,4 +38,3 @@ class Timer {
         return (stopTime - startTime) / 1e9;
     }
 }
-

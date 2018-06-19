@@ -1,5 +1,4 @@
 import units.qual.*;
-import units.UnitsTools;
 
 class Threads {
     void ThreadTest() throws InterruptedException {

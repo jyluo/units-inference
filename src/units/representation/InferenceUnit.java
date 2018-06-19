@@ -1,11 +1,11 @@
 package units.representation;
 
-import java.util.Map;
-import java.util.TreeMap;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
+import java.util.Map;
+import java.util.TreeMap;
 import units.util.UnitsZ3SmtEncoderUtils;
 
 /**
@@ -52,16 +52,22 @@ public class InferenceUnit {
     public static InferenceUnit makeVariableSlot(Context ctx, int slotID) {
         InferenceUnit slot = new InferenceUnit(ctx, slotID);
 
-        slot.uu = ctx.mkBoolConst(
-                UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.uuSlotName));
-        slot.ub = ctx.mkBoolConst(
-                UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.ubSlotName));
-        slot.prefixExponent = ctx.mkIntConst(
-                UnitsZ3SmtEncoderUtils.z3VarName(slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
+        slot.uu =
+                ctx.mkBoolConst(
+                        UnitsZ3SmtEncoderUtils.z3VarName(
+                                slotID, UnitsZ3SmtEncoderUtils.uuSlotName));
+        slot.ub =
+                ctx.mkBoolConst(
+                        UnitsZ3SmtEncoderUtils.z3VarName(
+                                slotID, UnitsZ3SmtEncoderUtils.ubSlotName));
+        slot.prefixExponent =
+                ctx.mkIntConst(
+                        UnitsZ3SmtEncoderUtils.z3VarName(
+                                slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
 
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
-            slot.exponents.put(baseUnit,
-                    ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
+            slot.exponents.put(
+                    baseUnit, ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
         }
 
         return slot;
@@ -172,5 +178,4 @@ public class InferenceUnit {
         }
         return true;
     }
-
 }

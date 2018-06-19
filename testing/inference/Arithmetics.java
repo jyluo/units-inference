@@ -1,5 +1,5 @@
-import units.qual.*;
 import units.UnitsTools;
+import units.qual.*;
 
 class Arithmetics {
     @m int m = UnitsTools.m;

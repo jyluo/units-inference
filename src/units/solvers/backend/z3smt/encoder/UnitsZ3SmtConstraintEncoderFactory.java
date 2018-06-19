@@ -1,7 +1,5 @@
 package units.solvers.backend.z3smt.encoder;
 
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
 import backend.z3smt.Z3SmtFormatTranslator;
 import backend.z3smt.encoder.Z3SmtConstraintEncoderFactory;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
@@ -12,6 +10,8 @@ import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncode
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
 import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
 
@@ -23,7 +23,9 @@ import units.representation.TypecheckUnit;
  */
 public class UnitsZ3SmtConstraintEncoderFactory
         extends Z3SmtConstraintEncoderFactory<InferenceUnit, TypecheckUnit> {
-    public UnitsZ3SmtConstraintEncoderFactory(Lattice lattice, Context ctx,
+    public UnitsZ3SmtConstraintEncoderFactory(
+            Lattice lattice,
+            Context ctx,
             Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }

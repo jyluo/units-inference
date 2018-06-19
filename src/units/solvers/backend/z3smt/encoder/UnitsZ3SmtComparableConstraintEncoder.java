@@ -1,7 +1,5 @@
 package units.solvers.backend.z3smt.encoder;
 
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
 import backend.z3smt.Z3SmtFormatTranslator;
 import backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
 import checkers.inference.model.ConstantSlot;
@@ -9,6 +7,8 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
 import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
 import units.util.UnitsZ3SmtEncoderUtils;
@@ -17,7 +17,9 @@ public class UnitsZ3SmtComparableConstraintEncoder
         extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
         implements ComparableConstraintEncoder<BoolExpr> {
 
-    public UnitsZ3SmtComparableConstraintEncoder(Lattice lattice, Context ctx,
+    public UnitsZ3SmtComparableConstraintEncoder(
+            Lattice lattice,
+            Context ctx,
             Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
@@ -27,7 +29,8 @@ public class UnitsZ3SmtComparableConstraintEncoder
         InferenceUnit second = snd.serialize(z3SmtFormatTranslator);
 
         // fst <: snd or snd <: fst
-        return ctx.mkOr(UnitsZ3SmtEncoderUtils.subtype(ctx, first, second),
+        return ctx.mkOr(
+                UnitsZ3SmtEncoderUtils.subtype(ctx, first, second),
                 UnitsZ3SmtEncoderUtils.subtype(ctx, second, first));
     }
 
@@ -45,5 +48,4 @@ public class UnitsZ3SmtComparableConstraintEncoder
     public BoolExpr encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
         return encode(fst, snd);
     }
-
 }

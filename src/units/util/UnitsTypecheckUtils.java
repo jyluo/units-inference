@@ -4,9 +4,7 @@ import javax.lang.model.element.AnnotationMirror;
 import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
 
-/**
- * Utility class with methods for computing the result unit of various arithmetic operations.
- */
+/** Utility class with methods for computing the result unit of various arithmetic operations. */
 public class UnitsTypecheckUtils {
 
     public static TypecheckUnit multiplication(TypecheckUnit lhs, TypecheckUnit rhs) {

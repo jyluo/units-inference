@@ -14,8 +14,8 @@ public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
 
     @Override
     protected void formatAnnotationMirror(AnnotationMirror anno, StringBuilder sb) {
-        super.formatAnnotationMirror(UnitsRepresentationUtils.getInstance().getSurfaceUnit(anno),
-                sb);
+        super.formatAnnotationMirror(
+                UnitsRepresentationUtils.getInstance().getSurfaceUnit(anno), sb);
     }
 
     // Same as superclass implementation except that we recursively format nested annotations

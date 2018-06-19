@@ -1,21 +1,5 @@
 package backend.z3smt;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.lang.model.element.AnnotationMirror;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
@@ -29,6 +13,22 @@ import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
 import checkers.inference.solver.util.StatisticRecorder;
 import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
+import com.microsoft.z3.Expr;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.lang.model.element.AnnotationMirror;
 
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
@@ -56,7 +56,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected long solvingStart;
     protected long solvingEnd;
 
-    public Z3SmtSolver(SolverEnvironment solverEnvironment, Collection<Slot> slots,
+    public Z3SmtSolver(
+            SolverEnvironment solverEnvironment,
+            Collection<Slot> slots,
             Collection<Constraint> constraints,
             Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator,
             Lattice lattice) {
@@ -97,15 +99,13 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         System.out.println("Solving Complete");
 
         // add -solverArgs collectStatistic to print?
-        StatisticRecorder.record(StatisticKey.SMT_SERIALIZATION_TIME,
-                serializationEnd - serializationStart);
+        StatisticRecorder.record(
+                StatisticKey.SMT_SERIALIZATION_TIME, serializationEnd - serializationStart);
         StatisticRecorder.record(StatisticKey.SMT_SOLVING_TIME, solvingEnd - solvingStart);
 
         System.out.println(
                 "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));
         System.out.println("SMT Solving Time (millisec): " + (solvingEnd - solvingStart));
-
-
 
         // Debug use, finds out number of calls to each instrumented method
         System.out.println("=== Arithmetic Constraints Printout ===");
@@ -121,8 +121,11 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             }
         }
         for (ArithmeticOperationKind kind : ArithmeticOperationKind.values()) {
-            System.out.println(" Made arithmetic " + kind.getSymbol() + " constraint: "
-                    + arithmeticConstraintCounters.get(kind));
+            System.out.println(
+                    " Made arithmetic "
+                            + kind.getSymbol()
+                            + " constraint: "
+                            + arithmeticConstraintCounters.get(kind));
         }
 
         System.out.println("=== Comparison Constraints Printout ===");
@@ -134,16 +137,15 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         }
         System.out.println(" Made comparison constraint: " + comparableConstraints);
 
-
-
         // System.out.println("=== Solutions: ===");
         // for (String r : results) {
         // System.out.println(r);
         // }
 
         if (!results.isEmpty()) {
-            result = formatTranslator.decodeSolution(results,
-                    solverEnvironment.processingEnvironment);
+            result =
+                    formatTranslator.decodeSolution(
+                            results, solverEnvironment.processingEnvironment);
         } else {
             System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
 
@@ -160,13 +162,14 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             solvingEnd = System.currentTimeMillis();
             System.out.println("Solving Complete");
 
-            System.out.println("SMT UNSAT Serialization Time (millisec): "
-                    + (serializationEnd - serializationStart));
+            System.out.println(
+                    "SMT UNSAT Serialization Time (millisec): "
+                            + (serializationEnd - serializationStart));
             System.out.println("SMT UNSAT Solving Time (millisec): " + (solvingEnd - solvingStart));
 
             System.out.println();
-            System.out
-                    .println("Unsatisfiable constraints: " + String.join(" ", unsatConstraintIDs));
+            System.out.println(
+                    "Unsatisfiable constraints: " + String.join(" ", unsatConstraintIDs));
             System.out.println();
 
             for (String constraintID : unsatConstraintIDs) {
@@ -246,8 +249,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
                 if (optimizingMode) {
                     // empty string means no optimization group
-                    solver.AssertSoft(formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1,
-                            "");
+                    solver.AssertSoft(
+                            formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1, "");
                 }
             }
         }
@@ -302,8 +305,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // existential constraints generated.
                 // Should investigate on this, and change this to ErrorAbort when eliminated
                 // unsupported constraints.
-                System.out.println("Unsupported constraint detected! Constraint type: "
-                        + constraint.getClass().getSimpleName());
+                System.out.println(
+                        "Unsupported constraint detected! Constraint type: "
+                                + constraint.getClass().getSimpleName());
                 current++;
                 continue;
             }
@@ -346,8 +350,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             if (optimizingMode && constraint instanceof SubtypeConstraint) {
                 SubtypeConstraint stc = (SubtypeConstraint) constraint;
 
-                Constraint eqc = InferenceMain.getInstance().getConstraintManager()
-                        .createEqualityConstraint(stc.getSubtype(), stc.getSupertype());
+                Constraint eqc =
+                        InferenceMain.getInstance()
+                                .getConstraintManager()
+                                .createEqualityConstraint(stc.getSubtype(), stc.getSupertype());
 
                 Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
 
@@ -362,8 +368,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             if (optimizingMode && constraint instanceof ComparableConstraint) {
                 ComparableConstraint cc = (ComparableConstraint) constraint;
 
-                Constraint eqc = InferenceMain.getInstance().getConstraintManager()
-                        .createEqualityConstraint(cc.getFirst(), cc.getSecond());
+                Constraint eqc =
+                        InferenceMain.getInstance()
+                                .getConstraintManager()
+                                .createEqualityConstraint(cc.getFirst(), cc.getSecond());
 
                 Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
 
@@ -402,7 +410,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     /* @formatter:off // this is for eclipse formatter */
     /*
     sat
-    (model 
+    (model
       (define-fun |338-BOT| () Bool
         false)
       (define-fun |509-TOP| () Bool
@@ -486,7 +494,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                         assert line.contains("Bool") || line.contains("Int");
 
                         // copy z3 variable name into results line
-                        resultsLine += line.substring(firstBar + 1, lastBar);;
+                        resultsLine += line.substring(firstBar + 1, lastBar);
+                        ;
                         continue;
                     }
                     // processing lines immediately following define-fun lines
@@ -539,23 +548,25 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             Thread handleZ3Output = new Z3OutputHandler(z3Process, results);
             handleZ3Output.start();
 
-            Thread handleZ3Error = new Thread() {
-                @Override
-                public void run() {
-                    String errorLine = "";
-                    StringBuilder sb = new StringBuilder();
-                    BufferedReader stdError =
-                            new BufferedReader(new InputStreamReader(z3Process.getErrorStream()));
-                    try {
-                        while ((errorLine = stdError.readLine()) != null) {
-                            sb.append(errorLine); // need + "\n" ?
+            Thread handleZ3Error =
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            String errorLine = "";
+                            StringBuilder sb = new StringBuilder();
+                            BufferedReader stdError =
+                                    new BufferedReader(
+                                            new InputStreamReader(z3Process.getErrorStream()));
+                            try {
+                                while ((errorLine = stdError.readLine()) != null) {
+                                    sb.append(errorLine); // need + "\n" ?
+                                }
+                                System.err.println(sb.toString());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
-                        System.err.println(sb.toString());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
+                    };
             handleZ3Error.start();
 
             // wait for threads to die

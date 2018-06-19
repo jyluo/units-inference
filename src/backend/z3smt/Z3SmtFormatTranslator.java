@@ -1,13 +1,5 @@
 package backend.z3smt;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.AnnotationMirror;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Optimize;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
@@ -16,6 +8,13 @@ import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.AbstractFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.AnnotationMirror;
 
 // <SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
 public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
@@ -23,9 +22,7 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
 
     protected Context ctx;
 
-    /**
-     * Cache of all serialized slots, keyed on slot ID.
-     */
+    /** Cache of all serialized slots, keyed on slot ID. */
     protected final Map<Integer, SlotEncodingT> serializedSlots;
 
     public Z3SmtFormatTranslator(Lattice lattice) {
@@ -76,6 +73,6 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
 
     public abstract BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot);
 
-    public abstract Map<Integer, AnnotationMirror> decodeSolution(List<String> model,
-            ProcessingEnvironment processingEnv);
+    public abstract Map<Integer, AnnotationMirror> decodeSolution(
+            List<String> model, ProcessingEnvironment processingEnv);
 }

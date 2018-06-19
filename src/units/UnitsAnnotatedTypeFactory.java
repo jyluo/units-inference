@@ -1,5 +1,7 @@
 package units;
 
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.Tree.Kind;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
@@ -27,8 +29,6 @@ import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ErrorReporter;
 import org.checkerframework.javacutil.TreeUtils;
-import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.Tree.Kind;
 import units.qual.IsBaseUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsInternal;
@@ -87,8 +87,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         }
 
         // check to see if it's a surface annotation such as @m or @UnknownUnits
-        for (AnnotationMirror metaAnno : anno.getAnnotationType().asElement()
-                .getAnnotationMirrors()) {
+        for (AnnotationMirror metaAnno :
+                anno.getAnnotationType().asElement().getAnnotationMirrors()) {
 
             // if it has a UnitsAlias or IsBaseUnit meta-annotation, then it must have been prebuilt
             // return the prebuilt internal annotation
@@ -132,14 +132,14 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // defaults for upper bounds is DIMENSIONLESS, individual bounds can be manually set to
         // UnknownUnits if they want to use units
         // defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.UPPER_BOUND);
-        defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS,
-                TypeUseLocation.EXPLICIT_UPPER_BOUND);
+        defs.addCheckedCodeDefault(
+                unitsRepUtils.DIMENSIONLESS, TypeUseLocation.EXPLICIT_UPPER_BOUND);
         defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.IMPLICIT_UPPER_BOUND);
         // defaults for lower bounds is BOTTOM, individual bounds can be manually set
         defs.addCheckedCodeDefault(unitsRepUtils.BOTTOM, TypeUseLocation.LOWER_BOUND);
         // exceptions are always dimensionless
-        defs.addCheckedCodeDefault(unitsRepUtils.DIMENSIONLESS,
-                TypeUseLocation.EXCEPTION_PARAMETER);
+        defs.addCheckedCodeDefault(
+                unitsRepUtils.DIMENSIONLESS, TypeUseLocation.EXCEPTION_PARAMETER);
         // set TOP as the default qualifier for local variables, for dataflow refinement
         defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.LOCAL_VARIABLE);
     }
@@ -172,10 +172,13 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         // Programmatically set UnitsRepresentationUtils.TOP as the top
         @Override
-        protected void finish(QualifierHierarchy qualHierarchy,
+        protected void finish(
+                QualifierHierarchy qualHierarchy,
                 Map<AnnotationMirror, Set<AnnotationMirror>> fullMap,
-                Map<AnnotationMirror, AnnotationMirror> polyQualifiers, Set<AnnotationMirror> tops,
-                Set<AnnotationMirror> bottoms, Object... args) {
+                Map<AnnotationMirror, AnnotationMirror> polyQualifiers,
+                Set<AnnotationMirror> tops,
+                Set<AnnotationMirror> bottoms,
+                Object... args) {
             super.finish(qualHierarchy, fullMap, polyQualifiers, tops, bottoms, args);
 
             // System.out.println(" === ATF ");
@@ -210,8 +213,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
             // Update polyQualifiers
             assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
-            polyQualifiers.put(unitsRepUtils.TOP,
-                    polyQualifiers.get(unitsRepUtils.RAWUNITSINTERNAL));
+            polyQualifiers.put(
+                    unitsRepUtils.TOP, polyQualifiers.get(unitsRepUtils.RAWUNITSINTERNAL));
             polyQualifiers.remove(unitsRepUtils.RAWUNITSINTERNAL);
 
             // Update tops
@@ -277,17 +280,20 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return result;
             }
 
-            ErrorReporter.errorAbort("Uncaught subtype check case:" + "\n    subtype:   "
-                    + getAnnotationFormatter().formatAnnotationMirror(subAnno) + "\n    supertype: "
-                    + getAnnotationFormatter().formatAnnotationMirror(superAnno));
+            ErrorReporter.errorAbort(
+                    "Uncaught subtype check case:"
+                            + "\n    subtype:   "
+                            + getAnnotationFormatter().formatAnnotationMirror(subAnno)
+                            + "\n    supertype: "
+                            + getAnnotationFormatter().formatAnnotationMirror(superAnno));
             return false;
         }
     }
 
     @Override
     public TreeAnnotator createTreeAnnotator() {
-        return new ListTreeAnnotator(new UnitsImplicitsTreeAnnotator(),
-                new UnitsPropagationTreeAnnotator());
+        return new ListTreeAnnotator(
+                new UnitsImplicitsTreeAnnotator(), new UnitsPropagationTreeAnnotator());
     }
 
     private final class UnitsImplicitsTreeAnnotator extends ImplicitsTreeAnnotator {
@@ -379,8 +385,10 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     // for use in AnnotatedTypeMirror.toString()
     @Override
     protected AnnotatedTypeFormatter createAnnotatedTypeFormatter() {
-        return new DefaultAnnotatedTypeFormatter(createAnnotationFormatter(),
-                checker.hasOption("printVerboseGenerics"), checker.hasOption("printAllQualifiers"));
+        return new DefaultAnnotatedTypeFormatter(
+                createAnnotationFormatter(),
+                checker.hasOption("printVerboseGenerics"),
+                checker.hasOption("printAllQualifiers"));
     }
 
     // for use in generating error outputs

@@ -10,9 +10,14 @@ import org.junit.runners.Parameterized.Parameters;
 public class UnitsTypecheckTest extends CheckerFrameworkPerFileTest {
 
     public UnitsTypecheckTest(File testFile) {
-        super(testFile, units.UnitsChecker.class, "units", "-d", "tests/build/outputdir"
-        // );
-                , "-Anomsgtext"); // comment to show bugs
+        super(
+                testFile,
+                units.UnitsChecker.class,
+                "units",
+                "-d",
+                "tests/build/outputdir",
+                "-Anomsgtext" // comment to show bugs
+                );
     }
 
     @Parameters

@@ -3,7 +3,6 @@ import static java.lang.Math.*;
 import static java.lang.System.*;
 import static java.lang.Thread.*;
 
-
 class MethodCounter {
 
     public void test() {

@@ -1,18 +1,23 @@
 package units;
 
+import checkers.inference.test.CFInferenceTest;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.checkerframework.framework.test.TestUtilities;
 import org.checkerframework.javacutil.Pair;
 import org.junit.runners.Parameterized.Parameters;
-import checkers.inference.test.CFInferenceTest;
 import units.solvers.backend.UnitsSolverEngine;
 
 public class UnitsInferenceTest extends CFInferenceTest {
 
     public UnitsInferenceTest(File testFile) {
-        super(testFile, units.UnitsChecker.class, "units", "-Anomsgtext", "-d",
+        super(
+                testFile,
+                units.UnitsChecker.class,
+                "units",
+                "-Anomsgtext",
+                "-d",
                 "tests/build/outputdir");
     }
 
@@ -35,5 +40,4 @@ public class UnitsInferenceTest extends CFInferenceTest {
         testfiles.addAll(TestUtilities.findRelativeNestedJavaFiles("testing", "inference"));
         return testfiles;
     }
-
 }

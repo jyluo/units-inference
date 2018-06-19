@@ -1,8 +1,5 @@
 package units.solvers.backend.z3smt.encoder;
 
-import org.checkerframework.javacutil.ErrorReporter;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
 import backend.z3smt.Z3SmtFormatTranslator;
 import backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
@@ -12,6 +9,9 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
+import org.checkerframework.javacutil.ErrorReporter;
 import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
 import units.util.UnitsTypecheckUtils;
@@ -21,15 +21,20 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
         extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
         implements ArithmeticConstraintEncoder<BoolExpr> {
 
-    public UnitsZ3SmtArithmeticConstraintEncoder(Lattice lattice, Context ctx,
+    public UnitsZ3SmtArithmeticConstraintEncoder(
+            Lattice lattice,
+            Context ctx,
             Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
 
     // Encoding for var-var, var-const, const-var combos of add/sub, and also const-const for
     // mul/div/mod
-    protected BoolExpr encode(ArithmeticOperationKind operation, Slot leftOperand,
-            Slot rightOperand, ArithmeticVariableSlot result) {
+    protected BoolExpr encode(
+            ArithmeticOperationKind operation,
+            Slot leftOperand,
+            Slot rightOperand,
+            ArithmeticVariableSlot result) {
         switch (operation) {
             case PLUS:
             case MINUS:
@@ -38,19 +43,21 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                 InferenceUnit left = leftOperand.serialize(z3SmtFormatTranslator);
                 InferenceUnit right = rightOperand.serialize(z3SmtFormatTranslator);
                 InferenceUnit res = result.serialize(z3SmtFormatTranslator);
-                return ctx.mkAnd(UnitsZ3SmtEncoderUtils.subtype(ctx, left, res),
+                return ctx.mkAnd(
+                        UnitsZ3SmtEncoderUtils.subtype(ctx, left, res),
                         UnitsZ3SmtEncoderUtils.subtype(ctx, right, res));
 
-            // // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
-            // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
-            // leftOperand.serialize(z3SmtFormatTranslator),
-            // rightOperand.serialize(z3SmtFormatTranslator),
-            // result.serialize(z3SmtFormatTranslator));
+                // // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
+                // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
+                // leftOperand.serialize(z3SmtFormatTranslator),
+                // rightOperand.serialize(z3SmtFormatTranslator),
+                // result.serialize(z3SmtFormatTranslator));
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
                 // UnitsBottom, for which then the result is always UnknownUnits
-                return UnitsZ3SmtEncoderUtils.multiply(ctx,
+                return UnitsZ3SmtEncoderUtils.multiply(
+                        ctx,
                         leftOperand.serialize(z3SmtFormatTranslator),
                         rightOperand.serialize(z3SmtFormatTranslator),
                         result.serialize(z3SmtFormatTranslator));
@@ -58,46 +65,65 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                 // Division between 2 slots resulting in result slot, is the difference of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
                 // UnitsBottom, for which then the result is always UnknownUnits
-                return UnitsZ3SmtEncoderUtils.divide(ctx,
+                return UnitsZ3SmtEncoderUtils.divide(
+                        ctx,
                         leftOperand.serialize(z3SmtFormatTranslator),
                         rightOperand.serialize(z3SmtFormatTranslator),
                         result.serialize(z3SmtFormatTranslator));
             case REMAINDER:
                 // Modulus between 2 slots resulting in result slot, is always an equality between
                 // leftOperand and result slots
-                return UnitsZ3SmtEncoderUtils.equality(ctx,
+                return UnitsZ3SmtEncoderUtils.equality(
+                        ctx,
                         leftOperand.serialize(z3SmtFormatTranslator),
                         result.serialize(z3SmtFormatTranslator));
             default:
-                ErrorReporter
-                        .errorAbort("Attempting to encode an unsupported arithmetic operation: "
-                                + operation + " leftOperand: " + leftOperand + " rightOperand: "
-                                + rightOperand + " result: " + result);
+                ErrorReporter.errorAbort(
+                        "Attempting to encode an unsupported arithmetic operation: "
+                                + operation
+                                + " leftOperand: "
+                                + leftOperand
+                                + " rightOperand: "
+                                + rightOperand
+                                + " result: "
+                                + result);
                 return null;
         }
     }
 
     @Override
-    public BoolExpr encodeVariable_Variable(ArithmeticOperationKind operation,
-            VariableSlot leftOperand, VariableSlot rightOperand, ArithmeticVariableSlot result) {
+    public BoolExpr encodeVariable_Variable(
+            ArithmeticOperationKind operation,
+            VariableSlot leftOperand,
+            VariableSlot rightOperand,
+            ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
 
     @Override
-    public BoolExpr encodeVariable_Constant(ArithmeticOperationKind operation,
-            VariableSlot leftOperand, ConstantSlot rightOperand, ArithmeticVariableSlot result) {
+    public BoolExpr encodeVariable_Constant(
+            ArithmeticOperationKind operation,
+            VariableSlot leftOperand,
+            ConstantSlot rightOperand,
+            ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
 
     @Override
-    public BoolExpr encodeConstant_Variable(ArithmeticOperationKind operation,
-            ConstantSlot leftOperand, VariableSlot rightOperand, ArithmeticVariableSlot result) {
+    public BoolExpr encodeConstant_Variable(
+            ArithmeticOperationKind operation,
+            ConstantSlot leftOperand,
+            VariableSlot rightOperand,
+            ArithmeticVariableSlot result) {
         return encode(operation, leftOperand, rightOperand, result);
     }
 
     @Override
-    public BoolExpr encodeConstant_Constant(ArithmeticOperationKind operation,
-            ConstantSlot leftOperand, ConstantSlot rightOperand, ArithmeticVariableSlot result) {
+    public BoolExpr encodeConstant_Constant(
+            ArithmeticOperationKind operation,
+            ConstantSlot leftOperand,
+            ConstantSlot rightOperand,
+            ArithmeticVariableSlot result) {
         switch (operation) {
             case PLUS:
             case MINUS:
@@ -105,12 +131,13 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
 
                 // if leftOperand == rightOperand, then encode equality between rightOperand and
                 // result
-                return UnitsTypecheckUtils.unitsEqual(leftOperand.getValue(),
-                        rightOperand.getValue())
-                                ? UnitsZ3SmtEncoderUtils.equality(ctx,
-                                        rightOperand.serialize(z3SmtFormatTranslator),
-                                        result.serialize(z3SmtFormatTranslator))
-                                : contradictoryValue;
+                return UnitsTypecheckUtils.unitsEqual(
+                                leftOperand.getValue(), rightOperand.getValue())
+                        ? UnitsZ3SmtEncoderUtils.equality(
+                                ctx,
+                                rightOperand.serialize(z3SmtFormatTranslator),
+                                result.serialize(z3SmtFormatTranslator))
+                        : contradictoryValue;
             case MULTIPLY:
                 // It is more efficient to encode an equality between the result of leftOperand *
                 // rightOperand and result, but to do that requires access to slotManager here to
@@ -126,10 +153,15 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
             case REMAINDER:
                 return encode(operation, leftOperand, rightOperand, result);
             default:
-                ErrorReporter
-                        .errorAbort("Attempting to encode an unsupported arithmetic operation: "
-                                + operation + " leftOperand: " + leftOperand + " rightOperand: "
-                                + rightOperand + " result: " + result);
+                ErrorReporter.errorAbort(
+                        "Attempting to encode an unsupported arithmetic operation: "
+                                + operation
+                                + " leftOperand: "
+                                + leftOperand
+                                + " rightOperand: "
+                                + rightOperand
+                                + " result: "
+                                + result);
                 return null;
         }
     }

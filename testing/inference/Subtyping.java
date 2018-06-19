@@ -1,6 +1,5 @@
-import org.checkerframework.framework.qual.PolyAll;
-import units.qual.*;
 import units.UnitsTools;
+import units.qual.*;
 
 class SubtypingTest {
 

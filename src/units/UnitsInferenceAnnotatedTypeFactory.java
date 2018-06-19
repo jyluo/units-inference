@@ -1,5 +1,16 @@
 package units;
 
+import checkers.inference.InferenceAnnotatedTypeFactory;
+import checkers.inference.InferenceChecker;
+import checkers.inference.InferenceQualifierHierarchy;
+import checkers.inference.InferenceTreeAnnotator;
+import checkers.inference.InferrableChecker;
+import checkers.inference.SlotManager;
+import checkers.inference.VariableAnnotator;
+import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.VariableSlot;
+import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.NewClassTree;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -26,27 +37,24 @@ import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGra
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
-import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.NewClassTree;
-import checkers.inference.InferenceAnnotatedTypeFactory;
-import checkers.inference.InferenceChecker;
-import checkers.inference.InferenceQualifierHierarchy;
-import checkers.inference.InferenceTreeAnnotator;
-import checkers.inference.InferrableChecker;
-import checkers.inference.SlotManager;
-import checkers.inference.VariableAnnotator;
-import checkers.inference.model.ConstraintManager;
-import checkers.inference.model.VariableSlot;
 import units.representation.UnitsRepresentationUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
     // static reference to the singleton instance
     protected static UnitsRepresentationUtils unitsRepUtils;
 
-    public UnitsInferenceAnnotatedTypeFactory(InferenceChecker inferenceChecker,
-            BaseAnnotatedTypeFactory realTypeFactory, InferrableChecker realChecker,
-            SlotManager slotManager, ConstraintManager constraintManager) {
-        super(inferenceChecker, false, realTypeFactory, realChecker, slotManager,
+    public UnitsInferenceAnnotatedTypeFactory(
+            InferenceChecker inferenceChecker,
+            BaseAnnotatedTypeFactory realTypeFactory,
+            InferrableChecker realChecker,
+            SlotManager slotManager,
+            ConstraintManager constraintManager) {
+        super(
+                inferenceChecker,
+                false,
+                realTypeFactory,
+                realChecker,
+                slotManager,
                 constraintManager);
 
         // Should already be initialized in the real ATF
@@ -127,10 +135,13 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         // Programmatically set UnitsRepresentationUtils.TOP as the top
         @Override
-        protected void finish(QualifierHierarchy qualHierarchy,
+        protected void finish(
+                QualifierHierarchy qualHierarchy,
                 Map<AnnotationMirror, Set<AnnotationMirror>> supertypes,
-                Map<AnnotationMirror, AnnotationMirror> polyQualifiers, Set<AnnotationMirror> tops,
-                Set<AnnotationMirror> bottoms, Object... args) {
+                Map<AnnotationMirror, AnnotationMirror> polyQualifiers,
+                Set<AnnotationMirror> tops,
+                Set<AnnotationMirror> bottoms,
+                Object... args) {
             super.finish(qualHierarchy, supertypes, polyQualifiers, tops, bottoms, args);
 
             // System.out.println(" === Inference ATF ");
@@ -163,15 +174,18 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public VariableAnnotator createVariableAnnotator() {
-        return new UnitsVariableAnnotator(this, realTypeFactory, realChecker, slotManager,
-                constraintManager);
+        return new UnitsVariableAnnotator(
+                this, realTypeFactory, realChecker, slotManager, constraintManager);
     }
 
     private final class UnitsVariableAnnotator extends VariableAnnotator {
 
-        public UnitsVariableAnnotator(InferenceAnnotatedTypeFactory typeFactory,
-                AnnotatedTypeFactory realTypeFactory, InferrableChecker realChecker,
-                SlotManager slotManager, ConstraintManager constraintManager) {
+        public UnitsVariableAnnotator(
+                InferenceAnnotatedTypeFactory typeFactory,
+                AnnotatedTypeFactory realTypeFactory,
+                InferrableChecker realChecker,
+                SlotManager slotManager,
+                ConstraintManager constraintManager) {
             super(typeFactory, realTypeFactory, realChecker, slotManager, constraintManager);
         }
 
@@ -203,8 +217,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     case MULTIPLY:
                     case DIVIDE:
                     case REMAINDER:
-                        result = slotManager.createArithmeticVariableSlot(
-                                VariableAnnotator.treeToLocation(inferenceTypeFactory, binaryTree));
+                        result =
+                                slotManager.createArithmeticVariableSlot(
+                                        VariableAnnotator.treeToLocation(
+                                                inferenceTypeFactory, binaryTree));
                         // ArithmeticOperationKind.fromTreeKind(binaryTree.getKind()), lhs, rhs);
                         break;
                     case CONDITIONAL_AND: // &&
@@ -240,9 +256,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     public TreeAnnotator createTreeAnnotator() {
-        return new ListTreeAnnotator(new UnitsInferenceImplicitsTreeAnnotator(),
-                new UnitsInferenceTreeAnnotator(this, realChecker, realTypeFactory,
-                        variableAnnotator, slotManager));
+        return new ListTreeAnnotator(
+                new UnitsInferenceImplicitsTreeAnnotator(),
+                new UnitsInferenceTreeAnnotator(
+                        this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
 
     private final class UnitsInferenceImplicitsTreeAnnotator extends ImplicitsTreeAnnotator {
@@ -262,10 +279,17 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     private final class UnitsInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
-        public UnitsInferenceTreeAnnotator(InferenceAnnotatedTypeFactory atypeFactory,
-                InferrableChecker realChecker, AnnotatedTypeFactory realAnnotatedTypeFactory,
-                VariableAnnotator variableAnnotator, SlotManager slotManager) {
-            super(atypeFactory, realChecker, realAnnotatedTypeFactory, variableAnnotator,
+        public UnitsInferenceTreeAnnotator(
+                InferenceAnnotatedTypeFactory atypeFactory,
+                InferrableChecker realChecker,
+                AnnotatedTypeFactory realAnnotatedTypeFactory,
+                VariableAnnotator variableAnnotator,
+                SlotManager slotManager) {
+            super(
+                    atypeFactory,
+                    realChecker,
+                    realAnnotatedTypeFactory,
+                    variableAnnotator,
                     slotManager);
         }
 
@@ -288,8 +312,11 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);
             final AnnotatedDeclaredType constructorReturnType = fromNewClass(newClassTree);
             final AnnotatedExecutableType constructorType =
-                    AnnotatedTypes.asMemberOf(types, UnitsInferenceAnnotatedTypeFactory.this,
-                            constructorReturnType, constructorElem);
+                    AnnotatedTypes.asMemberOf(
+                            types,
+                            UnitsInferenceAnnotatedTypeFactory.this,
+                            constructorReturnType,
+                            constructorElem);
 
             // Replace polymorphic annotations in the constructor call with Variable Slots
             inferencePoly.replacePolys(newClassTree, constructorType);
@@ -418,8 +445,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     // for use in AnnotatedTypeMirror.toString()
     @Override
     protected AnnotatedTypeFormatter createAnnotatedTypeFormatter() {
-        return new DefaultAnnotatedTypeFormatter(new UnitsAnnotationFormatter(checker),
-                checker.hasOption("printVerboseGenerics"), checker.hasOption("printAllQualifiers"));
+        return new DefaultAnnotatedTypeFormatter(
+                new UnitsAnnotationFormatter(checker),
+                checker.hasOption("printVerboseGenerics"),
+                checker.hasOption("printAllQualifiers"));
     }
 
     // for use in generating error outputs

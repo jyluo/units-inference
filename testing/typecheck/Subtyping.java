@@ -1,5 +1,5 @@
-import units.qual.*;
 import org.checkerframework.framework.qual.PolyAll;
+import units.qual.*;
 
 class Subtyping {
 
@@ -46,7 +46,7 @@ class Subtyping {
     @PolyUnit Integer polyunit;
     @UnitsInternal Integer raw;
 
-    public void OddCases(){
+    public void OddCases() {
         // For directly testing the subtyping relations defined between poly and unit types
         // these are not expected to be in source code
         polyall = raw;

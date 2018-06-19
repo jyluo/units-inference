@@ -11,6 +11,7 @@ import com.microsoft.z3.Optimize;
 import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.LubVariableSlot;
 import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.AbstractFormatTranslator;
@@ -66,8 +67,13 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
         return serializeVarSlot(slot);
     }
 
+    @Override
+    public SlotEncodingT serialize(LubVariableSlot slot) {
+        return serializeVarSlot(slot);
+    }
+
     public abstract BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot);
-    
+
     public abstract BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot);
 
     public abstract Map<Integer, AnnotationMirror> decodeSolution(List<String> model,

@@ -219,8 +219,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         result = slotManager.createConstantSlot(unitsRepUtils.DIMENSIONLESS);
                         break;
                     default:
-                        // TODO: replace with LUBSlot pending mier's PR
-                        result = slotManager.createCombVariableSlot(lhs, rhs);
+                        result = slotManager.createLubVariableSlot(lhs, rhs);
                         break;
                 }
 

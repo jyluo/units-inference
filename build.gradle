@@ -110,6 +110,15 @@ afterEvaluate {
             showStandardStreams true
         }
 
+        // remove the generated .smt files
+        afterTest {
+            ant.delete() {
+                fileset(dir: ".") {
+                    include(name: "*.smt")
+                }
+            }
+        }
+
         // After each test, print a summary.
         afterSuite { desc, result ->
             if (desc.getClassName() != null) {
@@ -126,12 +135,16 @@ afterEvaluate {
     }
 }
 
+task cleanTestOutput(type: Delete) {
+    delete += "testdata"
+    delete += fileTree(".").matching { include "*.smt" }
+}
+
 tasks.clean {
     delete += "build"
-    delete += "dist"
-    delete += "testdata"
-    delete += "*.smt"
 }
+tasks.clean.dependsOn 'cleanTestOutput'
+
 
 // // Commented out because plugins section is commented out
 // /* Configuration for formatting */

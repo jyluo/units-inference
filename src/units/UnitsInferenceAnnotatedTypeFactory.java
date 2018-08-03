@@ -309,6 +309,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             // Then replace Polys declared for the constructor call with variable slots
             // copied from {@link InferenceAnnotatedTypeFactory#constructorFromUse(NewClassTree)}
+
+            // TODO: see if we can just replace the following with
+            // constructorFromUse(newClassTree)
+
             final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);
             final AnnotatedDeclaredType constructorReturnType = fromNewClass(newClassTree);
             final AnnotatedExecutableType constructorType =

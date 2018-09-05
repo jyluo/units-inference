@@ -8,7 +8,6 @@ import units.solvers.backend.z3smt.UnitsZ3SmtSolverFactory;
 public class UnitsSolverEngine extends SolverEngine {
     @Override
     protected SolverFactory createSolverFactory() {
-        PrintUtils.appendWrite = true;
         return new UnitsZ3SmtSolverFactory();
     }
 

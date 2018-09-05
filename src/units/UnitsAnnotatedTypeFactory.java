@@ -27,7 +27,7 @@ import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ErrorReporter;
+import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
 import units.qual.IsBaseUnit;
 import units.qual.UnitsAlias;
@@ -280,13 +280,12 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return result;
             }
 
-            ErrorReporter.errorAbort(
+            throw new BugInCF(
                     "Uncaught subtype check case:"
                             + "\n    subtype:   "
                             + getAnnotationFormatter().formatAnnotationMirror(subAnno)
                             + "\n    supertype: "
                             + getAnnotationFormatter().formatAnnotationMirror(superAnno));
-            return false;
         }
     }
 

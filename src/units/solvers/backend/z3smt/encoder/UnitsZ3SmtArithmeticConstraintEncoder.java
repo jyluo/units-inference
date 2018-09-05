@@ -11,7 +11,8 @@ import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import org.checkerframework.javacutil.ErrorReporter;
+
+import org.checkerframework.javacutil.BugInCF;
 import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
 import units.util.UnitsTypecheckUtils;
@@ -78,7 +79,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                         leftOperand.serialize(z3SmtFormatTranslator),
                         result.serialize(z3SmtFormatTranslator));
             default:
-                ErrorReporter.errorAbort(
+                throw new BugInCF(
                         "Attempting to encode an unsupported arithmetic operation: "
                                 + operation
                                 + " leftOperand: "
@@ -87,7 +88,6 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                                 + rightOperand
                                 + " result: "
                                 + result);
-                return null;
         }
     }
 
@@ -153,7 +153,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
             case REMAINDER:
                 return encode(operation, leftOperand, rightOperand, result);
             default:
-                ErrorReporter.errorAbort(
+                throw new BugInCF(
                         "Attempting to encode an unsupported arithmetic operation: "
                                 + operation
                                 + " leftOperand: "
@@ -162,7 +162,6 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                                 + rightOperand
                                 + " result: "
                                 + result);
-                return null;
         }
     }
 }

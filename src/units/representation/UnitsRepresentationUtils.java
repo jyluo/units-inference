@@ -21,7 +21,7 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.ErrorReporter;
+import org.checkerframework.javacutil.BugInCF;
 import units.qual.BaseUnit;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
@@ -125,7 +125,7 @@ public class UnitsRepresentationUtils {
 
     public static UnitsRepresentationUtils getInstance() {
         if (singletonInstance == null) {
-            ErrorReporter.errorAbort(
+            throw new BugInCF(
                     "getInstance() called without initializing UnitsRepresentationUtils.");
         }
         return singletonInstance;

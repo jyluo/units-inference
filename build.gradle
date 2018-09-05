@@ -43,7 +43,7 @@ dependencies {
     compile fileTree(dir: "${cfiPath}/lib", include: "com.microsoft.z3.jar")
 
     // CF test lib dependency
-    testCompile fileTree(dir: "${cfPath}/util/build/libs", include: "testlib-*.jar")
+    testCompile fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
     testCompile 'junit:junit:4.12'
 }
 
@@ -94,7 +94,7 @@ afterEvaluate {
                 'path.inference.script': "${cfiPath}/scripts/inference",
                 JDK_JAR: "${cfPath}/checker/dist/jdk8.jar"
 
-        environment "external_checker_classpath", "${unitsPath}/build/classes/java/main:${unitsPath}/build/resources/main:${unitsPath}/build/libs/units-inference.jar"
+        environment "external_checker_classpath", "${unitsPath}/build/classes/java/main:${unitsPath}/build/resources/main"
 
         jvmArgs "-Xbootclasspath/p:${cfiPath}/dist/javac.jar"
 
@@ -157,19 +157,19 @@ tasks.googleJavaFormat {
     group 'Formatting'
     description = "Reformat Java source code with Google-Java-format"
     exclude 'testing'
+    exclude 'testdata'
     exclude 'manual-tests/typecheck'
     exclude 'manual-tests/inference'
     exclude 'manual-tests/CF-Tests'
-    exclude 'testdata'
     exclude 'projects'
 }
 tasks.verifyGoogleJavaFormat {
     group 'Formatting'
     description = "Check Java source code is in Google-Java-format"
     exclude 'testing'
+    exclude 'testdata'
     exclude 'manual-tests/typecheck'
     exclude 'manual-tests/inference'
     exclude 'manual-tests/CF-Tests'
-    exclude 'testdata'
     exclude 'projects'
 }

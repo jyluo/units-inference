@@ -4,28 +4,26 @@ set -e
 
 WORKING_DIR=$(pwd)
 
-ROOT=$(cd $(dirname "$0")/.. && pwd)
-
 if [ -z "${JSR308}" ] ; then
-    export JSR308=$(cd ${ROOT}/.. && pwd)
+    export JSR308=$(cd $(dirname "$0")/.. && pwd)
 fi
 
-DLJC="${JSR308}/do-like-javac"
-export AFU="${JSR308}/annotation-tools/annotation-file-utilities"
-export PATH="${PATH}:${AFU}/scripts"
+DLJC=$JSR308/do-like-javac
+export AFU=$JSR308/annotation-tools/annotation-file-utilities
+export PATH=$PATH:$AFU/scripts
+CFI=$JSR308/checker-framework-inference
 
-CFI="${ROOT}/checker-framework-inference"
-UI="${ROOT}/units-inference"
-libDir="${CFI}/lib"
+UI=$JSR308/units-inference
+UIPATH=$UI/build/classes/java/main
+export CLASSPATH=$UIPATH
 
-export CLASSPATH="${UI}/build/classes/java/main:${UI}/build/libs/units-inference.jar:."
-
-export DYLD_LIBRARY_PATH="${libDir}"
-export LD_LIBRARY_PATH="${libDir}"
+CFI_LIB=$CFI/lib
+export DYLD_LIBRARY_PATH=$CFI_LIB
+export LD_LIBRARY_PATH=$CFI_LIB
 
 CHECKER=units.UnitsChecker
 SOLVER=units.solvers.backend.UnitsSolverEngine
-DEBUG_SOLVER=checkers.inference.solver.DebugSolver
+# DEBUG_SOLVER=checkers.inference.solver.DebugSolver
 
 #parsing build command of the target program
 build_cmd="$1"
@@ -38,14 +36,16 @@ done
 
 cd "$WORKING_DIR"
 
-infer_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true\" -o logs --mode=\"INFER\" -afud $WORKING_DIR/annotated -- $build_cmd "
+
+infer_cmd="python $DLJC/dljc -t inference --guess --crashExit --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
 
 # debug_onlyCompile="--onlyCompileBytecodeBase true"
-# debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $JSR308/units-inference/bin $debug_onlyCompile --expectOutputRegex 'Unsatisfiable' --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true,solver=Z3Int\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
-debug_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $DEBUG_SOLVER --solverArgs=\"collectStatistic=true\" -o logs --mode=\"ROUNDTRIP\" -afud $WORKING_DIR/annotated -- $build_cmd "
+# debug_cmd="python $DLJC/dljc -t testminimizer --annotationClassPath $UIPATH $debug_onlyCompile --expectOutputRegex 'Unsatisfiable' --checker $CHECKER --solver $DEBUG_SOLVER --solverArgs=\"collectStatistic=true\" -o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+debug_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $DEBUG_SOLVER --solverArgs=\"collectStatistic=true\" -o logs -m ROUNDTRIP -afud $WORKING_DIR/annotated -- $build_cmd "
 
-#running_cmd=$infer_cmd
+
 running_cmd=$infer_cmd
+
 
 echo "============ Important variables ============="
 echo "JSR308: $JSR308"

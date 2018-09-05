@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if ! [ -n "$1" ]; then
+    echo "This script gives the language feature usage statistics from the inference outputs of a corpus"
+    echo "usage: $0 <corpus-root-folder-name>"
+    exit 1
+fi
+
+cd $1
+
 declare -a statsKeys=(
     "Made arithmetic + constraint:" \
     "Made arithmetic - constraint:" \
@@ -48,8 +56,6 @@ declare -a headers=(
     "tanh" \
     "toDegrees" \
     "toRadians" )
-
-cd ./$1
 
 declare -a projects=($(ls -d */ | sort))
 

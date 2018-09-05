@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if ! [ -n "$1" ]; then
+    echo "This script gives the overall inference summary statistics from a corpus in a tabular format"
+    echo "usage: $0 <corpus-root-folder-name>"
+    exit 1
+fi
+
+cd $1
+
 declare -a statsKeys=("slots_size" "constraint_size" \
     "constantslot" "variableslot" \
     "subtypeconstraint" "equalityconstraint" "arithmeticconstraint" "comparableconstraint" "existentialconstraint" "preferenceconstraint")
@@ -8,8 +16,6 @@ declare -a constantSlotsNameKeys=("Top" "Dimensionless" "Bottom" "m" "m2" "s" "m
 
 declare -a constantSlotsOutputKeys=("Annotation: @UnknownUnits" "Annotation: @Dimensionless" "Annotation: @UnitsBottom" \
     "Annotation: @m" "Annotation: @m2" "Annotation: @s" "Annotation: @ms" "Annotation: @ns" "Annotation: @mPERs" "Annotation: @deg" "Annotation: @rad")
-
-cd ./$1
 
 declare -a projects=($(ls -d */ | sort))
 

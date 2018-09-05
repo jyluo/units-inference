@@ -1,10 +1,16 @@
 #!/bin/bash
 
+if ! [ -n "$1" ]; then
+    echo "This script gives the overall inference summary statistics from a corpus in a human readable format"
+    echo "usage: $0 <corpus-root-folder-name>"
+    exit 1
+fi
+
 declare -a statsKeys=("slots_size" "constraint_size" \
     "constantslot" "variableslot" \
     "subtypeconstraint" "arithmeticconstraint" "equalityconstraint" "existentialconstraint" "preferenceconstraint")
 
-cd ./$1
+cd $1
 
 declare -a projects=($(ls -d */ | sort))
 

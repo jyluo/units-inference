@@ -1,6 +1,18 @@
 #!/bin/bash
 
-cd ./$1
+if ! [ -n "$1" ]; then
+    echo "This script gives the lines of code of a corpus"
+    echo "usage: $0 <corpus-root-folder-name>"
+    exit 1
+fi
+
+if ! [ -x "$(command -v cloc)" ]; then
+  echo "Error: cloc is not installed. Run:" >&2
+  echo "sudo apt install cloc" >&2
+  exit 1
+fi
+
+cd $1
 
 declare -a projects=($(ls -d */ | sort))
 

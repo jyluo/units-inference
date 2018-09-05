@@ -1,5 +1,13 @@
 #!/bin/bash
 
+if ! [ -n "$1" ]; then
+    echo "This script gives the language feature usage statistics from the source code of a corpus"
+    echo "usage: $0 <corpus-root-folder-name>"
+    exit 1
+fi
+
+cd $1
+
 declare -a statsKeys=("currentTimeMillis()" "nanoTime()" \
     "Thread.sleep(" \
     "Math.cos(" "Math.sin(" "Math.tan(" \
@@ -17,8 +25,6 @@ declare -a statsKeys=("currentTimeMillis()" "nanoTime()" \
     "\w >= \w" \
     "\w == \w" \
     "\w != \w" )
-
-cd ./$1
 
 declare -a projects=($(ls -d */ | sort))
 

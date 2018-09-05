@@ -1,10 +1,16 @@
 #!/bin/bash
 
+if ! [ -n "$1" ]; then
+    echo "This script gives the overall type check summary statistics from a corpus in a tabular format"
+    echo "usage: $0 <corpus-root-folder-name>"
+    exit 1
+fi
+
+cd $1
+
 declare -a statsKeys=("error: \[assignment.type.incompatible" \
     "error: \[argument.type.incompatible" \
     "error: \[return.type.incompatible" )
-
-cd ./$1
 
 declare -a projects=($(ls -d */ | sort))
 

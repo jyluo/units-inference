@@ -12,8 +12,17 @@ IFS=$OIFS
 
 export REPO_SITE=$SLUGOWNER
 
+# Build dependencies
 . ./dependency-setup.sh
 
-. ./travis-CI-test.sh
+# Failed the whole script if any command failed
+set -e
 
-. ./analyze-corpus.sh travis-benchmarks
+# Running Units Inference test suite
+gradle test
+
+# Running Units Inference on working benchmarks
+. ./run-travis-benchmarks.sh travis
+
+# Print summary stats
+. ./experiment-tools/gen-inference-summary.sh travis-benchmarks

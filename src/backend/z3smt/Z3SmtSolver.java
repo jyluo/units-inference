@@ -99,10 +99,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         System.out.println("Solving Complete");
 
         // add -solverArgs collectStatistic to print?
-        StatisticRecorder.record(StatisticKey.SAT_SERIALIZATION_TIME,
-                serializationEnd - serializationStart);
-        StatisticRecorder.record(StatisticKey.SAT_SOLVING_TIME,
-                solvingEnd - solvingStart);
+        StatisticRecorder.record(
+                StatisticKey.SAT_SERIALIZATION_TIME, serializationEnd - serializationStart);
+        StatisticRecorder.record(StatisticKey.SAT_SOLVING_TIME, solvingEnd - solvingStart);
 
         System.out.println(
                 "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));

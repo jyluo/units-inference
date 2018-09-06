@@ -8,3 +8,5 @@ rm default.jaif
 
 rm statistic.txt
 
+rm *.smt
+

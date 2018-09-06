@@ -8,4 +8,4 @@ else
 fi
 
 # ../run-units-typecheck.sh "${current_dir}/"$1
-../run-units-typecheck.sh --cfArgs="-AprintErrorStack=true" "${file}"
+../run-units-typecheck.sh "${file}"

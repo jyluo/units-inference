@@ -13,4 +13,4 @@ export CLASSPATH="${UI}/build/classes/java/main:${UI}/build/libs/units-inference
 export external_checker_classpath="${UI}/build/classes/java/main:${UI}/build/resources/main:${UI}/build/libs/units-inference.jar"
 
 # TYPE CHECKING
-$CFI/scripts/inference -m TYPECHECK --checker "$CHECKER" --targetclasspath "$CLASSPATH" --cfArgs "-AprintErrorStack" "$@"
+$CFI/scripts/inference -m TYPECHECK --checker "$CHECKER" --targetclasspath "$CLASSPATH" "$@"

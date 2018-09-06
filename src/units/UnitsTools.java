@@ -6,6 +6,8 @@ import units.qual.*;
 public class UnitsTools {
     // Static Constants
     public static final @m int m = 1;
+    public static final @km int km = 1;
+
     public static final @s int s = 1;
     public static final @ms Integer ms = 1;
     public static final @ns Integer ns = 1;

@@ -12,7 +12,6 @@ import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
 import checkers.inference.solver.util.StatisticRecorder;
-import checkers.inference.solver.util.StatisticRecorder.StatisticKey;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
@@ -77,7 +76,6 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     }
 
     // Main entry point
-    @SuppressWarnings("unused")
     @Override
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
@@ -98,14 +96,13 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         solvingEnd = System.currentTimeMillis();
         System.out.println("Solving Complete");
 
-        // add -solverArgs collectStatistic to print?
         StatisticRecorder.record(
-                StatisticKey.SAT_SERIALIZATION_TIME, serializationEnd - serializationStart);
-        StatisticRecorder.record(StatisticKey.SAT_SOLVING_TIME, solvingEnd - solvingStart);
+                "smt_serialization_time (millisec)", serializationEnd - serializationStart);
+        StatisticRecorder.record("smt_solving_time (millisec)", solvingEnd - solvingStart);
 
-        System.out.println(
-                "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));
-        System.out.println("SMT Solving Time (millisec): " + (solvingEnd - solvingStart));
+//        System.out.println(
+//                "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));
+//        System.out.println("SMT Solving Time (millisec): " + (solvingEnd - solvingStart));
 
         // Debug use, finds out number of calls to each instrumented method
         System.out.println("=== Arithmetic Constraints Printout ===");
@@ -278,8 +275,6 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
     @Override
     protected void encodeAllConstraints() {
-        int total = constraints.size();
-
         int current = 1;
         List<String> constraintClauses = new ArrayList<>();
 

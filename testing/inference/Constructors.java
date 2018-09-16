@@ -5,13 +5,15 @@ import units.qual.*;
 
 class PolyAllClass {
     @PolyAll PolyAllClass(@PolyAll int x) {}
+    @PolyAll PolyAllClass(@PolyAll PolyAllClass x) {}
 }
 
 class PolyUnitClass {
     @PolyUnit PolyUnitClass(@PolyUnit int x) {}
+    @PolyUnit PolyUnitClass(@PolyUnit PolyUnitClass x) {}
 }
 
-class MeterClass {
+@m class MeterClass {
     @m MeterClass(@m int x) {}
 }
 
@@ -26,14 +28,14 @@ class Constructors {
     // }
 
     void polyAllConstructorTest() {
-        // propagate @m from assignment context to the constructor arg
+        // propagate @m from assignment context
         // :: fixable-error: (assignment.type.incompatible)
         @m PolyAllClass pac1 = new PolyAllClass(5);
 
-        // progagate @m from constructor arg to assignment context
+        // progagate @m from constructor arg
         PolyAllClass pac2 = new PolyAllClass(5 * UnitsTools.m);
 
-        // propagate @m from constructor return type to arg and assignment context
+        // propagate @m from constructor return type
         // :: fixable-error: (constructor.invocation.invalid)
         PolyAllClass pac3 = new @m PolyAllClass(5);
 
@@ -42,14 +44,14 @@ class Constructors {
     }
 
     void polyUnitConstructorTest() {
-        // propagate @m from assignment context to the constructor arg
+        // propagate @m from assignment context
         // :: fixable-error: (assignment.type.incompatible)
         @m PolyUnitClass puc1 = new PolyUnitClass(5);
 
-        // progagate @m from constructor arg to assignment context
+        // progagate @m from constructor arg
         PolyUnitClass puc2 = new PolyUnitClass(5 * UnitsTools.m);
 
-        // propagate @m from constructor return type to arg and assignment context
+        // propagate @m from constructor return type
         // :: fixable-error: (constructor.invocation.invalid)
         PolyUnitClass puc3 = new @m PolyUnitClass(5);
 
@@ -58,11 +60,32 @@ class Constructors {
     }
 
     void nonPolyConstructorTest() {
-        // :: fixable-error: (argument.type.incompatible) :: fixable-error: (constructor.invocation.invalid) :: fixable-error: (assignment.type.incompatible)
+        // :: fixable-error: (argument.type.incompatible)
         @m MeterClass mc1 = new MeterClass(5);
         // :: fixable-error: (argument.type.incompatible)
         @m MeterClass mc2 = new @m MeterClass(5);
 
         @Dimensionless NoAnnotClass na1 = new NoAnnotClass(5);
     }
+
+    // this test currently fails in insertion, there are missing pairs of round
+    // brackets
+    // void chainPolyConstructorTest() {
+    // // propagate @m from assignment context
+    // // :: fixable-error: (assignment.type.incompatible)
+    // @m PolyAllClass pacc1 = new PolyAllClass(new PolyAllClass(5));
+    //
+    // // progagate @m from constructor arg
+    // PolyAllClass pacc2 = new PolyAllClass(new PolyAllClass(5 *
+    // UnitsTools.m));
+    //
+    // // propagate @m from constructor return type
+    // // :: fixable-error: (constructor.invocation.invalid)
+    // PolyAllClass pacc3 = new @m PolyAllClass(new PolyAllClass(5));
+    //
+    // // propagate @m from constructor return type
+    // // :: fixable-error: (constructor.invocation.invalid)
+    // PolyAllClass pacc4 = new PolyAllClass(new @m PolyAllClass(5));
+    // }
 }
+

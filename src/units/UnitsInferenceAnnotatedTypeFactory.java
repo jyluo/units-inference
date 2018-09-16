@@ -10,23 +10,28 @@ import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.NewClassTree;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.AnnotationClassLoader;
 import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -253,7 +258,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
                 new UnitsInferenceImplicitsTreeAnnotator(),
-                new InferenceTreeAnnotator(
+                new UnitsInferenceTreeAnnotator(
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
 
@@ -272,24 +277,68 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
     }
 
-    /*
-    private final class UnitsInferenceTreeAnnotator extends InferenceTreeAnnotator {
+    private final class UnitsInferenceTreeAnnotator
+            extends InferenceTreeAnnotator {
 
         public UnitsInferenceTreeAnnotator(
                 InferenceAnnotatedTypeFactory atypeFactory,
                 InferrableChecker realChecker,
                 AnnotatedTypeFactory realAnnotatedTypeFactory,
-                VariableAnnotator variableAnnotator,
-                SlotManager slotManager) {
-            super(
-                    atypeFactory,
-                    realChecker,
-                    realAnnotatedTypeFactory,
-                    variableAnnotator,
-                    slotManager);
+                VariableAnnotator variableAnnotator, SlotManager slotManager) {
+            super(atypeFactory, realChecker, realAnnotatedTypeFactory,
+                    variableAnnotator, slotManager);
+        }
+
+        private boolean isConstructorDeclaredWithPolymorphicReturn(NewClassTree newClassTree) {
+            final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);
+            final AnnotatedTypeMirror constructorReturnType = fromNewClass(newClassTree);
+            final AnnotatedExecutableType constructorType =
+                    AnnotatedTypes.asMemberOf(
+                            types,
+                            UnitsInferenceAnnotatedTypeFactory.this,
+                            constructorReturnType,
+                            constructorElem);
+
+            // if any of the annotations on the return type of the constructor is a polymorphic annotation, return true
+            for (AnnotationMirror annot : constructorType.getReturnType().getAnnotations()) {
+                if (AnnotationUtils.areSame(annot, unitsRepUtils.POLYUNIT)
+                        || AnnotationUtils.areSame(annot, unitsRepUtils.POLYALL)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public Void visitNewClass(NewClassTree newClassTree,
+                AnnotatedTypeMirror atm) {
+            // Call super to replace polymorphic annotations with fresh variable slots
+            super.visitNewClass(newClassTree, atm);
+
+            if (isConstructorDeclaredWithPolymorphicReturn(newClassTree)) {
+                // For a call "new @m Clazz(@m arg)" on a polymorphic constructor
+                // "@Poly Clazz(@Poly param)" we have the following annotations:
+
+                // 1) the variable slot generated for the polymorphic declared return type
+                VariableSlot varSlotForPolyReturn = variableAnnotator.getOrCreatePolyVar(newClassTree);
+
+                // 2) the call site return type: "@m" in "new @m Clazz(...)"
+                VariableSlot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
+
+                // Create a subtype constraint: callSiteReturnVarSlot <: varSlotForPolyReturn
+                // since after annotation insertion, the varSlotForPolyReturn appears as a cast of the
+                // newly created object: "(@varSlotForPolyReturn Clazz) new @m Clazz(...)"
+                constraintManager.addSubtypeConstraint(callSiteReturnVarSlot, varSlotForPolyReturn);
+
+                // Replace the slot/annotation in the atm (callSiteReturnVarSlot) with the varSlotForPolyReturn
+                // for upstream analysis
+                atm.replaceAnnotation(slotManager.getAnnotation(varSlotForPolyReturn));
+            }
+
+            return null;
         }
     }
-    */
 
     // for use in AnnotatedTypeMirror.toString()
     @Override

@@ -10,7 +10,11 @@ import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.MemberSelectTree;
+import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.Tree;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -18,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
-
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
@@ -277,18 +280,23 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
     }
 
-    private final class UnitsInferenceTreeAnnotator
-            extends InferenceTreeAnnotator {
+    private final class UnitsInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
         public UnitsInferenceTreeAnnotator(
                 InferenceAnnotatedTypeFactory atypeFactory,
                 InferrableChecker realChecker,
                 AnnotatedTypeFactory realAnnotatedTypeFactory,
-                VariableAnnotator variableAnnotator, SlotManager slotManager) {
-            super(atypeFactory, realChecker, realAnnotatedTypeFactory,
-                    variableAnnotator, slotManager);
+                VariableAnnotator variableAnnotator,
+                SlotManager slotManager) {
+            super(
+                    atypeFactory,
+                    realChecker,
+                    realAnnotatedTypeFactory,
+                    variableAnnotator,
+                    slotManager);
         }
 
+        // based on InferenceATF.constructorFromUse()
         private boolean isConstructorDeclaredWithPolymorphicReturn(NewClassTree newClassTree) {
             final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);
             final AnnotatedTypeMirror constructorReturnType = fromNewClass(newClassTree);
@@ -310,18 +318,78 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             return false;
         }
 
+        // based on InferenceATF.methodFromUse()
+        private boolean isMethodDeclaredWithPolymorphicReturn(
+                MethodInvocationTree methodInvocationTree) {
+            final ExecutableElement methodElem = TreeUtils.elementFromUse(methodInvocationTree);
+            final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
+
+            final ExpressionTree methodSelectExpression = methodInvocationTree.getMethodSelect();
+            final AnnotatedTypeMirror receiverType;
+            if (methodSelectExpression.getKind() == Tree.Kind.MEMBER_SELECT) {
+                receiverType =
+                        getAnnotatedType(
+                                ((MemberSelectTree) methodSelectExpression).getExpression());
+            } else {
+                receiverType = getSelfType(methodInvocationTree);
+            }
+
+            final AnnotatedExecutableType methodOfReceiver =
+                    AnnotatedTypes.asMemberOf(
+                            types,
+                            UnitsInferenceAnnotatedTypeFactory.this,
+                            receiverType,
+                            methodElem);
+
+            // if any of the annotations on the return type of the constructor is a polymorphic annotation, return true
+            for (AnnotationMirror annot : methodOfReceiver.getReturnType().getAnnotations()) {
+                if (AnnotationUtils.areSame(annot, unitsRepUtils.POLYUNIT)
+                        || AnnotationUtils.areSame(annot, unitsRepUtils.POLYALL)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         @Override
-        public Void visitNewClass(NewClassTree newClassTree,
-                AnnotatedTypeMirror atm) {
+        public Void visitNewClass(NewClassTree newClassTree, AnnotatedTypeMirror atm) {
             // Call super to replace polymorphic annotations with fresh variable slots
             super.visitNewClass(newClassTree, atm);
+
+            /*
+             * given   @m Clazz x = new Clazz(param)   where the constructor is polymorphic: @Poly Clazz(@Poly arg)
+             *
+             * without the fix below, the constraints are:
+             *
+             * @1 <: @4
+             * @2 <: @4
+             * @1 <: @m
+             *
+             * inserted as @m Clazz x = (@4 Clazz) new @1 Clazz(@2 param)
+             *
+             * this isn't sufficient, as there is no transitive requirement that @2 <: @m
+             *
+             *
+             * with the fix below, the constraints are:
+             *
+             * @1 <: @3
+             * @2 <: @3
+             * @3 <: @m
+             *
+             * inserted as @m Clazz x = new @1 Clazz(@2 param)
+             * @3 is not inserted
+             */
 
             if (isConstructorDeclaredWithPolymorphicReturn(newClassTree)) {
                 // For a call "new @m Clazz(@m arg)" on a polymorphic constructor
                 // "@Poly Clazz(@Poly param)" we have the following annotations:
 
                 // 1) the variable slot generated for the polymorphic declared return type
-                VariableSlot varSlotForPolyReturn = variableAnnotator.getOrCreatePolyVar(newClassTree);
+                VariableSlot varSlotForPolyReturn =
+                        variableAnnotator.getOrCreatePolyVar(newClassTree);
+                // disable insertion of polymorphic return variable slot
+                varSlotForPolyReturn.setInsertable(false);
 
                 // 2) the call site return type: "@m" in "new @m Clazz(...)"
                 VariableSlot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
@@ -334,6 +402,21 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 // Replace the slot/annotation in the atm (callSiteReturnVarSlot) with the varSlotForPolyReturn
                 // for upstream analysis
                 atm.replaceAnnotation(slotManager.getAnnotation(varSlotForPolyReturn));
+            }
+
+            return null;
+        }
+
+        @Override
+        public Void visitMethodInvocation(
+                MethodInvocationTree methodInvocationTree, AnnotatedTypeMirror atm) {
+            super.visitMethodInvocation(methodInvocationTree, atm);
+
+            if (isMethodDeclaredWithPolymorphicReturn(methodInvocationTree)) {
+                VariableSlot varSlotForPolyReturn =
+                        variableAnnotator.getOrCreatePolyVar(methodInvocationTree);
+                // disable insertion of polymorphic return variable slot
+                varSlotForPolyReturn.setInsertable(false);
             }
 
             return null;

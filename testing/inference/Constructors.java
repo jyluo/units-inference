@@ -3,17 +3,18 @@ import org.checkerframework.framework.qual.PolyAll;
 import units.UnitsTools;
 import units.qual.*;
 
+@UnknownUnits
 class PolyAllClass {
     @PolyAll PolyAllClass(@PolyAll int x) {}
-    @PolyAll PolyAllClass(@PolyAll PolyAllClass x) {}
+    // @PolyAll PolyAllClass(@PolyAll PolyAllClass x) {}
 }
 
 class PolyUnitClass {
     @PolyUnit PolyUnitClass(@PolyUnit int x) {}
-    @PolyUnit PolyUnitClass(@PolyUnit PolyUnitClass x) {}
+    // @PolyUnit PolyUnitClass(@PolyUnit PolyUnitClass x) {}
 }
 
-@m class MeterClass {
+class MeterClass {
     @m MeterClass(@m int x) {}
 }
 
@@ -41,6 +42,9 @@ class Constructors {
 
         // :: fixable-error: (constructor.invocation.invalid)
         @m PolyAllClass pac4 = new @m PolyAllClass(5);
+
+        // :: fixable-error: (constructor.invocation.invalid)
+        PolyAllClass pac5 = new @m PolyAllClass(5 * UnitsTools.s);
     }
 
     void polyUnitConstructorTest() {
@@ -57,10 +61,13 @@ class Constructors {
 
         // :: fixable-error: (constructor.invocation.invalid)
         @m PolyUnitClass puc4 = new @m PolyUnitClass(5);
+
+        // :: fixable-error: (constructor.invocation.invalid)
+        PolyUnitClass puc5 = new @m PolyUnitClass(5 * UnitsTools.s);
     }
 
     void nonPolyConstructorTest() {
-        // :: fixable-error: (argument.type.incompatible)
+        // :: fixable-error: (argument.type.incompatible) :: fixable-error: (constructor.invocation.invalid) :: fixable-error: (assignment.type.incompatible)
         @m MeterClass mc1 = new MeterClass(5);
         // :: fixable-error: (argument.type.incompatible)
         @m MeterClass mc2 = new @m MeterClass(5);
@@ -68,8 +75,8 @@ class Constructors {
         @Dimensionless NoAnnotClass na1 = new NoAnnotClass(5);
     }
 
-    // this test currently fails in insertion, there are missing pairs of round
-    // brackets
+    // if polymorphic var slots are inserted then this test fails as there are
+    // missing pairs of round brackets
     // void chainPolyConstructorTest() {
     // // propagate @m from assignment context
     // // :: fixable-error: (assignment.type.incompatible)

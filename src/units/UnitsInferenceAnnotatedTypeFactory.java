@@ -10,28 +10,23 @@ import checkers.inference.VariableAnnotator;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.NewClassTree;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.ExecutableElement;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
-import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.AnnotationClassLoader;
 import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
-import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -258,7 +253,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
                 new UnitsInferenceImplicitsTreeAnnotator(),
-                new UnitsInferenceTreeAnnotator(
+                new InferenceTreeAnnotator(
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
 
@@ -277,6 +272,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         }
     }
 
+    /*
     private final class UnitsInferenceTreeAnnotator extends InferenceTreeAnnotator {
 
         public UnitsInferenceTreeAnnotator(
@@ -292,159 +288,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     variableAnnotator,
                     slotManager);
         }
-
-        // This note also appears in Sparta Checker's TreeAnnotator#visitNewClass(), and
-        // SimpleFlowAnnotatedTypeFactory's TreeAnnotator#visitNewClass():
-
-        // This is a horrible hack around the bad implementation of constructor results
-        // (CF treats annotations on constructor results in stub files as if it were a
-        // default and therefore ignores it.)
-        @Override
-        public Void visitNewClass(NewClassTree newClassTree, AnnotatedTypeMirror atm) {
-            // Call super to annotate the constructor call with variable slots
-            super.visitNewClass(newClassTree, atm);
-
-            // This slot is the slot generated for new HERE Class(...)
-            VariableSlot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
-
-            // Then replace Polys declared for the constructor call with variable slots
-            // copied from {@link InferenceAnnotatedTypeFactory#constructorFromUse(NewClassTree)}
-
-            // TODO: see if we can just replace the following with
-            // constructorFromUse(newClassTree)
-
-            final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);
-            final AnnotatedDeclaredType constructorReturnType = fromNewClass(newClassTree);
-            final AnnotatedExecutableType constructorType =
-                    AnnotatedTypes.asMemberOf(
-                            types,
-                            UnitsInferenceAnnotatedTypeFactory.this,
-                            constructorReturnType,
-                            constructorElem);
-
-            // Replace polymorphic annotations in the constructor call with Variable Slots
-            inferencePoly.replacePolys(newClassTree, constructorType);
-
-            AnnotatedTypeMirror declaredReturnType = constructorType.getReturnType();
-
-            // This slot is the slot generated for the LUB of the @Poly annotations
-            VariableSlot declaredReturnVarSlot = slotManager.getVariableSlot(declaredReturnType);
-
-            // System.out.println("");
-            // System.out.println(" === callSiteReturnVarSlot " + callSiteReturnVarSlot);
-            // System.out.println(" === declaredReturnVarSlot " + declaredReturnVarSlot);
-
-            // With a constructor annotated as "@declaredReturnType Class(Type param)"
-            // and a call of "new Class( arg )"
-            // the call is annotated as:
-            // (@declaredReturnType Class) new @callSiteReturnType Class( arg )
-
-            // Create a subtype constraint: callSiteReturnType <: declaredReturnType
-            // since after annotation insertion, the declaredReturnType appears as a cast of the
-            // newly created object
-            constraintManager.addSubtypeConstraint(callSiteReturnVarSlot, declaredReturnVarSlot);
-
-            // Replace the annotation in the atm (callSiteReturnType) with the declaredReturnType
-            atm.replaceAnnotation(declaredReturnType.getAnnotationInHierarchy(getVarAnnot()));
-
-            return null;
-        }
-
-        // @Override
-        // public Void visitVariable(VariableTree varTree, AnnotatedTypeMirror atm) {
-        // super.visitVariable(varTree, atm);
-        //
-        // // For boxed primitive classes, we stub the constructors to be PolyUnit, thus there will
-        // // be a VarAnnot created for each instance of PolyUnit.
-        //
-        // // An additional subtype constraint is generated here to ensure the VarAnnot is a
-        // // subtype of the variable's VarAnnot.
-        //
-        // AnnotationMirror varAnnot =
-        // ((InferenceAnnotatedTypeFactory) atypeFactory).getVarAnnot();
-        //
-        // // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(varTree);
-        // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(varTree.getInitializer());
-        // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
-        //
-        // // AnnotationMirror varAM = varATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-        //
-        // AnnotationMirror expAM = expATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-        // AnnotationMirror expAnnotAM = expATM.getEffectiveAnnotationInHierarchy(varAnnot);
-        // //
-        // // VariableSlot expPolyAnnotSlot = slotManager
-        // // .createVariableSlot(VariableAnnotator.treeToLocation(atypeFactory, varTree));
-        //
-        // System.out.println(" === var: " + varTree);
-        //
-        // // System.out.println(" === varATM " + varATM);
-        // // System.out.println(" === varAM " + varAM);
-        //
-        // System.out.println(" === expATM " + expATM);
-        // System.out.println(" === expAM " + expAM);
-        // System.out.println(" === expAnnotAM " + expAnnotAM);
-        //
-        // // System.out.println(" === expPolyAnnotSlot " + expPolyAnnotSlot);
-        //
-        // System.out.println("");
-        //
-        // return null;
-        // }
-
-        //
-        // @Override
-        // public Void visitTypeCast(TypeCastTree tree, AnnotatedTypeMirror atm) {
-        // super.visitTypeCast(tree, atm);
-        //
-        // // applyUnitsAnnotationsFromSource(tree, atm);
-        //
-        // return null;
-        // }
-
-        // private void applyUnitsAnnotationsFromSourceAsConstant(Tree tree, AnnotatedTypeMirror
-        // atm) {
-        // // If there is a units annotation present on the tree, then retrieve it, normalize it,
-        // // create a constant slot for it replace the varAnnot in the ATM
-        // AnnotationMirror realUnitsAnno = realTypeFactory.getAnnotatedType(tree)
-        // .getAnnotationInHierarchy(unitsRepUtils.TOP);
-        // if (realUnitsAnno != null) {
-        // // Fill in any missing base units
-        // realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
-        // // Create a ConstantSlot for the explicit annotation
-        // ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, tree);
-        // // // Replace annotation in the slot
-        // // atm.replaceAnnotation(slotManager.getAnnotation(constSlot));
-        //
-        // // Get the VariableSlot generated for the variable
-        // VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
-        // // Add Equality constraint between the VariableSlot and the ConstantSlot
-        // constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
-        // }
-        // }
-        //
-        // private void applyUnitsAnnotationsFromSource(Tree tree, AnnotatedTypeMirror atm) {
-        // // If there's a units annotation present on the tree, then retrieve it, normalize it,
-        // // create a constant slot for it, and an equality constraint between the constant slot
-        // // and the VarAnnot generated for the ATM
-        // if (unitsRepUtils.hasUnitsAnnotation(realTypeFactory,
-        // atm.getUnderlyingType().getAnnotationMirrors())) {
-        // AnnotationMirror realUnitsAnno = realTypeFactory.getAnnotatedType(tree)
-        // .getAnnotationInHierarchy(unitsRepUtils.TOP);
-        // // Fill in any missing base units
-        // realUnitsAnno = unitsRepUtils.fillMissingBaseUnits(realUnitsAnno);
-        // // Create a ConstantSlot for the explicit annotation
-        // ConstantSlot constSlot = variableAnnotator.createConstant(realUnitsAnno, tree);
-        //
-        // // // Replace annotation in the slot
-        // // atm.replaceAnnotation(slotManager.getAnnotation(constSlot));
-        //
-        // // Get the VariableSlot generated for the variable
-        // VariableSlot varAnnotSlot = slotManager.getVariableSlot(atm);
-        // // Add Equality constraint between the VariableSlot and the ConstantSlot
-        // constraintManager.addEqualityConstraint(varAnnotSlot, constSlot);
-        // }
-        // }
     }
+    */
 
     // for use in AnnotatedTypeMirror.toString()
     @Override

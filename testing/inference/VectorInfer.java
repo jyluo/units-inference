@@ -8,7 +8,9 @@ class VectorInfer {
     int a1 = 30;
     int a2 = 40;
 
+    // :: fixable-error: (argument.type.incompatible)
     Vector v1 = new Vector(aInMeters, a1);
+    // :: fixable-error: (argument.type.incompatible)
     Vector v2 = new Vector(bInMeters, a2);
 
     class Vector {
@@ -16,9 +18,10 @@ class VectorInfer {
         double y;
 
         public Vector(int dist, int angle) {
+            // :: fixable-error: (argument.type.incompatible)
             this.x = dist * Math.cos(angle);
+            // :: fixable-error: (argument.type.incompatible)
             this.y = dist * Math.sin(angle);
         }
     }
 }
-

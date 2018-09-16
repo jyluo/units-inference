@@ -100,9 +100,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 "smt_serialization_time (millisec)", serializationEnd - serializationStart);
         StatisticRecorder.record("smt_solving_time (millisec)", solvingEnd - solvingStart);
 
-//        System.out.println(
-//                "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));
-//        System.out.println("SMT Solving Time (millisec): " + (solvingEnd - solvingStart));
+        //        System.out.println(
+        //                "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));
+        //        System.out.println("SMT Solving Time (millisec): " + (solvingEnd - solvingStart));
 
         // Debug use, finds out number of calls to each instrumented method
         System.out.println("=== Arithmetic Constraints Printout ===");

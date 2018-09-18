@@ -8,10 +8,9 @@ import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.Solver;
+import checkers.inference.solver.backend.ExternalProcessSolver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
-import checkers.inference.solver.util.StatisticRecorder;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
@@ -20,7 +19,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,9 +26,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.javacutil.BugInCF;
 
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
-        extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
+        extends ExternalProcessSolver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
 
     protected final Context ctx;
     protected com.microsoft.z3.Optimize solver;
@@ -96,9 +95,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         solvingEnd = System.currentTimeMillis();
         System.out.println("Solving Complete");
 
-        StatisticRecorder.record(
-                "smt_serialization_time (millisec)", serializationEnd - serializationStart);
-        StatisticRecorder.record("smt_solving_time (millisec)", solvingEnd - solvingStart);
+        //        StatisticRecorder.record(
+        //                "smt_serialization_time (millisec)", serializationEnd - serializationStart);
+        //        StatisticRecorder.record("smt_solving_time (millisec)", solvingEnd - solvingStart);
 
         //        System.out.println(
         //                "SMT Serialization Time (millisec): " + (serializationEnd - serializationStart));
@@ -401,6 +400,31 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         }
     }
 
+    private List<String> runZ3Solver() {
+        // TODO: add z3 stats?
+        String[] command = {z3Program, constraintsFile};
+
+        // TODO: build TCU here?
+        // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
+
+        // Run command
+        int exitStatus = runExternalSolver(command);
+        if (exitStatus != 0) {
+            throw new BugInCF("External Solver command did not exit successfully: " + command);
+        }
+
+        BufferedReader stdOut = getStdOut();
+        BufferedReader stdErr = getStdErr();
+
+        // TODO: check that stdErr has no errors
+
+        List<String> results = parseStdOut(stdOut);
+
+        resetExternalSolverProcess();
+
+        return results;
+    }
+
     // Sample satisfying output format:
     /* @formatter:off // this is for eclipse formatter */
     /*
@@ -428,153 +452,86 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     */
     /* @formatter:on // this is for eclipse formatter */
 
-    // A thread which handles the STD output from the z3 process, parsing SAT and UNSAT outputs
-    private class Z3OutputHandler extends Thread {
-        private final Process z3Process;
-        private final List<String> results;
-
-        public Z3OutputHandler(Process z3Process, List<String> results) {
-            this.z3Process = z3Process;
-            this.results = results;
-        }
-
-        @Override
-        public void run() {
-            String line = "";
-            BufferedReader stdInput =
-                    new BufferedReader(new InputStreamReader(z3Process.getInputStream()));
-
-            boolean declarationLine = true;
-            // each result line is "varName value"
-            String resultsLine = "";
-
-            boolean unsat = false;
-
-            try {
-                while ((line = stdInput.readLine()) != null) {
-                    line = line.trim();
-
-                    // UNSAT Cases ====================
-                    if (line.contentEquals("unsat")) {
-                        unsat = true;
-                        // skip over output line for get-model
-                        stdInput.readLine();
-                        continue;
-                    }
-                    if (unsat) {
-                        if (line.startsWith("(")) {
-                            line = line.substring(1); // remove open bracket
-                        }
-                        if (line.endsWith(")")) {
-                            line = line.substring(0, line.length() - 1);
-                        }
-
-                        for (String constraintID : line.split(" ")) {
-                            unsatConstraintIDs.add(constraintID);
-                        }
-                        continue;
-                    }
-
-                    // SAT Cases =======================
-                    // processing define-fun lines
-                    if (declarationLine && line.startsWith("(define-fun")) {
-                        declarationLine = false;
-
-                        int firstBar = line.indexOf('|');
-                        int lastBar = line.lastIndexOf('|');
-
-                        assert firstBar != -1;
-                        assert lastBar != -1;
-                        assert firstBar < lastBar;
-                        assert line.contains("Bool") || line.contains("Int");
-
-                        // copy z3 variable name into results line
-                        resultsLine += line.substring(firstBar + 1, lastBar);
-                        ;
-                        continue;
-                    }
-                    // processing lines immediately following define-fun lines
-                    if (!declarationLine) {
-                        declarationLine = true;
-                        String value = line.substring(0, line.lastIndexOf(')'));
-
-                        if (value.contains("-")) { // negative number
-                            // remove brackets surrounding negative numbers
-                            value = value.substring(1, value.length() - 1);
-                            // remove space between - and the number itself
-                            value = String.join("", value.split(" "));
-                        }
-
-                        resultsLine += " " + value;
-                        results.add(resultsLine);
-                        resultsLine = "";
-                        continue;
-                    }
-                    // process no-unsat core line
-                    // example output: (error "line 35892 column 15: unsat core is not available")
-                    if (line.contains("unsat core is not available")) {
-                        continue;
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private List<String> runZ3Solver() {
-        // TODO: add z3 stats?
-        String command = z3Program + " " + constraintsFile;
-
-        // TODO: build TCU here?
-        // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
-
+    // handles the STD output from the z3 process, parsing SAT and UNSAT outputs
+    private List<String> parseStdOut(BufferedReader stdOut) {
         // stores results from z3 program output
         final List<String> results = new ArrayList<>();
 
-        // spin up subprocess to execute z3
+        String line = "";
+
+        boolean declarationLine = true;
+        // each result line is "varName value"
+        String resultsLine = "";
+
+        boolean unsat = false;
+
         try {
-            System.out.println("Running program: " + command);
-            System.out.flush();
+            while ((line = stdOut.readLine()) != null) {
+                line = line.trim();
 
-            final Process z3Process = Runtime.getRuntime().exec(command);
+                // UNSAT Cases ====================
+                if (line.contentEquals("unsat")) {
+                    unsat = true;
+                    // skip over output line for get-model
+                    stdOut.readLine();
+                    continue;
+                }
+                if (unsat) {
+                    if (line.startsWith("(")) {
+                        line = line.substring(1); // remove open bracket
+                    }
+                    if (line.endsWith(")")) {
+                        line = line.substring(0, line.length() - 1);
+                    }
 
-            // spin up 2 threads at the same time to analyze z3 std output and catch std errors
-            Thread handleZ3Output = new Z3OutputHandler(z3Process, results);
-            handleZ3Output.start();
+                    for (String constraintID : line.split(" ")) {
+                        unsatConstraintIDs.add(constraintID);
+                    }
+                    continue;
+                }
 
-            Thread handleZ3Error =
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            String errorLine = "";
-                            StringBuilder sb = new StringBuilder();
-                            BufferedReader stdError =
-                                    new BufferedReader(
-                                            new InputStreamReader(z3Process.getErrorStream()));
-                            try {
-                                while ((errorLine = stdError.readLine()) != null) {
-                                    sb.append(errorLine); // need + "\n" ?
-                                }
-                                System.err.println(sb.toString());
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    };
-            handleZ3Error.start();
+                // SAT Cases =======================
+                // processing define-fun lines
+                if (declarationLine && line.startsWith("(define-fun")) {
+                    declarationLine = false;
 
-            // wait for threads to die
-            handleZ3Output.join();
-            handleZ3Error.join();
-            // tell Java's thread to wait for z3 process to finish
-            int exitStatus = z3Process.waitFor();
+                    int firstBar = line.indexOf('|');
+                    int lastBar = line.lastIndexOf('|');
 
-            // TODO: handle exit status for z3 process crashes, out of memory, etc
+                    assert firstBar != -1;
+                    assert lastBar != -1;
+                    assert firstBar < lastBar;
+                    assert line.contains("Bool") || line.contains("Int");
 
+                    // copy z3 variable name into results line
+                    resultsLine += line.substring(firstBar + 1, lastBar);
+                    ;
+                    continue;
+                }
+                // processing lines immediately following define-fun lines
+                if (!declarationLine) {
+                    declarationLine = true;
+                    String value = line.substring(0, line.lastIndexOf(')'));
+
+                    if (value.contains("-")) { // negative number
+                        // remove brackets surrounding negative numbers
+                        value = value.substring(1, value.length() - 1);
+                        // remove space between - and the number itself
+                        value = String.join("", value.split(" "));
+                    }
+
+                    resultsLine += " " + value;
+                    results.add(resultsLine);
+                    resultsLine = "";
+                    continue;
+                }
+                // process no-unsat core line
+                // example output: (error "line 35892 column 15: unsat core is not available")
+                if (line.contains("unsat core is not available")) {
+                    continue;
+                }
+            }
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 

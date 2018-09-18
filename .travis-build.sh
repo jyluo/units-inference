@@ -19,7 +19,7 @@ export REPO_SITE=$SLUGOWNER
 set -e
 
 # Running Units Inference test suite
-gradle test
+./gradlew test
 
 # Running Units Inference on working benchmarks
 . ./run-travis-benchmarks.sh travis

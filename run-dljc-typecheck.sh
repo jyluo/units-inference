@@ -38,7 +38,7 @@ done
 
 cd "$WORKING_DIR"
 
-typecheck_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistic=true\" -o logs --mode=\"TYPECHECK\" -afud $WORKING_DIR/annotated -- $build_cmd "
+typecheck_cmd="python $DLJC/dljc -t inference --crashExit --checker $CHECKER --solver $SOLVER --solverArgs=\"collectStatistics=true\" -o logs --mode=\"TYPECHECK\" -afud $WORKING_DIR/annotated -- $build_cmd "
 
 running_cmd=$typecheck_cmd
 

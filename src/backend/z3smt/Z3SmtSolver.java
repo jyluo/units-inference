@@ -1,5 +1,22 @@
 package backend.z3smt;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.lang.model.element.AnnotationMirror;
+
+import org.checkerframework.javacutil.BugInCF;
+
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
+import com.microsoft.z3.Expr;
+
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
@@ -11,22 +28,6 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.ExternalProcessSolver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.lang.model.element.AnnotationMirror;
-import org.checkerframework.javacutil.BugInCF;
 
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends ExternalProcessSolver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
@@ -143,6 +144,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                     formatTranslator.decodeSolution(
                             results, solverEnvironment.processingEnvironment);
         } else {
+            // TODO: move Unsat core handling feature to proper code location
             System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
 
             optimizingMode = false;
@@ -214,26 +216,11 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     private void writeConstraintsToSMTFile() {
         String fileContents = smtFileContents.toString();
 
-        try {
-            FileWriter fw = new FileWriter(constraintsFile, false);
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter pw = new PrintWriter(bw);
-            pw.write(fileContents);
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // write the constraints to the file for external solver use
+        writeFile(new File(constraintsFile), fileContents);
 
         // write a copy in append mode to stats file for later bulk analysis
-        try {
-            FileWriter fw = new FileWriter(constraintsStatsFile, true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter pw = new PrintWriter(bw);
-            pw.write(fileContents);
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        writeFileInAppendMode(new File(constraintsStatsFile), fileContents);
     }
 
     protected void encodeAllSlots() {
@@ -256,26 +243,19 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         int truncateIndex = slotDefinitionsAndConstraints.lastIndexOf("(check-sat)");
         assert truncateIndex != -1;
 
+        // append slot definitions to overall smt file
         smtFileContents.append(slotDefinitionsAndConstraints.substring(0, truncateIndex));
 
         // debug use:
         // Write Slots to file
-        String writePath = pathToProject + "/slots.smt";
-        try {
-            FileWriter fw = new FileWriter(writePath, false); // appends to slots.smt
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter pw = new PrintWriter(bw);
-            pw.write(solver.toString());
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        writeFileInAppendMode(new File(pathToProject + "/slots.smt"), solver.toString());
     }
 
     @Override
     protected void encodeAllConstraints() {
         int current = 1;
-        List<String> constraintClauses = new ArrayList<>();
+
+        StringBuffer constraintSmtFileContents = new StringBuffer();
 
         for (Constraint constraint : constraints) {
             // System.out.println("Getting next item.");
@@ -327,20 +307,21 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // add assertions with names, for unsat core dump
                 String constraintName = constraint.getClass().getSimpleName() + current;
 
-                smtFileContents.append("(assert (! ");
-                smtFileContents.append(clause);
-                smtFileContents.append(" :named " + constraintName + "))\n");
+                constraintSmtFileContents.append("(assert (! ");
+                constraintSmtFileContents.append(clause);
+                constraintSmtFileContents.append(" :named " + constraintName + "))\n");
 
+                // add constraint to serialized constraints map, so that we can retrieve later using
+                // the constraint name when outputting the unsat core
                 serializedConstraints.put(constraintName, constraint);
             } else {
-                smtFileContents.append("(assert ");
-                smtFileContents.append(clause);
-                smtFileContents.append(")\n");
+                constraintSmtFileContents.append("(assert ");
+                constraintSmtFileContents.append(clause);
+                constraintSmtFileContents.append(")\n");
             }
 
-            constraintClauses.add(simplifiedConstraint.toString());
-
             // generate a soft constraint that we prefer equality for subtype
+            // TODO: perhapse prefer not bottom and prefer not top will suffice?
             if (optimizingMode && constraint instanceof SubtypeConstraint) {
                 SubtypeConstraint stc = (SubtypeConstraint) constraint;
 
@@ -352,9 +333,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
 
                 if (!simplifiedEQC.isTrue()) {
-                    smtFileContents.append("(assert-soft ");
-                    smtFileContents.append(simplifiedEQC);
-                    smtFileContents.append(" :weight 1)\n");
+                    constraintSmtFileContents.append("(assert-soft ");
+                    constraintSmtFileContents.append(simplifiedEQC);
+                    constraintSmtFileContents.append(" :weight 1)\n");
                 }
             }
 
@@ -370,34 +351,23 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 Expr simplifiedEQC = eqc.serialize(formatTranslator).simplify();
 
                 if (!simplifiedEQC.isTrue()) {
-                    smtFileContents.append("(assert-soft ");
-                    smtFileContents.append(simplifiedEQC);
-                    smtFileContents.append(" :weight 1)\n");
+                    constraintSmtFileContents.append("(assert-soft ");
+                    constraintSmtFileContents.append(simplifiedEQC);
+                    constraintSmtFileContents.append(" :weight 1)\n");
                 }
             }
 
             current++;
-            // // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
+             // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
         }
+
+        String constraintSmt = constraintSmtFileContents.toString();
+
+        smtFileContents.append(constraintSmt);
 
         // debug use
-        // Write Slots to file
-        String writePath = pathToProject + "/constraints.smt";
-        try {
-            FileWriter fw = new FileWriter(writePath, false); // appends to constraints.smt
-            BufferedWriter bw = new BufferedWriter(fw);
-            PrintWriter pw = new PrintWriter(bw);
-
-            for (String clause : constraintClauses) {
-                pw.write("(assert ");
-                pw.write(clause);
-                pw.write(")\n");
-            }
-
-            pw.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Write Constraints to file
+        writeFileInAppendMode(new File(pathToProject + "/constraints.smt"), constraintSmt);
     }
 
     private List<String> runZ3Solver() {
@@ -452,7 +422,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     */
     /* @formatter:on // this is for eclipse formatter */
 
-    // handles the STD output from the z3 process, parsing SAT and UNSAT outputs
+    // parses the STD output from the z3 process and handles SAT and UNSAT outputs
     private List<String> parseStdOut(BufferedReader stdOut) {
         // stores results from z3 program output
         final List<String> results = new ArrayList<>();

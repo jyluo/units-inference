@@ -25,12 +25,12 @@ import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.ExternalProcessSolver;
+import checkers.inference.solver.backend.ExternalSolver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
 
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
-        extends ExternalProcessSolver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
+        extends ExternalSolver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
 
     protected final Context ctx;
     protected com.microsoft.z3.Optimize solver;
@@ -390,7 +390,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         List<String> results = parseStdOut(stdOut);
 
-        resetExternalSolverProcess();
+        resetExternalSolver();
 
         return results;
     }

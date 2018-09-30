@@ -1,22 +1,5 @@
 package backend.z3smt;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.lang.model.element.AnnotationMirror;
-
-import org.checkerframework.javacutil.BugInCF;
-
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
-import com.microsoft.z3.Expr;
-
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
@@ -28,6 +11,19 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.ExternalSolver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.SolverEnvironment;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
+import com.microsoft.z3.Expr;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.javacutil.BugInCF;
 
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends ExternalSolver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
@@ -354,7 +350,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             }
 
             current++;
-             // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
+            // System.out.println(" Added constraint. HasNext? " + iter.hasNext());
         }
 
         String constraintSmt = constraintSmtFileContents.toString();
@@ -368,7 +364,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
     private List<String> runZ3Solver() {
         // TODO: add z3 stats?
-        String[] command = { z3Program, constraintsFile };
+        String[] command = {z3Program, constraintsFile};
 
         // TODO: build TCU here?
         // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
@@ -378,9 +374,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         // Run command
         // TODO: check that stdErr has no errors
-        int exitStatus = runExternalSolver(command, stdOut -> parseStdOut(stdOut, results),
-                stdErr -> {
-                });
+        int exitStatus =
+                runExternalSolver(command, stdOut -> parseStdOut(stdOut, results), stdErr -> {});
         if (exitStatus != 0) {
             throw new BugInCF("External Solver command did not exit successfully: " + command);
         }

@@ -89,12 +89,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         System.out.println("Now encoding with soft constraints");
         serializeSMTFileContents();
 
-        System.out.println("Starting the solving");
         solvingStart = System.currentTimeMillis();
         // in Units, if the status is SAT then there must be output in the model
         List<String> results = runZ3Solver();
         solvingEnd = System.currentTimeMillis();
-        System.out.println("Solving Complete");
 
         //        StatisticRecorder.record(
         //                "smt_serialization_time (millisec)", serializationEnd - serializationStart);
@@ -153,12 +151,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             System.out.println("Now encoding for unsat core dump.");
             serializeSMTFileContents();
 
-            System.out.println("Starting the solving");
             solvingStart = System.currentTimeMillis();
             // in Units, if the status is SAT then there must be output in the model
             results = runZ3Solver();
             solvingEnd = System.currentTimeMillis();
-            System.out.println("Solving Complete");
 
             System.out.println(
                     "SMT UNSAT Serialization Time (millisec): "
@@ -372,25 +368,22 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
     private List<String> runZ3Solver() {
         // TODO: add z3 stats?
-        String[] command = {z3Program, constraintsFile};
+        String[] command = { z3Program, constraintsFile };
 
         // TODO: build TCU here?
         // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
 
+        // stores results from z3 program output
+        final List<String> results = new ArrayList<>();
+
         // Run command
-        int exitStatus = runExternalSolver(command);
+        // TODO: check that stdErr has no errors
+        int exitStatus = runExternalSolver(command, stdOut -> parseStdOut(stdOut, results),
+                stdErr -> {
+                });
         if (exitStatus != 0) {
             throw new BugInCF("External Solver command did not exit successfully: " + command);
         }
-
-        BufferedReader stdOut = getStdOut();
-        BufferedReader stdErr = getStdErr();
-
-        // TODO: check that stdErr has no errors
-
-        List<String> results = parseStdOut(stdOut);
-
-        resetExternalSolver();
 
         return results;
     }
@@ -423,10 +416,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     /* @formatter:on // this is for eclipse formatter */
 
     // parses the STD output from the z3 process and handles SAT and UNSAT outputs
-    private List<String> parseStdOut(BufferedReader stdOut) {
-        // stores results from z3 program output
-        final List<String> results = new ArrayList<>();
-
+    private void parseStdOut(BufferedReader stdOut, List<String> results) {
         String line = "";
 
         boolean declarationLine = true;
@@ -504,8 +494,6 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return results;
     }
 
     @Override

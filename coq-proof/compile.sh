@@ -18,7 +18,8 @@ fi
 ROOT=$(cd ${myDir} && pwd)
 
 # use system installed coqc if available
-if [[ $(command -v coqc) ]] && [[ $(coqc -v | grep 8.8.0) ]] ; then
+# if version dependent: && [[ $(coqc -v | grep 8.8.0) ]]
+if [[ $(command -v coqc) ]] ; then
     COQC=$(command -v coqc)
 fi
 if [ -z "$COQC" ] && [ -e $ROOT/coq-source/bin/coqc ] ; then

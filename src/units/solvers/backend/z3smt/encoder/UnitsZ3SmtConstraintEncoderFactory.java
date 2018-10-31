@@ -8,6 +8,7 @@ import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncode
 import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
+import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
@@ -32,12 +33,12 @@ public class UnitsZ3SmtConstraintEncoderFactory
 
     @Override
     public UnitsZ3SmtSubtypeConstraintEncoder createSubtypeConstraintEncoder() {
-        return new UnitsZ3SmtSubtypeConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
+        return new UnitsZ3SmtSubtypeConstraintEncoder(lattice, ctx, formatTranslator);
     }
 
     @Override
     public EqualityConstraintEncoder<BoolExpr> createEqualityConstraintEncoder() {
-        return new UnitsZ3SmtEqualityConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
+        return new UnitsZ3SmtEqualityConstraintEncoder(lattice, ctx, formatTranslator);
     }
 
     @Override
@@ -47,7 +48,7 @@ public class UnitsZ3SmtConstraintEncoderFactory
 
     @Override
     public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
-        return new UnitsZ3SmtComparableConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
+        return new UnitsZ3SmtComparableConstraintEncoder(lattice, ctx, formatTranslator);
     }
 
     @Override
@@ -66,7 +67,12 @@ public class UnitsZ3SmtConstraintEncoderFactory
     }
 
     @Override
+    public ImplicationConstraintEncoder<BoolExpr> createImplicationConstraintEncoder() {
+        return null;
+    }
+
+    @Override
     public ArithmeticConstraintEncoder<BoolExpr> createArithmeticConstraintEncoder() {
-        return new UnitsZ3SmtArithmeticConstraintEncoder(lattice, ctx, z3SmtFormatTranslator);
+        return new UnitsZ3SmtArithmeticConstraintEncoder(lattice, ctx, formatTranslator);
     }
 }

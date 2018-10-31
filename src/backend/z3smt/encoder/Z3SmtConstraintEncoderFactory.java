@@ -14,16 +14,15 @@ import com.microsoft.z3.Context;
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
 public abstract class Z3SmtConstraintEncoderFactory<SlotEncodingT, SlotSolutionT>
-        extends AbstractConstraintEncoderFactory<BoolExpr> {
+        extends AbstractConstraintEncoderFactory<
+                BoolExpr, Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
     protected final Context ctx;
-    protected final Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator;
 
     public Z3SmtConstraintEncoderFactory(
             Lattice lattice,
             Context ctx,
             Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator) {
-        super(lattice);
+        super(lattice, z3SmtFormatTranslator);
         this.ctx = ctx;
-        this.z3SmtFormatTranslator = z3SmtFormatTranslator;
     }
 }

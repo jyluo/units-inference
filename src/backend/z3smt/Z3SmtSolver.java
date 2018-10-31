@@ -32,7 +32,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected com.microsoft.z3.Optimize solver;
     protected StringBuffer smtFileContents;
 
-    protected final String z3Program = "z3";
+    protected static final String z3Program = "z3";
     protected boolean optimizingMode;
     protected boolean getUnsatCore;
 

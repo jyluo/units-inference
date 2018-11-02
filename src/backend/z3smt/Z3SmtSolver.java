@@ -44,7 +44,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected static final String pathToProject =
             new File(new File("").getAbsolutePath()).toString();
     protected static final String constraintsFile = pathToProject + "/z3Constraints.smt";
-    protected static final String constraintsStatsFile = pathToProject + "/z3ConstraintStats.smt";
+    protected static final String constraintsStatsFile = pathToProject + "/z3ConstraintsGlob.smt";
 
     // timing statistics variables
     protected long serializationStart;

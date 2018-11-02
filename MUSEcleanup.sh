@@ -6,7 +6,8 @@ rm -rf testing/*.class
 
 rm default.jaif
 
-rm statistic.txt
+rm statistics.txt
+
+rm solutions.txt
 
 rm *.smt
-

@@ -164,6 +164,7 @@ tasks.googleJavaFormat {
     exclude 'manual-tests/inference'
     exclude 'manual-tests/CF-Tests'
     exclude 'projects'
+    exclude '*benchmarks'
 }
 tasks.verifyGoogleJavaFormat {
     group 'Formatting'
@@ -174,4 +175,5 @@ tasks.verifyGoogleJavaFormat {
     exclude 'manual-tests/inference'
     exclude 'manual-tests/CF-Tests'
     exclude 'projects'
+    exclude '*benchmarks'
 }

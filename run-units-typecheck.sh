@@ -1,16 +1,18 @@
 #!/bin/bash
 
-ROOT=$(cd $(dirname "$0")/.. && pwd)
+JSR308=$(cd $(dirname "$0")/.. && pwd)
 
-echo "$ROOT"/units-inference
+echo "$JSR308"/units-inference
 
-CFI="${ROOT}/checker-framework-inference"
-UI="${ROOT}/units-inference"
+CFI=$JSR308/checker-framework-inference
+UI=$JSR308/units-inference
+UIPATH=$UI/build/classes/java/main:$UI/build/resources/main:$UI/build/libs/units-inference.jar
 
 CHECKER=units.UnitsChecker
 
-export CLASSPATH="${UI}/build/classes/java/main:${UI}/build/libs/units-inference.jar:."
-export external_checker_classpath="${UI}/build/classes/java/main:${UI}/build/resources/main:${UI}/build/libs/units-inference.jar"
+export CLASSPATH=$UIPATH:.
+export external_checker_classpath=$UIPATH
 
 # TYPE CHECKING
-$CFI/scripts/inference -m TYPECHECK --checker "$CHECKER" --targetclasspath "$CLASSPATH" "$@"
+$CFI/scripts/inference -m TYPECHECK --checker "$CHECKER" \
+    --targetclasspath "$CLASSPATH" "$@"

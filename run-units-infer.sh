@@ -6,18 +6,22 @@ echo "$JSR308"/units-inference
 
 CFI=$JSR308/checker-framework-inference
 UI=$JSR308/units-inference
+UIPATH=$UI/build/classes/java/main:$UI/build/resources/main:$UI/build/libs/units-inference.jar
 
 export AFU=$JSR308/annotation-tools/annotation-file-utilities
-export PATH=$PATH:$AFU/scripts
+export PATH=$AFU/scripts:$PATH
 
 CHECKER=units.UnitsChecker
 
 SOLVER=units.solvers.backend.UnitsSolverEngine
+SOLVERARGS=solver=Z3smt,collectStatistics=true,writeSolutions=true,noAppend=true
 
 IS_HACK=true
 
-export CLASSPATH=$UI/build/classes/java/main:$UI/build/libs/units-inference.jar:.
-export external_checker_classpath=$UI/build/classes/java/main:$UI/build/resources/main:$UI/build/libs/units-inference.jar
+export CLASSPATH=$UIPATH:.
+export external_checker_classpath=$UIPATH
 
 # Inference
-$CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" --solver "$SOLVER" --solverArgs="collectStatistics=true,writeSolutions=true,noAppend=true" --hacks="$IS_HACK" -afud ./annotated "$@"
+$CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
+    --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
+    --hacks="$IS_HACK" -afud ./annotated "$@"

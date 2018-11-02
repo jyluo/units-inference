@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
 
+// TODO: make this an abstract class with common features
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends ExternalSolver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
 
@@ -103,6 +104,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         // solvingStart));
 
         // Debug use, finds out number of calls to each instrumented method
+        // TODO: use updated stats package to print out the counters
         System.out.println("=== Arithmetic Constraints Printout ===");
         Map<ArithmeticOperationKind, Integer> arithmeticConstraintCounters = new HashMap<>();
         for (ArithmeticOperationKind kind : ArithmeticOperationKind.values()) {
@@ -123,14 +125,16 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                             + arithmeticConstraintCounters.get(kind));
         }
 
-        System.out.println("=== Comparison Constraints Printout ===");
-        int comparableConstraints = 0;
-        for (Constraint constraint : constraints) {
-            if (constraint instanceof ComparableConstraint) {
-                comparableConstraints++;
-            }
-        }
-        System.out.println(" Made comparison constraint: " + comparableConstraints);
+        // TODO: update parse scripts to interpret output of "comparableconstraint"
+        // System.out.println("=== Comparison Constraints Printout ===");
+        // int comparableConstraints = 0;
+        // for (Constraint constraint : constraints) {
+        // if (constraint instanceof ComparableConstraint) {
+        // comparableConstraints++;
+        // }
+        // }
+        // System.out.println(" Made comparison constraint: " +
+        // comparableConstraints);
 
         // System.out.println("=== Solutions: ===");
         // for (String r : results) {

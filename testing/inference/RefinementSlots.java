@@ -10,6 +10,7 @@ class RefinementSlotsTest {
 
     void refineMeter(@m Integer y) {
         y = UnitsTools.m;
+        // :: fixable-error: (assignment.type.incompatible)
         y = 10;
         y = null;
     }

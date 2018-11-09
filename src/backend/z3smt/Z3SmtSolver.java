@@ -8,8 +8,10 @@ import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.solver.backend.ExternalSolver;
+import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
+import checkers.inference.solver.util.ExternalSolverUtils;
+import checkers.inference.solver.util.FileUtils;
 import checkers.inference.solver.util.SolverEnvironment;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -26,7 +28,7 @@ import javax.lang.model.element.AnnotationMirror;
 
 // TODO: make this an abstract class with common features
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
-        extends ExternalSolver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
+        extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
 
     protected final Context ctx;
     protected com.microsoft.z3.Optimize solver;
@@ -125,7 +127,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                             + arithmeticConstraintCounters.get(kind));
         }
 
-        // TODO: update parse scripts to interpret output of "comparableconstraint"
+        // TODO: update parse scripts to interpret output of
+        // "comparableconstraint"
         // System.out.println("=== Comparison Constraints Printout ===");
         // int comparableConstraints = 0;
         // for (Constraint constraint : constraints) {
@@ -222,10 +225,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         String fileContents = smtFileContents.toString();
 
         // write the constraints to the file for external solver use
-        writeFile(new File(constraintsFile), fileContents);
+        FileUtils.writeFile(new File(constraintsFile), fileContents);
 
         // write a copy in append mode to stats file for later bulk analysis
-        writeFileInAppendMode(new File(constraintsStatsFile), fileContents);
+        FileUtils.appendFile(new File(constraintsStatsFile), fileContents);
     }
 
     protected void encodeAllSlots() {
@@ -254,7 +257,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         // debug use:
         // Write Slots to file
-        writeFileInAppendMode(new File(pathToProject + "/slots.smt"), solver.toString());
+        FileUtils.appendFile(new File(pathToProject + "/slots.smt"), solver.toString());
     }
 
     @Override
@@ -378,7 +381,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         // debug use
         // Write Constraints to file
-        writeFileInAppendMode(new File(pathToProject + "/constraints.smt"), constraintSmt);
+        FileUtils.appendFile(new File(pathToProject + "/constraints.smt"), constraintSmt);
     }
 
     private List<String> runZ3Solver() {
@@ -394,7 +397,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         // Run command
         // TODO: check that stdErr has no errors
         int exitStatus =
-                runExternalSolver(command, stdOut -> parseStdOut(stdOut, results), stdErr -> {});
+                ExternalSolverUtils.runExternalSolver(
+                        command,
+                        stdOut -> parseStdOut(stdOut, results),
+                        stdErr -> ExternalSolverUtils.printStdStream(System.err, stdErr));
         // if exit status from z3 is not 0, then it is unsat
         return exitStatus == 0 ? results : null;
     }

@@ -6,9 +6,10 @@ if ! [ -n "$1" ]; then
     exit 1
 fi
 
-declare -a statsKeys=("slots_size" "constraint_size" \
+declare -a statsKeys=("total_slots" "total_constraints" \
     "constantslot" "variableslot" \
-    "subtypeconstraint" "arithmeticconstraint" "equalityconstraint" "existentialconstraint" "preferenceconstraint")
+    "subtypeconstraint" "equalityconstraint" "arithmeticconstraint" \
+    "comparableconstraint" "existentialconstraint" "preferenceconstraint")
 
 cd $1
 
@@ -29,7 +30,7 @@ for project in "${projects[@]}"; do
     # number of successful sub-projects
     countKey="  successful-subtargets"
     padding=$(printf '%*.*s' 0 $((padlength - ${#countKey})) "$pad")
-    count=$(grep "Statistic start" "$project/logs/infer.log" | wc -l)
+    count=$(grep "Statistics" "$project/logs/infer.log" | wc -l)
     echo -e "$countKey$padding\t$count"
 
     for key in "${statsKeys[@]}"; do
@@ -38,8 +39,8 @@ for project in "${projects[@]}"; do
         # string consisting of the stats key, count, and space padding to 30 total characters
         padding=$(printf '%*.*s' 0 $((padlength - ${#keyArg})) "$pad")
         # sift through the log files to find all the statistics values, sum them up and print it
-        grep "$key" "$project/logs/infer.log" | cut -d ',' -f 2 | \
-            awk -v p="${keyArg}${padding}\t" '{sum += $1} END {print p sum}'
+        grep "$key" "$project/logs/infer.log" | cut -d ':' -f 2 | \
+            awk -v p="${keyArg}${padding}\t" '{sum += $1} END {print p sum+0}'
     done
 done
 

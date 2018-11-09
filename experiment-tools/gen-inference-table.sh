@@ -8,14 +8,19 @@ fi
 
 cd $1
 
-declare -a statsKeys=("slots_size" "constraint_size" \
+declare -a statsKeys=("total_slots" "total_constraints" \
     "constantslot" "variableslot" \
-    "subtypeconstraint" "equalityconstraint" "arithmeticconstraint" "comparableconstraint" "existentialconstraint" "preferenceconstraint")
+    "subtypeconstraint" "equalityconstraint" "arithmeticconstraint" \
+    "comparableconstraint" "existentialconstraint" "preferenceconstraint")
 
-declare -a constantSlotsNameKeys=("Top" "Dimensionless" "Bottom" "m" "m2" "s" "ms" "ns" "mPERs" "deg" "rad" "other")
+declare -a constantSlotsNameKeys=("Top" "Dimensionless" "Bottom" "m" "m2" "s" \
+    "ms" "ns" "mPERs" "deg" "rad" "other")
 
-declare -a constantSlotsOutputKeys=("Annotation: @UnknownUnits" "Annotation: @Dimensionless" "Annotation: @UnitsBottom" \
-    "Annotation: @m" "Annotation: @m2" "Annotation: @s" "Annotation: @ms" "Annotation: @ns" "Annotation: @mPERs" "Annotation: @deg" "Annotation: @rad")
+declare -a constantSlotsOutputKeys=("Annotation: @UnknownUnits" \
+    "Annotation: @Dimensionless" "Annotation: @UnitsBottom" \
+    "Annotation: @m" "Annotation: @m2" "Annotation: @s" "Annotation: @ms" \
+    "Annotation: @ns" "Annotation: @mPERs" "Annotation: @deg" \
+    "Annotation: @rad")
 
 declare -a projects=($(ls -d */ | sort))
 
@@ -45,7 +50,7 @@ for project in "${projects[@]}"; do
         count=$(grep -w "Running java" "$project/logs/infer.log" | wc -l)
         printf '%s\t' "$count"
         # number of successful sub-projects
-        count=$(grep -w "Statistic start" "$project/logs/infer.log" | wc -l)
+        count=$(grep -w "Statistics" "$project/logs/infer.log" | wc -l)
         printf '%s\t' "$count"
         # serialization time
         grep -w "SMT Serialization Time" "$project/logs/infer.log" | cut -d ':' -f 2 | \
@@ -81,10 +86,10 @@ for project in "${projects[@]}"; do
         printf '%s\t' "0"
     fi
 
-    if [ -f $project/statistic.txt ]; then
+    if [ -f $project/statistics.txt ]; then
         for key in "${statsKeys[@]}"; do
             # sift through the log files to find all the statistics values, sum them up and print it
-            grep -w "$key" "$project/statistic.txt" | cut -d ',' -f 2 | \
+            grep -w "$key" "$project/statistics.txt" | cut -d ',' -f 2 | \
                 awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
         done
     else

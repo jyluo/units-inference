@@ -19,4 +19,4 @@ export REPO_SITE=$SLUGOWNER
 set -e
 
 # Running Units Inference test suite
-./test-units.sh
+. ./test-units.sh

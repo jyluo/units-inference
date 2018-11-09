@@ -15,8 +15,5 @@ export REPO_SITE=$SLUGOWNER
 # Build dependencies
 . ./dependency-setup.sh
 
-# Failed the whole script if any command failed
-set -e
-
 # Running Units Inference test suite
 . ./test-units.sh

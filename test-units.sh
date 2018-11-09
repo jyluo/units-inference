@@ -24,7 +24,7 @@ fi
 ./gradlew test --console=plain
 
 # Running Units Inference on working benchmarks
-./run-travis-benchmarks.sh travis
+. ./run-travis-benchmarks.sh travis
 
 # Print summary stats
 ./experiment-tools/gen-inference-summary.sh travis-benchmarks

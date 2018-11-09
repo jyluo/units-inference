@@ -1,6 +1,6 @@
 #!/bin/bash
 
-gradle jar
+./gradlew jar
 
 CORPUSFILE="travis-benchmarks.yml"
 

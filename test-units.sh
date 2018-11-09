@@ -13,6 +13,8 @@ if [ -z "${JSR308}" ] ; then
 fi
 export PATH=$JSR308/z3/bin:$PATH
 
+echo "PATH = $PATH"
+
 # Pull DLJC if it doesn't exist
 # This is for downstream travis test for CFI.
 SLUGOWNER=${TRAVIS_REPO_SLUG%/*}

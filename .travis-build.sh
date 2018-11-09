@@ -19,12 +19,4 @@ export REPO_SITE=$SLUGOWNER
 set -e
 
 # Running Units Inference test suite
-export JSR308=$(cd $(dirname "$0")/.. && pwd)
-export PATH=$JSR308/z3/bin:$PATH
-./gradlew test
-
-# Running Units Inference on working benchmarks
-. ./run-travis-benchmarks.sh travis
-
-# Print summary stats
-. ./experiment-tools/gen-inference-summary.sh travis-benchmarks
+./test-units.sh

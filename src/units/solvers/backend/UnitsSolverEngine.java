@@ -12,7 +12,6 @@ public class UnitsSolverEngine extends SolverEngine {
         System.out.println("======= solver name: " + solverName);
         if (solverName.contentEquals("Z3smt")) {
             return new UnitsZ3SmtSolverFactory();
-            // TODO: add GJE solver
         } else if (solverName.contentEquals("GJE")) {
             return new UnitsGJESolverFactory();
         } else {

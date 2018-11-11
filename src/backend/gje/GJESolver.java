@@ -7,6 +7,7 @@ import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.FileUtils;
 import checkers.inference.solver.util.SolverEnvironment;
+import checkers.inference.solver.util.Statistics;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -67,6 +68,11 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
         solvingStart = System.currentTimeMillis();
         List<String> results = runSolver();
         solvingEnd = System.currentTimeMillis();
+
+        long serializationTime = serializationEnd - serializationStart;
+        long solvingTime = solvingEnd - solvingStart;
+        Statistics.addOrIncrementEntry("gje_serialization_time(ms)", serializationTime);
+        Statistics.addOrIncrementEntry("gje_solving_time(ms)", solvingTime);
 
         if (results != null) {
             result =

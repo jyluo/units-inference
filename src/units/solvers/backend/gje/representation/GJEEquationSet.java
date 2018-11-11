@@ -3,27 +3,47 @@ package units.solvers.backend.gje.representation;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import org.checkerframework.dataflow.util.HashCodeUtils;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.UnitsRepresentationUtils;
 
 public class GJEEquationSet {
 
-    // static reference to the singleton instance
-    protected static UnitsRepresentationUtils unitsRepUtils;
+    public static final String prefixExponentKey = "prefixExponent";
 
+    // for representing a contradictory outcome of an encoded constraint that
+    // contains constant-constant pairs
+    // TODO: set this too by adding incompatible equations??
+    private boolean isContradiction;
+
+    // Map<Dimension, Set<Equation>>
     private final Map<String, Set<String>> eqSet = new HashMap<>();
 
-    protected GJEEquationSet() {
-        unitsRepUtils = UnitsRepresentationUtils.getInstance();
+    public GJEEquationSet() {
+        this(false);
     }
 
-    protected Map<String, Set<String>> getEquationSet() {
+    public GJEEquationSet(boolean isContradiction) {
+        this.isContradiction = isContradiction;
+    }
+
+    public Map<String, Set<String>> getEquationSet() {
         return eqSet;
     }
 
-    protected void addEquation(String key, String equation) {
-        if (!(key == "prefixExponent" || unitsRepUtils.baseUnits().contains(key))) {
+    public boolean isEmpty() {
+        return eqSet.isEmpty();
+    }
+
+    public boolean isContradiction() {
+        return isContradiction;
+    }
+
+    public void addEquation(String key, String equation) {
+        if (!(key == prefixExponentKey
+                || UnitsRepresentationUtils.getInstance().baseUnits().contains(key))) {
             throw new BugInCF("Trying to add an equation for unsupported key " + key);
         }
 
@@ -34,16 +54,52 @@ public class GJEEquationSet {
         eqSet.get(key).add(equation);
     }
 
-    protected void union(GJEEquationSet otherSet) {
-        for (String key : otherSet.eqSet.keySet()) {
+    public void union(GJEEquationSet otherSet) {
+        isContradiction = isContradiction || otherSet.isContradiction;
 
+        for (Entry<String, Set<String>> otherEntry : otherSet.eqSet.entrySet()) {
+            String key = otherEntry.getKey();
             if (!eqSet.containsKey(key)) {
                 eqSet.put(key, new HashSet<>());
             }
-
-            for (String equation : otherSet.eqSet.get(key)) {
-                eqSet.get(key).add(equation);
+            Set<String> myEquations = eqSet.get(key);
+            for (String equation : otherEntry.getValue()) {
+                myEquations.add(equation);
             }
         }
+    }
+
+    // TODO: add a consistency check to ensure same # of equations per
+    // dimension??
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("[" + System.lineSeparator());
+        if (isContradiction) {
+            sb.append("contradiction");
+        } else {
+            for (String key : eqSet.keySet()) {
+                sb.append(" " + key + " -> [");
+                sb.append(String.join(", ", eqSet.get(key)));
+                sb.append("]" + System.lineSeparator());
+            }
+        }
+        sb.append("]" + System.lineSeparator());
+        return sb.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return HashCodeUtils.hash(isContradiction, eqSet);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        GJEEquationSet other = (GJEEquationSet) obj;
+        return isContradiction == other.isContradiction && eqSet.equals(other.eqSet);
     }
 }

@@ -2,22 +2,26 @@ package backend.gje;
 
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 import checkers.inference.model.serialization.ToStringSerializer;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.solver.util.PrintUtils.UniqueSlotCollector;
+import checkers.inference.solver.util.FileUtils;
 import checkers.inference.solver.util.SolverEnvironment;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 import javax.lang.model.element.AnnotationMirror;
+import org.checkerframework.javacutil.BugInCF;
 import units.solvers.backend.gje.representation.GJEEquationSet;
 
 // GaussJordanElimination solver
@@ -26,16 +30,10 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
 
     protected final Logger logger = Logger.getLogger(GJESolver.class.getName());
 
-    protected StringBuffer smtFileContents;
-
-    // maps serialized slot ID to the slot objects
-    protected final Map<Long, Slot> slotGJEtoCFIMap = new HashMap<>();
-    protected final Map<Slot, Long> slotCFItoGJEMap = new HashMap<>();
-
-    // file is written at projectRootFolder/constraints.smt
-    protected static final String pathToProject =
-            new File(new File("").getAbsolutePath()).toString();
-    protected static final String constraintsFilePrefix = pathToProject + "/gjeConstraints";
+    // file is written at projectRootFolder/gjeConstraints_<dimension>.gje
+    protected static final Path pathToProject = Paths.get(System.getProperty("user.dir"));
+    protected static final Path constraintsFilePrefix =
+            Paths.get(pathToProject.toString(), "gjeConstraints");
     protected static final String constraintsFileExtension = ".gje";
 
     // timing statistics variables
@@ -43,6 +41,9 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
     protected long serializationEnd;
     protected long solvingStart;
     protected long solvingEnd;
+
+    // number of GJE variables
+    protected int numOfGJEVariables;
 
     public GJESolver(
             SolverEnvironment solverEnvironment,
@@ -58,8 +59,7 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
-        encodeAllSlots();
-
+        numOfGJEVariables = formatTranslator.assignGJEVarIDs(constraints);
         encodeAllConstraints();
 
         solvingStart = System.currentTimeMillis();
@@ -79,45 +79,16 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
         return result;
     }
 
-    private List<String> runSolver() {
-        return null;
-    }
-
     @Override
-    public Collection<Constraint> explainUnsatisfiable() {
-
-        List<Constraint> unsatConstraints = new ArrayList<>();
-
-        return unsatConstraints;
-    }
-
-    protected void encodeAllSlots() {
-        long gjeID = 0;
+    protected void encodeAllConstraints() {
 
         final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
 
-        System.out.println("== Slot serialization map ==");
-        // get a set of unique slots used in the constraints
-        UniqueSlotCollector slotsCollector = new UniqueSlotCollector();
-        for (Constraint constraint : constraints) {
-            constraint.serialize(slotsCollector);
-        }
-
-        for (VariableSlot slot : slotsCollector.getSlots()) {
-            slotGJEtoCFIMap.put(gjeID, slot);
-            slotCFItoGJEMap.put(slot, gjeID);
-            System.out.println("ID: " + gjeID + " --> slot " + slot.serialize(toStringSerializer));
-            gjeID++;
-        }
-    }
-
-    @Override
-    protected void encodeAllConstraints() {
-        int current = 1;
-
-        StringBuffer constraintSmtFileContents = new StringBuffer();
+        GJEEquationSet totalEquationSet = new GJEEquationSet();
 
         for (Constraint constraint : constraints) {
+
+            System.out.println("Serializing " + constraint.serialize(toStringSerializer));
 
             GJEEquationSet serializedConstraint = constraint.serialize(formatTranslator);
 
@@ -126,8 +97,66 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
                         "Unsupported constraint detected! Constraint type: "
                                 + constraint.getClass().getSimpleName());
                 continue;
+            } else if (serializedConstraint.isContradiction()) {
+                // TODO: proper error reporter abort
+                throw new BugInCF(
+                        "the constraint "
+                                + constraint.serialize(toStringSerializer)
+                                + " is contradictory");
+            } else if (!serializedConstraint.isEmpty()) {
+                totalEquationSet.union(serializedConstraint);
             }
+
+            System.out.println(serializedConstraint.toString());
         }
+
+        System.out.println("Total equation set:");
+        System.out.println(totalEquationSet);
+
+        // serialize into files
+        writeGJEFiles(totalEquationSet.getEquationSet());
+    }
+
+    private void writeGJEFiles(Map<String, Set<String>> eqSet) {
+        for (Entry<String, Set<String>> entry : eqSet.entrySet()) {
+            String dimension = entry.getKey();
+            Set<String> equations = entry.getValue();
+
+            String fileName =
+                    constraintsFilePrefix.toString() + "_" + dimension + constraintsFileExtension;
+
+            File outFile = new File(fileName);
+
+            FileUtils.writeFile(outFile, generateGJEFileContent(equations));
+
+            System.out.println(
+                    "GJE eqs for "
+                            + dimension
+                            + " have been written to: "
+                            + outFile.getAbsolutePath()
+                            + System.lineSeparator());
+        }
+    }
+
+    private String generateGJEFileContent(Set<String> equations) {
+        StringBuffer sb = new StringBuffer();
+        // # of variables
+        sb.append(numOfGJEVariables);
+        sb.append(System.lineSeparator());
+        // # of rows
+        sb.append(equations.size());
+        sb.append(System.lineSeparator());
+        // sort and write each equation out
+        for (String eq : new TreeSet<>(equations)) {
+            sb.append(eq);
+            sb.append(System.lineSeparator());
+        }
+        return sb.toString();
+    }
+
+    private List<String> runSolver() {
+        // TODO
+        return null;
     }
 
     // outputs
@@ -140,5 +169,12 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Collection<Constraint> explainUnsatisfiable() {
+        // TODO
+        List<Constraint> unsatConstraints = new ArrayList<>();
+        return unsatConstraints;
     }
 }

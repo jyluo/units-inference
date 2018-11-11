@@ -11,8 +11,8 @@ import units.representation.UnitsRepresentationUtils;
  */
 public class GJEInferenceUnit {
 
-    private final long cfiSlotID;
-    private long gjeSlotID; // this is assigned after slot creation??
+    private final int cfiSlotID;
+    private final int gjeVarID;
 
     public enum Kind {
         constant,
@@ -30,9 +30,9 @@ public class GJEInferenceUnit {
     // Tree map maintaining sorted order on base unit names
     private final Map<String, Integer> exponents = new TreeMap<>();
 
-    private GJEInferenceUnit(long cfiSlotID, Kind kind) {
-        this.gjeSlotID = -1;
+    private GJEInferenceUnit(int cfiSlotID, int gjeVarID, Kind kind) {
         this.cfiSlotID = cfiSlotID;
+        this.gjeVarID = gjeVarID;
         this.kind = kind;
 
         // default UU value is false
@@ -48,12 +48,13 @@ public class GJEInferenceUnit {
         }
     }
 
-    public static GJEInferenceUnit makeConstantSlot(long cfiSlotID) {
-        return new GJEInferenceUnit(cfiSlotID, Kind.constant);
+    // constants do not have a gje variable ID
+    public static GJEInferenceUnit makeConstantSlot(int cfiSlotID) {
+        return new GJEInferenceUnit(cfiSlotID, -1, Kind.constant);
     }
 
-    public static GJEInferenceUnit makeVariableSlot(long cfiSlotID) {
-        return new GJEInferenceUnit(cfiSlotID, Kind.variable);
+    public static GJEInferenceUnit makeVariableSlot(int cfiSlotID, int gjeSlotID) {
+        return new GJEInferenceUnit(cfiSlotID, gjeSlotID, Kind.variable);
     }
 
     public Kind getKind() {
@@ -68,12 +69,8 @@ public class GJEInferenceUnit {
         return kind == Kind.variable;
     }
 
-    public void setGJESlotID(long gjeSlotID) {
-        this.gjeSlotID = gjeSlotID;
-    }
-
-    public long getGJESlotID() {
-        return gjeSlotID;
+    public int getGJEVarID() {
+        return gjeVarID;
     }
 
     public void setUnknownUnits(boolean val) {
@@ -114,7 +111,7 @@ public class GJEInferenceUnit {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("slot ");
-        sb.append(gjeSlotID);
+        sb.append(cfiSlotID);
         sb.append(" : UU = " + uu);
         sb.append(" UB = " + ub);
         sb.append(" Prefix = " + prefixExponent);

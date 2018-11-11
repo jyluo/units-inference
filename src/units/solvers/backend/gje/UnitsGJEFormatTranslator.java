@@ -28,11 +28,6 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<GJEInferenceUn
     }
 
     @Override
-    protected void finishInitializingEncoders() {
-        super.finishInitializingEncoders();
-    }
-
-    @Override
     protected ConstraintEncoderFactory<GJEEquationSet> createConstraintEncoderFactory() {
         return new UnitsGJEConstraintEncoderFactory(lattice, this);
     }
@@ -40,12 +35,13 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<GJEInferenceUn
     @Override
     protected GJEInferenceUnit serializeVarSlot(VariableSlot slot) {
         int cfiSlotID = slot.getId();
+        int gjeSlotID = slotCFItoGJEMap.get(slot);
 
         if (serializedSlots.containsKey(cfiSlotID)) {
             return serializedSlots.get(cfiSlotID);
         }
 
-        GJEInferenceUnit encodedSlot = GJEInferenceUnit.makeVariableSlot(cfiSlotID);
+        GJEInferenceUnit encodedSlot = GJEInferenceUnit.makeVariableSlot(cfiSlotID, gjeSlotID);
 
         serializedSlots.put(cfiSlotID, encodedSlot);
         return encodedSlot;

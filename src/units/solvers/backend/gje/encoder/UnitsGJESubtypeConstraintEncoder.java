@@ -22,10 +22,8 @@ public class UnitsGJESubtypeConstraintEncoder
     }
 
     protected GJEEquationSet encode(Slot subtype, Slot supertype) {
-        return null;
-        //        return UnitsGJEEncoderUtils.subtype(
-        //                subtype.serialize(gjeFormatTranslator),
-        //                supertype.serialize(gjeFormatTranslator));
+        return UnitsGJEEncoderUtils.subtype(
+                subtype.serialize(gjeFormatTranslator), supertype.serialize(gjeFormatTranslator));
     }
 
     @Override

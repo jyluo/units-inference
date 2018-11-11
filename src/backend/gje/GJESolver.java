@@ -59,11 +59,12 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
+        serializationStart = System.currentTimeMillis();
         numOfGJEVariables = formatTranslator.assignGJEVarIDs(constraints);
         encodeAllConstraints();
+        serializationEnd = System.currentTimeMillis();
 
         solvingStart = System.currentTimeMillis();
-        // in Units, if the status is SAT then there must be output in the model
         List<String> results = runSolver();
         solvingEnd = System.currentTimeMillis();
 

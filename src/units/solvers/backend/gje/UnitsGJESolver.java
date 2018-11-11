@@ -1,4 +1,4 @@
-package backend.gje;
+package units.solvers.backend.gje;
 
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
@@ -26,10 +26,9 @@ import org.checkerframework.javacutil.BugInCF;
 import units.solvers.backend.gje.representation.GJEEquationSet;
 
 // GaussJordanElimination solver
-public class GJESolver<SlotEncodingT, SlotSolutionT>
-        extends Solver<GJEFormatTranslator<SlotEncodingT, SlotSolutionT>> {
+public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
 
-    protected final Logger logger = Logger.getLogger(GJESolver.class.getName());
+    protected final Logger logger = Logger.getLogger(UnitsGJESolver.class.getName());
 
     // file is written at projectRootFolder/gjeConstraints_<dimension>.gje
     protected static final Path pathToProject = Paths.get(System.getProperty("user.dir"));
@@ -46,13 +45,13 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
     // number of GJE variables
     protected int numOfGJEVariables;
 
-    public GJESolver(
+    public UnitsGJESolver(
             SolverEnvironment solverEnvironment,
             Collection<Slot> slots,
             Collection<Constraint> constraints,
-            GJEFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator,
+            UnitsGJEFormatTranslator formatTranslator,
             Lattice lattice) {
-        super(solverEnvironment, slots, constraints, z3SmtFormatTranslator, lattice);
+        super(solverEnvironment, slots, constraints, formatTranslator, lattice);
     }
 
     // Main entry point

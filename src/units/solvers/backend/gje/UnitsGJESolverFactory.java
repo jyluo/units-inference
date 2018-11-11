@@ -1,16 +1,27 @@
 package units.solvers.backend.gje;
 
-import backend.gje.GJEFormatTranslator;
-import backend.gje.GJESolverFactory;
+import checkers.inference.model.Constraint;
+import checkers.inference.model.Slot;
+import checkers.inference.solver.backend.AbstractSolverFactory;
+import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
-import units.representation.TypecheckUnit;
-import units.solvers.backend.gje.representation.GJEInferenceUnit;
+import checkers.inference.solver.util.SolverEnvironment;
+import java.util.Collection;
 
-public class UnitsGJESolverFactory extends GJESolverFactory<GJEInferenceUnit, TypecheckUnit> {
+public class UnitsGJESolverFactory extends AbstractSolverFactory<UnitsGJEFormatTranslator> {
 
     @Override
-    protected GJEFormatTranslator<GJEInferenceUnit, TypecheckUnit> createFormatTranslator(
+    public Solver<?> createSolver(
+            SolverEnvironment solverEnvironment,
+            Collection<Slot> slots,
+            Collection<Constraint> constraints,
             Lattice lattice) {
+        UnitsGJEFormatTranslator formatTranslator = createFormatTranslator(lattice);
+        return new UnitsGJESolver(solverEnvironment, slots, constraints, formatTranslator, lattice);
+    }
+
+    @Override
+    protected UnitsGJEFormatTranslator createFormatTranslator(Lattice lattice) {
         return new UnitsGJEFormatTranslator(lattice);
     }
 }

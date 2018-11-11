@@ -1,10 +1,19 @@
 package units.solvers.backend.gje;
 
-import backend.gje.GJEFormatTranslator;
+import checkers.inference.model.CombVariableSlot;
 import checkers.inference.model.ConstantSlot;
+import checkers.inference.model.Constraint;
+import checkers.inference.model.ExistentialVariableSlot;
+import checkers.inference.model.LubVariableSlot;
+import checkers.inference.model.RefinementVariableSlot;
+import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
+import checkers.inference.model.serialization.ToStringSerializer;
+import checkers.inference.solver.backend.AbstractFormatTranslator;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
+import checkers.inference.solver.util.PrintUtils.UniqueSlotCollector;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,13 +26,23 @@ import units.solvers.backend.gje.encoder.UnitsGJEConstraintEncoderFactory;
 import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
-public class UnitsGJEFormatTranslator extends GJEFormatTranslator<GJEInferenceUnit, TypecheckUnit> {
+// AbstractFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
+public class UnitsGJEFormatTranslator
+        extends AbstractFormatTranslator<GJEInferenceUnit, GJEEquationSet, TypecheckUnit> {
 
     // static reference to the singleton instance
     protected static UnitsRepresentationUtils unitsRepUtils;
 
+    /** Cache of all serialized slots, keyed on slot ID. */
+    protected final Map<Integer, GJEInferenceUnit> serializedSlots = new HashMap<>();
+
+    // maps serialized slot ID to the slot objects
+    protected final Map<Integer, Slot> slotGJEtoCFIMap = new HashMap<>();
+    protected final Map<Slot, Integer> slotCFItoGJEMap = new HashMap<>();
+
     public UnitsGJEFormatTranslator(Lattice lattice) {
         super(lattice);
+        finishInitializingEncoders();
         unitsRepUtils = UnitsRepresentationUtils.getInstance();
     }
 
@@ -32,7 +51,28 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<GJEInferenceUn
         return new UnitsGJEConstraintEncoderFactory(lattice, this);
     }
 
-    @Override
+    protected int assignGJEVarIDs(Collection<Constraint> constraints) {
+        int gjeID = 0;
+
+        final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
+
+        System.out.println("== Slot serialization map ==");
+        // get a set of unique slots used in the constraints
+        UniqueSlotCollector slotsCollector = new UniqueSlotCollector();
+        for (Constraint constraint : constraints) {
+            constraint.serialize(slotsCollector);
+        }
+
+        for (VariableSlot slot : slotsCollector.getSlots()) {
+            slotGJEtoCFIMap.put(gjeID, slot);
+            slotCFItoGJEMap.put(slot, gjeID);
+            System.out.println("ID: " + gjeID + " --> slot " + slot.serialize(toStringSerializer));
+            gjeID++;
+        }
+
+        return gjeID;
+    }
+
     protected GJEInferenceUnit serializeVarSlot(VariableSlot slot) {
         int cfiSlotID = slot.getId();
         int gjeSlotID = slotCFItoGJEMap.get(slot);
@@ -47,7 +87,6 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<GJEInferenceUn
         return encodedSlot;
     }
 
-    @Override
     protected GJEInferenceUnit serializeConstantSlot(ConstantSlot slot) {
         int slotID = slot.getId();
 
@@ -95,8 +134,39 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<GJEInferenceUn
         return encodedSlot;
     }
 
-    // Decode overall solutions from Z3
     @Override
+    public GJEInferenceUnit serialize(VariableSlot slot) {
+        // System.out.println("Serializing vs " + slot);
+        return serializeVarSlot(slot);
+    }
+
+    @Override
+    public GJEInferenceUnit serialize(ConstantSlot slot) {
+        // System.out.println("Serializing cs " + slot);
+        return serializeConstantSlot(slot);
+    }
+
+    @Override
+    public GJEInferenceUnit serialize(ExistentialVariableSlot slot) {
+        return serializeVarSlot(slot);
+    }
+
+    @Override
+    public GJEInferenceUnit serialize(RefinementVariableSlot slot) {
+        return serializeVarSlot(slot);
+    }
+
+    @Override
+    public GJEInferenceUnit serialize(CombVariableSlot slot) {
+        return serializeVarSlot(slot);
+    }
+
+    @Override
+    public GJEInferenceUnit serialize(LubVariableSlot slot) {
+        return serializeVarSlot(slot);
+    }
+
+    // Decode overall solutions from GJE
     public Map<Integer, AnnotationMirror> decodeSolution(
             List<String> model, ProcessingEnvironment processingEnv) {
 

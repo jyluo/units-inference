@@ -1,7 +1,6 @@
 package units.solvers.backend.gje.encoder;
 
-import backend.gje.GJEFormatTranslator;
-import backend.gje.encoder.GJEConstraintEncoderFactory;
+import checkers.inference.solver.backend.encoder.AbstractConstraintEncoderFactory;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
@@ -12,9 +11,8 @@ import checkers.inference.solver.backend.encoder.existential.ExistentialConstrai
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import units.representation.TypecheckUnit;
+import units.solvers.backend.gje.UnitsGJEFormatTranslator;
 import units.solvers.backend.gje.representation.GJEEquationSet;
-import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 /**
  * GJE implementation of {@link checkers.inference.solver.backend.encoder.ConstraintEncoderFactory}
@@ -23,11 +21,11 @@ import units.solvers.backend.gje.representation.GJEInferenceUnit;
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
 public class UnitsGJEConstraintEncoderFactory
-        extends GJEConstraintEncoderFactory<GJEInferenceUnit, TypecheckUnit> {
+        extends AbstractConstraintEncoderFactory<GJEEquationSet, UnitsGJEFormatTranslator> {
+
     public UnitsGJEConstraintEncoderFactory(
-            Lattice lattice,
-            GJEFormatTranslator<GJEInferenceUnit, TypecheckUnit> gjeFormatTranslator) {
-        super(lattice, gjeFormatTranslator);
+            Lattice lattice, UnitsGJEFormatTranslator formatTranslator) {
+        super(lattice, formatTranslator);
     }
 
     @Override

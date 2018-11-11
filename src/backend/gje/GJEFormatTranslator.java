@@ -8,8 +8,6 @@ import checkers.inference.model.RefinementVariableSlot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.AbstractFormatTranslator;
 import checkers.inference.solver.frontend.Lattice;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,22 +16,19 @@ import javax.lang.model.element.AnnotationMirror;
 
 // AbstractFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
 public abstract class GJEFormatTranslator<SlotEncodingT, SlotSolutionT>
-        extends AbstractFormatTranslator<SlotEncodingT, BoolExpr, SlotSolutionT> {
-
-    protected Context ctx;
+        extends AbstractFormatTranslator<SlotEncodingT, String, SlotSolutionT> {
 
     /** Cache of all serialized slots, keyed on slot ID. */
-    protected final Map<Integer, SlotEncodingT> serializedSlots;
+    protected final Map<Integer, SlotEncodingT> serializedSlots = new HashMap<>();
 
     public GJEFormatTranslator(Lattice lattice) {
         super(lattice);
-        serializedSlots = new HashMap<>();
-    }
-
-    public final void init(Context ctx) {
-        this.ctx = ctx;
         finishInitializingEncoders();
     }
+
+    // public final void init(Context ctx) {
+    // finishInitializingEncoders();
+    // }
 
     protected abstract SlotEncodingT serializeVarSlot(VariableSlot slot);
 
@@ -41,11 +36,13 @@ public abstract class GJEFormatTranslator<SlotEncodingT, SlotSolutionT>
 
     @Override
     public SlotEncodingT serialize(VariableSlot slot) {
+        System.out.println("Serializing vs " + slot);
         return serializeVarSlot(slot);
     }
 
     @Override
     public SlotEncodingT serialize(ConstantSlot slot) {
+        System.out.println("Serializing cs " + slot);
         return serializeConstantSlot(slot);
     }
 
@@ -68,10 +65,6 @@ public abstract class GJEFormatTranslator<SlotEncodingT, SlotSolutionT>
     public SlotEncodingT serialize(LubVariableSlot slot) {
         return serializeVarSlot(slot);
     }
-
-    public abstract BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot);
-
-    public abstract BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot);
 
     public abstract Map<Integer, AnnotationMirror> decodeSolution(
             List<String> model, ProcessingEnvironment processingEnv);

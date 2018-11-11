@@ -7,41 +7,38 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
 import units.representation.TypecheckUnit;
-import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
+import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJESubtypeConstraintEncoder
-        extends GJEAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
-        implements SubtypeConstraintEncoder<BoolExpr> {
+        extends GJEAbstractConstraintEncoder<GJEInferenceUnit, TypecheckUnit>
+        implements SubtypeConstraintEncoder<String> {
 
     public UnitsGJESubtypeConstraintEncoder(
             Lattice lattice,
-            Context ctx,
-            GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
-        super(lattice, ctx, z3SmtFormatTranslator);
+            GJEFormatTranslator<GJEInferenceUnit, TypecheckUnit> gjeFormatTranslator) {
+        super(lattice, gjeFormatTranslator);
     }
 
-    protected BoolExpr encode(Slot subtype, Slot supertype) {
-        return UnitsGJEEncoderUtils.subtype(
-                ctx,
-                subtype.serialize(gjeFormatTranslator),
-                supertype.serialize(gjeFormatTranslator));
+    protected String encode(Slot subtype, Slot supertype) {
+        return null;
+        //        return UnitsGJEEncoderUtils.subtype(
+        //                subtype.serialize(gjeFormatTranslator),
+        //                supertype.serialize(gjeFormatTranslator));
     }
 
     @Override
-    public BoolExpr encodeVariable_Variable(VariableSlot subtype, VariableSlot supertype) {
+    public String encodeVariable_Variable(VariableSlot subtype, VariableSlot supertype) {
         return encode(subtype, supertype);
     }
 
     @Override
-    public BoolExpr encodeVariable_Constant(VariableSlot subtype, ConstantSlot supertype) {
+    public String encodeVariable_Constant(VariableSlot subtype, ConstantSlot supertype) {
         return encode(subtype, supertype);
     }
 
     @Override
-    public BoolExpr encodeConstant_Variable(ConstantSlot subtype, VariableSlot supertype) {
+    public String encodeConstant_Variable(ConstantSlot subtype, VariableSlot supertype) {
         return encode(subtype, supertype);
     }
 }

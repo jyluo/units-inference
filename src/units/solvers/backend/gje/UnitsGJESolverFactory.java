@@ -4,12 +4,12 @@ import backend.gje.GJEFormatTranslator;
 import backend.gje.GJESolverFactory;
 import checkers.inference.solver.frontend.Lattice;
 import units.representation.TypecheckUnit;
-import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
+import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
-public class UnitsGJESolverFactory extends GJESolverFactory<Z3InferenceUnit, TypecheckUnit> {
+public class UnitsGJESolverFactory extends GJESolverFactory<GJEInferenceUnit, TypecheckUnit> {
 
     @Override
-    protected GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> createFormatTranslator(
+    protected GJEFormatTranslator<GJEInferenceUnit, TypecheckUnit> createFormatTranslator(
             Lattice lattice) {
         return new UnitsGJEFormatTranslator(lattice);
     }

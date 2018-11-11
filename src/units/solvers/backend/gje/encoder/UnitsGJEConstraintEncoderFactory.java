@@ -6,73 +6,71 @@ import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
 import checkers.inference.solver.backend.encoder.binary.InequalityConstraintEncoder;
+import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.backend.encoder.combine.CombineConstraintEncoder;
 import checkers.inference.solver.backend.encoder.existential.ExistentialConstraintEncoder;
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
 import units.representation.TypecheckUnit;
-import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
+import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 /**
- * Z3 implementation of {@link checkers.inference.solver.backend.encoder.ConstraintEncoderFactory}
+ * GJE implementation of {@link checkers.inference.solver.backend.encoder.ConstraintEncoderFactory}
  * for Units Type System.
  *
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
 public class UnitsGJEConstraintEncoderFactory
-        extends GJEConstraintEncoderFactory<Z3InferenceUnit, TypecheckUnit> {
+        extends GJEConstraintEncoderFactory<GJEInferenceUnit, TypecheckUnit> {
     public UnitsGJEConstraintEncoderFactory(
             Lattice lattice,
-            Context ctx,
-            GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> gjeFormatTranslator) {
-        super(lattice, ctx, gjeFormatTranslator);
+            GJEFormatTranslator<GJEInferenceUnit, TypecheckUnit> gjeFormatTranslator) {
+        super(lattice, gjeFormatTranslator);
     }
 
     @Override
-    public UnitsGJESubtypeConstraintEncoder createSubtypeConstraintEncoder() {
-        return new UnitsGJESubtypeConstraintEncoder(lattice, ctx, formatTranslator);
+    public SubtypeConstraintEncoder<String> createSubtypeConstraintEncoder() {
+        return new UnitsGJESubtypeConstraintEncoder(lattice, formatTranslator);
     }
 
     @Override
-    public EqualityConstraintEncoder<BoolExpr> createEqualityConstraintEncoder() {
-        return new UnitsGJEEqualityConstraintEncoder(lattice, ctx, formatTranslator);
+    public EqualityConstraintEncoder<String> createEqualityConstraintEncoder() {
+        return new UnitsGJEEqualityConstraintEncoder(lattice, formatTranslator);
     }
 
     @Override
-    public InequalityConstraintEncoder<BoolExpr> createInequalityConstraintEncoder() {
+    public InequalityConstraintEncoder<String> createInequalityConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ComparableConstraintEncoder<BoolExpr> createComparableConstraintEncoder() {
-        return new UnitsGJEComparableConstraintEncoder(lattice, ctx, formatTranslator);
+    public ComparableConstraintEncoder<String> createComparableConstraintEncoder() {
+        return new UnitsGJEComparableConstraintEncoder(lattice, formatTranslator);
     }
 
     @Override
-    public PreferenceConstraintEncoder<BoolExpr> createPreferenceConstraintEncoder() {
+    public PreferenceConstraintEncoder<String> createPreferenceConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ExistentialConstraintEncoder<BoolExpr> createExistentialConstraintEncoder() {
+    public ExistentialConstraintEncoder<String> createExistentialConstraintEncoder() {
         return null;
     }
 
     @Override
-    public CombineConstraintEncoder<BoolExpr> createCombineConstraintEncoder() {
+    public CombineConstraintEncoder<String> createCombineConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ImplicationConstraintEncoder<BoolExpr> createImplicationConstraintEncoder() {
+    public ImplicationConstraintEncoder<String> createImplicationConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ArithmeticConstraintEncoder<BoolExpr> createArithmeticConstraintEncoder() {
-        return new UnitsGJEArithmeticConstraintEncoder(lattice, ctx, formatTranslator);
+    public ArithmeticConstraintEncoder<String> createArithmeticConstraintEncoder() {
+        return new UnitsGJEArithmeticConstraintEncoder(lattice, formatTranslator);
     }
 }

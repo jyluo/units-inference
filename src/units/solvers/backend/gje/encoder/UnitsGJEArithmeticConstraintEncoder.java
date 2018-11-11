@@ -9,28 +9,23 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Context;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.TypecheckUnit;
-import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
-import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
-import units.util.UnitsTypecheckUtils;
+import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJEArithmeticConstraintEncoder
-        extends GJEAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
-        implements ArithmeticConstraintEncoder<BoolExpr> {
+        extends GJEAbstractConstraintEncoder<GJEInferenceUnit, TypecheckUnit>
+        implements ArithmeticConstraintEncoder<String> {
 
     public UnitsGJEArithmeticConstraintEncoder(
             Lattice lattice,
-            Context ctx,
-            GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> gjeFormatTranslator) {
-        super(lattice, ctx, gjeFormatTranslator);
+            GJEFormatTranslator<GJEInferenceUnit, TypecheckUnit> gjeFormatTranslator) {
+        super(lattice, gjeFormatTranslator);
     }
 
     // Encoding for var-var, var-const, const-var combos of add/sub, and also const-const for
     // mul/div/mod
-    protected BoolExpr encode(
+    protected String encode(
             ArithmeticOperationKind operation,
             Slot leftOperand,
             Slot rightOperand,
@@ -40,43 +35,39 @@ public class UnitsGJEArithmeticConstraintEncoder
             case MINUS:
                 // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
                 // pair of subtype constraints
-                Z3InferenceUnit left = leftOperand.serialize(gjeFormatTranslator);
-                Z3InferenceUnit right = rightOperand.serialize(gjeFormatTranslator);
-                Z3InferenceUnit res = result.serialize(gjeFormatTranslator);
-                return ctx.mkAnd(
-                        UnitsZ3SmtEncoderUtils.subtype(ctx, left, res),
-                        UnitsZ3SmtEncoderUtils.subtype(ctx, right, res));
+                GJEInferenceUnit left = leftOperand.serialize(gjeFormatTranslator);
+                GJEInferenceUnit right = rightOperand.serialize(gjeFormatTranslator);
+                GJEInferenceUnit res = result.serialize(gjeFormatTranslator);
 
-                // // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
-                // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
-                // leftOperand.serialize(z3SmtFormatTranslator),
-                // rightOperand.serialize(z3SmtFormatTranslator),
-                // result.serialize(z3SmtFormatTranslator));
+                return UnitsGJEEncoderUtils.tripleEquality(left, right, res);
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
                 // UnitsBottom, for which then the result is always UnknownUnits
-                return UnitsZ3SmtEncoderUtils.multiply(
-                        ctx,
-                        leftOperand.serialize(gjeFormatTranslator),
-                        rightOperand.serialize(gjeFormatTranslator),
-                        result.serialize(gjeFormatTranslator));
+                return null;
+                //                return UnitsZ3SmtEncoderUtils.multiply(
+                //                        ctx,
+                //                        leftOperand.serialize(gjeFormatTranslator),
+                //                        rightOperand.serialize(gjeFormatTranslator),
+                //                        result.serialize(gjeFormatTranslator));
             case DIVIDE:
                 // Division between 2 slots resulting in result slot, is the difference of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
                 // UnitsBottom, for which then the result is always UnknownUnits
-                return UnitsZ3SmtEncoderUtils.divide(
-                        ctx,
-                        leftOperand.serialize(gjeFormatTranslator),
-                        rightOperand.serialize(gjeFormatTranslator),
-                        result.serialize(gjeFormatTranslator));
+                return null;
+                //                return UnitsZ3SmtEncoderUtils.divide(
+                //                        ctx,
+                //                        leftOperand.serialize(gjeFormatTranslator),
+                //                        rightOperand.serialize(gjeFormatTranslator),
+                //                        result.serialize(gjeFormatTranslator));
             case REMAINDER:
                 // Modulus between 2 slots resulting in result slot, is always an equality between
                 // leftOperand and result slots
-                return UnitsZ3SmtEncoderUtils.equality(
-                        ctx,
-                        leftOperand.serialize(gjeFormatTranslator),
-                        result.serialize(gjeFormatTranslator));
+                return null;
+                //                return UnitsZ3SmtEncoderUtils.equality(
+                //                        ctx,
+                //                        leftOperand.serialize(gjeFormatTranslator),
+                //                        result.serialize(gjeFormatTranslator));
             default:
                 throw new BugInCF(
                         "Attempting to encode an unsupported arithmetic operation: "
@@ -91,7 +82,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeVariable_Variable(
+    public String encodeVariable_Variable(
             ArithmeticOperationKind operation,
             VariableSlot leftOperand,
             VariableSlot rightOperand,
@@ -100,7 +91,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeVariable_Constant(
+    public String encodeVariable_Constant(
             ArithmeticOperationKind operation,
             VariableSlot leftOperand,
             ConstantSlot rightOperand,
@@ -109,7 +100,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeConstant_Variable(
+    public String encodeConstant_Variable(
             ArithmeticOperationKind operation,
             ConstantSlot leftOperand,
             VariableSlot rightOperand,
@@ -118,7 +109,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeConstant_Constant(
+    public String encodeConstant_Constant(
             ArithmeticOperationKind operation,
             ConstantSlot leftOperand,
             ConstantSlot rightOperand,
@@ -126,17 +117,17 @@ public class UnitsGJEArithmeticConstraintEncoder
         switch (operation) {
             case PLUS:
             case MINUS:
-                // TODO: do constant constant checks inside encode() ?
+                return null;
 
                 // if leftOperand == rightOperand, then encode equality between rightOperand and
                 // result
-                return UnitsTypecheckUtils.unitsEqual(
-                                leftOperand.getValue(), rightOperand.getValue())
-                        ? UnitsZ3SmtEncoderUtils.equality(
-                                ctx,
-                                rightOperand.serialize(gjeFormatTranslator),
-                                result.serialize(gjeFormatTranslator))
-                        : contradictoryValue;
+                //                return UnitsTypecheckUtils.unitsEqual(
+                //                                leftOperand.getValue(), rightOperand.getValue())
+                //                        ? UnitsZ3SmtEncoderUtils.equality(
+                //                                ctx,
+                //                                rightOperand.serialize(gjeFormatTranslator),
+                //                                result.serialize(gjeFormatTranslator))
+                //                        : contradictoryValue;
             case MULTIPLY:
                 // It is more efficient to encode an equality between the result of leftOperand *
                 // rightOperand and result, but to do that requires access to slotManager here to

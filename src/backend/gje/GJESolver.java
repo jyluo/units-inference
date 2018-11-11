@@ -8,8 +8,6 @@ import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.PrintUtils.UniqueSlotCollector;
 import checkers.inference.solver.util.SolverEnvironment;
-import com.microsoft.z3.BoolExpr;
-import com.microsoft.z3.Expr;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -120,19 +118,12 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
 
         for (Constraint constraint : constraints) {
 
-            BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
+            String serializedConstraint = constraint.serialize(formatTranslator);
 
             if (serializedConstraint == null) {
                 System.out.println(
                         "Unsupported constraint detected! Constraint type: "
                                 + constraint.getClass().getSimpleName());
-                continue;
-            }
-
-            Expr simplifiedConstraint = serializedConstraint.simplify();
-
-            if (simplifiedConstraint.isTrue()) {
-                current++;
                 continue;
             }
         }

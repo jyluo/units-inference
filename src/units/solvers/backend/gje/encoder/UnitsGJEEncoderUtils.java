@@ -1,5 +1,7 @@
 package units.solvers.backend.gje.encoder;
 
+import java.util.Map;
+import java.util.Set;
 import org.checkerframework.javacutil.BugInCF;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
@@ -35,7 +37,7 @@ public class UnitsGJEEncoderUtils {
 
     // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
-    public static String equality(GJEInferenceUnit fst, GJEInferenceUnit snd) {
+    public static Map<String, Set<String>> equality(GJEInferenceUnit fst, GJEInferenceUnit snd) {
         if (fst.isConstant() && snd.isConstant() && !fst.equals(snd)) {
             throw new BugInCF(
                     "trying to encode an always false equality constraint: " + fst + " == " + snd);
@@ -45,16 +47,16 @@ public class UnitsGJEEncoderUtils {
         // TODO: return 1 equation per dimension
         // Map<dimension, list<equation>> ??
 
-        if (fst.isConstant() && snd.isVariable()) {
-            // input: eg x = 3
-            // output: 1 1 ID 3
-            return String.join(
-                    " ",
-                    "1",
-                    "1",
-                    String.valueOf(snd.getGJESlotID()),
-                    String.valueOf(fst.getPrefixExponent()));
-        }
+        //        if (fst.isConstant() && snd.isVariable()) {
+        //            // input: eg x = 3
+        //            // output: 1 1 ID 3
+        //            return String.join(
+        //                    " ",
+        //                    "1",
+        //                    "1",
+        //                    String.valueOf(snd.getGJESlotID()),
+        //                    String.valueOf(fst.getPrefixExponent()));
+        //        }
 
         // 3 cases
         return null;
@@ -64,12 +66,12 @@ public class UnitsGJEEncoderUtils {
     // sub = bot, or
     // super = top, or
     // sub = super
-    public static String subtype(GJEInferenceUnit subT, GJEInferenceUnit superT) {
+    public static Map<String, Set<String>> subtype(GJEInferenceUnit subT, GJEInferenceUnit superT) {
         return equality(subT, superT);
     }
 
     // For Addition and Subtraction
-    public static String tripleEquality(
+    public static Map<String, Set<String>> tripleEquality(
             GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
         // TODO: return 2 equations per dimension
@@ -79,7 +81,7 @@ public class UnitsGJEEncoderUtils {
         // return ctx.mkAnd(equality(ctx, lhs, rhs), equality(ctx, rhs, res));
     }
 
-    public static String multiply(
+    public static Map<String, Set<String>> multiply(
             GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
         // TODO: return 1 equation per dimension

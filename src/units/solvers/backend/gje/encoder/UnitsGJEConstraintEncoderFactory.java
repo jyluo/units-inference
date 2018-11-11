@@ -12,6 +12,8 @@ import checkers.inference.solver.backend.encoder.existential.ExistentialConstrai
 import checkers.inference.solver.backend.encoder.implication.ImplicationConstraintEncoder;
 import checkers.inference.solver.backend.encoder.preference.PreferenceConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
+import java.util.Map;
+import java.util.Set;
 import units.representation.TypecheckUnit;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
@@ -30,47 +32,53 @@ public class UnitsGJEConstraintEncoderFactory
     }
 
     @Override
-    public SubtypeConstraintEncoder<String> createSubtypeConstraintEncoder() {
+    public SubtypeConstraintEncoder<Map<String, Set<String>>> createSubtypeConstraintEncoder() {
         return new UnitsGJESubtypeConstraintEncoder(lattice, formatTranslator);
     }
 
     @Override
-    public EqualityConstraintEncoder<String> createEqualityConstraintEncoder() {
+    public EqualityConstraintEncoder<Map<String, Set<String>>> createEqualityConstraintEncoder() {
         return new UnitsGJEEqualityConstraintEncoder(lattice, formatTranslator);
     }
 
     @Override
-    public InequalityConstraintEncoder<String> createInequalityConstraintEncoder() {
+    public InequalityConstraintEncoder<Map<String, Set<String>>>
+            createInequalityConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ComparableConstraintEncoder<String> createComparableConstraintEncoder() {
+    public ComparableConstraintEncoder<Map<String, Set<String>>>
+            createComparableConstraintEncoder() {
         return new UnitsGJEComparableConstraintEncoder(lattice, formatTranslator);
     }
 
     @Override
-    public PreferenceConstraintEncoder<String> createPreferenceConstraintEncoder() {
+    public PreferenceConstraintEncoder<Map<String, Set<String>>>
+            createPreferenceConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ExistentialConstraintEncoder<String> createExistentialConstraintEncoder() {
+    public ExistentialConstraintEncoder<Map<String, Set<String>>>
+            createExistentialConstraintEncoder() {
         return null;
     }
 
     @Override
-    public CombineConstraintEncoder<String> createCombineConstraintEncoder() {
+    public CombineConstraintEncoder<Map<String, Set<String>>> createCombineConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ImplicationConstraintEncoder<String> createImplicationConstraintEncoder() {
+    public ImplicationConstraintEncoder<Map<String, Set<String>>>
+            createImplicationConstraintEncoder() {
         return null;
     }
 
     @Override
-    public ArithmeticConstraintEncoder<String> createArithmeticConstraintEncoder() {
+    public ArithmeticConstraintEncoder<Map<String, Set<String>>>
+            createArithmeticConstraintEncoder() {
         return new UnitsGJEArithmeticConstraintEncoder(lattice, formatTranslator);
     }
 }

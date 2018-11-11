@@ -11,12 +11,13 @@ import checkers.inference.solver.frontend.Lattice;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
 // AbstractFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
 public abstract class GJEFormatTranslator<SlotEncodingT, SlotSolutionT>
-        extends AbstractFormatTranslator<SlotEncodingT, String, SlotSolutionT> {
+        extends AbstractFormatTranslator<SlotEncodingT, Map<String, Set<String>>, SlotSolutionT> {
 
     /** Cache of all serialized slots, keyed on slot ID. */
     protected final Map<Integer, SlotEncodingT> serializedSlots = new HashMap<>();

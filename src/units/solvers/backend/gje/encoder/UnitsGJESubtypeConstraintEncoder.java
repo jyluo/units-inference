@@ -7,12 +7,14 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
+import java.util.Map;
+import java.util.Set;
 import units.representation.TypecheckUnit;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJESubtypeConstraintEncoder
         extends GJEAbstractConstraintEncoder<GJEInferenceUnit, TypecheckUnit>
-        implements SubtypeConstraintEncoder<String> {
+        implements SubtypeConstraintEncoder<Map<String, Set<String>>> {
 
     public UnitsGJESubtypeConstraintEncoder(
             Lattice lattice,
@@ -20,7 +22,7 @@ public class UnitsGJESubtypeConstraintEncoder
         super(lattice, gjeFormatTranslator);
     }
 
-    protected String encode(Slot subtype, Slot supertype) {
+    protected Map<String, Set<String>> encode(Slot subtype, Slot supertype) {
         return null;
         //        return UnitsGJEEncoderUtils.subtype(
         //                subtype.serialize(gjeFormatTranslator),
@@ -28,17 +30,20 @@ public class UnitsGJESubtypeConstraintEncoder
     }
 
     @Override
-    public String encodeVariable_Variable(VariableSlot subtype, VariableSlot supertype) {
+    public Map<String, Set<String>> encodeVariable_Variable(
+            VariableSlot subtype, VariableSlot supertype) {
         return encode(subtype, supertype);
     }
 
     @Override
-    public String encodeVariable_Constant(VariableSlot subtype, ConstantSlot supertype) {
+    public Map<String, Set<String>> encodeVariable_Constant(
+            VariableSlot subtype, ConstantSlot supertype) {
         return encode(subtype, supertype);
     }
 
     @Override
-    public String encodeConstant_Variable(ConstantSlot subtype, VariableSlot supertype) {
+    public Map<String, Set<String>> encodeConstant_Variable(
+            ConstantSlot subtype, VariableSlot supertype) {
         return encode(subtype, supertype);
     }
 }

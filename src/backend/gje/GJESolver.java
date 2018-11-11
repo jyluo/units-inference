@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.lang.model.element.AnnotationMirror;
 
@@ -118,7 +119,7 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
 
         for (Constraint constraint : constraints) {
 
-            String serializedConstraint = constraint.serialize(formatTranslator);
+            Map<String, Set<String>> serializedConstraint = constraint.serialize(formatTranslator);
 
             if (serializedConstraint == null) {
                 System.out.println(

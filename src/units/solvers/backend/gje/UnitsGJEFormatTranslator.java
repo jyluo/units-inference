@@ -8,6 +8,7 @@ import checkers.inference.solver.frontend.Lattice;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
@@ -32,7 +33,7 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<GJEInferenceUn
     }
 
     @Override
-    protected ConstraintEncoderFactory<String> createConstraintEncoderFactory() {
+    protected ConstraintEncoderFactory<Map<String, Set<String>>> createConstraintEncoderFactory() {
         return new UnitsGJEConstraintEncoderFactory(lattice, this);
     }
 

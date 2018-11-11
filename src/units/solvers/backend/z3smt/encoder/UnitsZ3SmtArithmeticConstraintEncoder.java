@@ -12,19 +12,18 @@ import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import org.checkerframework.javacutil.BugInCF;
-import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 import units.util.UnitsTypecheckUtils;
-import units.util.UnitsZ3SmtEncoderUtils;
 
 public class UnitsZ3SmtArithmeticConstraintEncoder
-        extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
+        extends Z3SmtAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
         implements ArithmeticConstraintEncoder<BoolExpr> {
 
     public UnitsZ3SmtArithmeticConstraintEncoder(
             Lattice lattice,
             Context ctx,
-            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+            Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
 
@@ -40,9 +39,9 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
             case MINUS:
                 // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
                 // pair of subtype constraints
-                InferenceUnit left = leftOperand.serialize(z3SmtFormatTranslator);
-                InferenceUnit right = rightOperand.serialize(z3SmtFormatTranslator);
-                InferenceUnit res = result.serialize(z3SmtFormatTranslator);
+                Z3InferenceUnit left = leftOperand.serialize(z3SmtFormatTranslator);
+                Z3InferenceUnit right = rightOperand.serialize(z3SmtFormatTranslator);
+                Z3InferenceUnit res = result.serialize(z3SmtFormatTranslator);
                 return ctx.mkAnd(
                         UnitsZ3SmtEncoderUtils.subtype(ctx, left, res),
                         UnitsZ3SmtEncoderUtils.subtype(ctx, right, res));

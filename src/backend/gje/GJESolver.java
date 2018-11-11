@@ -93,7 +93,7 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
     }
 
     protected void encodeAllSlots() {
-        long count = 1;
+        long gjeID = 0;
 
         final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
 
@@ -105,10 +105,10 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
         }
 
         for (VariableSlot slot : slotsCollector.getSlots()) {
-            slotGJEtoCFIMap.put(count, slot);
-            slotCFItoGJEMap.put(slot, count);
-            count++;
-            System.out.println("ID: " + count + " --> slot " + slot.serialize(toStringSerializer));
+            slotGJEtoCFIMap.put(gjeID, slot);
+            slotCFItoGJEMap.put(slot, gjeID);
+            System.out.println("ID: " + gjeID + " --> slot " + slot.serialize(toStringSerializer));
+            gjeID++;
         }
     }
 

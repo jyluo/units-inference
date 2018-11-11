@@ -12,19 +12,19 @@ import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import org.checkerframework.javacutil.BugInCF;
-import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 import units.util.UnitsTypecheckUtils;
-import units.util.UnitsZ3SmtEncoderUtils;
 
 public class UnitsGJEArithmeticConstraintEncoder
-        extends GJEAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
+        extends GJEAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
         implements ArithmeticConstraintEncoder<BoolExpr> {
 
     public UnitsGJEArithmeticConstraintEncoder(
             Lattice lattice,
             Context ctx,
-            GJEFormatTranslator<InferenceUnit, TypecheckUnit> gjeFormatTranslator) {
+            GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> gjeFormatTranslator) {
         super(lattice, ctx, gjeFormatTranslator);
     }
 
@@ -40,9 +40,9 @@ public class UnitsGJEArithmeticConstraintEncoder
             case MINUS:
                 // Addition or Subtraction between 2 slots resulting in result slot, is encoded as a
                 // pair of subtype constraints
-                InferenceUnit left = leftOperand.serialize(gjeFormatTranslator);
-                InferenceUnit right = rightOperand.serialize(gjeFormatTranslator);
-                InferenceUnit res = result.serialize(gjeFormatTranslator);
+                Z3InferenceUnit left = leftOperand.serialize(gjeFormatTranslator);
+                Z3InferenceUnit right = rightOperand.serialize(gjeFormatTranslator);
+                Z3InferenceUnit res = result.serialize(gjeFormatTranslator);
                 return ctx.mkAnd(
                         UnitsZ3SmtEncoderUtils.subtype(ctx, left, res),
                         UnitsZ3SmtEncoderUtils.subtype(ctx, right, res));

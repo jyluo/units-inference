@@ -9,18 +9,17 @@ import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
-import units.util.UnitsGJEEncoderUtils;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
 public class UnitsGJESubtypeConstraintEncoder
-        extends GJEAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
+        extends GJEAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
         implements SubtypeConstraintEncoder<BoolExpr> {
 
     public UnitsGJESubtypeConstraintEncoder(
             Lattice lattice,
             Context ctx,
-            GJEFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+            GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
 

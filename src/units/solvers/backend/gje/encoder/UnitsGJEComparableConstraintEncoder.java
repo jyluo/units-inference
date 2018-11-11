@@ -9,24 +9,23 @@ import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEnco
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
-import units.util.UnitsGJEEncoderUtils;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
 public class UnitsGJEComparableConstraintEncoder
-        extends GJEAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
+        extends GJEAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
         implements ComparableConstraintEncoder<BoolExpr> {
 
     public UnitsGJEComparableConstraintEncoder(
             Lattice lattice,
             Context ctx,
-            GJEFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+            GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
 
     protected BoolExpr encode(Slot fst, Slot snd) {
-        InferenceUnit first = fst.serialize(gjeFormatTranslator);
-        InferenceUnit second = snd.serialize(gjeFormatTranslator);
+        Z3InferenceUnit first = fst.serialize(gjeFormatTranslator);
+        Z3InferenceUnit second = snd.serialize(gjeFormatTranslator);
 
         // fst <: snd or snd <: fst
         return ctx.mkOr(

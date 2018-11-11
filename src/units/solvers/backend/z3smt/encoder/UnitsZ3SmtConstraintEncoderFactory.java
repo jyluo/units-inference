@@ -13,8 +13,8 @@ import checkers.inference.solver.backend.encoder.preference.PreferenceConstraint
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
 /**
  * Z3 implementation of {@link checkers.inference.solver.backend.encoder.ConstraintEncoderFactory}
@@ -23,11 +23,11 @@ import units.representation.TypecheckUnit;
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
 public class UnitsZ3SmtConstraintEncoderFactory
-        extends Z3SmtConstraintEncoderFactory<InferenceUnit, TypecheckUnit> {
+        extends Z3SmtConstraintEncoderFactory<Z3InferenceUnit, TypecheckUnit> {
     public UnitsZ3SmtConstraintEncoderFactory(
             Lattice lattice,
             Context ctx,
-            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+            Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
 

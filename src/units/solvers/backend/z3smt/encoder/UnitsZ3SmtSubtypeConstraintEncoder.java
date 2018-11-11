@@ -9,18 +9,17 @@ import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
-import units.util.UnitsZ3SmtEncoderUtils;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
 public class UnitsZ3SmtSubtypeConstraintEncoder
-        extends Z3SmtAbstractConstraintEncoder<InferenceUnit, TypecheckUnit>
+        extends Z3SmtAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
         implements SubtypeConstraintEncoder<BoolExpr> {
 
     public UnitsZ3SmtSubtypeConstraintEncoder(
             Lattice lattice,
             Context ctx,
-            Z3SmtFormatTranslator<InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+            Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
 

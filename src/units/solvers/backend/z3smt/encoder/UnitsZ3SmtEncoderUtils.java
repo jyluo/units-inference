@@ -1,4 +1,4 @@
-package units.util;
+package units.solvers.backend.z3smt.encoder;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -6,14 +6,14 @@ import com.microsoft.z3.IntNum;
 import java.util.Arrays;
 import java.util.List;
 import org.checkerframework.javacutil.Pair;
-import units.representation.InferenceUnit;
 import units.representation.UnitsRepresentationUtils;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
 /**
  * Utility class with methods for defining z3 variable names and encoding of various relationships
  * between Units.
  */
-public class UnitsGJEEncoderUtils {
+public class UnitsZ3SmtEncoderUtils {
 
     private static final char idComponentSeparator = '-';
     public static final String uuSlotName = "TOP";
@@ -42,10 +42,10 @@ public class UnitsGJEEncoderUtils {
     }
 
     /** Slot well-formedness constraint: that either uu = true, ub = true, or uu == ub = false */
-    public static BoolExpr slotWellformedness(Context ctx, InferenceUnit unit) {
+    public static BoolExpr slotWellformedness(Context ctx, Z3InferenceUnit unit) {
         BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
         /* @formatter:off // this is for eclipse formatter */
-        return UnitsGJEEncoderUtils.mkChainXor(
+        return UnitsZ3SmtEncoderUtils.mkChainXor(
                 ctx,
                 ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom())),
                 ctx.mkAnd(unit.getUnknownUnits(), allPrefixesAreZero),
@@ -54,11 +54,11 @@ public class UnitsGJEEncoderUtils {
     }
 
     /** Slot preference constraint: that the slot == dimensionless */
-    public static BoolExpr slotPreference(Context ctx, InferenceUnit unit) {
+    public static BoolExpr slotPreference(Context ctx, Z3InferenceUnit unit) {
         return mustBeDimensionless(ctx, unit);
     }
 
-    private static BoolExpr allPrefixesAreZero(Context ctx, InferenceUnit unit) {
+    private static BoolExpr allPrefixesAreZero(Context ctx, Z3InferenceUnit unit) {
         IntNum zero = ctx.mkInt(0);
         BoolExpr result = ctx.mkEq(unit.getPrefixExponent(), zero);
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
@@ -69,7 +69,7 @@ public class UnitsGJEEncoderUtils {
         return result;
     }
 
-    private static BoolExpr mustBeDimensionless(Context ctx, InferenceUnit unit) {
+    private static BoolExpr mustBeDimensionless(Context ctx, Z3InferenceUnit unit) {
         BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
         /* @formatter:off // this is for eclipse formatter */
         return ctx.mkAnd(
@@ -118,7 +118,7 @@ public class UnitsGJEEncoderUtils {
 
     // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
-    public static BoolExpr equality(Context ctx, InferenceUnit fst, InferenceUnit snd) {
+    public static BoolExpr equality(Context ctx, Z3InferenceUnit fst, Z3InferenceUnit snd) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr equalityEncoding =
                 ctx.mkAnd(
@@ -139,7 +139,7 @@ public class UnitsGJEEncoderUtils {
     // sub = bot, or
     // super = top, or
     // sub = super
-    public static BoolExpr subtype(Context ctx, InferenceUnit subT, InferenceUnit superT) {
+    public static BoolExpr subtype(Context ctx, Z3InferenceUnit subT, Z3InferenceUnit superT) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr subtypeEncoding =
                 ctx.mkOr(
@@ -200,13 +200,13 @@ public class UnitsGJEEncoderUtils {
 
     // For Addition and Subtraction
     public static BoolExpr tripleEquality(
-            Context ctx, InferenceUnit lhs, InferenceUnit rhs, InferenceUnit res) {
+            Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         // set lhs == rhs, and rhs == res, transitively lhs == res
         return ctx.mkAnd(equality(ctx, lhs, rhs), equality(ctx, rhs, res));
     }
 
     public static BoolExpr multiply(
-            Context ctx, InferenceUnit lhs, InferenceUnit rhs, InferenceUnit res) {
+            Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent + rhs_exponent
         BoolExpr exponents = ctx.mkTrue();
@@ -237,7 +237,7 @@ public class UnitsGJEEncoderUtils {
     }
 
     public static BoolExpr divide(
-            Context ctx, InferenceUnit lhs, InferenceUnit rhs, InferenceUnit res) {
+            Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent - rhs_exponent
         BoolExpr exponents = ctx.mkTrue();

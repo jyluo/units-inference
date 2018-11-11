@@ -13,13 +13,13 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
-import units.representation.InferenceUnit;
 import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.gje.encoder.UnitsGJEConstraintEncoderFactory;
-import units.util.UnitsGJEEncoderUtils;
+import units.solvers.backend.gje.encoder.UnitsGJEEncoderUtils;
+import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
-public class UnitsGJEFormatTranslator extends GJEFormatTranslator<InferenceUnit, TypecheckUnit> {
+public class UnitsGJEFormatTranslator extends GJEFormatTranslator<Z3InferenceUnit, TypecheckUnit> {
 
     public static BoolExpr Z3TRUE;
     public static BoolExpr Z3FALSE;
@@ -46,21 +46,21 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<InferenceUnit,
     }
 
     @Override
-    protected InferenceUnit serializeVarSlot(VariableSlot slot) {
+    protected Z3InferenceUnit serializeVarSlot(VariableSlot slot) {
         int slotID = slot.getId();
 
         if (serializedSlots.containsKey(slotID)) {
             return serializedSlots.get(slotID);
         }
 
-        InferenceUnit encodedSlot = InferenceUnit.makeVariableSlot(ctx, slotID);
+        Z3InferenceUnit encodedSlot = Z3InferenceUnit.makeVariableSlot(ctx, slotID);
 
         serializedSlots.put(slotID, encodedSlot);
         return encodedSlot;
     }
 
     @Override
-    protected InferenceUnit serializeConstantSlot(ConstantSlot slot) {
+    protected Z3InferenceUnit serializeConstantSlot(ConstantSlot slot) {
         int slotID = slot.getId();
 
         if (serializedSlots.containsKey(slotID)) {
@@ -86,7 +86,7 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<InferenceUnit,
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
         // Makes a constant encoded slot with default values
-        InferenceUnit encodedSlot = InferenceUnit.makeConstantSlot(ctx, slotID);
+        Z3InferenceUnit encodedSlot = Z3InferenceUnit.makeConstantSlot(ctx, slotID);
 
         // Replace values in constant encoded slot with values in the annotation
         if (unit.isUnknownUnits()) {
@@ -117,7 +117,7 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<InferenceUnit,
             }
         }
 
-        InferenceUnit serializedSlot = slot.serialize(this);
+        Z3InferenceUnit serializedSlot = slot.serialize(this);
         return UnitsGJEEncoderUtils.slotWellformedness(ctx, serializedSlot);
     }
 
@@ -133,7 +133,7 @@ public class UnitsGJEFormatTranslator extends GJEFormatTranslator<InferenceUnit,
             }
         }
 
-        InferenceUnit serializedSlot = slot.serialize(this);
+        Z3InferenceUnit serializedSlot = slot.serialize(this);
         return UnitsGJEEncoderUtils.slotPreference(ctx, serializedSlot);
     }
 

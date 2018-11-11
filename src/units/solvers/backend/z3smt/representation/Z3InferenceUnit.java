@@ -1,4 +1,4 @@
-package units.representation;
+package units.solvers.backend.z3smt.representation;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
@@ -6,12 +6,13 @@ import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
 import java.util.Map;
 import java.util.TreeMap;
-import units.util.UnitsZ3SmtEncoderUtils;
+import units.representation.UnitsRepresentationUtils;
+import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
 
 /**
  * A data structure class to encapsulate a set of Z3 variables representing a unit for inference.
  */
-public class InferenceUnit {
+public class Z3InferenceUnit {
     private final Context ctx;
     private final int slotID;
 
@@ -24,15 +25,15 @@ public class InferenceUnit {
     // helper constant
     private final IntNum intZero;
 
-    private InferenceUnit(Context ctx, int slotID) {
+    private Z3InferenceUnit(Context ctx, int slotID) {
         this.ctx = ctx;
         this.slotID = slotID;
         exponents = new TreeMap<>();
         intZero = ctx.mkInt(0);
     }
 
-    public static InferenceUnit makeConstantSlot(Context ctx, int slotID) {
-        InferenceUnit slot = new InferenceUnit(ctx, slotID);
+    public static Z3InferenceUnit makeConstantSlot(Context ctx, int slotID) {
+        Z3InferenceUnit slot = new Z3InferenceUnit(ctx, slotID);
 
         // default UU value is false
         slot.uu = ctx.mkBool(false);
@@ -49,8 +50,8 @@ public class InferenceUnit {
         return slot;
     }
 
-    public static InferenceUnit makeVariableSlot(Context ctx, int slotID) {
-        InferenceUnit slot = new InferenceUnit(ctx, slotID);
+    public static Z3InferenceUnit makeVariableSlot(Context ctx, int slotID) {
+        Z3InferenceUnit slot = new Z3InferenceUnit(ctx, slotID);
 
         slot.uu =
                 ctx.mkBoolConst(
@@ -144,7 +145,7 @@ public class InferenceUnit {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        InferenceUnit other = (InferenceUnit) obj;
+        Z3InferenceUnit other = (Z3InferenceUnit) obj;
         if (exponents == null) {
             if (other.exponents != null) {
                 return false;

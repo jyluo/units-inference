@@ -7,14 +7,13 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import java.util.Map;
-import java.util.Set;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJEComparableConstraintEncoder
         extends GJEAbstractConstraintEncoder<GJEInferenceUnit, TypecheckUnit>
-        implements ComparableConstraintEncoder<Map<String, Set<String>>> {
+        implements ComparableConstraintEncoder<GJEEquationSet> {
 
     public UnitsGJEComparableConstraintEncoder(
             Lattice lattice,
@@ -22,7 +21,7 @@ public class UnitsGJEComparableConstraintEncoder
         super(lattice, z3SmtFormatTranslator);
     }
 
-    protected Map<String, Set<String>> encode(Slot fst, Slot snd) {
+    protected GJEEquationSet encode(Slot fst, Slot snd) {
         GJEInferenceUnit first = fst.serialize(gjeFormatTranslator);
         GJEInferenceUnit second = snd.serialize(gjeFormatTranslator);
 
@@ -34,17 +33,17 @@ public class UnitsGJEComparableConstraintEncoder
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Variable(VariableSlot fst, VariableSlot snd) {
+    public GJEEquationSet encodeVariable_Variable(VariableSlot fst, VariableSlot snd) {
         return encode(fst, snd);
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Constant(VariableSlot fst, ConstantSlot snd) {
+    public GJEEquationSet encodeVariable_Constant(VariableSlot fst, ConstantSlot snd) {
         return encode(fst, snd);
     }
 
     @Override
-    public Map<String, Set<String>> encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
+    public GJEEquationSet encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
         return encode(fst, snd);
     }
 }

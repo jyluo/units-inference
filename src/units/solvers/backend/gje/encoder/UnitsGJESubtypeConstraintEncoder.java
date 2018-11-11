@@ -7,14 +7,13 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.SubtypeConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import java.util.Map;
-import java.util.Set;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJESubtypeConstraintEncoder
         extends GJEAbstractConstraintEncoder<GJEInferenceUnit, TypecheckUnit>
-        implements SubtypeConstraintEncoder<Map<String, Set<String>>> {
+        implements SubtypeConstraintEncoder<GJEEquationSet> {
 
     public UnitsGJESubtypeConstraintEncoder(
             Lattice lattice,
@@ -22,7 +21,7 @@ public class UnitsGJESubtypeConstraintEncoder
         super(lattice, gjeFormatTranslator);
     }
 
-    protected Map<String, Set<String>> encode(Slot subtype, Slot supertype) {
+    protected GJEEquationSet encode(Slot subtype, Slot supertype) {
         return null;
         //        return UnitsGJEEncoderUtils.subtype(
         //                subtype.serialize(gjeFormatTranslator),
@@ -30,20 +29,17 @@ public class UnitsGJESubtypeConstraintEncoder
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Variable(
-            VariableSlot subtype, VariableSlot supertype) {
+    public GJEEquationSet encodeVariable_Variable(VariableSlot subtype, VariableSlot supertype) {
         return encode(subtype, supertype);
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Constant(
-            VariableSlot subtype, ConstantSlot supertype) {
+    public GJEEquationSet encodeVariable_Constant(VariableSlot subtype, ConstantSlot supertype) {
         return encode(subtype, supertype);
     }
 
     @Override
-    public Map<String, Set<String>> encodeConstant_Variable(
-            ConstantSlot subtype, VariableSlot supertype) {
+    public GJEEquationSet encodeConstant_Variable(ConstantSlot subtype, VariableSlot supertype) {
         return encode(subtype, supertype);
     }
 }

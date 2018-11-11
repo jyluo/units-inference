@@ -1,8 +1,7 @@
 package units.solvers.backend.gje.encoder;
 
-import java.util.Map;
-import java.util.Set;
 import org.checkerframework.javacutil.BugInCF;
+import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 /**
@@ -37,7 +36,7 @@ public class UnitsGJEEncoderUtils {
 
     // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
-    public static Map<String, Set<String>> equality(GJEInferenceUnit fst, GJEInferenceUnit snd) {
+    public static GJEEquationSet equality(GJEInferenceUnit fst, GJEInferenceUnit snd) {
         if (fst.isConstant() && snd.isConstant() && !fst.equals(snd)) {
             throw new BugInCF(
                     "trying to encode an always false equality constraint: " + fst + " == " + snd);
@@ -66,12 +65,12 @@ public class UnitsGJEEncoderUtils {
     // sub = bot, or
     // super = top, or
     // sub = super
-    public static Map<String, Set<String>> subtype(GJEInferenceUnit subT, GJEInferenceUnit superT) {
+    public static GJEEquationSet subtype(GJEInferenceUnit subT, GJEInferenceUnit superT) {
         return equality(subT, superT);
     }
 
     // For Addition and Subtraction
-    public static Map<String, Set<String>> tripleEquality(
+    public static GJEEquationSet tripleEquality(
             GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
         // TODO: return 2 equations per dimension
@@ -81,7 +80,7 @@ public class UnitsGJEEncoderUtils {
         // return ctx.mkAnd(equality(ctx, lhs, rhs), equality(ctx, rhs, res));
     }
 
-    public static Map<String, Set<String>> multiply(
+    public static GJEEquationSet multiply(
             GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
         // TODO: return 1 equation per dimension

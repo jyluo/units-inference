@@ -9,15 +9,14 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import java.util.Map;
-import java.util.Set;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJEArithmeticConstraintEncoder
         extends GJEAbstractConstraintEncoder<GJEInferenceUnit, TypecheckUnit>
-        implements ArithmeticConstraintEncoder<Map<String, Set<String>>> {
+        implements ArithmeticConstraintEncoder<GJEEquationSet> {
 
     public UnitsGJEArithmeticConstraintEncoder(
             Lattice lattice,
@@ -27,7 +26,7 @@ public class UnitsGJEArithmeticConstraintEncoder
 
     // Encoding for var-var, var-const, const-var combos of add/sub, and also const-const for
     // mul/div/mod
-    protected Map<String, Set<String>> encode(
+    protected GJEEquationSet encode(
             ArithmeticOperationKind operation,
             Slot leftOperand,
             Slot rightOperand,
@@ -84,7 +83,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Variable(
+    public GJEEquationSet encodeVariable_Variable(
             ArithmeticOperationKind operation,
             VariableSlot leftOperand,
             VariableSlot rightOperand,
@@ -93,7 +92,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Constant(
+    public GJEEquationSet encodeVariable_Constant(
             ArithmeticOperationKind operation,
             VariableSlot leftOperand,
             ConstantSlot rightOperand,
@@ -102,7 +101,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public Map<String, Set<String>> encodeConstant_Variable(
+    public GJEEquationSet encodeConstant_Variable(
             ArithmeticOperationKind operation,
             ConstantSlot leftOperand,
             VariableSlot rightOperand,
@@ -111,7 +110,7 @@ public class UnitsGJEArithmeticConstraintEncoder
     }
 
     @Override
-    public Map<String, Set<String>> encodeConstant_Constant(
+    public GJEEquationSet encodeConstant_Constant(
             ArithmeticOperationKind operation,
             ConstantSlot leftOperand,
             ConstantSlot rightOperand,

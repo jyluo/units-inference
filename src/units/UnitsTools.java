@@ -1,6 +1,15 @@
 package units;
 
-import units.qual.*;
+import units.qual.Dimensionless;
+import units.qual.UnitsBottom;
+import units.qual.UnknownUnits;
+import units.qual.deg;
+import units.qual.km;
+import units.qual.m;
+import units.qual.ms;
+import units.qual.ns;
+import units.qual.rad;
+import units.qual.s;
 
 @SuppressWarnings("units")
 public class UnitsTools {

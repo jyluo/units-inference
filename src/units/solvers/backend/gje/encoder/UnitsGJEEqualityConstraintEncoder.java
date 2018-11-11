@@ -7,14 +7,13 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import java.util.Map;
-import java.util.Set;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJEEqualityConstraintEncoder
         extends GJEAbstractConstraintEncoder<GJEInferenceUnit, TypecheckUnit>
-        implements EqualityConstraintEncoder<Map<String, Set<String>>> {
+        implements EqualityConstraintEncoder<GJEEquationSet> {
 
     public UnitsGJEEqualityConstraintEncoder(
             Lattice lattice,
@@ -23,24 +22,24 @@ public class UnitsGJEEqualityConstraintEncoder
     }
 
     // 2 Slots are equal if their components are equal
-    protected Map<String, Set<String>> encode(Slot fst, Slot snd) {
+    protected GJEEquationSet encode(Slot fst, Slot snd) {
         return null;
         //        return UnitsGJEEncoderUtils.equality(fst.serialize(gjeFormatTranslator),
         //                snd.serialize(gjeFormatTranslator));
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Variable(VariableSlot fst, VariableSlot snd) {
+    public GJEEquationSet encodeVariable_Variable(VariableSlot fst, VariableSlot snd) {
         return encode(fst, snd);
     }
 
     @Override
-    public Map<String, Set<String>> encodeVariable_Constant(VariableSlot fst, ConstantSlot snd) {
+    public GJEEquationSet encodeVariable_Constant(VariableSlot fst, ConstantSlot snd) {
         return encode(fst, snd);
     }
 
     @Override
-    public Map<String, Set<String>> encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
+    public GJEEquationSet encodeConstant_Variable(ConstantSlot fst, VariableSlot snd) {
         return encode(fst, snd);
     }
 }

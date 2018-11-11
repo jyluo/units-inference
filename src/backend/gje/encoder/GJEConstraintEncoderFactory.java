@@ -3,8 +3,7 @@ package backend.gje.encoder;
 import backend.gje.GJEFormatTranslator;
 import checkers.inference.solver.backend.encoder.AbstractConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
-import java.util.Map;
-import java.util.Set;
+import units.solvers.backend.gje.representation.GJEEquationSet;
 
 /**
  * Abstract Z3 implementation of {@link
@@ -15,7 +14,7 @@ import java.util.Set;
  */
 public abstract class GJEConstraintEncoderFactory<SlotEncodingT, SlotSolutionT>
         extends AbstractConstraintEncoderFactory<
-                Map<String, Set<String>>, GJEFormatTranslator<SlotEncodingT, SlotSolutionT>> {
+                GJEEquationSet, GJEFormatTranslator<SlotEncodingT, SlotSolutionT>> {
     public GJEConstraintEncoderFactory(
             Lattice lattice,
             GJEFormatTranslator<SlotEncodingT, SlotSolutionT> gjeFormatTranslator) {

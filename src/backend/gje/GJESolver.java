@@ -16,9 +16,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.lang.model.element.AnnotationMirror;
+import units.solvers.backend.gje.representation.GJEEquationSet;
 
 // GaussJordanElimination solver
 public class GJESolver<SlotEncodingT, SlotSolutionT>
@@ -119,7 +119,7 @@ public class GJESolver<SlotEncodingT, SlotSolutionT>
 
         for (Constraint constraint : constraints) {
 
-            Map<String, Set<String>> serializedConstraint = constraint.serialize(formatTranslator);
+            GJEEquationSet serializedConstraint = constraint.serialize(formatTranslator);
 
             if (serializedConstraint == null) {
                 System.out.println(

@@ -7,7 +7,6 @@ import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEnco
 import checkers.inference.solver.frontend.Lattice;
 import units.solvers.backend.gje.UnitsGJEFormatTranslator;
 import units.solvers.backend.gje.representation.GJEEquationSet;
-import units.solvers.backend.gje.representation.GJEInferenceUnit;
 
 public class UnitsGJEComparableConstraintEncoder extends UnitsGJEAbstractConstraintEncoder
         implements ComparableConstraintEncoder<GJEEquationSet> {
@@ -17,16 +16,12 @@ public class UnitsGJEComparableConstraintEncoder extends UnitsGJEAbstractConstra
         super(lattice, formatTranslator);
     }
 
-    // Comparable constraints generated for comparisons??
     protected GJEEquationSet encode(Slot fst, Slot snd) {
-        GJEInferenceUnit first = fst.serialize(formatTranslator);
-        GJEInferenceUnit second = snd.serialize(formatTranslator);
-
-        return null;
-        //        // fst <: snd or snd <: fst
-        //        return ctx.mkOr(
-        //                UnitsGJEEncoderUtils.subtype(first, second),
-        //                UnitsGJEEncoderUtils.subtype(second, first));
+        // fst <: snd or snd <: fst
+        // for GJE, this is fst == snd || snd == fst which simplifies to 1
+        // equality constraint
+        return UnitsGJEEncoderUtils.equality(
+                fst.serialize(formatTranslator), snd.serialize(formatTranslator));
     }
 
     @Override

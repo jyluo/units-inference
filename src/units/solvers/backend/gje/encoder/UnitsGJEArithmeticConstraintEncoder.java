@@ -39,18 +39,17 @@ public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstra
                 return UnitsGJEEncoderUtils.tripleEquality(left, right, res);
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot
-                return null;
-                // return UnitsGJEEncoderUtils.multiply(
-                // leftOperand.serialize(gjeFormatTranslator),
-                // rightOperand.serialize(gjeFormatTranslator),
-                // result.serialize(gjeFormatTranslator));
+                return UnitsGJEEncoderUtils.multiply(
+                        leftOperand.serialize(formatTranslator),
+                        rightOperand.serialize(formatTranslator),
+                        result.serialize(formatTranslator));
             case DIVIDE:
                 // Division between 2 slots resulting in result slot
                 return null;
                 // return UnitsGJEEncoderUtils.divide(
-                // leftOperand.serialize(gjeFormatTranslator),
-                // rightOperand.serialize(gjeFormatTranslator),
-                // result.serialize(gjeFormatTranslator));
+                // leftOperand.serialize(formatTranslator),
+                // rightOperand.serialize(formatTranslator),
+                // result.serialize(formatTranslator));
             case REMAINDER:
                 // Modulus between 2 slots resulting in result slot, is always
                 // an equality between leftOperand and result slots

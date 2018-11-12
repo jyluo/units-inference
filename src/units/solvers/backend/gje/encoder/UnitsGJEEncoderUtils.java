@@ -13,31 +13,6 @@ public class UnitsGJEEncoderUtils {
 
     private static final String delimiter = " ";
 
-    // private static String allPrefixesAreZero(GJEInferenceUnit unit) {
-    // IntNum zero = ctx.mkInt(0);
-    // String result = ctx.mkEq(unit.getPrefixExponent(), zero);
-    // for (String baseUnit :
-    // UnitsRepresentationUtils.getInstance().baseUnits()) {
-    // /* @formatter:off // this is for eclipse formatter */
-    // result = ctx.mkAnd(result, ctx.mkEq(unit.getExponent(baseUnit), zero));
-    // /* @formatter:on // this is for eclipse formatter */
-    // }
-    // return result;
-    // }
-    //
-    // private static String mustBeDimensionless(GJEInferenceUnit unit) {
-    // String allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
-    // /* @formatter:off // this is for eclipse formatter */
-    // return ctx.mkAnd(
-    // ctx.mkNot(unit.getUnknownUnits()),
-    // ctx.mkNot(unit.getUnitsBottom()),
-    // allPrefixesAreZero);
-    // /* @formatter:on // this is for eclipse formatter */
-    // }
-    //
-    // =========================================================================================
-
-    // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
     public static GJEEquationSet equality(GJEInferenceUnit fst, GJEInferenceUnit snd) {
         if (fst.isConstant() && snd.isConstant() && !fst.equals(snd)) {
@@ -45,7 +20,7 @@ public class UnitsGJEEncoderUtils {
                     "trying to encode an always false equality constraint: " + fst + " == " + snd);
         }
 
-        // returns 1 + |baseUnits| equation strings for pair-wise equality
+        // returns 1 + |baseUnits| equations for pair-wise equality
         if (fst.isConstant() && snd.isVariable()) {
             return equalityCV(fst, snd);
         } else if (fst.isVariable() && snd.isConstant()) {
@@ -55,7 +30,8 @@ public class UnitsGJEEncoderUtils {
             GJEEquationSet eqSet = new GJEEquationSet();
             // input: eg x = y (aka x - y = 0)
             // output: 2 1 IDx -1 IDy 0
-            String prefixExponentEq =
+            eqSet.addEquation(
+                    GJEEquationSet.prefixExponentKey,
                     String.join(
                             delimiter,
                             "2",
@@ -63,9 +39,7 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(fst.getGJEVarID()),
                             "-1",
                             String.valueOf(snd.getGJEVarID()),
-                            "0");
-            // System.out.println(" prefixEx eq: " + prefixExponentEq);
-            eqSet.addEquation(GJEEquationSet.prefixExponentKey, prefixExponentEq);
+                            "0"));
 
             for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
                 eqSet.addEquation(
@@ -87,15 +61,14 @@ public class UnitsGJEEncoderUtils {
         GJEEquationSet eqSet = new GJEEquationSet();
         // input: eg 3 = x
         // output: 1 1 IDx 3
-        String prefixExponentEq =
+        eqSet.addEquation(
+                GJEEquationSet.prefixExponentKey,
                 String.join(
                         delimiter,
                         "1",
                         "1",
                         String.valueOf(variable.getGJEVarID()),
-                        String.valueOf(constant.getPrefixExponent()));
-        // System.out.println(" prefixEx eq: " + prefixExponentEq);
-        eqSet.addEquation(GJEEquationSet.prefixExponentKey, prefixExponentEq);
+                        String.valueOf(constant.getPrefixExponent())));
 
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             eqSet.addEquation(
@@ -110,10 +83,6 @@ public class UnitsGJEEncoderUtils {
         return eqSet;
     }
 
-    // sub <: super has 5 cases:
-    // sub = bot, or
-    // super = top, or
-    // sub = super
     public static GJEEquationSet subtype(GJEInferenceUnit subT, GJEInferenceUnit superT) {
         return equality(subT, superT);
     }
@@ -125,45 +94,134 @@ public class UnitsGJEEncoderUtils {
         // set lhs == rhs, and rhs == res, transitively lhs == res
         GJEEquationSet eqSet = equality(lhs, rhs);
         eqSet.union(equality(rhs, res));
-
-        System.out.println(eqSet);
         return eqSet;
     }
 
     public static GJEEquationSet multiply(
             GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
-        // TODO: return 1 equation per dimension
-        return null;
+        assert res.isVariable();
 
-        // /* @formatter:off // this is for eclipse formatter */
-        // // Forall base units, r_exponent = lhs_exponent + rhs_exponent
-        // String exponents = ctx.mkTrue();
-        // for (String baseUnit :
-        // UnitsRepresentationUtils.getInstance().baseUnits()) {
-        // exponents =
-        // ctx.mkAnd(
-        // exponents,
-        // ctx.mkEq(
-        // res.getExponent(baseUnit),
-        // ctx.mkAdd(
-        // lhs.getExponent(baseUnit), rhs.getExponent(baseUnit))));
-        // }
-        // String multiplyEncoding =
-        // // res component = lhs component + rhs component
-        // ctx.mkAnd(
-        // ctx.mkEq(
-        // res.getUnknownUnits(),
-        // ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())),
-        // ctx.mkEq(
-        // res.getUnitsBottom(),
-        // ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())),
-        // ctx.mkEq(
-        // res.getPrefixExponent(),
-        // ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent())),
-        // exponents);
-        // /* @formatter:on // this is for eclipse formatter */
-        // return multiplyEncoding;
+        // returns 1 + |baseUnits| equations for pair-wise equality
+
+        // cases deemed impossible, because result is always a fresh variable:
+        // c1 * c2 = c3 // contra or always true
+        // c1 * v = c2 ==> exponents v = (c2 - c1)
+        // v * c1 = c2 same
+        // v1 * v2 = c1 ==> exponents v1 + v2 = c1
+
+        // cases deemed possible:
+        if (lhs.isConstant() && rhs.isConstant()) {
+            // c1 * c2 = v ==> exponents v = (c1 + c2)
+            GJEEquationSet eqSet = new GJEEquationSet();
+            // input: eg c1 * c2 = v
+            // output: 1 1 IDv (c1 + c2)
+            eqSet.addEquation(
+                    GJEEquationSet.prefixExponentKey,
+                    String.join(
+                            delimiter,
+                            "1",
+                            "1",
+                            String.valueOf(res.getGJEVarID()),
+                            String.valueOf(lhs.getPrefixExponent() + rhs.getPrefixExponent())));
+
+            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                eqSet.addEquation(
+                        baseUnit,
+                        String.join(
+                                delimiter,
+                                "1",
+                                "1",
+                                String.valueOf(res.getGJEVarID()),
+                                String.valueOf(
+                                        lhs.getExponent(baseUnit) + rhs.getExponent(baseUnit))));
+            }
+            return eqSet;
+
+        } else if (lhs.isConstant() && rhs.isVariable()) {
+            // c1 * v1 = v2 ==> exponents v2 - v1 = c1
+            return multiplyCV(lhs, rhs, res);
+
+        } else if (lhs.isVariable() && rhs.isConstant()) {
+            // v1 * c1 = v2 same
+            return multiplyCV(rhs, lhs, res);
+
+        } else if (lhs.isVariable() && rhs.isVariable()) {
+            // v1 * v2 = v3 ==> exponents v1 + v2 - v3 = 0
+            GJEEquationSet eqSet = new GJEEquationSet();
+            // input: eg v1 * v2 = v3
+            // output: 3 1 IDv1 1 IDv2 -1 IDv3 0
+            eqSet.addEquation(
+                    GJEEquationSet.prefixExponentKey,
+                    String.join(
+                            delimiter,
+                            "3",
+                            "1",
+                            String.valueOf(lhs.getGJEVarID()),
+                            "1",
+                            String.valueOf(rhs.getGJEVarID()),
+                            "-1",
+                            String.valueOf(res.getGJEVarID()),
+                            "0"));
+
+            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                eqSet.addEquation(
+                        baseUnit,
+                        String.join(
+                                delimiter,
+                                "3",
+                                "1",
+                                String.valueOf(lhs.getGJEVarID()),
+                                "1",
+                                String.valueOf(rhs.getGJEVarID()),
+                                "-1",
+                                String.valueOf(res.getGJEVarID()),
+                                "0"));
+            }
+            return eqSet;
+
+        } else {
+            throw new BugInCF(
+                    "Encoding a multiplication case which is unsupported: "
+                            + lhs
+                            + " * "
+                            + rhs
+                            + " = "
+                            + res);
+        }
+    }
+
+    private static GJEEquationSet multiplyCV(
+            GJEInferenceUnit constant, GJEInferenceUnit variable, GJEInferenceUnit res) {
+
+        GJEEquationSet eqSet = new GJEEquationSet();
+        // c1 * v1 = v2 ==> exponents v2 - v1 = c1
+        // input: eg c1 * v1 = v2
+        // output: 2 1 IDv2 -1 IDv1 c1
+        eqSet.addEquation(
+                GJEEquationSet.prefixExponentKey,
+                String.join(
+                        delimiter,
+                        "2",
+                        "1",
+                        String.valueOf(res.getGJEVarID()),
+                        "-1",
+                        String.valueOf(variable.getGJEVarID()),
+                        String.valueOf(constant.getPrefixExponent())));
+
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            eqSet.addEquation(
+                    baseUnit,
+                    String.join(
+                            delimiter,
+                            "2",
+                            "1",
+                            String.valueOf(res.getGJEVarID()),
+                            "-1",
+                            String.valueOf(variable.getGJEVarID()),
+                            String.valueOf(constant.getExponent(baseUnit))));
+        }
+        return eqSet;
     }
 
     public static String divide(GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {

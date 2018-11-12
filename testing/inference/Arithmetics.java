@@ -5,27 +5,54 @@ class Arithmetics {
     @m int m = UnitsTools.m;
     @s int s = UnitsTools.s;
 
-    public void Main() {
-        @m int mInferred = m + m;
+    public void primitiveTypes() {
+        int mInferred = m + m;
 
-        @s int sInferred = s - s;
+        int sInferred = s - s;
 
-        @m2 int m2 = m * m;
+        int m2 = m * m;
 
-        @mPERs int mPERs = m / s;
+        int mPERs = m / s;
 
-        @mPERs int mPERsSecond = mPERs % UnitsTools.m;
+        int mPERsSecond = mPERs % UnitsTools.m;
     }
 
-    private void BoxedTypes() {
-        @m Integer mInferred = m + m;
+    private void boxedTypes() {
+        Integer mInferred = m + m;
 
-        @s Integer sInferred = s - s;
+        Integer sInferred = s - s;
 
-        @m2 Integer m2 = m * m;
+        Integer m2 = m * m;
 
-        @mPERs Integer mPERs = m / s;
+        Integer mPERs = m / s;
 
-        @mPERs Integer mPERsSecond = mPERs % UnitsTools.m;
+        Integer mPERsSecond = mPERs % UnitsTools.m;
+    }
+
+    public void twoVariableEquations() {
+        int mInferred = 5 + m;
+
+        int sInferred = 5 - s;
+
+        // :: fixable-error: (assignment.type.incompatible)
+        @m2 int m2 = 10 * m;
+
+        // :: fixable-error: (assignment.type.incompatible)
+        @mPERs int mPERs = m / 20;
+
+        // :: fixable-error: (assignment.type.incompatible)
+        @mPERs int mPERsSecond = 20 % UnitsTools.m;
+    }
+
+    public void threeVariableEquations() {
+        int a = 5 + 6;
+
+        int s = 5 - 6;
+
+        int m = 5 * 6;
+
+        int d = 5 / 6;
+
+        int mo = 5 % 6;
     }
 }

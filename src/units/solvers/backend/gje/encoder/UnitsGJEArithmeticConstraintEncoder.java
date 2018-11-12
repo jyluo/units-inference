@@ -10,7 +10,6 @@ import checkers.inference.solver.frontend.Lattice;
 import org.checkerframework.javacutil.BugInCF;
 import units.solvers.backend.gje.UnitsGJEFormatTranslator;
 import units.solvers.backend.gje.representation.GJEEquationSet;
-import units.solvers.backend.gje.representation.GJEInferenceUnit;
 import units.util.UnitsTypecheckUtils;
 
 public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstraintEncoder
@@ -32,11 +31,10 @@ public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstra
             case PLUS:
             case MINUS:
                 // Addition or Subtraction between 2 slots resulting in result slot
-                GJEInferenceUnit left = leftOperand.serialize(formatTranslator);
-                GJEInferenceUnit right = rightOperand.serialize(formatTranslator);
-                GJEInferenceUnit res = result.serialize(formatTranslator);
-
-                return UnitsGJEEncoderUtils.tripleEquality(left, right, res);
+                return UnitsGJEEncoderUtils.tripleEquality(
+                        leftOperand.serialize(formatTranslator),
+                        rightOperand.serialize(formatTranslator),
+                        result.serialize(formatTranslator));
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot
                 return UnitsGJEEncoderUtils.multiply(
@@ -45,11 +43,10 @@ public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstra
                         result.serialize(formatTranslator));
             case DIVIDE:
                 // Division between 2 slots resulting in result slot
-                return null;
-                // return UnitsGJEEncoderUtils.divide(
-                // leftOperand.serialize(formatTranslator),
-                // rightOperand.serialize(formatTranslator),
-                // result.serialize(formatTranslator));
+                return UnitsGJEEncoderUtils.divide(
+                        leftOperand.serialize(formatTranslator),
+                        rightOperand.serialize(formatTranslator),
+                        result.serialize(formatTranslator));
             case REMAINDER:
                 // Modulus between 2 slots resulting in result slot, is always
                 // an equality between leftOperand and result slots

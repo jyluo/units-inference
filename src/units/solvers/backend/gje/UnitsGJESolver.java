@@ -153,10 +153,7 @@ public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
         sb.append(equations.size());
         sb.append(System.lineSeparator());
         // sort and write each equation out
-        for (String eq : new TreeSet<>(equations)) {
-            sb.append(eq);
-            sb.append(System.lineSeparator());
-        }
+        sb.append(String.join(System.lineSeparator(), new TreeSet<>(equations)));
         return sb.toString();
     }
 

@@ -465,7 +465,14 @@ public class UnitsRepresentationUtils {
 
         TypecheckUnit unit = new TypecheckUnit();
 
-        if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+        // if it is a polyunit annotation, generate top
+        if (AnnotationUtils.areSameByClass(anno, PolyUnit.class)
+                || AnnotationUtils.areSameByClass(anno, PolyAll.class)) {
+            unit.setOriginalName("PolyUnit");
+            unit.setUnknownUnits(true);
+        }
+        // if it is a units internal annotation, generate the internal unit
+        else if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
             unit.setOriginalName(
                     AnnotationUtils.getElementValue(anno, "originalName", String.class, true));
             unit.setUnknownUnits(

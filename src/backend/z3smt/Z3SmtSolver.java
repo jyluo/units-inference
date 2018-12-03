@@ -211,9 +211,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         System.out.println("Encoding constraints done!");
 
         smtFileContents.append("(check-sat)\n");
-        smtFileContents.append("(get-model)\n");
         if (!optimizingMode && getUnsatCore) {
             smtFileContents.append("(get-unsat-core)\n");
+        } else {
+            smtFileContents.append("(get-model)\n");
         }
 
         System.out.println("Writing constraints to file: " + constraintsFile);
@@ -447,67 +448,60 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             while ((line = stdOut.readLine()) != null) {
                 line = line.trim();
 
-                // UNSAT Cases ====================
-                if (line.contentEquals("unsat")) {
-                    unsat = true;
-                    // skip over output line for get-model
-                    stdOut.readLine();
-                    continue;
-                }
-                if (unsat) {
-                    if (line.startsWith("(")) {
-                        line = line.substring(1); // remove open bracket
+                if (getUnsatCore) {
+                    // UNSAT Cases ====================
+                    if (line.contentEquals("unsat")) {
+                        unsat = true;
+                        continue;
                     }
-                    if (line.endsWith(")")) {
-                        line = line.substring(0, line.length() - 1);
+                    if (unsat) {
+                        if (line.startsWith("(")) {
+                            line = line.substring(1); // remove open bracket
+                        }
+                        if (line.endsWith(")")) {
+                            line = line.substring(0, line.length() - 1);
+                        }
+
+                        for (String constraintID : line.split(" ")) {
+                            unsatConstraintIDs.add(constraintID);
+                        }
+                        continue;
                     }
+                } else {
+                    // SAT Cases =======================
+                    // processing define-fun lines
+                    if (declarationLine && line.startsWith("(define-fun")) {
+                        declarationLine = false;
 
-                    for (String constraintID : line.split(" ")) {
-                        unsatConstraintIDs.add(constraintID);
+                        int firstBar = line.indexOf('|');
+                        int lastBar = line.lastIndexOf('|');
+
+                        assert firstBar != -1;
+                        assert lastBar != -1;
+                        assert firstBar < lastBar;
+                        assert line.contains("Bool") || line.contains("Int");
+
+                        // copy z3 variable name into results line
+                        resultsLine += line.substring(firstBar + 1, lastBar);
+                        continue;
                     }
-                    continue;
-                }
+                    // processing lines immediately following define-fun lines
+                    if (!declarationLine) {
+                        declarationLine = true;
+                        String value = line.substring(0, line.lastIndexOf(')'));
 
-                // SAT Cases =======================
-                // processing define-fun lines
-                if (declarationLine && line.startsWith("(define-fun")) {
-                    declarationLine = false;
+                        if (value.contains("-")) { // negative number
+                            // remove brackets surrounding negative numbers
+                            value = value.substring(1, value.length() - 1);
+                            // remove space between - and the number itself
+                            value = String.join("", value.split(" "));
+                        }
 
-                    int firstBar = line.indexOf('|');
-                    int lastBar = line.lastIndexOf('|');
-
-                    assert firstBar != -1;
-                    assert lastBar != -1;
-                    assert firstBar < lastBar;
-                    assert line.contains("Bool") || line.contains("Int");
-
-                    // copy z3 variable name into results line
-                    resultsLine += line.substring(firstBar + 1, lastBar);
-                    ;
-                    continue;
-                }
-                // processing lines immediately following define-fun lines
-                if (!declarationLine) {
-                    declarationLine = true;
-                    String value = line.substring(0, line.lastIndexOf(')'));
-
-                    if (value.contains("-")) { // negative number
-                        // remove brackets surrounding negative numbers
-                        value = value.substring(1, value.length() - 1);
-                        // remove space between - and the number itself
-                        value = String.join("", value.split(" "));
+                        resultsLine += " " + value;
+                        results.add(resultsLine);
+                        resultsLine = "";
+                        continue;
                     }
-
-                    resultsLine += " " + value;
-                    results.add(resultsLine);
-                    resultsLine = "";
-                    continue;
-                }
-                // process no-unsat core line
-                // example output: (error "line 35892 column 15: unsat core is
-                // not available")
-                if (line.contains("unsat core is not available")) {
-                    continue;
                 }
             }
         } catch (IOException e) {

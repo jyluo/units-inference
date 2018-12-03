@@ -75,7 +75,7 @@ public class UnitsZ3SmtEncoderUtils {
                         ctx.mkOr(ctx.mkNot(arg2), ctx.mkNot(arg3)));
         /* @formatter:on // this is for eclipse formatter */
         BoolExpr result = ctx.mkAnd(atLeastOne, atMostOne);
-        System.out.println("WF: (assert " + result.simplify().toString() + ")");
+        // System.out.println("WF: (assert " + result.simplify().toString() + ")");
         return result;
     }
 
@@ -248,7 +248,10 @@ public class UnitsZ3SmtEncoderUtils {
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent + rhs_exponent
-        BoolExpr exponents = ctx.mkTrue();
+        BoolExpr exponents =
+                ctx.mkEq(
+                        res.getPrefixExponent(),
+                        ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             exponents =
                     ctx.mkAnd(
@@ -259,35 +262,57 @@ public class UnitsZ3SmtEncoderUtils {
                                             lhs.getExponent(baseUnit), rhs.getExponent(baseUnit))));
         }
 
-        /*
-         * r = x * y
-        x = top && r = top ||
-        y = top && r = top ||
-
-        */
+        // r = x * y
+        // (((x=top || y=top) && r=top) ||
+        // (x=bot && !y=top && r=bot) ||
+        // (!x=top && y=bot && r=bot) ||
+        // (!x=top && !x=bot && !y=top && !y=bot && exponents))
 
         BoolExpr multiplyEncoding =
-                // res component = lhs component + rhs component
-                ctx.mkAnd(
-                        ctx.mkEq(
-                                res.getUnknownUnits(),
-                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())),
-                        ctx.mkEq(
-                                res.getUnitsBottom(),
-                                ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())),
-                        ctx.mkEq(
-                                res.getPrefixExponent(),
-                                ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent())),
-                        exponents);
+                ctx.mkOr(
+                        ctx.mkAnd(
+                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits()),
+                                res.getUnknownUnits()),
+                        ctx.mkAnd(
+                                lhs.getUnitsBottom(),
+                                ctx.mkNot(rhs.getUnknownUnits()),
+                                res.getUnitsBottom()),
+                        ctx.mkAnd(
+                                ctx.mkNot(lhs.getUnknownUnits()),
+                                rhs.getUnitsBottom(),
+                                res.getUnitsBottom()),
+                        ctx.mkAnd(
+                                ctx.mkNot(lhs.getUnknownUnits()),
+                                ctx.mkNot(lhs.getUnitsBottom()),
+                                ctx.mkNot(rhs.getUnknownUnits()),
+                                ctx.mkNot(rhs.getUnitsBottom()),
+                                exponents));
         /* @formatter:on // this is for eclipse formatter */
         return multiplyEncoding;
+
+        // old encoding: which always computed exponents
+        // res component = lhs component + rhs component
+        // ctx.mkAnd(
+        //        ctx.mkEq(
+        //                res.getUnknownUnits(),
+        //                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())),
+        //        ctx.mkEq(
+        //                res.getUnitsBottom(),
+        //                ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())),
+        //        ctx.mkEq(
+        //                res.getPrefixExponent(),
+        //                ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent())),
+        //        exponents);
     }
 
     public static BoolExpr divide(
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent - rhs_exponent
-        BoolExpr exponents = ctx.mkTrue();
+        BoolExpr exponents =
+                ctx.mkEq(
+                        res.getPrefixExponent(),
+                        ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             exponents =
                     ctx.mkAnd(
@@ -298,19 +323,39 @@ public class UnitsZ3SmtEncoderUtils {
                                             lhs.getExponent(baseUnit), rhs.getExponent(baseUnit))));
         }
         BoolExpr divideEncoding =
-                // res component = lhs component + rhs component
-                ctx.mkAnd(
-                        ctx.mkEq(
-                                res.getUnknownUnits(),
-                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())),
-                        ctx.mkEq(
-                                res.getUnitsBottom(),
-                                ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())),
-                        ctx.mkEq(
-                                res.getPrefixExponent(),
-                                ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent())),
-                        exponents);
+                ctx.mkOr(
+                        ctx.mkAnd(
+                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits()),
+                                res.getUnknownUnits()),
+                        ctx.mkAnd(
+                                lhs.getUnitsBottom(),
+                                ctx.mkNot(rhs.getUnknownUnits()),
+                                res.getUnitsBottom()),
+                        ctx.mkAnd(
+                                ctx.mkNot(lhs.getUnknownUnits()),
+                                rhs.getUnitsBottom(),
+                                res.getUnitsBottom()),
+                        ctx.mkAnd(
+                                ctx.mkNot(lhs.getUnknownUnits()),
+                                ctx.mkNot(lhs.getUnitsBottom()),
+                                ctx.mkNot(rhs.getUnknownUnits()),
+                                ctx.mkNot(rhs.getUnitsBottom()),
+                                exponents));
         /* @formatter:on // this is for eclipse formatter */
         return divideEncoding;
+
+        // old encoding: which always computed exponents
+        // res component = lhs component - rhs component
+        // ctx.mkAnd(
+        //        ctx.mkEq(
+        //                res.getUnknownUnits(),
+        //                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits())),
+        //        ctx.mkEq(
+        //                res.getUnitsBottom(),
+        //                ctx.mkOr(lhs.getUnitsBottom(), rhs.getUnitsBottom())),
+        //        ctx.mkEq(
+        //                res.getPrefixExponent(),
+        //                ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent())),
+        //        exponents);
     }
 }

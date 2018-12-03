@@ -9,7 +9,7 @@ fi
 cd $1
 
 declare -a statsKeys=("total_slots" "total_constraints" \
-    "constantslot" "variableslot" \
+    "constantslot" "total_variable_slots" \
     "subtypeconstraint" "equalityconstraint" "arithmeticconstraint" \
     "comparableconstraint" "existentialconstraint" "preferenceconstraint")
 
@@ -89,7 +89,7 @@ for project in "${projects[@]}"; do
     if [ -f $project/statistics.txt ]; then
         for key in "${statsKeys[@]}"; do
             # sift through the log files to find all the statistics values, sum them up and print it
-            grep -w "$key" "$project/statistics.txt" | cut -d ',' -f 2 | \
+            grep -w "$key" "$project/statistics.txt" | cut -d ':' -f 2 | \
                 awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
         done
     else

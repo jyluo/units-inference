@@ -7,7 +7,7 @@ if ! [ -n "$1" ]; then
 fi
 
 declare -a statsKeys=("total_slots" "total_constraints" \
-    "constantslot" "variableslot" \
+    "constantslot" "total_variable_slots" \
     "subtypeconstraint" "equalityconstraint" "arithmeticconstraint" \
     "comparableconstraint" "existentialconstraint" "preferenceconstraint")
 

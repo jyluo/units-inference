@@ -208,6 +208,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
 
                 // create varslot for the result of the binary tree computation
+                // note: constraints for binary ops are added in UnitsVisitor
                 VariableSlot result;
                 switch (binaryTree.getKind()) {
                     case PLUS:

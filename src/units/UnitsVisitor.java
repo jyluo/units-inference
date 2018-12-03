@@ -112,6 +112,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
     @Override
     public Void visitBinary(BinaryTree binaryTree, Void p) {
+        // infer mode, adds constraints for binary operations
         if (infer) {
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
             ConstraintManager constraintManager =

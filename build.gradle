@@ -163,6 +163,7 @@ tasks.googleJavaFormat {
     exclude 'manual-tests/typecheck'
     exclude 'manual-tests/inference'
     exclude 'manual-tests/CF-Tests'
+    exclude 'annotated'
     exclude 'projects'
     exclude '*benchmarks'
 }
@@ -174,6 +175,7 @@ tasks.verifyGoogleJavaFormat {
     exclude 'manual-tests/typecheck'
     exclude 'manual-tests/inference'
     exclude 'manual-tests/CF-Tests'
+    exclude 'annotated'
     exclude 'projects'
     exclude '*benchmarks'
 }

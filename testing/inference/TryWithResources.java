@@ -8,7 +8,8 @@ import units.qual.*;
 // TODO: try variable defaulting? implicits?
 
 class TryWithResources {
-    static String readFirstLineFromFile(String path) throws IOException {
+
+    String readFirstLineFromFile(String path) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             return br.readLine();
         }

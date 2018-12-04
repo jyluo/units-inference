@@ -12,6 +12,10 @@ class Methods {
         return x;
     }
 
+    @PolyUnit int polyUnitMethod(@PolyUnit int x, @PolyUnit int y) {
+        return x + y;
+    }
+
     @m int meterMethod(@m int x) {
         return x;
     }
@@ -28,6 +32,9 @@ class Methods {
         @m int pum1 = polyUnitMethod(5);
 
         int pum2 = polyUnitMethod(5 * UnitsTools.m);
+
+        // :: fixable-error: (assignment.type.incompatible)
+        @m int pum3 = polyUnitMethod(5, 6);
     }
 
     void normalMethodTest() {

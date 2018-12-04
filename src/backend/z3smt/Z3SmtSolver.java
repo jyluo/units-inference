@@ -3,6 +3,7 @@ package backend.z3smt;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
+import checkers.inference.model.serialization.ToStringSerializer;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
@@ -26,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
 
+import org.checkerframework.javacutil.BugInCF;
+
 // TODO: make this an abstract class with common features
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
@@ -46,6 +49,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected static final String pathToProject =
             new File(new File("").getAbsolutePath()).toString();
     protected static final String constraintsFile = pathToProject + "/z3Constraints.smt";
+    protected static final String constraintsUnsatCoreFile = pathToProject + "/z3ConstraintsUnsatCore.smt";
     protected static final String constraintsStatsFile = pathToProject + "/z3ConstraintsGlob.smt";
 
     // timing statistics variables
@@ -225,9 +229,13 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     private void writeConstraintsToSMTFile() {
         String fileContents = smtFileContents.toString();
 
-        // write the constraints to the file for external solver use
-        FileUtils.writeFile(new File(constraintsFile), fileContents);
-
+        if (!getUnsatCore) {
+            // write the constraints to the file for external solver use
+            FileUtils.writeFile(new File(constraintsFile), fileContents);
+        } else {
+            // write the constraints to the file for external solver use
+            FileUtils.writeFile(new File(constraintsUnsatCoreFile), fileContents);
+        }
         // write a copy in append mode to stats file for later bulk analysis
         FileUtils.appendFile(new File(constraintsStatsFile), fileContents);
     }
@@ -313,6 +321,13 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 continue;
             }
 
+            if (simplifiedConstraint.isFalse()) {
+                final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
+                throw new BugInCF(
+                        "impossible constraint: " + constraint.serialize(toStringSerializer)
+                                + "\nSerialized:\n" + serializedConstraint);
+            }
+
             String clause = simplifiedConstraint.toString();
 
             if (!optimizingMode && getUnsatCore) {
@@ -387,7 +402,12 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
     private List<String> runZ3Solver() {
         // TODO: add z3 stats?
-        String[] command = {z3Program, constraintsFile};
+        String[] command;
+        if (!getUnsatCore) {
+            command = new String[] { z3Program, constraintsFile };
+        } else {
+            command = new String[] { z3Program, constraintsUnsatCoreFile };
+        }
 
         // TODO: build TCU here?
         // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();

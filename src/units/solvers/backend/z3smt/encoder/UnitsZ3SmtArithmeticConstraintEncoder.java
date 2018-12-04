@@ -125,17 +125,18 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
         switch (operation) {
             case PLUS:
             case MINUS:
-                // TODO: do constant constant checks inside encode() ?
+                // TODO: expand the constant-constant cases here (between top, bot, and constant
+                // units) instead of using encode()
 
                 // if leftOperand == rightOperand, then encode equality between rightOperand and
-                // result
+                // result, otherwise encode using encode()
                 return UnitsTypecheckUtils.unitsEqual(
                                 leftOperand.getValue(), rightOperand.getValue())
                         ? UnitsZ3SmtEncoderUtils.equality(
                                 ctx,
                                 rightOperand.serialize(z3SmtFormatTranslator),
                                 result.serialize(z3SmtFormatTranslator))
-                        : contradictoryValue;
+                        : encode(operation, leftOperand, rightOperand, result);
             case MULTIPLY:
                 // It is more efficient to encode an equality between the result of leftOperand *
                 // rightOperand and result, but to do that requires access to slotManager here to

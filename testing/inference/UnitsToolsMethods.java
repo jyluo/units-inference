@@ -2,7 +2,8 @@ import units.UnitsTools;
 import units.qual.*;
 
 class UnitsToolsMethods {
-    void m() {
+
+    void methods() {
         // :: fixable-error: (assignment.type.incompatible)
         @s int seconds = 10;
 

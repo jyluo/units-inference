@@ -5,7 +5,7 @@ class StringAdd {
     String s = "";
     @Dimensionless int y = 20;
 
-    public StringAdd() {
+    void StringAdd() {
         String z = s + y;
     }
 }

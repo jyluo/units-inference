@@ -3,7 +3,8 @@ import units.UnitsTools;
 import units.qual.*;
 
 class JavaCollections {
-    void m() {
+
+    void collections() {
         // infers that the list has to be a list of meters
         List<Integer> x = new ArrayList<>();
 

@@ -2,6 +2,7 @@ import units.UnitsTools;
 import units.qual.*;
 
 class RefinementSlotsTest {
+
     void refineTop(@UnknownUnits int y) {
         y = 10;
         y = UnitsTools.m;

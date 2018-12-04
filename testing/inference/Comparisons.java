@@ -9,10 +9,12 @@ class Comparisons {
         int mInferred = 10;
 
         // :: fixable-error: (comparison.unit.mismatch)
-        if (m < mInferred) {}
+        if (m < mInferred) {
+        }
 
         // :: fixable-error: (comparison.unit.mismatch)
-        if (mInferred >= m) {}
+        if (mInferred >= m) {
+        }
 
         // :: fixable-error: (comparison.unit.mismatch)
         @m int y = m == mInferred ? m : m;

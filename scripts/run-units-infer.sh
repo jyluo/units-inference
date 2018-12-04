@@ -14,7 +14,7 @@ export PATH=$AFU/scripts:$PATH
 CHECKER=units.UnitsChecker
 
 SOLVER=units.solvers.backend.UnitsSolverEngine
-if [ -n "$1" ] && [ $1 = "gauss" ]; then
+if [ -n "$1" ] && [ $1 = "GJE" ]; then
     SOLVERARGS=solver=GJE,collectStatistics=true,writeSolutions=true,noAppend=true
 else
     SOLVERARGS=solver=Z3smt,collectStatistics=true,writeSolutions=true,noAppend=true
@@ -26,7 +26,7 @@ export CLASSPATH=$UIPATH:.
 export external_checker_classpath=$UIPATH
 
 # Inference
-if [ -n "$1" ] && [ $1 = "gauss" ]; then
+if [ -n "$1" ] && [ $1 = "GJE" ]; then
     $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
         --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
         --hacks="$IS_HACK" -afud ./annotated "${@:2}"

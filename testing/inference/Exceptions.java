@@ -1,6 +1,7 @@
+
 class Exceptions {
 
-    public void Main() {
+    public void Exception() {
         try {
 
         } catch (Exception e) {

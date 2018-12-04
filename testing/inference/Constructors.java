@@ -3,29 +3,32 @@ import org.checkerframework.framework.qual.PolyAll;
 import units.UnitsTools;
 import units.qual.*;
 
-@UnknownUnits
-class PolyAllClass {
-    @PolyAll PolyAllClass(@PolyAll int x) {}
+@UnknownUnits class PolyAllClass {
+    @PolyAll PolyAllClass(@PolyAll int x) {
+    }
     // @PolyAll PolyAllClass(@PolyAll PolyAllClass x) {}
 }
 
 class PolyUnitClass {
-    @PolyUnit PolyUnitClass(@PolyUnit int x) {}
+    @PolyUnit PolyUnitClass(@PolyUnit int x) {
+    }
     // @PolyUnit PolyUnitClass(@PolyUnit PolyUnitClass x) {}
 }
 
 class MeterClass {
-    @m MeterClass(@m int x) {}
+    @m MeterClass(@m int x) {
+    }
 }
 
 class NoAnnotClass {
-    NoAnnotClass(int x) {}
+    NoAnnotClass(int x) {
+    }
 }
 
 class Constructors {
     // TODO: return check isn't quite correct for inner declared classes
     // class PolyAllClass {
-    //     @PolyAll PolyAllClass(@PolyAll int x) {}
+    // @PolyAll PolyAllClass(@PolyAll int x) {}
     // }
 
     void polyAllConstructorTest() {
@@ -67,7 +70,9 @@ class Constructors {
     }
 
     void nonPolyConstructorTest() {
-        // :: fixable-error: (argument.type.incompatible) :: fixable-error: (constructor.invocation.invalid) :: fixable-error: (assignment.type.incompatible)
+        // :: fixable-error: (argument.type.incompatible) :: fixable-error:
+        // (constructor.invocation.invalid) :: fixable-error:
+        // (assignment.type.incompatible)
         @m MeterClass mc1 = new MeterClass(5);
         // :: fixable-error: (argument.type.incompatible)
         @m MeterClass mc2 = new @m MeterClass(5);
@@ -95,4 +100,3 @@ class Constructors {
     // PolyAllClass pacc4 = new PolyAllClass(new @m PolyAllClass(5));
     // }
 }
-

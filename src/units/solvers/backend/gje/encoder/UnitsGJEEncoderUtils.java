@@ -27,23 +27,16 @@ public class UnitsGJEEncoderUtils {
             return equalityCV(snd, fst);
         } else {
             // both are variables
-            GJEEquationSet eqSet = new GJEEquationSet();
-            // input: eg x = y (aka x - y = 0)
-            // output: 2 1 IDx -1 IDy 0
-            eqSet.addEquation(
-                    GJEEquationSet.prefixExponentKey,
-                    String.join(
-                            delimiter,
-                            "2",
-                            "1",
-                            String.valueOf(fst.getGJEVarID()),
-                            "-1",
-                            String.valueOf(snd.getGJEVarID()),
-                            "0"));
-
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            if(fst.getGJEVarID() == snd.getGJEVarID()) {
+                // v == v ==> encode empty equation set
+                return new GJEEquationSet();
+            } else {
+                // v1 = v2 ==> exponents v1 - v2 = 0
+                GJEEquationSet eqSet = new GJEEquationSet();
+                // input: eg v1 = v2 (aka v1 - v2 = 0)
+                // output: 2 1 IDv1 -1 IDv2 0
                 eqSet.addEquation(
-                        baseUnit,
+                        GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
                                 "2",
@@ -52,8 +45,21 @@ public class UnitsGJEEncoderUtils {
                                 "-1",
                                 String.valueOf(snd.getGJEVarID()),
                                 "0"));
+    
+                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                    eqSet.addEquation(
+                            baseUnit,
+                            String.join(
+                                    delimiter,
+                                    "2",
+                                    "1",
+                                    String.valueOf(fst.getGJEVarID()),
+                                    "-1",
+                                    String.valueOf(snd.getGJEVarID()),
+                                    "0"));
+                }
+                return eqSet;
             }
-            return eqSet;
         }
     }
 
@@ -111,6 +117,11 @@ public class UnitsGJEEncoderUtils {
         // v1 * v2 = c1 ==> exponents v1 + v2 = c1
 
         // cases deemed possible:
+        // c1 * c2 = v ==> exponents v = (c1 + c2)
+        // c1 * v1 = v2 ==> exponents v2 - v1 = c1
+        // v1 * c1 = v2 same as above
+        // v * v = v2 ==> 2v - v2 = 0
+        // v1 * v2 = v3 ==> exponents v1 + v2 - v3 = 0
         if (lhs.isConstant() && rhs.isConstant()) {
             // c1 * c2 = v ==> exponents v = (c1 + c2)
             GJEEquationSet eqSet = new GJEEquationSet();
@@ -143,30 +154,46 @@ public class UnitsGJEEncoderUtils {
             return multiplyCV(lhs, rhs, res);
 
         } else if (lhs.isVariable() && rhs.isConstant()) {
-            // v1 * c1 = v2 same
+            // v1 * c1 = v2 same as above
             return multiplyCV(rhs, lhs, res);
 
         } else if (lhs.isVariable() && rhs.isVariable()) {
-            // v1 * v2 = v3 ==> exponents v1 + v2 - v3 = 0
-            GJEEquationSet eqSet = new GJEEquationSet();
-            // input: eg v1 * v2 = v3
-            // output: 3 1 IDv1 1 IDv2 -1 IDv3 0
-            eqSet.addEquation(
-                    GJEEquationSet.prefixExponentKey,
-                    String.join(
-                            delimiter,
-                            "3",
-                            "1",
-                            String.valueOf(lhs.getGJEVarID()),
-                            "1",
-                            String.valueOf(rhs.getGJEVarID()),
-                            "-1",
-                            String.valueOf(res.getGJEVarID()),
-                            "0"));
+            if (lhs.getGJEVarID() == rhs.getGJEVarID()) {
+                // v * v = v2 ==> 2v - v2 = 0
+                System.out.println(" MUL slots equal == " + lhs + " " + rhs);
+                GJEEquationSet eqSet = new GJEEquationSet();
+                // input: eg v * v = v2
+                // output: 2 2 IDv -1 IDv2 0
+                eqSet.addEquation(GJEEquationSet.prefixExponentKey,
+                        String.join(
+                                delimiter,
+                                "2",
+                                "2",
+                                String.valueOf(lhs.getGJEVarID()),
+                                "-1",
+                                String.valueOf(res.getGJEVarID()),
+                                "0"));
+                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                    eqSet.addEquation(
+                            baseUnit,
+                            String.join(
+                                    delimiter,
+                                    "2",
+                                    "2",
+                                    String.valueOf(lhs.getGJEVarID()),
+                                    "-1",
+                                    String.valueOf(res.getGJEVarID()),
+                                    "0"));
+                }
+                return eqSet;
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            } else {
+                // v1 * v2 = v3 ==> exponents v1 + v2 - v3 = 0
+                GJEEquationSet eqSet = new GJEEquationSet();
+                // input: eg v1 * v2 = v3
+                // output: 3 1 IDv1 1 IDv2 -1 IDv3 0
                 eqSet.addEquation(
-                        baseUnit,
+                        GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
                                 "3",
@@ -177,9 +204,23 @@ public class UnitsGJEEncoderUtils {
                                 "-1",
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
+    
+                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                    eqSet.addEquation(
+                            baseUnit,
+                            String.join(
+                                    delimiter,
+                                    "3",
+                                    "1",
+                                    String.valueOf(lhs.getGJEVarID()),
+                                    "1",
+                                    String.valueOf(rhs.getGJEVarID()),
+                                    "-1",
+                                    String.valueOf(res.getGJEVarID()),
+                                    "0"));
+                }
+                return eqSet;
             }
-            return eqSet;
-
         } else {
             throw new BugInCF(
                     "Encoding a multiplication case which is unsupported: "
@@ -238,6 +279,12 @@ public class UnitsGJEEncoderUtils {
         // v1 / v2 = c1 ==> exponents v1 - v2 = c1
 
         // cases deemed possible:
+        // c1 / c2 = v ==> exponents v = (c1 - c2)
+        // c1 / v1 = v2 ==> c1 = v2 * v1 ==> exponents v1 + v2 = c1
+        // v1 / c1 = v2 ==> v1 = v2 * c1 ==> v1 / v2 = c1 ==> exponents v1 - v2 = c1
+        // v / v = v3 ==> v3 = dimensionless ==> exponents v3 = 0
+        // v1 / v2 = v3 ==> exponents v1 - v2 - v3 = 0
+
         if (lhs.isConstant() && rhs.isConstant()) {
             // c1 / c2 = v ==> exponents v = (c1 - c2)
             GJEEquationSet eqSet = new GJEEquationSet();
@@ -326,26 +373,39 @@ public class UnitsGJEEncoderUtils {
             return eqSet;
 
         } else if (lhs.isVariable() && rhs.isVariable()) {
-            // v1 / v2 = v3 ==> exponents v1 - v2 - v3 = 0
-            GJEEquationSet eqSet = new GJEEquationSet();
-            // input: eg v1 / v2 = v3
-            // output: 3 1 IDv1 -1 IDv2 -1 IDv3 0
-            eqSet.addEquation(
-                    GJEEquationSet.prefixExponentKey,
-                    String.join(
-                            delimiter,
-                            "3",
-                            "1",
-                            String.valueOf(lhs.getGJEVarID()),
-                            "-1",
-                            String.valueOf(rhs.getGJEVarID()),
-                            "-1",
-                            String.valueOf(res.getGJEVarID()),
-                            "0"));
-
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            if (lhs.getGJEVarID() == rhs.getGJEVarID()) {
+                // v / v = v3 ==> v3 = dimensionless ==> exponents v3 = 0
+                System.out.println(" DIV slots equal == " + lhs.getGJEVarID() + " res " + res.getGJEVarID());
+                GJEEquationSet eqSet = new GJEEquationSet();
+                // input: eg v / v = v3
+                // output: 1 1 IDv3 0
                 eqSet.addEquation(
-                        baseUnit,
+                        GJEEquationSet.prefixExponentKey,
+                        String.join(
+                                delimiter,
+                                "1",
+                                "1",
+                                String.valueOf(res.getGJEVarID()),
+                                "0"));
+                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                    eqSet.addEquation(
+                            baseUnit,
+                            String.join(
+                                    delimiter,
+                                    "1",
+                                    "1",
+                                    String.valueOf(res.getGJEVarID()),
+                                    "0"));
+                }
+                return eqSet;
+
+            } else {
+                // v1 / v2 = v3 ==> exponents v1 - v2 - v3 = 0
+                GJEEquationSet eqSet = new GJEEquationSet();
+                // input: eg v1 / v2 = v3
+                // output: 3 1 IDv1 -1 IDv2 -1 IDv3 0
+                eqSet.addEquation(
+                        GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
                                 "3",
@@ -356,8 +416,24 @@ public class UnitsGJEEncoderUtils {
                                 "-1",
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
+
+                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                    eqSet.addEquation(
+                            baseUnit,
+                            String.join(
+                                    delimiter,
+                                    "3",
+                                    "1",
+                                    String.valueOf(lhs.getGJEVarID()),
+                                    "-1",
+                                    String.valueOf(rhs.getGJEVarID()),
+                                    "-1",
+                                    String.valueOf(res.getGJEVarID()),
+                                    "0"));
+                }
+                return eqSet;
             }
-            return eqSet;
+            
 
         } else {
             throw new BugInCF(

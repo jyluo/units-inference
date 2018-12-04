@@ -5,7 +5,7 @@ class Arithmetics {
     @m int m = UnitsTools.m;
     @s int s = UnitsTools.s;
 
-    public void primitiveTypes() {
+    void primitiveTypes() {
         int mInferred = m + m;
 
         int sInferred = s - s;
@@ -17,7 +17,7 @@ class Arithmetics {
         int mPERsSecond = mPERs % UnitsTools.m;
     }
 
-    private void boxedTypes() {
+    void boxedTypes() {
         Integer mInferred = m + m;
 
         Integer sInferred = s - s;
@@ -29,7 +29,7 @@ class Arithmetics {
         Integer mPERsSecond = mPERs % UnitsTools.m;
     }
 
-    public void twoVariableEquations() {
+    void twoVariableEquations() {
         int mInferred = 5 + m;
 
         int sInferred = 5 - s;
@@ -44,7 +44,7 @@ class Arithmetics {
         @mPERs int mPERsSecond = 20 % UnitsTools.m;
     }
 
-    public void threeVariableEquations() {
+    void threeVariableEquations() {
         int a = 5 + 6;
 
         int s = 5 - 6;

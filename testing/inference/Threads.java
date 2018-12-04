@@ -1,6 +1,7 @@
 import units.qual.*;
 
 class Threads {
+
     void ThreadTest() throws InterruptedException {
         int msInferred = 10;
         int sleepTime = 10;

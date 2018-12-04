@@ -94,7 +94,8 @@ public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
 
         for (Constraint constraint : constraints) {
 
-            System.out.println("Serializing " + constraint.serialize(toStringSerializer));
+            // System.out.println("Serializing " +
+            // constraint.serialize(toStringSerializer));
 
             GJEEquationSet serializedConstraint = constraint.serialize(formatTranslator);
 
@@ -113,11 +114,11 @@ public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
                 totalEquationSet.union(serializedConstraint);
             }
 
-            System.out.println(serializedConstraint.toString());
+            // System.out.println(serializedConstraint.toString());
         }
 
-        System.out.println("Total equation set:");
-        System.out.println(totalEquationSet);
+        // System.out.println("Total equation set:");
+        // System.out.println(totalEquationSet);
 
         // serialize into files
         writeGJEFiles(totalEquationSet.getEquationSet());

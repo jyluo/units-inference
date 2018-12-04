@@ -81,6 +81,13 @@ public class UnitsZ3SmtEncoderUtils {
 
     /** Slot well-formedness constraint: that either uu = true, ub = true, or uu == ub = false */
     public static BoolExpr slotWellformedness(Context ctx, Z3InferenceUnit unit) {
+        // for GJE experiment
+        // return ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()),
+        // ctx.mkNot(unit.getUnitsBottom()));
+
+        // TODO: more preferable to not have to encode exponent == 0 in
+        // wellformedness, but currently we must do so in order to have exponent
+        // variable declarations outputted for the z3 files
         BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
         /* @formatter:off // this is for eclipse formatter */
         return UnitsZ3SmtEncoderUtils.mkOneHot(
@@ -90,20 +97,6 @@ public class UnitsZ3SmtEncoderUtils {
                 ctx.mkAnd(unit.getUnitsBottom(), allPrefixesAreZero));
         /* @formatter:on // this is for eclipse formatter */
     }
-
-    // TODO: more preferable to not have to encode exponent == 0 in
-    // wellformedness, but currently we must do so in order to have exponent
-    // variable declarations outputted for the z3 files
-    // public static BoolExpr slotWellformedness(Context ctx, Z3InferenceUnit unit)
-    // {
-    //        /* @formatter:off // this is for eclipse formatter */
-    //        return UnitsZ3SmtEncoderUtils.mkOneHot(
-    //                ctx,
-    //                ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom())),
-    //                unit.getUnknownUnits(),
-    //                unit.getUnitsBottom());
-    //        /* @formatter:on // this is for eclipse formatter */
-    // }
 
     /** Slot preference constraint: that the slot == dimensionless */
     public static BoolExpr slotPreference(Context ctx, Z3InferenceUnit unit) {
@@ -130,28 +123,6 @@ public class UnitsZ3SmtEncoderUtils {
                 allPrefixesAreZero);
         /* @formatter:on // this is for eclipse formatter */
     }
-    //
-    //    private static BoolExpr mustBeUnknownUnits(Context ctx, InferenceUnit unit) {
-    //        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
-    //        /* @formatter:off // this is for eclipse formatter */
-    //        return ctx.mkAnd(
-    //                 unit.getUnknownUnits(),
-    //                 ctx.mkNot(unit.getUnitsBottom()),
-    //                 allPrefixesAreZero
-    //               );
-    //        /* @formatter:on // this is for eclipse formatter */
-    //    }
-    //
-    //    private static BoolExpr mustBeUnitsBottom(Context ctx, InferenceUnit unit) {
-    //        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
-    //        /* @formatter:off // this is for eclipse formatter */
-    //        return ctx.mkAnd(
-    //                 ctx.mkNot(unit.getUnknownUnits()),
-    //                 unit.getUnitsBottom(),
-    //                 allPrefixesAreZero
-    //               );
-    //        /* @formatter:on // this is for eclipse formatter */
-    //    }
 
     // =========================================================================================
 
@@ -188,51 +159,6 @@ public class UnitsZ3SmtEncoderUtils {
                         superT.getUnknownUnits(),
                         // sub = super
                         equality(ctx, subT, superT));
-
-        //            ctx.mkOr(
-        //                // sub = top --> super = top
-        //                ctx.mkAnd(subT.getUnknownUnits(), superT.getUnknownUnits()),
-        //                // sub = bot
-        //                subT.getUnitsBottom(),
-        //                // super = top
-        //                superT.getUnknownUnits(),
-        //                // super = bot --> sub = bot
-        //                ctx.mkAnd(superT.getUnitsBottom(), subT.getUnitsBottom()),
-        //                // sub = super
-        //                equality(ctx, subT, superT)
-        //            );
-
-        //            ctx.mkOr(
-        //                // sub = top --> super = top
-        //                ctx.mkAnd(mustBeUnknownUnits(ctx, subT), mustBeUnknownUnits(ctx, superT)),
-        //                // sub = bot
-        //                mustBeUnitsBottom(ctx, subT),
-        //                // super = top
-        //                mustBeUnknownUnits(ctx, superT),
-        //                // super = bot --> sub = bot
-        //                ctx.mkAnd(mustBeUnitsBottom(ctx, superT), mustBeUnitsBottom(ctx, subT)),
-        //                // sub = super
-        //                equality(ctx, subT, superT)
-        //            );
-
-        //            ctx.mkAnd(
-        //                //ctx.mkImplies(arg0, arg1)
-        //                // not (super = top or super = bottom) --> sub = super xor sub = bottom
-        //                ctx.mkOr(
-        //                    ctx.mkOr(
-        //                        superT.getUnknownUnits(),
-        //                        superT.getUnitsBottom()
-        //                    ),
-        //                    ctx.mkXor(equality(ctx, subT, superT), subT.getUnitsBottom())
-        //                ),
-        //                // super = bottom --> sub = bottom
-        //                ctx.mkOr(
-        //                    ctx.mkNot(
-        //                        superT.getUnitsBottom()
-        //                    ),
-        //                    subT.getUnitsBottom()
-        //                )
-        //            );
         /* @formatter:on // this is for eclipse formatter */
         return subtypeEncoding;
     }
@@ -286,6 +212,8 @@ public class UnitsZ3SmtEncoderUtils {
                                 ctx.mkNot(lhs.getUnitsBottom()),
                                 ctx.mkNot(rhs.getUnknownUnits()),
                                 ctx.mkNot(rhs.getUnitsBottom()),
+                                ctx.mkNot(res.getUnknownUnits()),
+                                ctx.mkNot(res.getUnitsBottom()),
                                 exponents));
         /* @formatter:on // this is for eclipse formatter */
         return multiplyEncoding;
@@ -340,6 +268,8 @@ public class UnitsZ3SmtEncoderUtils {
                                 ctx.mkNot(lhs.getUnitsBottom()),
                                 ctx.mkNot(rhs.getUnknownUnits()),
                                 ctx.mkNot(rhs.getUnitsBottom()),
+                                ctx.mkNot(res.getUnknownUnits()),
+                                ctx.mkNot(res.getUnitsBottom()),
                                 exponents));
         /* @formatter:on // this is for eclipse formatter */
         return divideEncoding;

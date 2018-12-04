@@ -6,6 +6,7 @@ import argparse
 import time
 
 UNITS_INFERENCE_DIR = os.path.dirname(os.path.realpath(__file__))
+tool_excutable = os.path.join(UNITS_INFERENCE_DIR, "run-dljc.sh")
 
 def main(argv):
     parser = argparse.ArgumentParser()
@@ -13,8 +14,6 @@ def main(argv):
     parser.add_argument('--corpus', dest='corpus')
     parser.add_argument('--is-travis-build', type=bool, dest='is_travis_build')
     args = parser.parse_args()
-
-    tool_excutable = os.path.join(UNITS_INFERENCE_DIR, "run-dljc.sh")
 
     corpus_name = args.corpus if not args.corpus == None else os.path.splitext(args.corpus_file)[0]
 
@@ -25,7 +24,7 @@ def main(argv):
         print "Creating corpus dir {}.".format(BENCHMARK_DIR)
         os.makedirs(BENCHMARK_DIR)
         print "Corpus dir {} created.".format(BENCHMARK_DIR)
- 
+
     print "Enter corpus dir {}.".format(BENCHMARK_DIR)
     os.chdir(BENCHMARK_DIR)
 

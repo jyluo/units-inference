@@ -19,16 +19,7 @@ coq-proof/*.vo
 coq-proof/*.glob
 
 # corpus
-corpus/
-worked-benchmarks/
-projects/
-uomo-swap-benchmarks/
-giant-projects/
-
-# output logs
-compilationLog/
-inferenceLog/
-typecheckLog/
+benchmarks/*/
 
 # example classes and annotated output
 testing/**/*.class

@@ -5,7 +5,8 @@ import shlex
 import argparse
 import time
 
-UNITS_INFERENCE_DIR = os.path.dirname(os.path.realpath(__file__))
+SCRIPTS_DIR = os.path.dirname(os.path.realpath(__file__))
+UNITS_INFERENCE_DIR = os.path.join(SCRIPTS_DIR, "..")
 
 def main(argv):
     parser = argparse.ArgumentParser()
@@ -15,19 +16,19 @@ def main(argv):
 
     corpus_name = args.corpus if not args.corpus == None else os.path.splitext(args.corpus_file)[0]
 
-    BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, corpus_name)
+    BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, "benchmarks", corpus_name)
 
     print "----- Fetching corpus... -----"
     if not os.path.exists(BENCHMARK_DIR):
         print "Creating corpus dir {}.".format(BENCHMARK_DIR)
         os.makedirs(BENCHMARK_DIR)
         print "Corpus dir {} created.".format(BENCHMARK_DIR)
- 
+
     print "Enter corpus dir {}.".format(BENCHMARK_DIR)
     os.chdir(BENCHMARK_DIR)
 
     projects = None
-    with open (os.path.join(UNITS_INFERENCE_DIR, args.corpus_file)) as projects_file:
+    with open (os.path.join(UNITS_INFERENCE_DIR, "benchmarks", args.corpus_file)) as projects_file:
         projects = yaml.load(projects_file)["projects"]
 
     for project_name, project_attrs in projects.iteritems():

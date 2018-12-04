@@ -3,7 +3,8 @@
 WORKING_DIR=$(cd $(dirname "$0") && pwd)
 UI=$WORKING_DIR/..
 
-CORPUSFILE=$WORKING_DIR/travis-benchmarks.yml
+PROJECTNAME=travis-benchmarks
+CORPUSFILE=$WORKING_DIR/$PROJECTNAME.yml
 
 # Build jar dependency
 (cd $UI && ./gradlew jar)

@@ -3,7 +3,7 @@
 set -e
 
 WORKING_DIR=$(pwd)
-JSR308=$(cd $(dirname "$0")/.. && pwd)
+JSR308=$(cd $(dirname "$0")/../.. && pwd)
 
 CFI=$JSR308/checker-framework-inference
 UI=$JSR308/units-inference

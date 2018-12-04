@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JSR308=$(cd $(dirname "$0")/.. && pwd)
+JSR308=$(cd $(dirname "$0")/../.. && pwd)
 
 echo "$JSR308"/units-inference
 

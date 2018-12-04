@@ -4,5 +4,4 @@ TESTFILE=testing/typecheck/Speeds.java
 
 subl $TESTFILE
 
-./run-units-typecheck.sh $TESTFILE
-
+./scripts/run-units-typecheck.sh $TESTFILE

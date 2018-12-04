@@ -5,6 +5,6 @@ ANNOTATEDFILE=annotated/VectorInfer.java
 
 subl $TESTFILE
 
-./run-units-infer.sh $TESTFILE
+./scripts/run-units-infer.sh $TESTFILE
 
 subl $ANNOTATEDFILE

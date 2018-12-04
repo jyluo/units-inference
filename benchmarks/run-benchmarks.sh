@@ -2,5 +2,5 @@
 
 gradle jar
 
-# python run-units-on-corpus.py --corpus-file=projects.yml
-time python run-units-on-corpus.py --corpus-file worked-benchmarks.yml
+# python run-units-infer-on-corpus.py --corpus-file=projects.yml
+time python run-units-infer-on-corpus.py --corpus-file worked-benchmarks.yml

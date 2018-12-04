@@ -1,12 +1,16 @@
 #!/bin/bash
 
-./gradlew jar
+WORKING_DIR=$(cd $(dirname "$0") && pwd)
+UI=$WORKING_DIR/..
 
-CORPUSFILE="travis-benchmarks.yml"
+CORPUSFILE=$WORKING_DIR/travis-benchmarks.yml
+
+# Build jar dependency
+(cd $UI && ./gradlew jar)
 
 # Running Units Inference on travis benchmarks
 if [ -n "$1" ] && [ $1 = "travis" ]; then
-    time python run-units-on-corpus.py --corpus-file $CORPUSFILE --is-travis-build true
+    time python $UI/scripts/run-units-infer-on-corpus.py --corpus-file $CORPUSFILE --is-travis-build true
 else
-    time python run-units-on-corpus.py --corpus-file $CORPUSFILE
+    time python $UI/scripts/run-units-infer-on-corpus.py --corpus-file $CORPUSFILE
 fi

@@ -10,9 +10,9 @@ directory `units-inference`:
 
 # Running Units on sci-corpus
 
-## Dependencies & prerequisites 
+## Dependencies & prerequisites
 
-To run driver script `run-units-on-corpus.py`, you need first to install below
+To run driver script `run-units-infer-on-corpus.py`, you need first to install below
 packages:
 
 - pyYaml: `pip install pyyaml`
@@ -35,7 +35,7 @@ To run units-inference on sci-corpus, just run following command:
 
 ```bash
 # cd units-inference
-python run-units-on-corpus.py
+python run-units-infer-on-corpus.py
 ```
 
 This script would first fetching the projects defined in `projects.yml` from

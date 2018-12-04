@@ -3,7 +3,7 @@
 set -e
 
 WORKING_DIR=$(pwd)
-JSR308=$(cd $(dirname "$0")/.. && pwd)
+JSR308=$(cd $(dirname "$0")/../.. && pwd)
 
 CFI=$JSR308/checker-framework-inference
 UI=$JSR308/units-inference
@@ -57,7 +57,7 @@ echo "============ Important variables ============="
 echo "JSR308: $JSR308"
 echo "CLASSPATH: $CLASSPATH"
 echo "build cmd: $build_cmd"
-echo "running cmd: $running_cmd"
+echo "infer cmd: $running_cmd"
 echo "============================================="
 
 eval "$running_cmd"

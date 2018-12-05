@@ -409,7 +409,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             command = new String[] { z3Program, constraintsUnsatCoreFile };
         }
 
-        // TODO: build TCU here?
+        // TODO: build Typecheckunits here?
         // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
 
         // stores results from z3 program output
@@ -444,11 +444,11 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     )
     */
     /* @formatter:on // this is for eclipse formatter */
+
     // Sample unsat output format:
     /* @formatter:off // this is for eclipse formatter */
     /*
     unsat
-    (error "line yyy column 10: model is not available")
     (SubtypeConstraint58 ArithmeticConstraint73 EqualityConstraint188 SubtypeConstraint553)
     */
     /* @formatter:on // this is for eclipse formatter */

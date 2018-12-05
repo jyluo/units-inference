@@ -7,6 +7,24 @@ projects:
     build: mvn install
     clean: mvn clean
 
+  FaceDetection:
+    giturl: https://github.com/jyluo-benchmarks/FaceDetection.git
+    # git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
+    build: mvn compile
+    clean: mvn clean
+
+  imgscalr:
+    giturl: https://github.com/jyluo-benchmarks/imgscalr.git # try using latest from source?
+    # git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
+    build: mvn compile
+    clean: mvn clean
+
+  jama:
+    giturl: https://github.com/jyluo-benchmarks/jama.git
+    # git-ref: d6b3e3d192bb901aec5e16a084c824d8db336d74
+    build: mvn compile
+    clean: mvn clean
+
   jblas:
     giturl: https://github.com/jyluo-benchmarks/jblas.git
     build: mvn install
@@ -22,9 +40,9 @@ projects:
     build: mvn install
     clean: mvn clean
 
-  imgscalr:
-    giturl: https://github.com/jyluo-benchmarks/imgscalr.git # try using latest from source?
-    # git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
+  la4j:
+    giturl: https://github.com/jyluo-benchmarks/la4j.git
+    # git-ref: db204167aa6161cd2104ce845e62518cae451d70
     build: mvn compile
     clean: mvn clean
 
@@ -34,33 +52,10 @@ projects:
     build: mvn compile
     clean: mvn clean
 
-  FaceDetection:
-    giturl: https://github.com/jyluo-benchmarks/FaceDetection.git
-    # git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
-    build: mvn compile
-    clean: mvn clean
-
-  jama:
-    giturl: https://github.com/jyluo-benchmarks/jama.git
-    # git-ref: d6b3e3d192bb901aec5e16a084c824d8db336d74
-    build: mvn compile
-    clean: mvn clean
-
-  la4j:
-    giturl: https://github.com/jyluo-benchmarks/la4j.git
-    # git-ref: db204167aa6161cd2104ce845e62518cae451d70
-    build: mvn compile
-    clean: mvn clean
-
 # Failing:
 
   # fails due to subclassing java.lang.Number which requires constant slots for PolyUnit / PolyAll
   # not adding this use case to inference atm, can manually annotate if necessary
-
-  matrix-toolkits-java:
-    giturl: https://github.com/jyluo-benchmarks/matrix-toolkits-java.git
-    build: mvn compile
-    clean: mvn clean
 
   jump:
     giturl: https://github.com/jyluo-benchmarks/jump.git
@@ -69,10 +64,15 @@ projects:
     build: ant jar
     clean: ant clean
 
+  matrix-toolkits-java:
+    giturl: https://github.com/jyluo-benchmarks/matrix-toolkits-java.git
+    build: mvn compile
+    clean: mvn clean
+
 # # Typechecking only:
 #   sis:
 #     giturl: https://github.com/jyluo-benchmarks/sis.git
-#     build: mvn install -Dmaven.test.skip=true
+#     build: mvn install -DskipTests
 #     clean: mvn clean
 
 # Future test:

@@ -122,6 +122,7 @@ public class UnitsGJEEncoderUtils {
         // v1 * c1 = v2 same as above
         // v * v = v2 ==> 2v - v2 = 0
         // v1 * v2 = v3 ==> exponents v1 + v2 - v3 = 0
+
         if (lhs.isConstant() && rhs.isConstant()) {
             // c1 * c2 = v ==> exponents v = (c1 + c2)
             GJEEquationSet eqSet = new GJEEquationSet();

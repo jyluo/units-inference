@@ -27,7 +27,7 @@ public class UnitsGJEEncoderUtils {
             return equalityCV(snd, fst);
         } else {
             // both are variables
-            if(fst.getGJEVarID() == snd.getGJEVarID()) {
+            if (fst.getGJEVarID() == snd.getGJEVarID()) {
                 // v == v ==> encode empty equation set
                 return new GJEEquationSet();
             } else {
@@ -45,7 +45,7 @@ public class UnitsGJEEncoderUtils {
                                 "-1",
                                 String.valueOf(snd.getGJEVarID()),
                                 "0"));
-    
+
                 for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
@@ -165,7 +165,8 @@ public class UnitsGJEEncoderUtils {
                 GJEEquationSet eqSet = new GJEEquationSet();
                 // input: eg v * v = v2
                 // output: 2 2 IDv -1 IDv2 0
-                eqSet.addEquation(GJEEquationSet.prefixExponentKey,
+                eqSet.addEquation(
+                        GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
                                 "2",
@@ -205,7 +206,7 @@ public class UnitsGJEEncoderUtils {
                                 "-1",
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
-    
+
                 for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
@@ -383,21 +384,12 @@ public class UnitsGJEEncoderUtils {
                 // output: 1 1 IDv3 0
                 eqSet.addEquation(
                         GJEEquationSet.prefixExponentKey,
-                        String.join(
-                                delimiter,
-                                "1",
-                                "1",
-                                String.valueOf(res.getGJEVarID()),
-                                "0"));
+                        String.join(delimiter, "1", "1", String.valueOf(res.getGJEVarID()), "0"));
                 for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
                             String.join(
-                                    delimiter,
-                                    "1",
-                                    "1",
-                                    String.valueOf(res.getGJEVarID()),
-                                    "0"));
+                                    delimiter, "1", "1", String.valueOf(res.getGJEVarID()), "0"));
                 }
                 return eqSet;
 
@@ -435,7 +427,6 @@ public class UnitsGJEEncoderUtils {
                 }
                 return eqSet;
             }
-            
 
         } else {
             throw new BugInCF(

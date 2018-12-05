@@ -3,12 +3,12 @@ package backend.z3smt;
 import checkers.inference.InferenceMain;
 import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
-import checkers.inference.model.serialization.ToStringSerializer;
 import checkers.inference.model.ComparableConstraint;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
 import checkers.inference.model.SubtypeConstraint;
 import checkers.inference.model.VariableSlot;
+import checkers.inference.model.serialization.ToStringSerializer;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.ExternalSolverUtils;
@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.lang.model.element.AnnotationMirror;
-
 import org.checkerframework.javacutil.BugInCF;
 
 // TODO: make this an abstract class with common features
@@ -49,7 +48,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     protected static final String pathToProject =
             new File(new File("").getAbsolutePath()).toString();
     protected static final String constraintsFile = pathToProject + "/z3Constraints.smt";
-    protected static final String constraintsUnsatCoreFile = pathToProject + "/z3ConstraintsUnsatCore.smt";
+    protected static final String constraintsUnsatCoreFile =
+            pathToProject + "/z3ConstraintsUnsatCore.smt";
     protected static final String constraintsStatsFile = pathToProject + "/z3ConstraintsGlob.smt";
 
     // timing statistics variables
@@ -324,8 +324,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             if (simplifiedConstraint.isFalse()) {
                 final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
                 throw new BugInCF(
-                        "impossible constraint: " + constraint.serialize(toStringSerializer)
-                                + "\nSerialized:\n" + serializedConstraint);
+                        "impossible constraint: "
+                                + constraint.serialize(toStringSerializer)
+                                + "\nSerialized:\n"
+                                + serializedConstraint);
             }
 
             String clause = simplifiedConstraint.toString();
@@ -404,9 +406,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         // TODO: add z3 stats?
         String[] command;
         if (!getUnsatCore) {
-            command = new String[] { z3Program, constraintsFile };
+            command = new String[] {z3Program, constraintsFile};
         } else {
-            command = new String[] { z3Program, constraintsUnsatCoreFile };
+            command = new String[] {z3Program, constraintsUnsatCoreFile};
         }
 
         // TODO: build Typecheckunits here?

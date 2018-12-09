@@ -4,14 +4,16 @@ FILENAME=scanProjectsStats.txt
 
 echo "Files containing JavaFX, AWT, Time, System.ms, or Math trig functions:" > $FILENAME
 
-grep -rl -e 'import.*javafx' \
+# grep -rl \
+grep -rn \
+    -e 'import.*javafx' \
     -e 'import.*java\.awt' \
     -e 'import.*java\.time' \
     -e 'System\.currentTimeMillis()' \
     -e 'sin(.*)' -e 'cos(.*)' -e 'tan(.*)' \
     -e 'asin(.*)' -e 'acos(.*)' -e 'atan(.*)' \
     -e 'sinh(.*)' -e 'cosh(.*)' -e 'tanh(.*)' \
-    *.java >> $FILENAME
+    --include=*.java | sort >> $FILENAME
 
 ##### JavaFX
 

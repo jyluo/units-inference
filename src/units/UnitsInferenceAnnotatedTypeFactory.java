@@ -323,7 +323,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         private boolean isMethodDeclaredWithPolymorphicReturn(
                 MethodInvocationTree methodInvocationTree) {
             final ExecutableElement methodElem = TreeUtils.elementFromUse(methodInvocationTree);
-            final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
+            // final AnnotatedExecutableType methodType = getAnnotatedType(methodElem);
 
             final ExpressionTree methodSelectExpression = methodInvocationTree.getMethodSelect();
             final AnnotatedTypeMirror receiverType;

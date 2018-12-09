@@ -8,12 +8,7 @@ fi
 
 cd $1
 
-declare -a statsKeys=("currentTimeMillis()" "nanoTime()" \
-    "Thread.sleep(" \
-    "Math.cos(" "Math.sin(" "Math.tan(" \
-    "Math.asin(" "Math.acos(" "Math.atan(" "Math.atan2(" \
-    "Math.sinh(" "Math.cosh(" "Math.tanh(" \
-    "Math.toDegrees(" "Math.toRadians(" \
+declare -a statsKeys=(
     "\w + \w" \
     "\w - \w" \
     "\w \* \w" \
@@ -25,9 +20,15 @@ declare -a statsKeys=("currentTimeMillis()" "nanoTime()" \
     "\w >= \w" \
     "\w == \w" \
     "\w != \w" \
-    "import.*javafx"
-    "import.*java\.awt"
-    "import.*java\.time"
+    "currentTimeMillis()" "nanoTime()" \
+    "Thread.sleep(" \
+    "Math.cos(" "Math.sin(" "Math.tan(" \
+    "Math.asin(" "Math.acos(" "Math.atan(" "Math.atan2(" \
+    "Math.sinh(" "Math.cosh(" "Math.tanh(" \
+    "Math.toDegrees(" "Math.toRadians(" \
+    "import.*javafx" \
+    "import.*java\.awt" \
+    "import.*java\.time" \
     )
 
 declare -a projects=($(ls -d */ | sort))

@@ -1,19 +1,21 @@
 #!/bin/bash
 
-FILENAME=scanProjectsStats.txt
+echo "Files containing JavaFX, AWT, Time, System.ms, or Math trig functions:"
+echo "Use gen-lang-usage-table.sh for finer grain scan"
+echo ""
 
-echo "Files containing JavaFX, AWT, Time, System.ms, or Math trig functions:" > $FILENAME
-
-# grep -rl \
-grep -rn \
+grep -rl \
     -e 'import.*javafx' \
     -e 'import.*java\.awt' \
     -e 'import.*java\.time' \
     -e 'System\.currentTimeMillis()' \
+    -e 'System\.nanoTime()' \
+    -e 'Thread\.sleep(.*)' \
     -e 'sin(.*)' -e 'cos(.*)' -e 'tan(.*)' \
-    -e 'asin(.*)' -e 'acos(.*)' -e 'atan(.*)' \
+    -e 'asin(.*)' -e 'acos(.*)' -e 'atan(.*)' -e 'atan2(.*)' \
     -e 'sinh(.*)' -e 'cosh(.*)' -e 'tanh(.*)' \
-    --include=*.java | sort >> $FILENAME
+    -e 'toDegrees(.*)' -e 'toRadians(.*)' \
+    --include=*.java | sort
 
 ##### JavaFX
 

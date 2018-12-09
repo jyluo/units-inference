@@ -24,7 +24,11 @@ declare -a statsKeys=("currentTimeMillis()" "nanoTime()" \
     "\w <= \w" \
     "\w >= \w" \
     "\w == \w" \
-    "\w != \w" )
+    "\w != \w" \
+    "import.*javafx"
+    "import.*java\.awt"
+    "import.*java\.time"
+    )
 
 declare -a projects=($(ls -d */ | sort))
 
@@ -57,5 +61,3 @@ for project in "${projects[@]}"; do
 done
 
 printf '\n'
-
-# TODO: LOCs

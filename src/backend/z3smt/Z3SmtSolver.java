@@ -14,6 +14,7 @@ import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.ExternalSolverUtils;
 import checkers.inference.solver.util.FileUtils;
 import checkers.inference.solver.util.SolverEnvironment;
+import checkers.inference.solver.util.Statistics;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
@@ -83,8 +84,6 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
-        // Runtime.getRuntime().gc(); // trigger garbage collector
-
         // first time serialize and run in optimizing mode
         optimizingMode = true;
         getUnsatCore = false;
@@ -97,17 +96,9 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         List<String> results = runZ3Solver();
         solvingEnd = System.currentTimeMillis();
 
-        // StatisticRecorder.record(
-        // "smt_serialization_time (millisec)", serializationEnd -
-        // serializationStart);
-        // StatisticRecorder.record("smt_solving_time (millisec)", solvingEnd -
-        // solvingStart);
-
-        // System.out.println(
-        // "SMT Serialization Time (millisec): " + (serializationEnd -
-        // serializationStart));
-        // System.out.println("SMT Solving Time (millisec): " + (solvingEnd -
-        // solvingStart));
+        Statistics.addOrIncrementEntry(
+                "smt_serialization_time(millisec)", serializationEnd - serializationStart);
+        Statistics.addOrIncrementEntry("smt_solving_time(millisec)", solvingEnd - solvingStart);
 
         // Debug use, finds out number of calls to each instrumented method
         // TODO: use updated stats package to print out the counters
@@ -143,11 +134,6 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         // System.out.println(" Made comparison constraint: " +
         // comparableConstraints);
 
-        // System.out.println("=== Solutions: ===");
-        // for (String r : results) {
-        // System.out.println(r);
-        // }
-
         if (results != null) {
             result =
                     formatTranslator.decodeSolution(
@@ -172,10 +158,10 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         runZ3Solver();
         solvingEnd = System.currentTimeMillis();
 
-        System.out.println(
-                "SMT UNSAT Serialization Time (millisec): "
-                        + (serializationEnd - serializationStart));
-        System.out.println("SMT UNSAT Solving Time (millisec): " + (solvingEnd - solvingStart));
+        Statistics.addOrIncrementEntry(
+                "smt_unsat_serialization_time(millisec)", serializationEnd - serializationStart);
+        Statistics.addOrIncrementEntry(
+                "smt_unsat_solving_time(millisec)", solvingEnd - solvingStart);
 
         // System.out.println();
         // System.out.println("Unsatisfiable constraints: " + String.join(" ",

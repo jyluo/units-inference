@@ -4,6 +4,10 @@ echo "Files containing JavaFX, AWT, Time, System.ms, or Math trig functions:"
 echo "Use gen-lang-usage-table.sh for finer grain scan"
 echo ""
 
+# standard grep output here is the full path to a java file containing a match
+# we refine it to print out just the project names
+# raw grep output rows:  0/PROJECT/dir/dir/dir/blah.java
+
 grep -rl \
     -e 'import.*javafx' \
     -e 'import.*java\.awt' \
@@ -15,7 +19,7 @@ grep -rl \
     -e 'asin(.*)' -e 'acos(.*)' -e 'atan(.*)' -e 'atan2(.*)' \
     -e 'sinh(.*)' -e 'cosh(.*)' -e 'tanh(.*)' \
     -e 'toDegrees(.*)' -e 'toRadians(.*)' \
-    --include=*.java | sort
+    --include=*.java | cut -d/ -f2 | sort | uniq
 
 ##### JavaFX
 

@@ -12,14 +12,14 @@ class SubtypingTest {
         @UnitsBottom int x = y;
     }
 
-    void doublebound(@m int x) {
+    void inferMeterDoubleBound(@m int x) {
         // @m <: y
         int y = UnitsTools.m;
         // y <: @m
         x = y;
     }
 
-    void inferTopTwo(@UnknownUnits int x) {
+    void inferTopTwoVar(@UnknownUnits int x) {
         // @m <: y
         int y = UnitsTools.m;
         // @s <: y
@@ -29,9 +29,11 @@ class SubtypingTest {
     }
 
     void flexibleSuper(@UnitsBottom int x) {
+        // typically infers dimensionless
         int y = x;
     }
 
+    // typically infers dimensionless
     void flexibleSub(int x) {
         @UnknownUnits int y = x;
     }

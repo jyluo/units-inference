@@ -7,7 +7,9 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
+import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
@@ -155,7 +157,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             // TODO: see what needs to be here in Inference finish
 
-            /// in Ontology, there's varannot, ontology raw, bottom, poly ontology, poly all, ...
+            // in Ontology, there's varannot, ontology raw, bottom, polyontology, polyall,
+            // ...
 
             /*
              * --- full map:
@@ -194,8 +197,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
         @Override
         public void handleBinaryTree(AnnotatedTypeMirror atm, BinaryTree binaryTree) {
-            // Super creates an LUB constraint by default, we create an VariableSlot here instead
-            // for the result of the binary op and create LUB constraint in units visitor.
+            // Super creates an LUB constraint by default, we create an VariableSlot here
+            // instead for the result of the binary op and create LUB constraint in units
+            // visitor.
             if (treeToVarAnnoPair.containsKey(binaryTree)) {
                 atm.replaceAnnotations(treeToVarAnnoPair.get(binaryTree).second);
             } else {
@@ -225,7 +229,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                                 slotManager.createArithmeticVariableSlot(
                                         VariableAnnotator.treeToLocation(
                                                 inferenceTypeFactory, binaryTree));
-                        // ArithmeticOperationKind.fromTreeKind(binaryTree.getKind()), lhs, rhs);
                         break;
                     case CONDITIONAL_AND: // &&
                     case CONDITIONAL_OR: // ||
@@ -276,12 +279,14 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             addLiteralKind(LiteralKind.CHAR, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.BOOLEAN, unitsRepUtils.DIMENSIONLESS);
 
-            // we do not implictly set dimensionless for the number literals as we want to infer
-            // casts
+            // we do not implicitly set dimensionless for the number literals as we want to
+            // infer casts
         }
     }
 
     private final class UnitsInferenceTreeAnnotator extends InferenceTreeAnnotator {
+        // TODO: per design of InferenceTreeAnnotator, this code should be moved into
+        // UnitsVariableAnnotator if it performs deep traversal
 
         public UnitsInferenceTreeAnnotator(
                 InferenceAnnotatedTypeFactory atypeFactory,
@@ -297,6 +302,17 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     slotManager);
         }
 
+        // see if given annotation mirror is the VarAnnot versions of @PolyUnit and
+        // @PolyAll
+        private boolean isPolyAnnotation(AnnotationMirror annot) {
+            Slot slot = slotManager.getSlot(annot);
+            if (slot.isConstant()) {
+                AnnotationMirror constant = ((ConstantSlot) slot).getValue();
+                return InferenceQualifierHierarchy.isPolymorphic(constant);
+            }
+            return false;
+        }
+
         // based on InferenceATF.constructorFromUse()
         private boolean isConstructorDeclaredWithPolymorphicReturn(NewClassTree newClassTree) {
             final ExecutableElement constructorElem = TreeUtils.constructor(newClassTree);
@@ -308,10 +324,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                             constructorReturnType,
                             constructorElem);
 
-            // if any of the annotations on the return type of the constructor is a polymorphic annotation, return true
+            // if any of the annotations on the return type of the constructor is a
+            // polymorphic annotation, return true
             for (AnnotationMirror annot : constructorType.getReturnType().getAnnotations()) {
-                if (AnnotationUtils.areSame(annot, unitsRepUtils.POLYUNIT)
-                        || AnnotationUtils.areSame(annot, unitsRepUtils.POLYALL)) {
+                if (isPolyAnnotation(annot)) {
                     return true;
                 }
             }
@@ -342,10 +358,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                             receiverType,
                             methodElem);
 
-            // if any of the annotations on the return type of the constructor is a polymorphic annotation, return true
+            // if any of the annotations on the return type of the constructor is a
+            // polymorphic annotation, return true
             for (AnnotationMirror annot : methodOfReceiver.getReturnType().getAnnotations()) {
-                if (AnnotationUtils.areSame(annot, unitsRepUtils.POLYUNIT)
-                        || AnnotationUtils.areSame(annot, unitsRepUtils.POLYALL)) {
+                if (isPolyAnnotation(annot)) {
                     return true;
                 }
             }
@@ -359,18 +375,20 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             super.visitNewClass(newClassTree, atm);
 
             /*
-             * given   @m Clazz x = new Clazz(param)   where the constructor is polymorphic: @Poly Clazz(@Poly arg)
+             * given   @m Clazz x = new Clazz(param)   where the constructor is
+             * polymorphic: @Poly Clazz(@Poly arg)
              *
              * without the fix below, the constraints are:
              *
-             * @1 <: @4
-             * @2 <: @4
+             * @1 <: @3
+             * @2 <: @3
              * @1 <: @m
              *
-             * inserted as @m Clazz x = (@4 Clazz) new @1 Clazz(@2 param)
+             * inserted as @m Clazz x = new @1 Clazz(@2 param)
+             * @3 is not inserted
              *
-             * this isn't sufficient, as there is no transitive requirement that @2 <: @m
-             *
+             * this isn't sufficient, as there is no requirement that @2 <: @m
+             * in turn, it fails in type checking as the LUB of @1 and @2 can be a supertype of @m
              *
              * with the fix below, the constraints are:
              *
@@ -379,7 +397,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
              * @3 <: @m
              *
              * inserted as @m Clazz x = new @1 Clazz(@2 param)
-             * @3 is not inserted
              */
 
             if (isConstructorDeclaredWithPolymorphicReturn(newClassTree)) {
@@ -396,12 +413,13 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 VariableSlot callSiteReturnVarSlot = slotManager.getVariableSlot(atm);
 
                 // Create a subtype constraint: callSiteReturnVarSlot <: varSlotForPolyReturn
-                // since after annotation insertion, the varSlotForPolyReturn appears as a cast of the
-                // newly created object: "(@varSlotForPolyReturn Clazz) new @m Clazz(...)"
+                // since after annotation insertion, the varSlotForPolyReturn is conceptually a
+                // cast of the newly created object:
+                // "(@varSlotForPolyReturn Clazz) new @m Clazz(...)"
                 constraintManager.addSubtypeConstraint(callSiteReturnVarSlot, varSlotForPolyReturn);
 
-                // Replace the slot/annotation in the atm (callSiteReturnVarSlot) with the varSlotForPolyReturn
-                // for upstream analysis
+                // Replace the slot/annotation in the atm (callSiteReturnVarSlot) with the
+                // varSlotForPolyReturn for upstream analysis
                 atm.replaceAnnotation(slotManager.getAnnotation(varSlotForPolyReturn));
             }
 

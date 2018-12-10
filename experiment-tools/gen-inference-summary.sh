@@ -19,7 +19,7 @@ pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
 for project in "${projects[@]}"; do
-    # print project name without trailing slash
+    # print project name and new lines without trailing slash
     printf '\n%*.*s\n' 0 $((${#project} - 1)) "$project"
 
     # number of sub-projects

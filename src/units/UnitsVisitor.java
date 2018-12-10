@@ -34,72 +34,13 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         super(checker, ichecker, factory, infer);
     }
 
-    // @Override
-    // public Void visitVariable(VariableTree node, Void p) {
-    // super.visitVariable(node, p);
-    //
-    // if (infer) {
-    // // For boxed primitive classes, we stub the constructors to be PolyUnit, thus there will
-    // // be a VarAnnot created for each instance of PolyUnit.
-    //
-    // // An additional subtype constraint is generated here to ensure the VarAnnot is a
-    // // subtype of the variable's VarAnnot.
-    // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
-    //
-    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node);
-    //
-    // ExpressionTree expr = node.getInitializer();
-    // if (expr != null) {
-    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(expr);
-    //
-    // System.out.println(" === var: " + node);
-    // System.out.println(" == node initializer kind " + expr.getKind());
-    //
-    // AnnotationMirror varAM = varATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
-    // AnnotationMirror expAM = expATM.getAnnotationInHierarchy(unitsRepUtils.VARANNOT);
-    //
-    // System.out.println(" === varATM " + varATM);
-    // System.out.println(" === varAM " + varAM);
-    //
-    // System.out.println(" === expATM " + expATM);
-    // System.out.println(" === expAM " + expAM);
-    //
-    // System.out.println("");
-    // }
-    //
-    // }
-    //
-    // return null;
-    // }
-
-    // @Override
-    // public Void visitAssignment(AssignmentTree node, Void p) {
-    // if (infer) {
-    // AnnotatedTypeMirror varATM = atypeFactory.getAnnotatedType(node.getVariable());
-    // AnnotatedTypeMirror expATM = atypeFactory.getAnnotatedType(node.getExpression());
-    // UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
-    //
-    // AnnotationMirror varAM = varATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-    // AnnotationMirror expAM = expATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
-    //
-    // System.out.println(" === assign: " + node);
-    //
-    // System.out.println(" === varATM " + varATM);
-    // System.out.println(" === varAM " + varAM);
-    //
-    // System.out.println(" === expATM " + expATM);
-    // System.out.println(" === expAM " + expAM);
-    //
-    // System.out.println("");
-    // }
-    //
-    // return super.visitAssignment(node, p);
-    // }
-
     @Override
     public Void visitUnary(UnaryTree node, Void p) {
-        // Note i++ in a for loop generates a subtype constraint that the type variable for i is a
-        // supertype of raw units internal, this subtype doesn't need to be generated
+        // TODO: make this more sensitive? ie make it only apply in inference mode?
+
+        // Note i++ in a for loop generates a subtype constraint that the type variable
+        // for i is a supertype of raw units internal, this subtype constraint doesn't
+        // need to be generated
         if ((node.getKind() == Kind.PREFIX_DECREMENT)
                 || (node.getKind() == Kind.PREFIX_INCREMENT)
                 || (node.getKind() == Kind.POSTFIX_DECREMENT)
@@ -227,7 +168,8 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
     // permit casts from dimensionless to a unit
     // cast to top are redundant but permitted
-    // cast to bottom is usually nonsense, but can appear in inference results... so permitted
+    // TODO: should this be permitted?
+    // cast to bottom is usually nonsense, but can appear in inference results...
     @Override
     public Void visitTypeCast(TypeCastTree node, Void p) {
         // TODO: infer mode
@@ -239,16 +181,16 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         // validate "node" instead of "node.getType()" to prevent duplicate errors.
         boolean valid = validateTypeOf(node) && validateTypeOf(node.getExpression());
         if (valid) {
-            UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
-
             // AnnotationMirror castType =
             // atypeFactory.getAnnotatedType(node).getAnnotationInHierarchy(unitsRepUtils.TOP);
             AnnotationMirror exprType =
                     atypeFactory
                             .getAnnotatedType(node.getExpression())
-                            .getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+                            .getEffectiveAnnotationInHierarchy(
+                                    UnitsRepresentationUtils.getInstance().TOP);
 
-            if (UnitsTypecheckUtils.unitsEqual(exprType, unitsRepUtils.DIMENSIONLESS)) {
+            if (UnitsTypecheckUtils.unitsEqual(
+                    exprType, UnitsRepresentationUtils.getInstance().DIMENSIONLESS)) {
                 if (atypeFactory.getDependentTypesHelper() != null) {
                     AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
                     atypeFactory.getDependentTypesHelper().checkType(type, node.getType());
@@ -331,10 +273,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     //        return super.visitMethodInvocation(node, p);
     //    }
 
+    // Notes:
     // Slots created in ATF
-
     // Constraints created in Visitor
-
-    // see
-    // https://github.com/topnessman/immutability/blob/master/src/main/java/pico/inference/PICOInferenceVisitor.java
 }

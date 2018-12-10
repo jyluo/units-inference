@@ -31,7 +31,10 @@ if [ -n "$1" ] && [ $1 = "GJE" ]; then
         --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
         --hacks="$IS_HACK" -afud ./annotated "${@:2}"
 else
+    # Logging level set to SEVERE to hide output spam
+    # see java.util.logging.Level
     $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
         --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
+        --logLevel "SEVERE" \
         --hacks="$IS_HACK" -afud ./annotated "$@"
 fi

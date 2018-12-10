@@ -145,10 +145,13 @@ public class UnitsZ3SmtEncoderUtils {
         return equalityEncoding;
     }
 
-    // sub <: super has 5 cases:
-    // sub = bot, or
-    // super = top, or
-    // sub = super
+    // sub <: super has 6 cases:
+    // bot <: bot
+    // bot <: x
+    // bot <: top
+    // x <: top
+    // top <: top
+    // x <: x
     public static BoolExpr subtype(Context ctx, Z3InferenceUnit subT, Z3InferenceUnit superT) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr subtypeEncoding =
@@ -157,11 +160,26 @@ public class UnitsZ3SmtEncoderUtils {
                         subT.getUnitsBottom(),
                         // super = top
                         superT.getUnknownUnits(),
-                        // sub = super
-                        equality(ctx, subT, superT));
+                        // if neither is top or bottom then they must be equal: sub = super
+                        ctx.mkAnd(
+                                ctx.mkNot(subT.getUnknownUnits()),
+                                ctx.mkNot(subT.getUnitsBottom()),
+                                ctx.mkNot(superT.getUnknownUnits()),
+                                ctx.mkNot(superT.getUnitsBottom()),
+                                equality(ctx, subT, superT)));
         /* @formatter:on // this is for eclipse formatter */
         return subtypeEncoding;
     }
+
+    // old subtype encoding
+    //  BoolExpr subtypeEncoding =
+    //  ctx.mkOr(
+    //          // sub = bot
+    //          subT.getUnitsBottom(),
+    //          // super = top
+    //          superT.getUnknownUnits(),
+    //          // sub = super
+    //          equality(ctx, subT, superT));
 
     // For Addition and Subtraction
     public static BoolExpr tripleEquality(

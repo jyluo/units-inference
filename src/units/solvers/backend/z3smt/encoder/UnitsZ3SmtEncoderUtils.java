@@ -169,17 +169,16 @@ public class UnitsZ3SmtEncoderUtils {
                                 equality(ctx, subT, superT)));
         /* @formatter:on // this is for eclipse formatter */
         return subtypeEncoding;
-    }
 
-    // old subtype encoding
-    //  BoolExpr subtypeEncoding =
-    //  ctx.mkOr(
-    //          // sub = bot
-    //          subT.getUnitsBottom(),
-    //          // super = top
-    //          superT.getUnknownUnits(),
-    //          // sub = super
-    //          equality(ctx, subT, superT));
+        // old subtype encoding, which potentially enforced equality even when unnecessary
+        // ctx.mkOr(
+        //   // sub = bot
+        //   subT.getUnitsBottom(),
+        //   // super = top
+        //   superT.getUnknownUnits(),
+        //   // sub = super
+        //   equality(ctx, subT, superT));
+    }
 
     // For Addition and Subtraction
     public static BoolExpr tripleEquality(

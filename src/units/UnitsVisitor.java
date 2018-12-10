@@ -166,14 +166,14 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         return super.visitBinary(binaryTree, p);
     }
 
-    // permit casts from dimensionless to a unit
-    // cast to top are redundant but permitted
-    // TODO: should this be permitted?
-    // cast to bottom is usually nonsense, but can appear in inference results...
+    // permit casts from dimensionless to any unit
     @Override
     public Void visitTypeCast(TypeCastTree node, Void p) {
-        // TODO: infer mode
         if (infer) {
+            // TODO: infer mode
+            // in infer mode, we are generating constraints for explicitly written casts in
+            // code we do not generate constraints here for the casts inserted for literals
+            // from inference output
             return super.visitTypeCast(node, p);
         }
         // typecheck mode
@@ -189,6 +189,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
                             .getEffectiveAnnotationInHierarchy(
                                     UnitsRepresentationUtils.getInstance().TOP);
 
+            // If expression type is dimensionless, permit it to be casted to anything
             if (UnitsTypecheckUtils.unitsEqual(
                     exprType, UnitsRepresentationUtils.getInstance().DIMENSIONLESS)) {
                 if (atypeFactory.getDependentTypesHelper() != null) {

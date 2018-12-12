@@ -29,7 +29,8 @@ for project in "${projects[@]}"; do
     # print project name without trailing slash
     printf '%*.*s\t' 0 $((${#project} - 1)) "$project"
 
-    cloc --quiet --csv --csv-delimiter="${tab}" --include-lang=Java ${project} | grep Java
+    result=$(cloc --quiet --csv --csv-delimiter="${tab}" --include-lang=Java ${project} | grep Java)
+    printf '%s\n' "$result"
 done
 
 printf '\n'

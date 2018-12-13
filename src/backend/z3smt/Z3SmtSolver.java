@@ -85,7 +85,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         Map<Integer, AnnotationMirror> result;
 
         // first time serialize and run in optimizing mode
-        optimizingMode = true;
+        optimizingMode = false;
         getUnsatCore = false;
 
         System.out.println("Now encoding with soft constraints");
@@ -337,7 +337,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             }
 
             // generate a soft constraint that we prefer equality for subtype
-            // TODO: perhapse prefer not bottom and prefer not top will suffice?
+            // TODO: perhaps prefer not bottom and prefer not top will suffice?
             if (optimizingMode && constraint instanceof SubtypeConstraint) {
                 SubtypeConstraint stc = (SubtypeConstraint) constraint;
 

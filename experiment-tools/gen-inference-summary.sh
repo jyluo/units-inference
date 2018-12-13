@@ -30,7 +30,7 @@ for project in "${projects[@]}"; do
     # number of successful sub-projects
     countKey="  successful-subtargets"
     padding=$(printf '%*.*s' 0 $((padlength - ${#countKey})) "$pad")
-    count=$(grep "Statistics" "$project/logs/infer.log" | wc -l)
+    count=$(grep "Statistics have been written to" "$project/logs/infer.log" | wc -l)
     echo -e "$countKey$padding\t$count"
 
     for key in "${statsKeys[@]}"; do

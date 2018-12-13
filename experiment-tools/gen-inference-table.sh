@@ -59,7 +59,7 @@ for project in "${projects[@]}"; do
         count=$(grep -w "Running java" "$project/logs/infer.log" | wc -l)
         printf '%s\t' "$count"
         # number of successful sub-projects
-        count=$(grep -w "Statistics" "$project/logs/infer.log" | wc -l)
+        count=$(grep -w "Statistics have been written to" "$project/logs/infer.log" | wc -l)
         printf '%s\t' "$count"
     else
         printf '%s\t' "1"

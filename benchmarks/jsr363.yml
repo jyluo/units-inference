@@ -1,0 +1,14 @@
+projects:
+
+# Crash in CF
+  hombucha:
+    giturl: https://github.com/ruffkat/hombucha.git
+    build: mvn -DskipTests=true compile
+    clean: mvn clean
+
+# Unsat:
+  # SKgateway:
+  #   giturl: https://github.com/jboynes/SKgateway.git
+  #   build: mvn -DskipTests=true compile
+  #   clean: mvn clean
+

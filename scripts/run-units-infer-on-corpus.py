@@ -91,12 +91,23 @@ def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('--corpus-file', dest='corpus_file', required=True)
     parser.add_argument('--corpus', dest='corpus')
-    parser.add_argument('--optimizing-mode', type=bool, dest='is_optimizing_mode')
-    parser.add_argument('--is-travis-build', type=bool, dest='is_travis_build')
+    parser.add_argument('--optimizing-mode', dest='is_optimizing_mode', action='store_true')
+    parser.add_argument('--no-optimizing-mode', dest='is_optimizing_mode', action='store_false')
+    parser.set_defaults(is_optimizing_mode=False)
+    parser.add_argument('--run-in-parallel', dest='run_in_parallel', action='store_true')
+    parser.add_argument('--no-run-in-parallel', dest='run_in_parallel', action='store_false')
+    parser.set_defaults(run_in_parallel=True)
+    parser.add_argument('--is-travis-build', dest='is_travis_build', action='store_true')
     args = parser.parse_args()
+
+    print("debug: {}".format(args.run_in_parallel))
 
     corpus_name = args.corpus if not args.corpus == None else os.path.splitext(args.corpus_file)[0]
     optimizing_mode = 'true' if args.is_optimizing_mode else 'false'
+
+    print("optimizing-mode: {}".format(optimizing_mode))
+    print("run-in-parallel: {}".format(args.run_in_parallel))
+    print("is-travis-build: {}".format(args.is_travis_build))
 
     BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, "benchmarks", corpus_name)
 
@@ -126,10 +137,12 @@ def main(argv):
     failed_projects = list()
 
     num_cpu = multiprocessing.cpu_count()
-    num_workers = max(num_cpu - 1, 1)
+    num_workers = 1
+    if args.run_in_parallel:
+        num_workers = max(num_cpu - 1, 1)
 
     print("Available CPUs in System = " + str(num_cpu))
-    print("Creating " + str(num_workers) + " workers in the pool")
+    print("Creating " + str(num_workers) + " worker(s) in the pool")
 
     pool = multiprocessing.Pool(num_workers)
 

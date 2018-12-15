@@ -11,7 +11,7 @@ CORPUSFILE=$WORKING_DIR/$PROJECTNAME.yml
 
 # Running Units Inference on travis benchmarks
 if [ -n "$1" ] && [ $1 = "travis" ]; then
-    time python $UI/scripts/run-units-infer-on-corpus.py --corpus-file $CORPUSFILE --is-travis-build true
+    time python $UI/scripts/run-units-infer-on-corpus.py --corpus-file $CORPUSFILE --is-travis-build
 else
     time python $UI/scripts/run-units-infer-on-corpus.py --corpus-file $CORPUSFILE
 fi

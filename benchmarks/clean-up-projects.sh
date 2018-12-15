@@ -8,15 +8,16 @@ fi
 
 cd $1
 
-find . -name "infer\.log" | xargs rm
-find . -name "*\.jaif" | xargs rm
-find . -name "*\.class" | xargs rm
-find . -name "solutions\.txt" | xargs rm
-find . -name "statistics\.txt" | xargs rm
-find . -name "unsatConstraints\.txt" | xargs rm
-find . -name "slots\.smt" | xargs rm
-find . -name "constraints\.smt" | xargs rm
-find . -name "z3Constraints\.smt" | xargs rm
-find . -name "z3ConstraintsUnsatCore\.smt" | xargs rm
-find . -name "z3ConstraintsGlob\.smt" | xargs rm
-find . -name "gjeConstraints*\.gje" | xargs rm
+find . -name "inferTiming\.log" | xargs rm -f
+find . -name "infer\.log" | xargs rm -f
+find . -name "*\.jaif" | xargs rm -f
+find . -name "*\.class" | xargs rm -f
+find . -name "solutions\.txt" | xargs rm -f
+find . -name "statistics\.txt" | xargs rm -f
+find . -name "unsatConstraints\.txt" | xargs rm -f
+find . -name "slots\.smt" | xargs rm -f
+find . -name "constraints\.smt" | xargs rm -f
+find . -name "z3Constraints\.smt" | xargs rm -f
+find . -name "z3ConstraintsUnsatCore\.smt" | xargs rm -f
+find . -name "z3ConstraintsGlob\.smt" | xargs rm -f
+find . -name "gjeConstraints*\.gje" | xargs rm -f

@@ -70,14 +70,12 @@ def run_worker(project_dir, project_name, project_attrs, optimizing_mode):
                 log.write("Time taken by {}: \t{}\t seconds\n".format(project_name, end - start))
 
                 print("Completed job for {}".format(project_name))
-
                 return rtn_code
+
             except SystemExit:  # triggered by pool.terminate()
                 if proc is not None:
                     print("Killing {}".format(project_name))
                     proc.terminate()
-                    # proc.kill()
-
                 return 1
 
     except KeyboardInterrupt:

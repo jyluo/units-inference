@@ -37,7 +37,24 @@ pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
 # Print header row
-printf 'Project\tinference failed\texpected-subtargets\tsuccessful-subtargets\tserialization-time(ms)\tsolving-time(ms)\tunsat-serialization-time(ms)\tunsat-solving-time(ms)\tz3-bools\tz3-ints\tz3-asserts\tz3-assert-softs\t'
+declare -a headers=(
+    'Project' \
+    'inference-failed' \
+    'expected-subtargets' \
+    'successful-subtargets' \
+    'serialization-time(ms)' \
+    'solving-time(ms)' \
+    'unsat-serialization-time(ms)' \
+    'unsat-solving-time(ms)' \
+    'process-time(sec)'\
+    'z3-bools' \
+    'z3-ints' \
+    'z3-asserts' \
+    'z3-assert-softs')
+
+for key in "${headers[@]}"; do
+    printf '%s\t' "$key"
+done
 for key in "${statsKeys[@]}"; do
     printf '%s\t' "$key"
 done
@@ -48,18 +65,21 @@ printf '\n'
 
 # Print each project
 for project in "${projects[@]}"; do
-    # print project name without trailing slash
-    printf '%*.*s\t' 0 $((${#project} - 1)) "$project"
+    # remove trailing slash in project name
+    project=$(printf '%*.*s' 0 $((${#project} - 1)) "$project")
 
-    if [ -f $project/logs/infer.log ]; then
+    printf '%s\t' "$project"
+
+    InferenceLogFile=$project/logs/infer.log
+    if [ -f $InferenceLogFile ]; then
         # inference success?
-        count=$(grep -w "!!! The set of constraints is unsatisfiable! !!!" "$project/logs/infer.log" | wc -l)
+        count=$(grep -w "!!! The set of constraints is unsatisfiable! !!!" "$InferenceLogFile" | wc -l)
         printf '%s\t' "$count"
         # number of sub-projects
-        count=$(grep -w "Running java" "$project/logs/infer.log" | wc -l)
+        count=$(grep -w "Running java" "$InferenceLogFile" | wc -l)
         printf '%s\t' "$count"
         # number of successful sub-projects
-        count=$(grep -w "Statistics have been written to" "$project/logs/infer.log" | wc -l)
+        count=$(grep -w "Statistics have been written to" "$InferenceLogFile" | wc -l)
         printf '%s\t' "$count"
     else
         printf '%s\t' "1"
@@ -78,6 +98,15 @@ for project in "${projects[@]}"; do
         for key in "${statsTimeKeys[@]}"; do
             printf '%s\t' "0"
         done
+    fi
+
+    InferenceTimingFile=$project/inferTiming.log
+    if [ -f $InferenceTimingFile ]; then
+        grep "Time taken by" "$InferenceTimingFile" | \
+            cut -d $'\t' -f 2 | \
+            xargs printf '%s\t'
+    else
+        printf '%s\t' "0"
     fi
 
     ConstraintsStatsFile=$project/z3ConstraintsGlob.smt
@@ -114,7 +143,7 @@ for project in "${projects[@]}"; do
     fi
 
     InferenceSolutionsFile=$project/solutions.txt
-    if [ -f $project/solutions.txt ]; then
+    if [ -f $InferenceSolutionsFile ]; then
         for key in "${constantSlotsOutputKeys[@]}"; do
             # sift through the log files to find all the constant slot output values, sum them up and print it
             grep -w "$key" "$InferenceSolutionsFile" | wc -l | \

@@ -122,8 +122,6 @@ def main(argv):
 
     print("----- Fetching corpus done. -----")
 
-
-
     print("----- Running Units Inference on corpus... -----")
 
     successful_projects = list()

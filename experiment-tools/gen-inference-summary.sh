@@ -19,18 +19,30 @@ pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
 for project in "${projects[@]}"; do
-    # print project name and new lines without trailing slash
-    printf '\n%*.*s\n' 0 $((${#project} - 1)) "$project"
+    # remove trailing slash in project name
+    project=$(printf '%*.*s' 0 $((${#project} - 1)) "$project")
+
+    printf '\n%s\n' "$project"
+
+    InferenceLogFile=$project/logs/infer.log
 
     # number of sub-projects
     countKey="  expected-subtargets"
     padding=$(printf '%*.*s' 0 $((padlength - ${#countKey})) "$pad")
-    count=$(grep "Running java" "$project/logs/infer.log" | wc -l)
+    if [ -f $InferenceLogFile ]; then
+        count=$(grep "Running java" "$InferenceLogFile" | wc -l)
+    else
+        count=0
+    fi
     echo -e "$countKey$padding\t$count"
     # number of successful sub-projects
     countKey="  successful-subtargets"
     padding=$(printf '%*.*s' 0 $((padlength - ${#countKey})) "$pad")
-    count=$(grep "Statistics have been written to" "$project/logs/infer.log" | wc -l)
+    if [ -f $InferenceLogFile ]; then
+        count=$(grep "Statistics have been written to" "$InferenceLogFile" | wc -l)
+    else
+        count=0
+    fi
     echo -e "$countKey$padding\t$count"
 
     for key in "${statsKeys[@]}"; do
@@ -38,10 +50,27 @@ for project in "${projects[@]}"; do
         keyArg="  ${key}"
         # string consisting of the stats key, count, and space padding to 30 total characters
         padding=$(printf '%*.*s' 0 $((padlength - ${#keyArg})) "$pad")
-        # sift through the log files to find all the statistics values, sum them up and print it
-        grep "$key" "$project/logs/infer.log" | cut -d ':' -f 2 | \
-            awk -v p="${keyArg}${padding}\t" '{sum += $1} END {print p sum+0}'
+
+        if [ -f $InferenceLogFile ]; then
+            # sift through the log files to find all the statistics values, sum them up and print it
+            grep "$key" "$InferenceLogFile" | cut -d ':' -f 2 | \
+                awk -v p="${keyArg}${padding}\t" '{sum += $1} END {print p sum+0}'
+        else
+            echo -e "${keyArg}${padding}\t0"
+        fi
     done
+
+    InferenceTimingFile=$project/inferTiming.log
+    countKey="  process-time(sec)"
+    padding=$(printf '%*.*s' 0 $((padlength - ${#countKey})) "$pad")
+    if [ -f $InferenceTimingFile ]; then
+        count=$(grep "Time taken by" "$InferenceTimingFile" | \
+            cut -d $'\t' -f 2)
+    else
+        count=0
+    fi
+    echo -e "$countKey$padding\t$count"
+
 done
 
 printf '\n'

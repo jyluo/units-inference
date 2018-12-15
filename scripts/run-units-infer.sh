@@ -16,6 +16,8 @@ CHECKER=units.UnitsChecker
 SOLVER=units.solvers.backend.UnitsSolverEngine
 if [ -n "$1" ] && [ $1 = "GJE" ]; then
     SOLVERARGS=solver=GJE,collectStatistics=true,writeSolutions=true,noAppend=true
+else if [ -n "$1" ] && [ $1 = "true" ]; then
+    SOLVERARGS=solver=Z3smt,optimizingMode=true,collectStatistics=true,writeSolutions=true,noAppend=true
 else
     SOLVERARGS=solver=Z3smt,collectStatistics=true,writeSolutions=true,noAppend=true
 fi

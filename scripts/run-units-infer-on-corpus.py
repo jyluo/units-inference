@@ -31,7 +31,7 @@ def sleep_delay(n):
 class KeyboardInterruptException(Exception): pass
 
 # Run a single experiment and return the final exit code
-def run_worker(project_dir, project_name, project_attrs):
+def run_worker(project_dir, project_name, project_attrs, optimizing_mode):
     print("Running {} on worker process (pid = {})".format(project_name, os.getpid()))
 
     try:
@@ -57,7 +57,7 @@ def run_worker(project_dir, project_name, project_attrs):
                 proc.wait()
                 log.write("Cleaning done.\n")
 
-                cmd = [INFER_SCRIPT, project_attrs["build"]]
+                cmd = [INFER_SCRIPT, optimizing_mode, project_attrs["build"]]
                 log.write("Running command: {}\n".format(cmd))
                 log.flush()   # manual flush required to sequence subprocess content
                 start = time.time()
@@ -93,10 +93,12 @@ def main(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('--corpus-file', dest='corpus_file', required=True)
     parser.add_argument('--corpus', dest='corpus')
+    parser.add_argument('--optimizing-mode', type=bool, dest='is_optimizing_mode')
     parser.add_argument('--is-travis-build', type=bool, dest='is_travis_build')
     args = parser.parse_args()
 
     corpus_name = args.corpus if not args.corpus == None else os.path.splitext(args.corpus_file)[0]
+    optimizing_mode = 'true' if args.is_optimizing_mode else 'false'
 
     BENCHMARK_DIR = os.path.join(UNITS_INFERENCE_DIR, "benchmarks", corpus_name)
 
@@ -143,8 +145,9 @@ def main(argv):
             project_dir = os.path.join(BENCHMARK_DIR, project_name)
             project_names.append(project_name)
             # add the jobs into the job queue, execute asynchronously from this process
-            # each job is a call to run_worker(project_dir, project_name, project_attrs)
-            results.append(pool.apply_async(run_worker, (project_dir, project_name, project_attrs)))
+            # each job is a call to run_worker(project_dir, project_name, project_attrs, optimizing_mode)
+            results.append(pool.apply_async(run_worker,
+                (project_dir, project_name, project_attrs, optimizing_mode)))
 
         total_jobs = len(results)
         print("Queued {} jobs".format(total_jobs))

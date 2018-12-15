@@ -21,12 +21,15 @@ export LD_LIBRARY_PATH=$CFI_LIB
 CHECKER=units.UnitsChecker
 SOLVER=units.solvers.backend.UnitsSolverEngine
 # DEBUG_SOLVER=checkers.inference.solver.DebugSolver
-SOLVERARGS="solver=Z3smt,collectStatistics=true,writeSolutions=true,noAppend=true"
+
+OPTIMIZINGMODE=$1
+shift
+SOLVERARGS="solver=Z3smt,optimizingMode=$OPTIMIZINGMODE,collectStatistics=true,writeSolutions=true,noAppend=true"
 
 DLJC=$JSR308/do-like-javac
 
 # Parsing build command of the target program
-build_cmd="$1"
+build_cmd=$1
 shift
 while [ "$#" -gt 0 ]
 do

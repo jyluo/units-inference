@@ -1,5 +1,6 @@
 projects:
+# Projects for swapping out UOMO with Units
   siddhi-execution-unitconversion:
     giturl: https://github.com/jyluo-benchmarks/siddhi-execution-unitconversion.git
-    build: mvn install
-    clean: mvn clean
+    build: mvn -B install
+    clean: mvn -B clean

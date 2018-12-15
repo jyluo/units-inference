@@ -1,14 +1,15 @@
 projects:
+# Projects for typechecking / inferring jsr363 code
 
 # Crash in CF
   hombucha:
     giturl: https://github.com/ruffkat/hombucha.git
-    build: mvn -DskipTests=true compile
-    clean: mvn clean
+    build: mvn -B -DskipTests compile
+    clean: mvn -B clean
 
 # Unsat:
   # SKgateway:
   #   giturl: https://github.com/jboynes/SKgateway.git
-  #   build: mvn -DskipTests=true compile
-  #   clean: mvn clean
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn -B clean
 

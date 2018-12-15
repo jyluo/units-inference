@@ -3,37 +3,37 @@ projects:
   FaceDetection:
     giturl: https://github.com/jyluo-benchmarks/FaceDetection.git
     # git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
-    build: mvn compile
-    clean: mvn clean
+    build: mvn -B compile
+    clean: mvn -B clean
 
   # size: ~800 slots ~1000 constraints
   imgscalr:
     giturl: https://github.com/jyluo-benchmarks/imgscalr.git
     # git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
-    build: mvn compile
-    clean: mvn clean
+    build: mvn -B compile
+    clean: mvn -B clean
 
   # size: ~6000 slots ~6000 constraints
   # exp4j:
   #   giturl: https://github.com/jyluo-benchmarks/exp4j.git
-  #   build: mvn install
-  #   clean: mvn clean
+  #   build: mvn -B install
+  #   clean: mvn -B clean
 
   # size: ~22500 slots ~28000 constraints
   # seems to time out a lot
   # jblas:
   #   giturl: https://github.com/jyluo-benchmarks/jblas.git
-  #   build: mvn install
-  #   clean: mvn clean
+  #   build: mvn -B install
+  #   clean: mvn -B clean
 
   # size: ~17500 slots ~20000 constraints
   # JLargeArrays:
   #   giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
-  #   build: mvn install
-  #   clean: mvn clean
+  #   build: mvn -B install
+  #   clean: mvn -B clean
 
   # size: ~12500 slots ~19000 constraints
   # jReactPhysics3D:
   #  giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
-  #  build: mvn install
-  #  clean: mvn clean
+  #  build: mvn -B install
+  #  clean: mvn -B clean

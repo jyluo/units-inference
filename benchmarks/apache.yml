@@ -5,8 +5,8 @@ projects:
 # https://github.com/jyluo-benchmarks/sis/commit/0f95e588192a4ce1b19ae35ce138922ef5ff5536
   sis:
     giturl: https://github.com/jyluo-benchmarks/sis.git
-    build: mvn install -DskipTests
-    clean: mvn clean
+    build: mvn -B -DskipTests install
+    clean: mvn -B clean
 
 # requirements:
 # Java 10
@@ -20,4 +20,4 @@ projects:
 
 # compile:
 
-# mvn install -DskipTests
+# mvn -B install -DskipTests

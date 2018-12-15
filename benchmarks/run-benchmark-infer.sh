@@ -3,8 +3,10 @@
 if ! [ -n "$1" ]; then
     echo "This script runs units in infer mode on all of the projects from a corpus"
     echo "Give the yml file name by itself without the file extension"
+    echo "By default this runs in non-optimizing mode"
     echo "usage: $0 [optimizing-mode] <some-corpus>"
     echo "eg: $0 projects"
+    echo "eg: $0 true projects"
     exit 1
 fi
 

@@ -33,4 +33,4 @@ else
     time python $UI/scripts/run-units-infer-on-corpus.py --corpus-file $CORPUSFILE
 fi
 
-echo "Real = clock, user = sum of processes, sys = sum of kernel"
+echo "Note: real = clock, user = sum of processes, sys = sum of kernel"

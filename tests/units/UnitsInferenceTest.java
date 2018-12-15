@@ -30,7 +30,7 @@ public class UnitsInferenceTest extends CFInferenceTest {
     public Pair<String, List<String>> getSolverNameAndOptions() {
         final String solverName = UnitsSolverEngine.class.getCanonicalName();
         List<String> solverOptions = new ArrayList<>();
-        solverOptions.add("solver=Z3smt");
+        solverOptions.add("solver=Z3smt,optimizingMode=true");
         return Pair.<String, List<String>>of(solverName, solverOptions);
     }
 

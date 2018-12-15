@@ -13,6 +13,7 @@ import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.ExternalSolverUtils;
 import checkers.inference.solver.util.FileUtils;
+import checkers.inference.solver.util.SolverArg;
 import checkers.inference.solver.util.SolverEnvironment;
 import checkers.inference.solver.util.Statistics;
 import com.microsoft.z3.BoolExpr;
@@ -32,6 +33,11 @@ import org.checkerframework.javacutil.BugInCF;
 // TODO: make this an abstract class with common features
 public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
+
+    public enum Z3SolverEngineArg implements SolverArg {
+        /** option to use optimizing mode or not */
+        optimizingMode
+    }
 
     protected final Context ctx;
     protected com.microsoft.z3.Optimize solver;
@@ -84,8 +90,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
-        // first time serialize and run in optimizing mode
-        optimizingMode = false;
+        // serialize based on user choice of running in optimizing or non-optimizing mode
+        optimizingMode = solverEnvironment.getBoolArg(Z3SolverEngineArg.optimizingMode);
         getUnsatCore = false;
 
         System.out.println("Now encoding with soft constraints");

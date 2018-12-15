@@ -75,7 +75,7 @@ def run_worker(project_dir, project_name, project_attrs, optimizing_mode):
             except SystemExit:  # triggered by pool.terminate()
                 if proc is not None:
                     print("Killing {}".format(project_name))
-                    proc.terminate()
+                    proc.kill()
                 return 1
 
     except KeyboardInterrupt:
@@ -141,6 +141,8 @@ def main(argv):
     if args.run_in_parallel:
         num_workers = max(num_cpu - 1, 1)
 
+    # TODO: with 8gb ram, might be able to run 2 parallel z3 instances
+
     print("Available CPUs in System = " + str(num_cpu))
     print("Creating " + str(num_workers) + " worker(s) in the pool")
 
@@ -189,6 +191,7 @@ def main(argv):
         print("Caught KeyboardInterrupt, terminating workers")
         pool.terminate()
         pool.join()
+        # TODO: kill the relevant z3 processes too, via matching project names
         sys.exit(1)
 
     else:

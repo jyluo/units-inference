@@ -11,6 +11,7 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
+import checkers.inference.qual.VarAnnot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
@@ -19,7 +20,6 @@ import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
@@ -39,6 +39,7 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
+import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
@@ -67,7 +68,12 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // and it should already have some base units
         assert !unitsRepUtils.baseUnits().isEmpty();
 
-        unitsRepUtils.VARANNOT = getVarAnnot();
+        // unitsRepUtils.VARANNOT = getVarAnnot();
+
+        // build in the same way as DefaultSlotManager's varannot
+        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, VarAnnot.class);
+        builder.setValue("value", -1);
+        unitsRepUtils.VARANNOT = builder.build();
 
         postInit();
     }
@@ -121,60 +127,85 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             super(multiGraphFactory);
         }
 
-        // Programmatically set UnitsRepresentationUtils.BOTTOM as the bottom
+        // In inference mode, the only bottom is VarAnnot
         @Override
         protected Set<AnnotationMirror> findBottoms(
                 Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {
             Set<AnnotationMirror> newBottoms = super.findBottoms(supertypes);
-
             newBottoms.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            newBottoms.add(unitsRepUtils.BOTTOM);
-
-            // set direct supertypes of bottom
-            Set<AnnotationMirror> supertypesOfBottom = new LinkedHashSet<>();
-            supertypesOfBottom.add(unitsRepUtils.TOP);
-            supertypes.put(unitsRepUtils.BOTTOM, supertypesOfBottom);
-
             return newBottoms;
         }
 
-        // Programmatically set UnitsRepresentationUtils.TOP as the top
+        // In inference mode, the only qualifier is VarAnnot. The poly qualifiers are
+        // PolyAll and any poly qual from the type system.
         @Override
         protected void finish(
                 QualifierHierarchy qualHierarchy,
-                Map<AnnotationMirror, Set<AnnotationMirror>> supertypes,
+                Map<AnnotationMirror, Set<AnnotationMirror>> supertypesMap,
                 Map<AnnotationMirror, AnnotationMirror> polyQualifiers,
                 Set<AnnotationMirror> tops,
                 Set<AnnotationMirror> bottoms,
                 Object... args) {
-            super.finish(qualHierarchy, supertypes, polyQualifiers, tops, bottoms, args);
+            super.finish(qualHierarchy, supertypesMap, polyQualifiers, tops, bottoms, args);
 
-            // System.out.println(" === Inference ATF ");
-            // System.out.println(" fullMap " + supertypes);
-            // System.out.println(" polyQualifiers " + polyQualifiers);
-            // System.out.println(" tops " + tops);
-            // System.out.println(" bottoms " + bottoms);
-
-            // TODO: see what needs to be here in Inference finish
-
-            // in Ontology, there's varannot, ontology raw, bottom, polyontology, polyall,
-            // ...
+            // TODO: this update, which is sensible to keep the inference qual hierarchy clean, causes
+            // crashes in creating constant slots for @PolyUnit
+            // disabiling for now
 
             /*
-             * --- full map:
-             * {@checkers.inference.qual.VarAnnot=[@org.checkerframework.framework.qual.PolyAll]
-             * , @ontology.qual.Ontology=[], @ontology.qual.Ontology(values={ontology.qual.
-             * OntologyValue.BOTTOM})=[@ontology.qual.Ontology(values={ontology.qual.OntologyValue.
-             * TOP}), @ontology.qual.PolyOntology, @org.checkerframework.framework.qual.PolyAll]
-             * , @ontology.qual.PolyOntology=[@ontology.qual.Ontology, @org.checkerframework.
-             * framework.qual.PolyAll], @org.checkerframework.framework.qual.PolyAll=[@checkers.
-             * inference.qual.VarAnnot, @ontology.qual.Ontology]}
+             * Map before update:
+            supertypesMap
+              @checkers.inference.qual.VarAnnot -> [@org.checkerframework.framework.qual.PolyAll]
+              @org.checkerframework.framework.qual.PolyAll -> [@checkers.inference.qual.VarAnnot, @units.qual.UnitsInternal]
+              @units.qual.PolyUnit -> [@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsInternal]
+              @units.qual.UnitsInternal -> []
+            polyQualifiers {null=@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsInternal=@units.qual.PolyUnit}
+            tops [@checkers.inference.qual.VarAnnot]
+            bottoms [@checkers.inference.qual.VarAnnot]
              */
+            //
+            // // Remove UnitsInternal from super of PolyAll
+            // assert supertypesMap.containsKey(unitsRepUtils.POLYALL);
+            // Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
+            // polyAllSupers.addAll(supertypesMap.get(unitsRepUtils.POLYALL));
+            // polyAllSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            // supertypesMap.put(unitsRepUtils.POLYALL,
+            // Collections.unmodifiableSet(polyAllSupers));
+            //
+            // // Remove UnitsInternal from super of PolyUnit
+            // assert supertypesMap.containsKey(unitsRepUtils.POLYUNIT);
+            // Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
+            // polyUnitSupers.addAll(supertypesMap.get(unitsRepUtils.POLYUNIT));
+            // polyUnitSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            // supertypesMap.put(unitsRepUtils.POLYUNIT,
+            // Collections.unmodifiableSet(polyUnitSupers));
+            //
+            // // Remove UnitsInternal from map
+            // supertypesMap.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            //
+            // // Remove UnitsInternal from polyQualifiers
+            // assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
+            // polyQualifiers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            //
+            // System.err.println(" === Inference ATF ");
+            // System.err.println(" supertypesMap ");
+            // for (Entry<?, ?> e : supertypesMap.entrySet()) {
+            // System.err.println(" " + e.getKey() + " -> " + e.getValue());
+            // }
+            // System.err.println(" polyQualifiers " + polyQualifiers);
+            // System.err.println(" tops " + tops);
+            // System.err.println(" bottoms " + bottoms);
 
-            // System.out.println(" === supertypes: " + supertypes);
-            // System.out.println(" === polyQualifiers: " + polyQualifiers);
-            // System.out.println(" === tops: " + tops);
-            // System.out.println(" === bottoms: " + bottoms);
+            /*
+            * Map after update:
+            supertypesMap
+              @checkers.inference.qual.VarAnnot -> [@org.checkerframework.framework.qual.PolyAll]
+              @org.checkerframework.framework.qual.PolyAll -> [@checkers.inference.qual.VarAnnot]
+              @units.qual.PolyUnit -> [@org.checkerframework.framework.qual.PolyAll]
+            polyQualifiers {null=@org.checkerframework.framework.qual.PolyAll}
+            tops [@checkers.inference.qual.VarAnnot]
+            bottoms [@checkers.inference.qual.VarAnnot]
+            */
         }
     }
 

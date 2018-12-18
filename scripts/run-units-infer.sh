@@ -16,7 +16,7 @@ CHECKER=units.UnitsChecker
 SOLVER=units.solvers.backend.UnitsSolverEngine
 if [ -n "$1" ] && [ $1 = "GJE" ]; then
     SOLVERARGS=solver=GJE,collectStatistics=true,writeSolutions=true,noAppend=true
-else if [ -n "$1" ] && [ $1 = "true" ]; then
+elif [ -n "$1" ] && [ $1 = "true" ]; then
     SOLVERARGS=solver=Z3smt,optimizingMode=true,collectStatistics=true,writeSolutions=true,noAppend=true
 else
     SOLVERARGS=solver=Z3smt,collectStatistics=true,writeSolutions=true,noAppend=true
@@ -32,11 +32,16 @@ if [ -n "$1" ] && [ $1 = "GJE" ]; then
     $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
         --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
         --hacks="$IS_HACK" -afud ./annotated "${@:2}"
+elif [ -n "$1" ] && [ $1 = "true" ]; then
+    $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
+        --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
+        --hacks="$IS_HACK" -afud ./annotated "${@:2}"
 else
     # Logging level set to SEVERE to hide output spam
+    # --logLevel "SEVERE" \
     # see java.util.logging.Level
     $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \
         --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
-        --logLevel "SEVERE" \
+        --logLevel "INFO" \
         --hacks="$IS_HACK" -afud ./annotated "$@"
 fi

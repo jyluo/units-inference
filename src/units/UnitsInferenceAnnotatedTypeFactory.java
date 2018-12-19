@@ -11,7 +11,6 @@ import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
-import checkers.inference.qual.VarAnnot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MemberSelectTree;
@@ -39,7 +38,6 @@ import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
-import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
@@ -71,9 +69,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // unitsRepUtils.VARANNOT = getVarAnnot();
 
         // build in the same way as DefaultSlotManager's varannot
-        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, VarAnnot.class);
-        builder.setValue("value", -1);
-        unitsRepUtils.VARANNOT = builder.build();
+        // AnnotationBuilder builder = new AnnotationBuilder(processingEnv,
+        // VarAnnot.class);
+        // builder.setValue("value", -1);
+        // unitsRepUtils.VARANNOT = builder.build();
 
         postInit();
     }

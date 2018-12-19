@@ -1,6 +1,5 @@
 package units.representation;
 
-import checkers.inference.qual.VarAnnot;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,8 +66,8 @@ public class UnitsRepresentationUtils {
 
     public AnnotationMirror SURFACE_BOTTOM;
 
-    /** Instance of {@link VarAnnot} for use in UnitsVisitor in infer mode. */
-    public AnnotationMirror VARANNOT;
+    // /** Instance of {@link VarAnnot} for use in UnitsVisitor in infer mode. */
+    // public AnnotationMirror VARANNOT;
 
     // public AnnotationMirror METER;
 

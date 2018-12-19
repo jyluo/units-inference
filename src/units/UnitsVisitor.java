@@ -1,5 +1,6 @@
 package units;
 
+import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -9,6 +10,7 @@ import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.ArithmeticVariableSlot;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
+import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
@@ -59,12 +61,43 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             ConstraintManager constraintManager =
                     InferenceMain.getInstance().getConstraintManager();
 
-            AnnotatedTypeMirror lhsATM = atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
-            AnnotatedTypeMirror rhsATM =
-                    atypeFactory.getAnnotatedType(binaryTree.getRightOperand());
-            // Note: lhs and rhs either contains constant slots or var slots, resolved
-            VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
-            VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
+            // AnnotatedTypeMirror lhsATM =
+            // atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
+            // AnnotatedTypeMirror rhsATM =
+            // atypeFactory.getAnnotatedType(binaryTree.getRightOperand());
+            // // Note: lhs and rhs either contains constant slots or var slots, resolved
+            // VariableSlot lhs = slotManager.getVariableSlot(lhsATM);
+            // VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
+
+            // Candidate Fix 1:
+            InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
+
+            AnnotatedTypeMirror lhsATM = iatf.getAnnotatedType(binaryTree.getLeftOperand());
+            AnnotatedTypeMirror rhsATM = iatf.getAnnotatedType(binaryTree.getRightOperand());
+            // For types such as T extends @VarAnnot() Class, use @VarAnnot(), by grabbing
+            // the effective annotation in varannot hierarchy
+            AnnotationMirror lhsEAM = lhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+            AnnotationMirror rhsEAM = rhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+            Slot lhs = slotManager.getSlot(lhsEAM);
+            Slot rhs = slotManager.getSlot(rhsEAM);
+
+            // System.err.println("");
+            //
+            // System.err.println("lhsATM: " + lhsATM);
+            // System.err.println("lhs EAs: " + lhsATM.getEffectiveAnnotations());
+            // System.err.println("lhs: " + lhs);
+            // System.err.println("lhsEAM: " + lhsEAM);
+            // System.err.println("lhsES: " + lhsES);
+            // System.err.println("");
+            //
+            // System.err.println("rhsATM: " + rhsATM);
+            // System.err.println("rhs EAs: " + rhsATM.getEffectiveAnnotations());
+            // System.err.println("rhs: " + rhs);
+            // System.err.println("rhsEAM: " + rhsEAM);
+            // System.err.println("rhsES: " + rhsES);
+            // System.err.println("");
+            //
+            // System.err.println("");
 
             Kind kind = binaryTree.getKind();
             switch (binaryTree.getKind()) {
@@ -110,7 +143,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         // Note to self: in typecheck mode, always use getEffectiveAnnotationInHierarchy
 
         // if (atypeFactory instanceof UnitsAnnotatedTypeFactory)
-        UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) atypeFactory;
+        UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) realChecker.getTypeFactory();
         UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
 
         AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(binaryTree.getLeftOperand());

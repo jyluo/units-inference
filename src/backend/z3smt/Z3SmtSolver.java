@@ -94,7 +94,12 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         optimizingMode = solverEnvironment.getBoolArg(Z3SolverEngineArg.optimizingMode);
         getUnsatCore = false;
 
-        System.err.println("Now encoding with soft constraints");
+        if (optimizingMode) {
+            System.err.println("Encoding for optimizing mode");
+        } else {
+            System.err.println("Encoding for non-optimizing mode");
+        }
+
         serializeSMTFileContents();
 
         solvingStart = System.currentTimeMillis();

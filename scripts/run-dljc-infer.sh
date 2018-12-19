@@ -24,7 +24,7 @@ SOLVER=units.solvers.backend.UnitsSolverEngine
 
 OPTIMIZINGMODE=$1
 shift
-SOLVERARGS="solver=Z3smt,optimizingMode=$OPTIMIZINGMODE,collectStatistics=true,writeSolutions=true,noAppend=true"
+SOLVERARGS="solver=Z3smt,optimizingMode=$OPTIMIZINGMODE,collectStatistics=true,writeSolutions=true,noAppend=false"
 
 DLJC=$JSR308/do-like-javac
 

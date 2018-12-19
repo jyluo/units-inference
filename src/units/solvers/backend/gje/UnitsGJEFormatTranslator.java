@@ -56,7 +56,7 @@ public class UnitsGJEFormatTranslator
 
         final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
 
-        System.out.println("== Slot serialization map ==");
+        System.err.println("== Slot serialization map ==");
         // get a set of unique slots used in the constraints
         UniqueSlotCollector slotsCollector = new UniqueSlotCollector();
         for (Constraint constraint : constraints) {
@@ -66,7 +66,7 @@ public class UnitsGJEFormatTranslator
         for (VariableSlot slot : slotsCollector.getSlots()) {
             slotGJEtoCFIMap.put(gjeID, slot);
             slotCFItoGJEMap.put(slot, gjeID);
-            System.out.println("ID: " + gjeID + " --> slot " + slot.serialize(toStringSerializer));
+            System.err.println("ID: " + gjeID + " --> slot " + slot.serialize(toStringSerializer));
             gjeID++;
         }
 
@@ -110,7 +110,7 @@ public class UnitsGJEFormatTranslator
             anno = unitsRepUtils.DIMENSIONLESS;
         }
 
-        // System.out.println(" ==== creating constant slot for " + anno);
+        // System.err.println(" ==== creating constant slot for " + anno);
 
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
@@ -136,13 +136,13 @@ public class UnitsGJEFormatTranslator
 
     @Override
     public GJEInferenceUnit serialize(VariableSlot slot) {
-        // System.out.println("Serializing vs " + slot);
+        // System.err.println("Serializing vs " + slot);
         return serializeVarSlot(slot);
     }
 
     @Override
     public GJEInferenceUnit serialize(ConstantSlot slot) {
-        // System.out.println("Serializing cs " + slot);
+        // System.err.println("Serializing cs " + slot);
         return serializeConstantSlot(slot);
     }
 
@@ -205,7 +205,7 @@ public class UnitsGJEFormatTranslator
         // }
         //
         // // DEBUG:
-        // // System.out.println(" " + varName + " => " + value);
+        // // System.err.println(" " + varName + " => " + value);
         // // 10-s => -3
         // // 10-m => 1
         // // 10-Prefix => 0

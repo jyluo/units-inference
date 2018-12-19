@@ -95,7 +95,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)
                     || AnnotationUtils.areSameByClass(metaAnno, IsBaseUnit.class)) {
 
-                // System.out.println(" returning prebuilt alias for " + anno.toString());
+                // System.err.println(" returning prebuilt alias for " + anno.toString());
 
                 return unitsRepUtils.getInternalAliasUnit(anno);
             }
@@ -181,8 +181,8 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 Object... args) {
             super.finish(qualHierarchy, supertypesMap, polyQualifiers, tops, bottoms, args);
 
-            // System.out.println(" === ATF ");
-            // System.out.println(" pre - fullMap " + fullMap);
+            // System.err.println(" === ATF ");
+            // System.err.println(" pre - fullMap " + fullMap);
 
             // swap every instance of RAWUNITSINTERNAL with TOP
             assert supertypesMap.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
@@ -237,7 +237,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
         @Override
         public boolean isSubtype(AnnotationMirror subAnno, AnnotationMirror superAnno) {
-            // System.out.println(" === checking SUBTYPE \n "
+            // System.err.println(" === checking SUBTYPE \n "
             // + getAnnotationFormatter().formatAnnotationMirror(subAnno) + " <:\n"
             // + getAnnotationFormatter().formatAnnotationMirror(superAnno) + "\n");
 
@@ -278,7 +278,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 boolean result = UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
 
                 // if (AnnotationUtils.areSame(superAnno, unitsRepUtils.METER)) {
-                // System.out.println(" === checking SUBTYPE \n "
+                // System.err.println(" === checking SUBTYPE \n "
                 // + getAnnotationFormatter().formatAnnotationMirror(subAnno) + " <:\n"
                 // + getAnnotationFormatter().formatAnnotationMirror(superAnno) + "\n"
                 // + " result: " + result);

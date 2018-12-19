@@ -280,7 +280,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     //                case "tanh":
     //                case "toDegrees":
     //                case "toRadians":
-    //                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+    //                    System.err.println(" visited: " + classOfMethod + "." + methodName);
     //                    break;
     //                default:
     //                    break;
@@ -289,7 +289,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     //            switch (methodName) {
     //                case "currentTimeMillis":
     //                case "nanoTime":
-    //                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+    //                    System.err.println(" visited: " + classOfMethod + "." + methodName);
     //                    break;
     //                default:
     //                    break;
@@ -297,7 +297,7 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     //        } else if (classOfMethod.contentEquals("java.lang.Thread")) {
     //            switch (methodName) {
     //                case "sleep":
-    //                    System.out.println(" visited: " + classOfMethod + "." + methodName);
+    //                    System.err.println(" visited: " + classOfMethod + "." + methodName);
     //                    break;
     //                default:
     //                    break;

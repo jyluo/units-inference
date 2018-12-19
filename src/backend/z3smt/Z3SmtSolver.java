@@ -94,7 +94,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         optimizingMode = solverEnvironment.getBoolArg(Z3SolverEngineArg.optimizingMode);
         getUnsatCore = false;
 
-        System.out.println("Now encoding with soft constraints");
+        System.err.println("Now encoding with soft constraints");
         serializeSMTFileContents();
 
         solvingStart = System.currentTimeMillis();
@@ -108,7 +108,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         // Debug use, finds out number of calls to each instrumented method
         // TODO: use updated stats package to print out the counters
-        System.out.println("=== Arithmetic Constraints Printout ===");
+        System.err.println("=== Arithmetic Constraints Printout ===");
         Map<ArithmeticOperationKind, Integer> arithmeticConstraintCounters = new HashMap<>();
         for (ArithmeticOperationKind kind : ArithmeticOperationKind.values()) {
             arithmeticConstraintCounters.put(kind, 0);
@@ -121,7 +121,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             }
         }
         for (ArithmeticOperationKind kind : ArithmeticOperationKind.values()) {
-            System.out.println(
+            System.err.println(
                     " Made arithmetic "
                             + kind.getSymbol()
                             + " constraint: "
@@ -130,14 +130,14 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
 
         // TODO: update parse scripts to interpret output of
         // "comparableconstraint"
-        // System.out.println("=== Comparison Constraints Printout ===");
+        // System.err.println("=== Comparison Constraints Printout ===");
         // int comparableConstraints = 0;
         // for (Constraint constraint : constraints) {
         // if (constraint instanceof ComparableConstraint) {
         // comparableConstraints++;
         // }
         // }
-        // System.out.println(" Made comparison constraint: " +
+        // System.err.println(" Made comparison constraint: " +
         // comparableConstraints);
 
         if (results != null) {
@@ -145,7 +145,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                     formatTranslator.decodeSolution(
                             results, solverEnvironment.processingEnvironment);
         } else {
-            System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
+            System.err.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
             result = null;
         }
 
@@ -157,7 +157,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         optimizingMode = false;
         getUnsatCore = true;
 
-        System.out.println("Now encoding for unsat core dump.");
+        System.err.println("Now encoding for unsat core dump.");
         serializeSMTFileContents();
 
         solvingStart = System.currentTimeMillis();
@@ -169,19 +169,19 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         Statistics.addOrIncrementEntry(
                 "smt_unsat_solving_time(millisec)", solvingEnd - solvingStart);
 
-        // System.out.println();
-        // System.out.println("Unsatisfiable constraints: " + String.join(" ",
+        // System.err.println();
+        // System.err.println("Unsatisfiable constraints: " + String.join(" ",
         // unsatConstraintIDs));
-        // System.out.println();
+        // System.err.println();
 
         List<Constraint> unsatConstraints = new ArrayList<>();
 
         for (String constraintID : unsatConstraintIDs) {
             Constraint c = serializedConstraints.get(constraintID);
-            // System.out.println(constraintID + " :");
-            // System.out.println(c);
-            // System.out.println(c.getLocation());
-            // System.out.println();
+            // System.err.println(constraintID + " :");
+            // System.err.println(c);
+            // System.err.println(c.getLocation());
+            // System.err.println();
             unsatConstraints.add(c);
         }
 
@@ -204,7 +204,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         encodeAllConstraints();
         serializationEnd = System.currentTimeMillis();
 
-        System.out.println("Encoding constraints done!");
+        System.err.println("Encoding constraints done!");
 
         smtFileContents.append("(check-sat)\n");
         if (!optimizingMode && getUnsatCore) {
@@ -213,7 +213,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             smtFileContents.append("(get-model)\n");
         }
 
-        System.out.println("Writing constraints to file: " + constraintsFile);
+        System.err.println("Writing constraints to file: " + constraintsFile);
 
         writeConstraintsToSMTFile();
     }
@@ -268,20 +268,20 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         StringBuffer constraintSmtFileContents = new StringBuffer();
 
         for (Constraint constraint : constraints) {
-            // System.out.println("Getting next item.");
+            // System.err.println("Getting next item.");
 
-            // System.out.println(
+            // System.err.println(
             // " Serializing Constraint " + current + " / " + total + " : " +
             // constraint);
 
             // if (current % 100 == 0) {
-            // System.out.println("=== Running GC ===");
+            // System.err.println("=== Running GC ===");
             // Runtime.getRuntime().gc(); // trigger garbage collector
             // }
 
             BoolExpr serializedConstraint = constraint.serialize(formatTranslator);
 
-            // System.out.println(" Constraint serialized. ");
+            // System.err.println(" Constraint serialized. ");
 
             if (serializedConstraint == null) {
                 // TODO: Should error abort if unsupported constraint detected.
@@ -289,14 +289,14 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // working, as in some cases existential constraints generated.
                 // Should investigate on this, and change this to ErrorAbort
                 // when eliminated unsupported constraints.
-                System.out.println(
+                System.err.println(
                         "Unsupported constraint detected! Constraint type: "
                                 + constraint.getClass().getSimpleName());
                 // current++;
                 continue;
             }
 
-            // System.out.println(" Constraint \n" + serializedConstraint
+            // System.err.println(" Constraint \n" + serializedConstraint
             // + "\n simplified :\n " + serializedConstraint.simplify());
 
             Expr simplifiedConstraint = serializedConstraint.simplify();
@@ -308,7 +308,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
                 // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0
                 // 0))
                 // Skip tautology.
-                // System.out.println(" simplified to tautology.");
+                // System.err.println(" simplified to tautology.");
                 current++;
                 continue;
             }
@@ -381,7 +381,7 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
             }
 
             current++;
-            // System.out.println(" Added constraint. HasNext? " +
+            // System.err.println(" Added constraint. HasNext? " +
             // iter.hasNext());
         }
 

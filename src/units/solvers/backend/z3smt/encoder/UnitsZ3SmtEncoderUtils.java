@@ -59,8 +59,8 @@ public class UnitsZ3SmtEncoderUtils {
     // }
     // }
     //
-    // System.out.println("ALO " + atLeastOne.simplify().toString());
-    // System.out.println("AMO " + atMostOne.simplify().toString());
+    // System.err.println("ALO " + atLeastOne.simplify().toString());
+    // System.err.println("AMO " + atMostOne.simplify().toString());
     //
     // return ctx.mkAnd(atLeastOne, atMostOne);
     // }
@@ -75,7 +75,7 @@ public class UnitsZ3SmtEncoderUtils {
                         ctx.mkOr(ctx.mkNot(arg2), ctx.mkNot(arg3)));
         /* @formatter:on // this is for eclipse formatter */
         BoolExpr result = ctx.mkAnd(atLeastOne, atMostOne);
-        // System.out.println("WF: (assert " + result.simplify().toString() + ")");
+        // System.err.println("WF: (assert " + result.simplify().toString() + ")");
         return result;
     }
 

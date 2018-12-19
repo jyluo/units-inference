@@ -161,7 +161,7 @@ public class UnitsGJEEncoderUtils {
         } else if (lhs.isVariable() && rhs.isVariable()) {
             if (lhs.getGJEVarID() == rhs.getGJEVarID()) {
                 // v * v = v2 ==> 2v - v2 = 0
-                // System.out.println(" MUL slots equal == " + lhs.getGJEVarID() + " res " +
+                // System.err.println(" MUL slots equal == " + lhs.getGJEVarID() + " res " +
                 // res.getGJEVarID());
                 GJEEquationSet eqSet = new GJEEquationSet();
                 // input: eg v * v = v2
@@ -378,7 +378,7 @@ public class UnitsGJEEncoderUtils {
         } else if (lhs.isVariable() && rhs.isVariable()) {
             if (lhs.getGJEVarID() == rhs.getGJEVarID()) {
                 // v / v = v3 ==> v3 = dimensionless ==> exponents v3 = 0
-                // System.out.println(" DIV slots equal == " + lhs.getGJEVarID() + " res " +
+                // System.err.println(" DIV slots equal == " + lhs.getGJEVarID() + " res " +
                 // res.getGJEVarID());
                 GJEEquationSet eqSet = new GJEEquationSet();
                 // input: eg v / v = v3

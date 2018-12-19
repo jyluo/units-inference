@@ -82,7 +82,7 @@ public class UnitsZ3SmtFormatTranslator
             anno = unitsRepUtils.DIMENSIONLESS;
         }
 
-        // System.out.println(" ==== creating constant slot for " + anno);
+        // System.err.println(" ==== creating constant slot for " + anno);
 
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
@@ -175,7 +175,7 @@ public class UnitsZ3SmtFormatTranslator
             }
 
             // DEBUG:
-            // System.out.println(" " + varName + " => " + value);
+            // System.err.println(" " + varName + " => " + value);
             // 10-s => -3
             // 10-m => 1
             // 10-Prefix => 0

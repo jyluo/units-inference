@@ -9,7 +9,6 @@ import units.solvers.backend.z3smt.UnitsZ3SmtSolverFactory;
 public class UnitsSolverEngine extends SolverEngine {
     @Override
     protected SolverFactory createSolverFactory() {
-        System.out.println("======= solver name: " + solverName);
         if (solverName.contentEquals("Z3smt")) {
             return new UnitsZ3SmtSolverFactory();
         } else if (solverName.contentEquals("GJE")) {

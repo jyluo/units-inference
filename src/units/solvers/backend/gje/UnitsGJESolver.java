@@ -78,7 +78,7 @@ public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
                     formatTranslator.decodeSolution(
                             results, solverEnvironment.processingEnvironment);
         } else {
-            System.out.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
+            System.err.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
             result = null;
         }
 
@@ -94,13 +94,13 @@ public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
 
         for (Constraint constraint : constraints) {
 
-            // System.out.println("Serializing " +
+            // System.err.println("Serializing " +
             // constraint.serialize(toStringSerializer));
 
             GJEEquationSet serializedConstraint = constraint.serialize(formatTranslator);
 
             if (serializedConstraint == null) {
-                System.out.println(
+                System.err.println(
                         "Unsupported constraint detected! Constraint type: "
                                 + constraint.getClass().getSimpleName());
                 continue;
@@ -114,11 +114,11 @@ public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
                 totalEquationSet.union(serializedConstraint);
             }
 
-            // System.out.println(serializedConstraint.toString());
+            // System.err.println(serializedConstraint.toString());
         }
 
-        // System.out.println("Total equation set:");
-        // System.out.println(totalEquationSet);
+        // System.err.println("Total equation set:");
+        // System.err.println(totalEquationSet);
 
         // serialize into files
         writeGJEFiles(totalEquationSet.getEquationSet());
@@ -136,7 +136,7 @@ public class UnitsGJESolver extends Solver<UnitsGJEFormatTranslator> {
 
             FileUtils.writeFile(outFile, generateGJEFileContent(equations));
 
-            System.out.println(
+            System.err.println(
                     "GJE eqs for "
                             + dimension
                             + " have been written to: "

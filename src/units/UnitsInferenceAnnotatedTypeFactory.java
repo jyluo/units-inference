@@ -92,7 +92,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // and also puts in VarAnnot
         qualSet.addAll(super.createSupportedTypeQualifiers());
 
-        // System.out.println( " --- quals = " + qualSet );
+        // System.err.println( " --- quals = " + qualSet );
 
         // // load all the external units
         // loadAllExternalUnits();
@@ -108,7 +108,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
         // TODO: cache results
         AnnotationMirror result = realTypeFactory.aliasedAnnotation(anno);
-        // System.out.println(" === Aliasing: " + anno.toString() + " ==> " + result);
+        // System.err.println(" === Aliasing: " + anno.toString() + " ==> " + result);
 
         if (result == null) {
             result = super.aliasedAnnotation(anno);

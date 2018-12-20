@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
+import org.checkerframework.checker.units.UnitsAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.javacutil.AnnotationBuilder;
@@ -70,6 +71,12 @@ public class UnitsRepresentationUtils {
     // public AnnotationMirror VARANNOT;
 
     // public AnnotationMirror METER;
+
+    /**
+     * Instances of time units for use with various time APIs, used by {@link
+     * UnitsAnnotatedTypeFactory#UnitsImplicitsTreeAnnotator}
+     */
+    public AnnotationMirror SECOND, MILLISECOND, MICROSECOND, NANOSECOND;
 
     // Comparator used to sort annotation classes by their simple class name
     private static Comparator<Class<? extends Annotation>> annoClassComparator =
@@ -212,6 +219,13 @@ public class UnitsRepresentationUtils {
 
         SURFACE_TOP = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
         SURFACE_BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
+
+        Map<String, Integer> secondBaseMap = createZeroFilledBaseUnitsMap();
+        secondBaseMap.put("s", 1);
+        SECOND = createInternalUnit("Second", false, false, 0, secondBaseMap);
+        MILLISECOND = createInternalUnit("Millisecond", false, false, -3, secondBaseMap);
+        MICROSECOND = createInternalUnit("Microsecond", false, false, -6, secondBaseMap);
+        NANOSECOND = createInternalUnit("Nanoecond", false, false, -9, secondBaseMap);
 
         // for (Entry<AnnotationMirror, AnnotationMirror> entry : unitsAnnotationMirrorMap
         // .entrySet()) {

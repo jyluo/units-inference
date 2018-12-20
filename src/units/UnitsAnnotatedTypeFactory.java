@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Name;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.qual.LiteralKind;
@@ -18,7 +19,6 @@ import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotationClassLoader;
 import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
-import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
@@ -29,6 +29,7 @@ import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
+import org.checkerframework.javacutil.TypesUtils;
 import units.qual.IsBaseUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsInternal;
@@ -299,23 +300,49 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new UnitsImplicitsTreeAnnotator(), new UnitsPropagationTreeAnnotator());
+                new UnitsTypecheckImplicitsTreeAnnotator(), new UnitsPropagationTreeAnnotator());
     }
 
-    private final class UnitsImplicitsTreeAnnotator extends ImplicitsTreeAnnotator {
+    protected final class UnitsTypecheckImplicitsTreeAnnotator extends UnitsImplicitsTreeAnnotator {
         // Programmatically set the qualifier implicits
-        public UnitsImplicitsTreeAnnotator() {
+        public UnitsTypecheckImplicitsTreeAnnotator() {
             super(UnitsAnnotatedTypeFactory.this);
-            // set BOTTOM as the implicit qualifier for null literals
-            addLiteralKind(LiteralKind.NULL, unitsRepUtils.BOTTOM);
-            addLiteralKind(LiteralKind.STRING, unitsRepUtils.DIMENSIONLESS);
-            addLiteralKind(LiteralKind.CHAR, unitsRepUtils.DIMENSIONLESS);
-            addLiteralKind(LiteralKind.BOOLEAN, unitsRepUtils.DIMENSIONLESS);
-
+            // in type checking mode, we also set dimensionless for the number literals
             addLiteralKind(LiteralKind.INT, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.LONG, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.FLOAT, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.DOUBLE, unitsRepUtils.DIMENSIONLESS);
+        }
+
+        /**
+         * HACK: Replace the types of the enum constants in {@link java.util.concurrent.TimeUnit}.
+         *
+         * <p>TODO: the cleaner way would be to support annotating enum constants via stubs;
+         * currently unavailable as a feature.
+         */
+        @Override
+        void replaceTimeUnitEnumConstantType(Name name, AnnotatedTypeMirror atm) {
+            if (TypesUtils.isDeclaredOfName(
+                    atm.getUnderlyingType(),
+                    java.util.concurrent.TimeUnit.class.getCanonicalName())) {
+                switch (name.toString()) {
+                    case "NANOSECONDS":
+                        atm.replaceAnnotation(unitsRepUtils.NANOSECOND);
+                        break;
+                    case "MICROSECONDS":
+                        atm.replaceAnnotation(unitsRepUtils.MICROSECOND);
+                        break;
+                    case "MILLISECONDS":
+                        atm.replaceAnnotation(unitsRepUtils.MILLISECOND);
+                        break;
+                    case "SECONDS":
+                        atm.replaceAnnotation(unitsRepUtils.SECOND);
+                        break;
+                    default:
+                        // TODO: MINUTES, HOURS, DAYS
+                        break;
+                }
+            }
         }
     }
 

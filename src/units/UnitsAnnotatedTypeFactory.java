@@ -321,7 +321,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
          * currently unavailable as a feature.
          */
         @Override
-        void replaceTimeUnitEnumConstantType(Name name, AnnotatedTypeMirror atm) {
+        void replaceEnumConstantType(Name name, AnnotatedTypeMirror atm) {
             if (TypesUtils.isDeclaredOfName(
                     atm.getUnderlyingType(),
                     java.util.concurrent.TimeUnit.class.getCanonicalName())) {

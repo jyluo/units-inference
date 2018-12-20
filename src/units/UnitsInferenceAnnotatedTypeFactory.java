@@ -7,12 +7,14 @@ import checkers.inference.InferenceTreeAnnotator;
 import checkers.inference.InferrableChecker;
 import checkers.inference.SlotManager;
 import checkers.inference.VariableAnnotator;
+import checkers.inference.model.AnnotationLocation;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.NewClassTree;
@@ -22,8 +24,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
+
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
@@ -38,6 +43,7 @@ import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
@@ -315,7 +321,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
          * currently unavailable as a feature.
          */
         @Override
-        void replaceTimeUnitEnumConstantType(Name name, AnnotatedTypeMirror atm) {
+        void replaceEnumConstantType(Name name, AnnotatedTypeMirror atm) {
             if (TypesUtils.isDeclaredOfName(
                     atm.getUnderlyingType(),
                     java.util.concurrent.TimeUnit.class.getCanonicalName())) {
@@ -361,6 +367,49 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     variableAnnotator,
                     slotManager);
         }
+
+        // ====== generate variable slots for static final constants such as Math.PI and Math.E
+
+        // For when the constants are directly used via static import: "PI"
+        @Override
+        public Void visitIdentifier(IdentifierTree tree, AnnotatedTypeMirror atm) {
+            super.visitIdentifier(tree, atm);
+            generateVarSlotForStaticFinalConstants(tree, tree.getName(), atm);
+            return null;
+        }
+
+        // For when the constants are used via Class.Constant: "Math.PI"
+        @Override
+        public Void visitMemberSelect(MemberSelectTree tree, AnnotatedTypeMirror atm) {
+            super.visitMemberSelect(tree, atm);
+            generateVarSlotForStaticFinalConstants(tree, tree.getIdentifier(), atm);
+            return null;
+        }
+
+        private void generateVarSlotForStaticFinalConstants(
+                Tree tree, Name name, AnnotatedTypeMirror atm) {
+
+            // The element being accessed: F in "X.F" or "F" depending on static import
+            Element member = TreeUtils.elementFromTree(tree);
+            // The class declaring element: X in "X.F" or "F" depending on static import
+            TypeElement declaringClass = ElementUtils.enclosingClass(member);
+
+            boolean isUnitsToolsConstant = TypesUtils.isDeclaredOfName(
+                    declaringClass.asType(), UnitsTools.class.getCanonicalName());
+
+            if (!isUnitsToolsConstant
+                    && ElementUtils.isStatic(member)
+                    && ElementUtils.isFinal(member)
+                    && ElementUtils.isCompileTimeConstant(member)) {
+
+                AnnotationLocation loc = VariableAnnotator.treeToLocation(atypeFactory, tree);
+
+                VariableSlot slot = slotManager.createVariableSlot(loc);
+                atm.replaceAnnotation(slotManager.getAnnotation(slot));
+            }
+        }
+
+        // ====== handle polymorphic returns in constructors and methods
 
         // see if given annotation mirror is the VarAnnot versions of @PolyUnit and
         // @PolyAll

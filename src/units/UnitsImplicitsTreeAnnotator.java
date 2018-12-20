@@ -29,7 +29,7 @@ public abstract class UnitsImplicitsTreeAnnotator extends ImplicitsTreeAnnotator
     @Override
     public Void visitIdentifier(IdentifierTree node, AnnotatedTypeMirror atm) {
         super.visitIdentifier(node, atm);
-        replaceTimeUnitEnumConstantType(node.getName(), atm);
+        replaceEnumConstantType(node.getName(), atm);
         return null;
     }
 
@@ -37,9 +37,9 @@ public abstract class UnitsImplicitsTreeAnnotator extends ImplicitsTreeAnnotator
     @Override
     public Void visitMemberSelect(MemberSelectTree node, AnnotatedTypeMirror atm) {
         super.visitMemberSelect(node, atm);
-        replaceTimeUnitEnumConstantType(node.getIdentifier(), atm);
+        replaceEnumConstantType(node.getIdentifier(), atm);
         return null;
     }
 
-    abstract void replaceTimeUnitEnumConstantType(Name name, AnnotatedTypeMirror atm);
+    abstract void replaceEnumConstantType(Name name, AnnotatedTypeMirror atm);
 }

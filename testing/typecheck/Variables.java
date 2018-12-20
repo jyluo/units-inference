@@ -13,7 +13,7 @@ class Variables {
     // :: error: (assignment.type.incompatible)
     @s Integer e = 20;
 
-    public void Main() {
+    void test() {
         @UnknownUnits int h = 10;
         // :: error: (assignment.type.incompatible)
         @UnitsBottom int i = 20;

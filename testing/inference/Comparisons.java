@@ -5,7 +5,7 @@ class Comparisons {
     @m int m = UnitsTools.m;
     @s int s = UnitsTools.s;
 
-    void Compare() {
+    void compare() {
         int mInferred = 10;
 
         // :: fixable-error: (comparison.unit.mismatch)

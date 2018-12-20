@@ -11,7 +11,7 @@ class Subtyping {
     @m Integer m;
     @s Integer s;
 
-    public void Main() {
+    void test() {
         uu = bot;
         uu = dim;
         uu = m;
@@ -46,7 +46,7 @@ class Subtyping {
     @PolyUnit Integer polyunit;
     @UnitsInternal Integer raw;
 
-    public void OddCases() {
+    void oddCases() {
         // For directly testing the subtyping relations defined between poly and unit types
         // these are not expected to be in source code
         polyall = raw;

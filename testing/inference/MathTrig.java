@@ -3,7 +3,7 @@ import units.qual.*;
 
 class MathTrig {
 
-    void Trig() {
+    void trig() {
         // x should be inferred to be dimensionless
         double x = 10;
         // ac,as,at should be inferred to be radians

@@ -2,7 +2,7 @@ import units.qual.*;
 
 class StubFiles {
 
-    void Stubs() {
+    void stubs() {
         // currentTimeMillis() is stubbed to return @ms long
         long k = System.currentTimeMillis();
 

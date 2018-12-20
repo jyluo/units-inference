@@ -2,11 +2,11 @@ import units.qual.*;
 
 class GenericMethods {
 
-    public <T> T IDOne(T param) {
+    public <T> T idOne(T param) {
         return param;
     }
 
-    public <T extends Number> T IDTwo(T param) {
+    public <T extends Number> T idTwo(T param) {
         return param;
     }
 

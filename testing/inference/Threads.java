@@ -2,7 +2,7 @@ import units.qual.*;
 
 class Threads {
 
-    void ThreadTest() throws InterruptedException {
+    void threadTest() throws InterruptedException {
         int msInferred = 10;
         int sleepTime = 10;
         long delta = 20;

@@ -7,9 +7,10 @@ import units.qual.m;
 // need to be able to set default array component qualifier, and fix some crazy
 // bug
 
-@UnknownUnits class Arrays {
+@UnknownUnits
+class Arrays {
 
-    void Arrays() {
+    void arrays() {
         @m int[] arrayOfMeters1 = null;
 
         @m int[] arrayOfMeters2 = new int @Dimensionless [5];

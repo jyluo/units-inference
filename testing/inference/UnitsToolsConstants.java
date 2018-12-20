@@ -3,7 +3,7 @@ import units.qual.*;
 
 class UnitsToolsConstants {
 
-    void Constants() {
+    void constants() {
         @m Integer m = UnitsTools.m;
         @s Integer s = UnitsTools.s;
         @ms Integer ms = UnitsTools.ms;

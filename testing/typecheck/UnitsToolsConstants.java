@@ -12,7 +12,7 @@ class UnitsToolsConstants {
     @s Integer s;
     @ms Integer ms;
 
-    public void Main() {
+    void test() {
         uu = UnitsTools.m;
         uu = UnitsTools.s;
         uu = UnitsTools.ms;
@@ -31,7 +31,7 @@ class UnitsToolsConstants {
         s = UnitsTools.ms;
     }
 
-    public void TestingOnly() {
+    void test2() {
         uu = UnitsTools.top;
         bot = UnitsTools.bottom;
         dim = UnitsTools.dimensionless;

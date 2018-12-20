@@ -7,7 +7,7 @@ class Speeds {
         return d / t;
     }
 
-    public void Main() {
+    void test() {
         @km int xInKilometers = 10 * UnitsTools.km;
         @m int yInMeters = 20 * UnitsTools.m;
 

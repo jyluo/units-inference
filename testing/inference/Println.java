@@ -2,7 +2,7 @@ import units.qual.*;
 
 class Println {
 
-    void Main() {
+    void test() {
         @ns long start = (@ns long) 0L;
 
         // @ms long fail = System.nanoTime();

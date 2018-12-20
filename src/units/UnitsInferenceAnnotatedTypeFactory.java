@@ -27,8 +27,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
-
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
@@ -386,26 +384,43 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             return null;
         }
 
+        // Generate a variable slot for a static final constant only if it
+        // isn't already annotated in source or in a stub with a non-dimensionless unit
         private void generateVarSlotForStaticFinalConstants(
                 Tree tree, Name name, AnnotatedTypeMirror atm) {
-
             // The element being accessed: F in "X.F" or "F" depending on static import
             Element member = TreeUtils.elementFromTree(tree);
-            // The class declaring element: X in "X.F" or "F" depending on static import
-            TypeElement declaringClass = ElementUtils.enclosingClass(member);
+            // // The class declaring element: X in "X.F" or "F" depending on static import
+            // TypeElement declaringClass = ElementUtils.enclosingClass(member);
+            // boolean isUnitsToolsConstant = TypesUtils.isDeclaredOfName(
+            // declaringClass.asType(), UnitsTools.class.getCanonicalName());
 
-            boolean isUnitsToolsConstant = TypesUtils.isDeclaredOfName(
-                    declaringClass.asType(), UnitsTools.class.getCanonicalName());
-
-            if (!isUnitsToolsConstant
-                    && ElementUtils.isStatic(member)
+            // the member must be a static final program constant
+            if (ElementUtils.isStatic(member)
                     && ElementUtils.isFinal(member)
                     && ElementUtils.isCompileTimeConstant(member)) {
 
-                AnnotationLocation loc = VariableAnnotator.treeToLocation(atypeFactory, tree);
+                AnnotationMirror am = atm.getEffectiveAnnotationInHierarchy(getVarAnnot());
+                if (am != null) {
+                    Slot slot = slotManager.getSlot(am);
+                    boolean fromByteCode = ElementUtils.isElementFromByteCode(member);
 
-                VariableSlot slot = slotManager.createVariableSlot(loc);
-                atm.replaceAnnotation(slotManager.getAnnotation(slot));
+                    // if member is from source code, it must be unannotated
+                    // if member is from byte code, it must not be annotated with a
+                    // non-dimensionless unit
+                    if ((!fromByteCode && slot.isVariable())
+                            || (fromByteCode
+                                    && slot.isConstant()
+                                    && AnnotationUtils.areSame(
+                                            ((ConstantSlot) slot).getValue(),
+                                            unitsRepUtils.DIMENSIONLESS))) {
+                        // Generate a fresh variable for inference
+                        AnnotationLocation loc =
+                                VariableAnnotator.treeToLocation(atypeFactory, tree);
+                        VariableSlot varSlot = slotManager.createVariableSlot(loc);
+                        atm.replaceAnnotation(slotManager.getAnnotation(varSlot));
+                    }
+                }
             }
         }
 

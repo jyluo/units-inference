@@ -23,6 +23,8 @@ class StaticFinalConstants {
         public static final double X = 10;
         public static final Integer Y = Integer.MAX_VALUE;
 
+        public static final @rad int HASUNIT = 20 * UnitsTools.rad;
+
         public MyConstants() {};
     }
 
@@ -32,5 +34,7 @@ class StaticFinalConstants {
 
         // :: fixable-error: (argument.type.incompatible)
         tan(MyConstants.Y);
+
+        cos(MyConstants.HASUNIT);
     }
 }

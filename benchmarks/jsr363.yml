@@ -7,11 +7,6 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn -B clean
 
-  RinSim:
-    giturl: https://github.com/jyluo-benchmarks/RinSim.git
-    build: mvn -B -DskipTests compile
-    clean: mvn -B clean
-
   glabels-importer:
     giturl: https://github.com/jyluo-benchmarks/glabels-importer.git
     build: mvn -B -DskipTests compile
@@ -34,3 +29,8 @@ projects:
 # see if charles ever experimented on android projects???
 # https://github.com/spacerIV/Android-Scientific-Unit-Converter.git
 
+# DLCJ unable to intercept build... very weird
+  # RinSim:
+  #   giturl: https://github.com/jyluo-benchmarks/RinSim.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn -B clean

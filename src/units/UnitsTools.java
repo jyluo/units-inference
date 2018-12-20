@@ -1,15 +1,6 @@
 package units;
 
-import units.qual.Dimensionless;
-import units.qual.UnitsBottom;
-import units.qual.UnknownUnits;
-import units.qual.deg;
-import units.qual.km;
-import units.qual.m;
-import units.qual.ms;
-import units.qual.ns;
-import units.qual.rad;
-import units.qual.s;
+import units.qual.*;
 
 @SuppressWarnings("units")
 public class UnitsTools {
@@ -19,6 +10,7 @@ public class UnitsTools {
 
     public static final @s int s = 1;
     public static final @ms Integer ms = 1;
+    public static final @us Integer us = 1;
     public static final @ns Integer ns = 1;
 
     public static final @rad int rad = 1;

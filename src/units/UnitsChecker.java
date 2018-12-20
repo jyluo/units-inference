@@ -18,6 +18,8 @@ import units.representation.UnitsRepresentationUtils;
     "JavaMath.astub",
     "JavaMathTrig.astub",
     "JavaThread.astub",
+    "JavaUtilConcurrent.astub", // for hombucha
+    "JavaUtilConcurrentTimeUnit.astub",
     "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
     "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays
 })

@@ -7,12 +7,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A nanosecond.
+ * A microsecond.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-@UnitsAlias({@BaseUnit(prefix = -9, unit = "s", exponent = 1)})
+@UnitsAlias({@BaseUnit(prefix = -6, unit = "s", exponent = 1)})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface ns {}
+public @interface us {}

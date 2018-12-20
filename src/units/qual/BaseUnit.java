@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BaseUnit {
 
+    // TODO: remove prefix here, this is only ever used in declaring annotation aliases via @UnitsAlias
     // value of p in 10 ^ p as a prefix, for kilo p = 3, for milli p = -3
     int prefix() default 0;
 

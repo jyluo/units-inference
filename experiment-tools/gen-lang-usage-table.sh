@@ -29,6 +29,7 @@ declare -a statsKeys=(
     "import.*javafx" \
     "import.*java\.awt" \
     "import.*java\.time" \
+    "import.*javax\.measure" \
     )
 
 declare -a projects=($(ls -d */ | sort))

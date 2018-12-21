@@ -18,19 +18,41 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn -B clean
 
-# TODO: need to disable 2 submodules in mvn, then it will compile
-# sudo apt install node npm; sudo npm i npm@latest -g
-  # kha:
-  #   giturl: https://github.com/jyluo-benchmarks/kha.git
-  #   build: mvn -B -DskipTests compile
-  #   clean: mvn -B clean
+# inference fail due to creation of equality constraint with null slot, as part of creating a refinement variable
+  ChemLab:
+    giturl: https://github.com/jyluo-benchmarks/ChemLab.git
+    build: ant compile
+    clean: ant clean
 
-# TODO: need android SDK
-# see if charles ever experimented on android projects???
-# https://github.com/spacerIV/Android-Scientific-Unit-Converter.git
+# had to disable 2 submodules in mvn, then it will compile
+# sudo apt install node npm; sudo npm i npm@latest -g
+  kha:
+    giturl: https://github.com/jyluo-benchmarks/kha.git
+    build: mvn -B -DskipTests compile
+    clean: mvn -B clean
+
+# Extremely large
+# DLJC does not trigger correctly
+  # smarthome:
+  #   giturl: https://github.com/jyluo-benchmarks/smarthome.git
+  #   build: mvn -B -DskipTests install
+  #   clean: mvn -B clean
 
 # DLCJ unable to intercept build... very weird
   # RinSim:
   #   giturl: https://github.com/jyluo-benchmarks/RinSim.git
   #   build: mvn -B -DskipTests compile
   #   clean: mvn -B clean
+
+
+# initial compile time: ~3 mins, have to disable the core feature... missing dependencies, still fails after disabling
+  # Palladio-Analyzer-SimuLizar:
+  #   giturl: https://github.com/jyluo-benchmarks/Palladio-Analyzer-SimuLizar.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn -B clean
+
+
+# TODO: need android SDK
+# see if charles ever experimented on android projects???
+# https://github.com/spacerIV/Android-Scientific-Unit-Converter.git
+

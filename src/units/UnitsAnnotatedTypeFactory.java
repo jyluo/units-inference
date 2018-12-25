@@ -30,6 +30,8 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
+import org.checkerframework.javacutil.UserError;
+
 import units.qual.BaseUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsInternal;
@@ -74,7 +76,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         // mirrors
         unitsRepUtils.postInit();
         // and it should already have some base units
-        assert !unitsRepUtils.baseUnits().isEmpty();
+        if (unitsRepUtils.baseUnits().isEmpty()) {
+            throw new UserError("Must supply at least 1 base unit to use Units Checker");
+        }
 
         return qualSet;
     }

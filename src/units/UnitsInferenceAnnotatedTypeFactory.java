@@ -45,6 +45,8 @@ import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
+import org.checkerframework.javacutil.UserError;
+
 import units.representation.UnitsRepresentationUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
@@ -68,7 +70,9 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // Should already be initialized in the real ATF
         unitsRepUtils = UnitsRepresentationUtils.getInstance();
         // and it should already have some base units
-        assert !unitsRepUtils.baseUnits().isEmpty();
+        if (unitsRepUtils.baseUnits().isEmpty()) {
+            throw new UserError("Must supply at least 1 base unit to use Units Checker");
+        }
 
         // unitsRepUtils.VARANNOT = getVarAnnot();
 

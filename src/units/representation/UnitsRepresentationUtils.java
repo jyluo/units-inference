@@ -22,7 +22,7 @@ import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import units.UnitsAnnotatedTypeFactory;
-import units.qual.BaseUnit;
+import units.qual.BUC;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
 import units.qual.UnitsAlias;
@@ -279,7 +279,7 @@ public class UnitsRepresentationUtils {
 
         // replace default base unit exponents from anno, and accumulate prefixes
         UnitsAlias aliasInfo = aliasUnitClass.getAnnotation(UnitsAlias.class);
-        for (BaseUnit bu : aliasInfo.baseUnits()) {
+        for (BUC bu : aliasInfo.baseUnitComponents()) {
             exponents.put(bu.unit(), bu.exponent());
         }
 
@@ -416,7 +416,7 @@ public class UnitsRepresentationUtils {
         Map<Class<? extends Annotation>, Integer> baseUnitsFromAnno = new HashMap<>();
         for (AnnotationMirror buAnno :
                 AnnotationUtils.getElementValueArray(
-                        anno, "baseUnits", AnnotationMirror.class, true)) {
+                        anno, "baseUnitComponents", AnnotationMirror.class, true)) {
             @SuppressWarnings("unchecked")
             Class<? extends Annotation> baseUnit =
                     (Class<? extends Annotation>)
@@ -462,7 +462,7 @@ public class UnitsRepresentationUtils {
             // replace base units with values in annotation
             for (AnnotationMirror bu :
                     AnnotationUtils.getElementValueArray(
-                            anno, "baseUnits", AnnotationMirror.class, true)) {
+                            anno, "baseUnitComponents", AnnotationMirror.class, true)) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Annotation> baseUnit =
                         (Class<? extends Annotation>)
@@ -522,7 +522,7 @@ public class UnitsRepresentationUtils {
             // replace base units with values in annotation
             for (AnnotationMirror bu :
                     AnnotationUtils.getElementValueArray(
-                            anno, "baseUnits", AnnotationMirror.class, true)) {
+                            anno, "baseUnitComponents", AnnotationMirror.class, true)) {
                 @SuppressWarnings("unchecked")
                 Class<? extends Annotation> baseUnit =
                         (Class<? extends Annotation>)
@@ -579,7 +579,7 @@ public class UnitsRepresentationUtils {
         List<AnnotationMirror> expos = new ArrayList<>();
         for (Class<? extends Annotation> key : exponents.keySet()) {
             // Construct BaseUnit annotations for each exponent
-            AnnotationBuilder buBuilder = new AnnotationBuilder(processingEnv, BaseUnit.class);
+            AnnotationBuilder buBuilder = new AnnotationBuilder(processingEnv, BUC.class);
             buBuilder.setValue("unit", key);
             buBuilder.setValue("exponent", exponents.get(key));
             expos.add(buBuilder.build());
@@ -590,7 +590,7 @@ public class UnitsRepresentationUtils {
         builder.setValue("unknownUnits", unknownUnits);
         builder.setValue("unitsBottom", unitsBottom);
         builder.setValue("prefixExponent", prefixExponent);
-        builder.setValue("baseUnits", expos);
+        builder.setValue("baseUnitComponents", expos);
         return builder.build();
     }
 }

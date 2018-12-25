@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * @checker_framework.manual #units-checker Units Checker
  */
 @UnitsAlias(
-    baseUnits = {@BaseUnit(unit = m.class, exponent = 1), @BaseUnit(unit = s.class, exponent = -1)}
+    baseUnitComponents = {@BUC(unit = m.class, exponent = 1), @BUC(unit = s.class, exponent = -1)}
 )
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 public @interface UnitsAlias {
     int prefixExponent() default 0;
 
-    BaseUnit[] baseUnits();
+    BUC[] baseUnitComponents();
 }

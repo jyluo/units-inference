@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE})
 public @interface UnitsAlias {
-    // TODO: update this meta-annotation to be the same as UnitsInternal in terms of
-    // fields
-    BaseUnit[] value();
+    int prefixExponent() default 0;
+
+    BaseUnit[] baseUnits();
 }

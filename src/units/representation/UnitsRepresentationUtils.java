@@ -264,16 +264,15 @@ public class UnitsRepresentationUtils {
             return;
         }
 
-        int prefix = 0;
-
         Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
 
         // replace default base unit exponents from anno, and accumulate prefixes
         UnitsAlias aliasInfo = aliasUnitClass.getAnnotation(UnitsAlias.class);
-        for (BaseUnit bu : aliasInfo.value()) {
+        for (BaseUnit bu : aliasInfo.baseUnits()) {
             exponents.put(bu.unit(), bu.exponent());
-            prefix += bu.prefix();
         }
+
+        int prefix = aliasInfo.prefixExponent();
 
         unitsAnnotationMirrorMap.put(
                 aliasUnitAM,

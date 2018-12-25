@@ -7,13 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BaseUnit {
-
-    // TODO: remove prefix here, this is only ever used in declaring annotation
-    // aliases via @UnitsAlias
-    // value of p in 10 ^ p as a prefix, for kilo p = 3, for milli p = -3
-    int prefix() default 0;
-
-    // TODO: replace with Class<? extends Annotation> unit();
+    // TODO: replace with Class<? extends Annotation>, makes it more type safe
     String unit() default "none";
 
     int exponent() default 0;

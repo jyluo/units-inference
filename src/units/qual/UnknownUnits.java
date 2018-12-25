@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 // // EXCEPTION_PARAMETER, // exceptions are always top
 // IMPLICIT_UPPER_BOUND, // <T>, so that T can take on any type in usage
 // })
-@UnitsAlias({})
+@UnitsAlias(baseUnits = {})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) // ElementType.TYPE,

@@ -1,0 +1,6 @@
+projects:
+
+  exp4j:
+    giturl: https://github.com/jyluo-benchmarks/exp4j.git
+    build: mvn -B install
+    clean: mvn -B clean

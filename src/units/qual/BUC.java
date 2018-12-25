@@ -5,9 +5,7 @@ import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/**
- * Base unit component
- */
+/** Base unit component */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BUC {

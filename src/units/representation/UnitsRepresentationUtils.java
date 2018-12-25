@@ -279,8 +279,8 @@ public class UnitsRepresentationUtils {
 
         // replace default base unit exponents from anno, and accumulate prefixes
         UnitsAlias aliasInfo = aliasUnitClass.getAnnotation(UnitsAlias.class);
-        for (BUC bu : aliasInfo.baseUnitComponents()) {
-            exponents.put(bu.unit(), bu.exponent());
+        for (BUC baseUnitComponent : aliasInfo.baseUnitComponents()) {
+            exponents.put(baseUnitComponent.unit(), baseUnitComponent.exponent());
         }
 
         int prefix = aliasInfo.prefixExponent();
@@ -579,10 +579,10 @@ public class UnitsRepresentationUtils {
         List<AnnotationMirror> expos = new ArrayList<>();
         for (Class<? extends Annotation> key : exponents.keySet()) {
             // Construct BaseUnit annotations for each exponent
-            AnnotationBuilder buBuilder = new AnnotationBuilder(processingEnv, BUC.class);
-            buBuilder.setValue("unit", key);
-            buBuilder.setValue("exponent", exponents.get(key));
-            expos.add(buBuilder.build());
+            AnnotationBuilder bucBuilder = new AnnotationBuilder(processingEnv, BUC.class);
+            bucBuilder.setValue("unit", key);
+            bucBuilder.setValue("exponent", exponents.get(key));
+            expos.add(bucBuilder.build());
         }
 
         // See {@link UnitsInternal}

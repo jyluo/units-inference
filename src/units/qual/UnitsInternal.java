@@ -21,6 +21,7 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 public @interface UnitsInternal {
 
+    // TODO: remove name
     String originalName() default "default";
 
     boolean unknownUnits() default false;

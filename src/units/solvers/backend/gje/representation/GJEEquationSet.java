@@ -1,5 +1,6 @@
 package units.solvers.backend.gje.representation;
 
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,6 +53,10 @@ public class GJEEquationSet {
         }
 
         eqSet.get(key).add(equation);
+    }
+
+    public void addEquation(Class<? extends Annotation> key, String equation) {
+        addEquation(key.getSimpleName(), equation);
     }
 
     public void union(GJEEquationSet otherSet) {

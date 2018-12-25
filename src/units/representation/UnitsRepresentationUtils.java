@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
-import org.checkerframework.checker.units.UnitsAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.PolyAll;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
+import units.UnitsAnnotatedTypeFactory;
 import units.qual.BaseUnit;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
@@ -29,6 +29,7 @@ import units.qual.UnitsAlias;
 import units.qual.UnitsBottom;
 import units.qual.UnitsInternal;
 import units.qual.UnknownUnits;
+import units.qual.s;
 
 /**
  * Utility class containing logic for creating and converting internal representations of units
@@ -88,12 +89,13 @@ public class UnitsRepresentationUtils {
             };
 
     /** The set of base units */
-    private final Set<Class<? extends Annotation>> baseUnits = new TreeSet<>(annoClassComparator);
+    private final Map<String, Class<? extends Annotation>> baseUnits = new TreeMap<>();
 
-    private Set<String> baseUnitNames;
+    private Set<Class<? extends Annotation>> immutableViewBaseUnits;
 
     /** The set of alias units defined as qualifiers */
-    private final Set<Class<? extends Annotation>> aliasUnits = new TreeSet<>(annoClassComparator);
+    private final Set<Class<? extends Annotation>> aliasUnits =
+            createSortedAnnotationClassLiteralSet();
 
     /** A map from surface units annotation mirrors to their internal units representation. */
     private final Map<AnnotationMirror, AnnotationMirror> unitsAnnotationMirrorMap =
@@ -137,22 +139,30 @@ public class UnitsRepresentationUtils {
         return singletonInstance;
     }
 
-    public void addBaseUnit(Class<? extends Annotation> baseUnit) {
-        baseUnits.add(baseUnit);
+    public static Set<Class<? extends Annotation>> createSortedAnnotationClassLiteralSet() {
+        return new TreeSet<>(annoClassComparator);
     }
 
-    public Set<String> baseUnits() {
-        // copy simple names of all base units into the set if it hasn't been done before
-        if (baseUnitNames == null) {
-            baseUnitNames = new TreeSet<>();
-            for (Class<? extends Annotation> baseUnit : baseUnits) {
-                baseUnitNames.add(baseUnit.getSimpleName());
-            }
+    public static <TVal>
+            Map<Class<? extends Annotation>, TVal> createSortedAnnotationClassLiteralMap() {
+        return new TreeMap<>(annoClassComparator);
+    }
 
-            baseUnitNames = Collections.unmodifiableSet(baseUnitNames);
+    public void addBaseUnit(Class<? extends Annotation> baseUnit) {
+        baseUnits.put(baseUnit.getSimpleName(), baseUnit);
+    }
+
+    public Class<? extends Annotation> getBaseUnitClass(String simpleClassName) {
+        return baseUnits.get(simpleClassName);
+    }
+
+    public Set<Class<? extends Annotation>> baseUnits() {
+        if (immutableViewBaseUnits == null) {
+            Set<Class<? extends Annotation>> baseUnitsSet = createSortedAnnotationClassLiteralSet();
+            baseUnitsSet.addAll(baseUnits.values());
+            immutableViewBaseUnits = Collections.unmodifiableSet(baseUnitsSet);
         }
-
-        return baseUnitNames;
+        return immutableViewBaseUnits;
     }
 
     public Set<Class<? extends Annotation>> surfaceUnitsSet() {
@@ -167,9 +177,9 @@ public class UnitsRepresentationUtils {
      * Creates and returns an exponent values map with all defined base units sorted alphabetically
      * according to unit symbol name, and with the exponent values set to 0.
      */
-    protected Map<String, Integer> createZeroFilledBaseUnitsMap() {
-        Map<String, Integer> map = new TreeMap<>();
-        for (String baseUnit : baseUnits()) {
+    protected Map<Class<? extends Annotation>, Integer> createZeroFilledBaseUnitsMap() {
+        Map<Class<? extends Annotation>, Integer> map = createSortedAnnotationClassLiteralMap();
+        for (Class<? extends Annotation> baseUnit : baseUnits()) {
             map.put(baseUnit, 0);
         }
         return map;
@@ -187,7 +197,8 @@ public class UnitsRepresentationUtils {
 
         RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsInternal.class);
 
-        Map<String, Integer> zeroBaseDimensions = createZeroFilledBaseUnitsMap();
+        Map<Class<? extends Annotation>, Integer> zeroBaseDimensions =
+                createZeroFilledBaseUnitsMap();
         TOP = createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
         BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
         DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, zeroBaseDimensions);
@@ -207,10 +218,10 @@ public class UnitsRepresentationUtils {
         surfaceUnitsSet.add(UnitsBottom.class);
         surfaceUnitsSet.add(Dimensionless.class);
 
-        for (Class<? extends Annotation> baseUnit : baseUnits) {
+        for (Class<? extends Annotation> baseUnit : baseUnits()) {
             createInternalBaseUnit(baseUnit);
         }
-        surfaceUnitsSet.addAll(baseUnits);
+        surfaceUnitsSet.addAll(baseUnits());
 
         for (Class<? extends Annotation> aliasUnit : aliasUnits) {
             createInternalAliasUnit(aliasUnit);
@@ -220,8 +231,8 @@ public class UnitsRepresentationUtils {
         SURFACE_TOP = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
         SURFACE_BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
 
-        Map<String, Integer> secondBaseMap = createZeroFilledBaseUnitsMap();
-        secondBaseMap.put("s", 1);
+        Map<Class<? extends Annotation>, Integer> secondBaseMap = createZeroFilledBaseUnitsMap();
+        secondBaseMap.put(s.class, 1);
         SECOND = createInternalUnit("Second", false, false, 0, secondBaseMap);
         MILLISECOND = createInternalUnit("Millisecond", false, false, -3, secondBaseMap);
         MICROSECOND = createInternalUnit("Microsecond", false, false, -6, secondBaseMap);
@@ -243,10 +254,10 @@ public class UnitsRepresentationUtils {
             return;
         }
 
-        Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
+        Map<Class<? extends Annotation>, Integer> exponents = createZeroFilledBaseUnitsMap();
 
         // set the exponent of the given base unit to 1
-        exponents.put(baseUnitClass.getSimpleName(), 1);
+        exponents.put(baseUnitClass, 1);
         // create the internal unit and add to alias map
         unitsAnnotationMirrorMap.put(
                 baseUnitAM,
@@ -264,7 +275,7 @@ public class UnitsRepresentationUtils {
             return;
         }
 
-        Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
+        Map<Class<? extends Annotation>, Integer> exponents = createZeroFilledBaseUnitsMap();
 
         // replace default base unit exponents from anno, and accumulate prefixes
         UnitsAlias aliasInfo = aliasUnitClass.getAnnotation(UnitsAlias.class);
@@ -402,11 +413,14 @@ public class UnitsRepresentationUtils {
         }
 
         // add declared base units from the anno to the map, filtering out duplicate base units
-        Map<String, Integer> baseUnitsFromAnno = new HashMap<>();
+        Map<Class<? extends Annotation>, Integer> baseUnitsFromAnno = new HashMap<>();
         for (AnnotationMirror buAnno :
                 AnnotationUtils.getElementValueArray(
                         anno, "baseUnits", AnnotationMirror.class, true)) {
-            String baseUnit = AnnotationUtils.getElementValue(buAnno, "unit", String.class, false);
+            @SuppressWarnings("unchecked")
+            Class<? extends Annotation> baseUnit =
+                    (Class<? extends Annotation>)
+                            AnnotationUtils.getElementValueClass(buAnno, "unit", false);
             int exponent =
                     AnnotationUtils.getElementValue(buAnno, "exponent", Integer.class, false);
             // ensure the declared base unit is actually a supported base unit
@@ -443,14 +457,19 @@ public class UnitsRepresentationUtils {
             int prefixExponent =
                     AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true);
 
-            Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
+            Map<Class<? extends Annotation>, Integer> exponents = createZeroFilledBaseUnitsMap();
 
             // replace base units with values in annotation
             for (AnnotationMirror bu :
                     AnnotationUtils.getElementValueArray(
                             anno, "baseUnits", AnnotationMirror.class, true)) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Annotation> baseUnit =
+                        (Class<? extends Annotation>)
+                                AnnotationUtils.getElementValueClass(bu, "unit", false);
                 exponents.put(
-                        AnnotationUtils.getElementValue(bu, "unit", String.class, false),
+                        // AnnotationUtils.getElementValue(bu, "unit", String.class, false)
+                        baseUnit,
                         AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
             }
 
@@ -494,21 +513,26 @@ public class UnitsRepresentationUtils {
             unit.setPrefixExponent(
                     AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true));
 
-            Map<String, Integer> exponents = new TreeMap<>();
+            Map<Class<? extends Annotation>, Integer> exponents =
+                    createSortedAnnotationClassLiteralMap();
             // default all base units to exponent 0
-            for (String bu : baseUnits()) {
+            for (Class<? extends Annotation> bu : baseUnits()) {
                 exponents.put(bu, 0);
             }
             // replace base units with values in annotation
             for (AnnotationMirror bu :
                     AnnotationUtils.getElementValueArray(
                             anno, "baseUnits", AnnotationMirror.class, true)) {
+                @SuppressWarnings("unchecked")
+                Class<? extends Annotation> baseUnit =
+                        (Class<? extends Annotation>)
+                                AnnotationUtils.getElementValueClass(bu, "unit", false);
                 exponents.put(
-                        AnnotationUtils.getElementValue(bu, "unit", String.class, false),
+                        baseUnit,
                         AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
             }
 
-            for (String bu : exponents.keySet()) {
+            for (Class<? extends Annotation> bu : exponents.keySet()) {
                 unit.setExponent(bu, exponents.get(bu));
             }
         } else {
@@ -546,14 +570,14 @@ public class UnitsRepresentationUtils {
             boolean unknownUnits,
             boolean unitsBottom,
             int prefixExponent,
-            Map<String, Integer> exponents) {
+            Map<Class<? extends Annotation>, Integer> exponents) {
         // not allowed to set both a UU and UB to true on the same annotation
         assert !(unknownUnits && unitsBottom);
 
         AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsInternal.class);
 
         List<AnnotationMirror> expos = new ArrayList<>();
-        for (String key : exponents.keySet()) {
+        for (Class<? extends Annotation> key : exponents.keySet()) {
             // Construct BaseUnit annotations for each exponent
             AnnotationBuilder buBuilder = new AnnotationBuilder(processingEnv, BaseUnit.class);
             buBuilder.setValue("unit", key);

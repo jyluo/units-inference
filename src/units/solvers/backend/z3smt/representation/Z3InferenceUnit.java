@@ -4,8 +4,8 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
+import java.lang.annotation.Annotation;
 import java.util.Map;
-import java.util.TreeMap;
 import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
 
@@ -20,7 +20,7 @@ public class Z3InferenceUnit {
     private BoolExpr ub;
     private IntExpr prefixExponent;
     // Tree map maintaining sorted order on base unit names
-    private final Map<String, IntExpr> exponents;
+    private final Map<Class<? extends Annotation>, IntExpr> exponents;
 
     // helper constant
     private final IntNum intZero;
@@ -28,7 +28,7 @@ public class Z3InferenceUnit {
     private Z3InferenceUnit(Context ctx, int slotID) {
         this.ctx = ctx;
         this.slotID = slotID;
-        exponents = new TreeMap<>();
+        exponents = UnitsRepresentationUtils.createSortedAnnotationClassLiteralMap();
         intZero = ctx.mkInt(0);
     }
 
@@ -42,7 +42,8 @@ public class Z3InferenceUnit {
         // default prefixExponent is 0
         slot.prefixExponent = slot.intZero;
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             // default exponents are 0
             slot.exponents.put(baseUnit, slot.intZero);
         }
@@ -66,9 +67,12 @@ public class Z3InferenceUnit {
                         UnitsZ3SmtEncoderUtils.z3VarName(
                                 slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             slot.exponents.put(
-                    baseUnit, ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
+                    baseUnit,
+                    ctx.mkIntConst(
+                            UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit.getSimpleName())));
         }
 
         return slot;
@@ -98,12 +102,12 @@ public class Z3InferenceUnit {
         return prefixExponent;
     }
 
-    public void setExponent(String unit, int exp) {
+    public void setExponent(Class<? extends Annotation> unit, int exp) {
         assert exponents.containsKey(unit);
         exponents.replace(unit, ctx.mkInt(exp));
     }
 
-    public IntExpr getExponent(String unit) {
+    public IntExpr getExponent(Class<? extends Annotation> unit) {
         assert exponents.containsKey(unit);
         return exponents.get(unit);
     }
@@ -116,7 +120,8 @@ public class Z3InferenceUnit {
         sb.append(" : UU = " + uu.toString());
         sb.append(" UB = " + ub.toString());
         sb.append(" Prefix = " + prefixExponent.toString());
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

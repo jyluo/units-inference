@@ -1,5 +1,6 @@
 package units.representation;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 
 /**
@@ -13,7 +14,7 @@ public class TypecheckUnit {
     private boolean ub;
     private int prefixExponent;
     // Tree map maintaining sorted order on base unit names
-    private final Map<String, Integer> exponents;
+    private final Map<Class<? extends Annotation>, Integer> exponents;
 
     public TypecheckUnit() {
         // default originalName value is "default"
@@ -62,17 +63,17 @@ public class TypecheckUnit {
         return prefixExponent;
     }
 
-    public void setExponent(String unit, int exp) {
+    public void setExponent(Class<? extends Annotation> unit, int exp) {
         assert exponents.containsKey(unit);
         exponents.replace(unit, exp);
     }
 
-    public int getExponent(String unit) {
+    public int getExponent(Class<? extends Annotation> unit) {
         assert exponents.containsKey(unit);
         return exponents.get(unit);
     }
 
-    public Map<String, Integer> getExponents() {
+    public Map<Class<? extends Annotation>, Integer> getExponents() {
         return exponents;
     }
 
@@ -82,7 +83,8 @@ public class TypecheckUnit {
         sb.append(" UU = " + uu);
         sb.append(" UB = " + ub);
         sb.append(" Prefix = " + prefixExponent);
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

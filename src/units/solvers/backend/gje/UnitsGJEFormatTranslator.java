@@ -13,6 +13,7 @@ import checkers.inference.solver.backend.AbstractFormatTranslator;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
 import checkers.inference.solver.util.PrintUtils.UniqueSlotCollector;
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -124,8 +125,8 @@ public class UnitsGJEFormatTranslator
             encodedSlot.setUnitsBottom(true);
         } else {
             encodedSlot.setPrefixExponent(unit.getPrefixExponent());
-            Map<String, Integer> expos = unit.getExponents();
-            for (String bu : expos.keySet()) {
+            Map<Class<? extends Annotation>, Integer> expos = unit.getExponents();
+            for (Class<? extends Annotation> bu : expos.keySet()) {
                 encodedSlot.setExponent(bu, unit.getExponent(bu));
             }
         }

@@ -6,6 +6,7 @@ import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +97,8 @@ public class UnitsZ3SmtFormatTranslator
             encodedSlot.setUnitsBottom(true);
         } else {
             encodedSlot.setPrefixExponent(unit.getPrefixExponent());
-            Map<String, Integer> expos = unit.getExponents();
-            for (String bu : expos.keySet()) {
+            Map<Class<? extends Annotation>, Integer> expos = unit.getExponents();
+            for (Class<? extends Annotation> bu : expos.keySet()) {
                 encodedSlot.setExponent(bu, unit.getExponent(bu));
             }
         }
@@ -171,7 +172,8 @@ public class UnitsZ3SmtFormatTranslator
                 z3Slot.setPrefixExponent(Integer.parseInt(value));
             } else {
                 // assumes it is a base unit exponent
-                z3Slot.setExponent(component, Integer.parseInt(value));
+                z3Slot.setExponent(
+                        unitsRepUtils.getBaseUnitClass(component), Integer.parseInt(value));
             }
 
             // DEBUG:

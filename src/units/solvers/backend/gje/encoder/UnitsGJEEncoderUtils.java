@@ -1,5 +1,6 @@
 package units.solvers.backend.gje.encoder;
 
+import java.lang.annotation.Annotation;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.gje.representation.GJEEquationSet;
@@ -46,7 +47,8 @@ public class UnitsGJEEncoderUtils {
                                 String.valueOf(snd.getGJEVarID()),
                                 "0"));
 
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (Class<? extends Annotation> baseUnit :
+                        UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
                             String.join(
@@ -76,7 +78,8 @@ public class UnitsGJEEncoderUtils {
                         String.valueOf(variable.getGJEVarID()),
                         String.valueOf(constant.getPrefixExponent())));
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             eqSet.addEquation(
                     baseUnit,
                     String.join(
@@ -137,7 +140,8 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(lhs.getPrefixExponent() + rhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (Class<? extends Annotation> baseUnit :
+                    UnitsRepresentationUtils.getInstance().baseUnits()) {
                 eqSet.addEquation(
                         baseUnit,
                         String.join(
@@ -176,7 +180,8 @@ public class UnitsGJEEncoderUtils {
                                 "-1",
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (Class<? extends Annotation> baseUnit :
+                        UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
                             String.join(
@@ -208,7 +213,8 @@ public class UnitsGJEEncoderUtils {
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
 
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (Class<? extends Annotation> baseUnit :
+                        UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
                             String.join(
@@ -253,7 +259,8 @@ public class UnitsGJEEncoderUtils {
                         String.valueOf(variable.getGJEVarID()),
                         String.valueOf(constant.getPrefixExponent())));
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             eqSet.addEquation(
                     baseUnit,
                     String.join(
@@ -302,7 +309,8 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(lhs.getPrefixExponent() - rhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (Class<? extends Annotation> baseUnit :
+                    UnitsRepresentationUtils.getInstance().baseUnits()) {
                 eqSet.addEquation(
                         baseUnit,
                         String.join(
@@ -331,7 +339,8 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(lhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (Class<? extends Annotation> baseUnit :
+                    UnitsRepresentationUtils.getInstance().baseUnits()) {
                 eqSet.addEquation(
                         baseUnit,
                         String.join(
@@ -361,7 +370,8 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(rhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (Class<? extends Annotation> baseUnit :
+                    UnitsRepresentationUtils.getInstance().baseUnits()) {
                 eqSet.addEquation(
                         baseUnit,
                         String.join(
@@ -386,7 +396,8 @@ public class UnitsGJEEncoderUtils {
                 eqSet.addEquation(
                         GJEEquationSet.prefixExponentKey,
                         String.join(delimiter, "1", "1", String.valueOf(res.getGJEVarID()), "0"));
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (Class<? extends Annotation> baseUnit :
+                        UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
                             String.join(
@@ -412,7 +423,8 @@ public class UnitsGJEEncoderUtils {
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
 
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (Class<? extends Annotation> baseUnit :
+                        UnitsRepresentationUtils.getInstance().baseUnits()) {
                     eqSet.addEquation(
                             baseUnit,
                             String.join(

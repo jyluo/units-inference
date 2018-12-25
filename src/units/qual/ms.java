@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @UnitsAlias(
     prefixExponent = -3,
-    baseUnits = {@BaseUnit(unit = "s", exponent = 1)}
+    baseUnits = {@BaseUnit(unit = s.class, exponent = 1)}
 )
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

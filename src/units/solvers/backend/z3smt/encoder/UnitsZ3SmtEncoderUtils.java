@@ -3,6 +3,7 @@ package units.solvers.backend.z3smt.encoder;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntNum;
+import java.lang.annotation.Annotation;
 import org.checkerframework.javacutil.Pair;
 import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
@@ -22,6 +23,7 @@ public class UnitsZ3SmtEncoderUtils {
         return slotID + String.valueOf(idComponentSeparator) + component;
     }
 
+    // returns the integer slot and component name from a z3VarName
     public static Pair<Integer, String> slotFromZ3VarName(String z3VarName) {
         int dashIndex = z3VarName.indexOf(idComponentSeparator);
 
@@ -106,7 +108,8 @@ public class UnitsZ3SmtEncoderUtils {
     private static BoolExpr allPrefixesAreZero(Context ctx, Z3InferenceUnit unit) {
         IntNum zero = ctx.mkInt(0);
         BoolExpr result = ctx.mkEq(unit.getPrefixExponent(), zero);
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             /* @formatter:off // this is for eclipse formatter */
             result = ctx.mkAnd(result, ctx.mkEq(unit.getExponent(baseUnit), zero));
             /* @formatter:on // this is for eclipse formatter */
@@ -135,7 +138,8 @@ public class UnitsZ3SmtEncoderUtils {
                         ctx.mkEq(fst.getUnknownUnits(), snd.getUnknownUnits()),
                         ctx.mkEq(fst.getUnitsBottom(), snd.getUnitsBottom()),
                         ctx.mkEq(fst.getPrefixExponent(), snd.getPrefixExponent()));
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             equalityEncoding =
                     ctx.mkAnd(
                             equalityEncoding,
@@ -195,7 +199,8 @@ public class UnitsZ3SmtEncoderUtils {
                 ctx.mkEq(
                         res.getPrefixExponent(),
                         ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             exponents =
                     ctx.mkAnd(
                             exponents,
@@ -258,7 +263,8 @@ public class UnitsZ3SmtEncoderUtils {
                 ctx.mkEq(
                         res.getPrefixExponent(),
                         ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             exponents =
                     ctx.mkAnd(
                             exponents,

@@ -1,7 +1,7 @@
 package units.solvers.backend.gje.representation;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
-import java.util.TreeMap;
 import org.checkerframework.dataflow.util.HashCodeUtils;
 import units.representation.UnitsRepresentationUtils;
 
@@ -28,7 +28,8 @@ public class GJEInferenceUnit {
     private static final int defaultExponent = 0;
 
     // Tree map maintaining sorted order on base unit names
-    private final Map<String, Integer> exponents = new TreeMap<>();
+    private final Map<Class<? extends Annotation>, Integer> exponents =
+            UnitsRepresentationUtils.createSortedAnnotationClassLiteralMap();
 
     private GJEInferenceUnit(int cfiSlotID, int gjeVarID, Kind kind) {
         this.cfiSlotID = cfiSlotID;
@@ -42,7 +43,8 @@ public class GJEInferenceUnit {
         // default prefixExponent is 0
         this.prefixExponent = defaultExponent;
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             // default exponents are 0
             this.exponents.put(baseUnit, defaultExponent);
         }
@@ -97,12 +99,12 @@ public class GJEInferenceUnit {
         return prefixExponent;
     }
 
-    public void setExponent(String unit, int exp) {
+    public void setExponent(Class<? extends Annotation> unit, int exp) {
         assert exponents.containsKey(unit);
         exponents.replace(unit, exp);
     }
 
-    public int getExponent(String unit) {
+    public int getExponent(Class<? extends Annotation> unit) {
         assert exponents.containsKey(unit);
         return exponents.get(unit);
     }
@@ -115,7 +117,8 @@ public class GJEInferenceUnit {
         sb.append(" : UU = " + uu);
         sb.append(" UB = " + ub);
         sb.append(" Prefix = " + prefixExponent);
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (Class<? extends Annotation> baseUnit :
+                UnitsRepresentationUtils.getInstance().baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

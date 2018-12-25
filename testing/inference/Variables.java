@@ -61,6 +61,6 @@ class Variables {
 
     void customUnitForInsertion() {
         // :: fixable-error: (assignment.type.incompatible)
-        @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 4, baseUnits = {@BaseUnit(unit = "m", exponent = 12), @BaseUnit(unit = "s", exponent = -34) }) Integer x = 50;
+        @UnitsInternal(unknownUnits = false, unitsBottom = false, prefixExponent = 4, baseUnitComponents = {@BUC(unit = "m", exponent = 12), @BUC(unit = "s", exponent = -34) }) Integer x = 50;
     }
 }

@@ -25,7 +25,7 @@ import java.lang.annotation.Target;
 // // need to be impliclty
 // // declared
 // typeNames = {Throwable.class, Exception.class, Class.class})
-@UnitsAlias(baseUnits = {})
+@UnitsAlias(baseUnitComponents = {})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})

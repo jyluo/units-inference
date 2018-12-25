@@ -1,5 +1,5 @@
-import units.qual.*;
 import units.UnitsTools;
+import units.qual.*;
 
 class VectorInfer {
     @m int aInMeters = 10 * UnitsTools.m;

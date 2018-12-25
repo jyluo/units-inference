@@ -30,7 +30,7 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
-import units.qual.IsBaseUnit;
+import units.qual.BaseUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsInternal;
 import units.representation.UnitsRepresentationUtils;
@@ -94,7 +94,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // if it has a UnitsAlias or IsBaseUnit meta-annotation, then it must have been prebuilt
             // return the prebuilt internal annotation
             if (AnnotationUtils.areSameByClass(metaAnno, UnitsAlias.class)
-                    || AnnotationUtils.areSameByClass(metaAnno, IsBaseUnit.class)) {
+                    || AnnotationUtils.areSameByClass(metaAnno, BaseUnit.class)) {
 
                 // System.err.println(" returning prebuilt alias for " + anno.toString());
 

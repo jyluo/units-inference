@@ -5,7 +5,6 @@ import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
 import java.util.Map;
-import java.util.TreeMap;
 import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
 
@@ -28,7 +27,7 @@ public class Z3InferenceUnit {
     private Z3InferenceUnit(Context ctx, int slotID) {
         this.ctx = ctx;
         this.slotID = slotID;
-        exponents = new TreeMap<>();
+        exponents = UnitsRepresentationUtils.createSortedBaseUnitMap();
         intZero = ctx.mkInt(0);
     }
 

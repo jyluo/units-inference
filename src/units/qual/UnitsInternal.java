@@ -30,5 +30,5 @@ public @interface UnitsInternal {
 
     int prefixExponent() default 0;
 
-    BaseUnit[] baseUnits() default {};
+    BUC[] baseUnitComponents() default {};
 }

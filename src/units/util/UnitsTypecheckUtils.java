@@ -24,8 +24,8 @@ public class UnitsTypecheckUtils {
 
         // otherwise res component = lhs component + rhs component
         result.setPrefixExponent(lhs.getPrefixExponent() + rhs.getPrefixExponent());
-        for (String bu : UnitsRepresentationUtils.getInstance().baseUnits()) {
-            result.setExponent(bu, lhs.getExponent(bu) + rhs.getExponent(bu));
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            result.setExponent(baseUnit, lhs.getExponent(baseUnit) + rhs.getExponent(baseUnit));
         }
 
         return result;
@@ -54,8 +54,8 @@ public class UnitsTypecheckUtils {
 
         // otherwise res component = lhs component - rhs component
         result.setPrefixExponent(lhs.getPrefixExponent() - rhs.getPrefixExponent());
-        for (String bu : UnitsRepresentationUtils.getInstance().baseUnits()) {
-            result.setExponent(bu, lhs.getExponent(bu) - rhs.getExponent(bu));
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            result.setExponent(baseUnit, lhs.getExponent(baseUnit) - rhs.getExponent(baseUnit));
         }
 
         return result;

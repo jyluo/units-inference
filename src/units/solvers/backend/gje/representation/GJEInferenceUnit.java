@@ -1,7 +1,6 @@
 package units.solvers.backend.gje.representation;
 
 import java.util.Map;
-import java.util.TreeMap;
 import org.checkerframework.dataflow.util.HashCodeUtils;
 import units.representation.UnitsRepresentationUtils;
 
@@ -28,7 +27,7 @@ public class GJEInferenceUnit {
     private static final int defaultExponent = 0;
 
     // Tree map maintaining sorted order on base unit names
-    private final Map<String, Integer> exponents = new TreeMap<>();
+    private final Map<String, Integer> exponents;
 
     private GJEInferenceUnit(int cfiSlotID, int gjeVarID, Kind kind) {
         this.cfiSlotID = cfiSlotID;
@@ -41,6 +40,8 @@ public class GJEInferenceUnit {
         this.ub = false;
         // default prefixExponent is 0
         this.prefixExponent = defaultExponent;
+
+        exponents = UnitsRepresentationUtils.createSortedBaseUnitMap();
 
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
             // default exponents are 0

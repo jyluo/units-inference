@@ -20,7 +20,7 @@ import org.checkerframework.framework.qual.TargetLocations;
 // typeNames = Void.class,
 // literals = LiteralKind.NULL)
 // @DefaultFor({LOWER_BOUND})
-@UnitsAlias(baseUnits = {})
+@UnitsAlias(baseUnitComponents = {})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})

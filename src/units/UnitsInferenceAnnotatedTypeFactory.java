@@ -409,6 +409,13 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                     Slot slot = slotManager.getSlot(am);
                     boolean fromByteCode = ElementUtils.isElementFromByteCode(member);
 
+                    // System.err.println(" member: " + member);
+                    // System.err.println(" am: " + am);
+                    // System.err.println(" fromByteCode: " + fromByteCode);
+                    // System.err.println(" slot.isVariable(): " + slot.isVariable());
+                    // System.err.println(" isDimensionless: " + AnnotationUtils.areSame(
+                    // ((ConstantSlot) slot).getValue(), unitsRepUtils.DIMENSIONLESS));
+
                     // if member is from source code, it must be unannotated
                     // if member is from byte code, it must not be annotated with a
                     // non-dimensionless unit

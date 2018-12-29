@@ -27,13 +27,12 @@ import units.qual.Dimensionless;
 import units.qual.PolyUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsBottom;
-import units.qual.UnitsInternal;
+import units.qual.UnitsRep;
 import units.qual.UnknownUnits;
 
 /**
  * Utility class containing logic for creating and converting internal representations of units
- * between its 3 primary forms: {@link UnitsInternal} as annotation mirrors and {@link
- * TypecheckUnit}.
+ * between its 3 primary forms: {@link UnitsRep} as annotation mirrors and {@link TypecheckUnit}.
  *
  * <p>TODO: {@code @Unit}, and alias forms.
  */
@@ -48,16 +47,16 @@ public class UnitsRepresentationUtils {
     /** An instance of {@link PolyUnit} as an {@link AnnotationMirror} */
     public AnnotationMirror POLYUNIT;
 
-    /** An instance of {@link UnitsInternal} with no values in its elements */
+    /** An instance of {@link UnitsRep} with no values in its elements */
     public AnnotationMirror RAWUNITSINTERNAL;
 
-    /** Instances of {@link UnitsInternal} with values to represent UnknownUnits and UnitsBottom */
+    /** Instances of {@link UnitsRep} with values to represent UnknownUnits and UnitsBottom */
     public AnnotationMirror TOP;
 
     public AnnotationMirror BOTTOM;
 
     /**
-     * An instance of {@link UnitsInternal} with default values in its elements, which represents
+     * An instance of {@link UnitsRep} with default values in its elements, which represents
      * dimensionless
      */
     public AnnotationMirror DIMENSIONLESS;
@@ -190,7 +189,7 @@ public class UnitsRepresentationUtils {
         POLYALL = AnnotationBuilder.fromClass(elements, PolyAll.class);
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
 
-        RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsInternal.class);
+        RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsRep.class);
 
         Map<String, Integer> zeroBaseDimensions = createZeroFilledBaseUnitsMap();
         TOP = createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
@@ -343,11 +342,11 @@ public class UnitsRepresentationUtils {
     }
 
     /**
-     * Returns the surface unit representation for the given {@link UnitsInternal} annotation if
+     * Returns the surface unit representation for the given {@link UnitsRep} annotation if
      * available, otherwise returns the given annotation unchanged.
      *
-     * @param anno an {@link AnnotationMirror} of a {@link UnitsInternal} annotation
-     * @return the surface representation unit if available, otherwise the UnitsInternal annotation
+     * @param anno an {@link AnnotationMirror} of a {@link UnitsRep} annotation
+     * @return the surface representation unit if available, otherwise the @UnitsRep annotation
      *     unchanged
      */
     public AnnotationMirror getSurfaceUnit(AnnotationMirror anno) {
@@ -362,14 +361,14 @@ public class UnitsRepresentationUtils {
 
     /*
      * It is a units annotation if we have built an alias for it in the past (this includes @m
-     * --> @UnitsInternal(..)), or is supported by the qual hierarchy, or it is a @UnitsInternal
+     * --> @UnitsRep(..)), or is supported by the qual hierarchy, or it is a @UnitsRep
      * annotation (with possibly not all base units).
      */
     public boolean isUnitsAnnotation(
             BaseAnnotatedTypeFactory realTypeFactory, AnnotationMirror anno) {
         return unitsAnnotationMirrorMap.keySet().contains(anno)
                 || realTypeFactory.isSupportedQualifier(anno)
-                || AnnotationUtils.areSameByClass(anno, UnitsInternal.class);
+                || AnnotationUtils.areSameByClass(anno, UnitsRep.class);
     }
 
     public boolean hasUnitsAnnotation(
@@ -402,7 +401,7 @@ public class UnitsRepresentationUtils {
     }
 
     public boolean hasAllBaseUnits(AnnotationMirror anno) {
-        if (!AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+        if (!AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             return false;
         }
 
@@ -434,17 +433,15 @@ public class UnitsRepresentationUtils {
     // TODO: merge with below
     // create an uncached TypeCheckUnits as a "struct" to hold the integers etc
     public AnnotationMirror fillMissingBaseUnits(AnnotationMirror anno) {
-        if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+        if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             if (fillMissingBaseUnitsCache.containsKey(anno)) {
                 return fillMissingBaseUnitsCache.get(anno);
             }
 
             String originalName =
                     AnnotationUtils.getElementValue(anno, "originalName", String.class, true);
-            boolean unknownUnits =
-                    AnnotationUtils.getElementValue(anno, "unknownUnits", Boolean.class, true);
-            boolean unitsBottom =
-                    AnnotationUtils.getElementValue(anno, "unitsBottom", Boolean.class, true);
+            boolean top = AnnotationUtils.getElementValue(anno, "top", Boolean.class, true);
+            boolean bot = AnnotationUtils.getElementValue(anno, "bot", Boolean.class, true);
             int prefixExponent =
                     AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true);
 
@@ -460,8 +457,7 @@ public class UnitsRepresentationUtils {
             }
 
             AnnotationMirror filledInAM =
-                    createInternalUnit(
-                            originalName, unknownUnits, unitsBottom, prefixExponent, exponents);
+                    createInternalUnit(originalName, top, bot, prefixExponent, exponents);
 
             fillMissingBaseUnitsCache.put(anno, filledInAM);
 
@@ -489,13 +485,11 @@ public class UnitsRepresentationUtils {
             unit.setUnknownUnits(true);
         }
         // if it is a units internal annotation, generate the internal unit
-        else if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+        else if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             unit.setOriginalName(
                     AnnotationUtils.getElementValue(anno, "originalName", String.class, true));
-            unit.setUnknownUnits(
-                    AnnotationUtils.getElementValue(anno, "unknownUnits", Boolean.class, true));
-            unit.setUnitsBottom(
-                    AnnotationUtils.getElementValue(anno, "unitsBottom", Boolean.class, true));
+            unit.setUnknownUnits(AnnotationUtils.getElementValue(anno, "top", Boolean.class, true));
+            unit.setUnitsBottom(AnnotationUtils.getElementValue(anno, "bot", Boolean.class, true));
             unit.setPrefixExponent(
                     AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true));
 
@@ -548,14 +542,14 @@ public class UnitsRepresentationUtils {
 
     public AnnotationMirror createInternalUnit(
             String originalName,
-            boolean unknownUnits,
-            boolean unitsBottom,
+            boolean top,
+            boolean bot,
             int prefixExponent,
             Map<String, Integer> exponents) {
         // not allowed to set both a UU and UB to true on the same annotation
-        assert !(unknownUnits && unitsBottom);
+        assert !(top && bot);
 
-        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsInternal.class);
+        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsRep.class);
 
         List<AnnotationMirror> expos = new ArrayList<>();
         for (String key : exponents.keySet()) {
@@ -566,10 +560,10 @@ public class UnitsRepresentationUtils {
             expos.add(bucBuilder.build());
         }
 
-        // See {@link UnitsInternal}
+        // See {@link UnitsRep}
         // builder.setValue("originalName", originalName); // TODO: set original name
-        builder.setValue("unknownUnits", unknownUnits);
-        builder.setValue("unitsBottom", unitsBottom);
+        builder.setValue("top", top);
+        builder.setValue("bot", bot);
         builder.setValue("prefixExponent", prefixExponent);
         builder.setValue("baseUnitComponents", expos);
         return builder.build();

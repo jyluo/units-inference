@@ -227,7 +227,7 @@ public class UnitsGJEFormatTranslator
     public AnnotationMirror decodeSolution(
             TypecheckUnit solutionSlot, ProcessingEnvironment processingEnv) {
 
-        // TODO: translate @UnitsInternal annotations to string from @Units
+        // TODO: translate @UnitsRep annotations to string from @Units
         // annotations
         // TODO: infer original name somehow
 

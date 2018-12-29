@@ -33,7 +33,7 @@ import org.checkerframework.javacutil.TypesUtils;
 import org.checkerframework.javacutil.UserError;
 import units.qual.BaseUnit;
 import units.qual.UnitsAlias;
-import units.qual.UnitsInternal;
+import units.qual.UnitsRep;
 import units.representation.UnitsRepresentationUtils;
 import units.util.UnitsTypecheckUtils;
 
@@ -85,7 +85,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
         // check to see if it is an internal units annotation
-        if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+        if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             // fill in missing base units
             return unitsRepUtils.fillMissingBaseUnits(anno);
         }
@@ -108,20 +108,20 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         return super.aliasedAnnotation(anno);
     }
 
-    // Make sure only UnitsInternal annotations with all base units defined are considered supported
-    // any UnitsInternal annotations without all base units should go through aliasing to have the
+    // Make sure only @UnitsRep annotations with all base units defined are considered supported
+    // any @UnitsRep annotations without all base units should go through aliasing to have the
     // base units filled in.
     @Override
     public boolean isSupportedQualifier(AnnotationMirror anno) {
         /*
          * getQualifierHierarchy().getTypeQualifiers() contains PolyAll, PolyUnit, and the AMs of
-         * Top and Bottom. We need to check all other instances of UnitsInternal AMs that are
+         * Top and Bottom. We need to check all other instances of @UnitsRep AMs that are
          * supported qualifiers here.
          */
         if (!super.isSupportedQualifier(anno)) {
             return false;
         }
-        if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
+        if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             return unitsRepUtils.hasAllBaseUnits(anno);
         }
         // Anno is PolyAll, PolyUnit
@@ -195,7 +195,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             supertypesMap.remove(unitsRepUtils.RAWUNITSINTERNAL);
 
             // Set direct supertypes of PolyAll
-            // replace raw UnitsInternal with UnitsTop in super of PolyAll
+            // replace raw @UnitsRep with UnitsTop in super of PolyAll
             assert supertypesMap.containsKey(unitsRepUtils.POLYALL);
             Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
             polyAllSupers.addAll(supertypesMap.get(unitsRepUtils.POLYALL));
@@ -204,7 +204,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             supertypesMap.put(unitsRepUtils.POLYALL, Collections.unmodifiableSet(polyAllSupers));
 
             // Set direct supertypes of PolyUnit
-            // replace raw UnitsInternal with UnitsTop in super of PolyUnit
+            // replace raw @UnitsRep with UnitsTop in super of PolyUnit
             assert supertypesMap.containsKey(unitsRepUtils.POLYUNIT);
             Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
             polyUnitSupers.addAll(supertypesMap.get(unitsRepUtils.POLYUNIT));
@@ -245,7 +245,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // + getAnnotationFormatter().formatAnnotationMirror(subAnno) + " <:\n"
             // + getAnnotationFormatter().formatAnnotationMirror(superAnno) + "\n");
 
-            // replace raw @UnitsInternal with Dimensionless
+            // replace raw @UnitsRep with Dimensionless
             // for some reason this shows up in inference mode when building the lattice
             if (AnnotationUtils.areSame(subAnno, unitsRepUtils.RAWUNITSINTERNAL)) {
                 subAnno = unitsRepUtils.DIMENSIONLESS;
@@ -274,9 +274,9 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 return true;
             }
 
-            // Case: @UnitsInternal(x) <: @UnitsInternal(y)
-            if (AnnotationUtils.areSameByClass(subAnno, UnitsInternal.class)
-                    && AnnotationUtils.areSameByClass(superAnno, UnitsInternal.class)
+            // Case: @UnitsRep(x) <: @UnitsRep(y)
+            if (AnnotationUtils.areSameByClass(subAnno, UnitsRep.class)
+                    && AnnotationUtils.areSameByClass(superAnno, UnitsRep.class)
                     && AnnotationUtils.areSameIgnoringValues(subAnno, superAnno)) {
 
                 boolean result = UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);

@@ -19,14 +19,14 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Retention(RetentionPolicy.RUNTIME)
 // TODO somehow make this not usable by users?
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface UnitsInternal {
+public @interface UnitsRep {
 
     // TODO: remove name
     String originalName() default "default";
 
-    boolean unknownUnits() default false;
+    boolean top() default false;
 
-    boolean unitsBottom() default false;
+    boolean bot() default false;
 
     int prefixExponent() default 0;
 

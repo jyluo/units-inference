@@ -162,15 +162,15 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
              * Map before update:
             supertypesMap
               @checkers.inference.qual.VarAnnot -> [@org.checkerframework.framework.qual.PolyAll]
-              @org.checkerframework.framework.qual.PolyAll -> [@checkers.inference.qual.VarAnnot, @units.qual.UnitsInternal]
-              @units.qual.PolyUnit -> [@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsInternal]
-              @units.qual.UnitsInternal -> []
-            polyQualifiers {null=@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsInternal=@units.qual.PolyUnit}
+              @org.checkerframework.framework.qual.PolyAll -> [@checkers.inference.qual.VarAnnot, @units.qual.UnitsRep]
+              @units.qual.PolyUnit -> [@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsRep]
+              @units.qual.UnitsRep -> []
+            polyQualifiers {null=@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsRep=@units.qual.PolyUnit}
             tops [@checkers.inference.qual.VarAnnot]
             bottoms [@checkers.inference.qual.VarAnnot]
              */
             //
-            // // Remove UnitsInternal from super of PolyAll
+            // // Remove @UnitsRep from super of PolyAll
             // assert supertypesMap.containsKey(unitsRepUtils.POLYALL);
             // Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
             // polyAllSupers.addAll(supertypesMap.get(unitsRepUtils.POLYALL));
@@ -178,7 +178,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // supertypesMap.put(unitsRepUtils.POLYALL,
             // Collections.unmodifiableSet(polyAllSupers));
             //
-            // // Remove UnitsInternal from super of PolyUnit
+            // // Remove @UnitsRep from super of PolyUnit
             // assert supertypesMap.containsKey(unitsRepUtils.POLYUNIT);
             // Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
             // polyUnitSupers.addAll(supertypesMap.get(unitsRepUtils.POLYUNIT));
@@ -186,10 +186,10 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // supertypesMap.put(unitsRepUtils.POLYUNIT,
             // Collections.unmodifiableSet(polyUnitSupers));
             //
-            // // Remove UnitsInternal from map
+            // // Remove @UnitsRep from map
             // supertypesMap.remove(unitsRepUtils.RAWUNITSINTERNAL);
             //
-            // // Remove UnitsInternal from polyQualifiers
+            // // Remove @UnitsRep from polyQualifiers
             // assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
             // polyQualifiers.remove(unitsRepUtils.RAWUNITSINTERNAL);
             //

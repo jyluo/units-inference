@@ -150,7 +150,7 @@ for project in "${projects[@]}"; do
                 awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
         done
 
-        grep "Annotation: @UnitsInternal(" "$InferenceSolutionsFile" | wc -l | \
+        grep "Annotation: @UnitsRep(" "$InferenceSolutionsFile" | wc -l | \
             awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
     else
         for key in "${constantSlotsOutputKeys[@]}"; do

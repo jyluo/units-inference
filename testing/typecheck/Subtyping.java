@@ -44,7 +44,7 @@ class Subtyping {
 
     @PolyAll Integer polyall;
     @PolyUnit Integer polyunit;
-    @UnitsInternal Integer raw;
+    @UnitsRep Integer raw;
 
     void oddCases() {
         // For directly testing the subtyping relations defined between poly and unit types

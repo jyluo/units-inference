@@ -196,7 +196,7 @@ public class UnitsZ3SmtFormatTranslator
     public AnnotationMirror decodeSolution(
             TypecheckUnit solutionSlot, ProcessingEnvironment processingEnv) {
 
-        // TODO: translate @UnitsInternal annotations to string from @Units annotations
+        // TODO: translate @UnitsRep annotations to string from @Units annotations
         // TODO: infer original name somehow
 
         AnnotationMirror solutionUnit =

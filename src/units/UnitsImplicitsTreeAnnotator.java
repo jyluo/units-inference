@@ -23,6 +23,9 @@ public abstract class UnitsImplicitsTreeAnnotator extends ImplicitsTreeAnnotator
         addLiteralKind(LiteralKind.STRING, unitsRepUtils.DIMENSIONLESS);
         addLiteralKind(LiteralKind.CHAR, unitsRepUtils.DIMENSIONLESS);
         addLiteralKind(LiteralKind.BOOLEAN, unitsRepUtils.DIMENSIONLESS);
+
+        // TODO: set BOTTOM as the implicit qualifier for lower bounds? Its nice to
+        // infer a bound which is the current mode.
     }
 
     // this is called if the enum constant is directly used via a static import

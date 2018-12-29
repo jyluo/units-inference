@@ -6,9 +6,9 @@ class GenericMethods {
         return param;
     }
 
-    public <T extends Number> T idTwo(T param) {
-        T localVar = null;
-        return param;
+    public <@UnitsBottom T extends Number> T idTwo(T param) {
+        T copy = param;
+        return copy;
     }
 
     public <T> String mStringCatOne(T param) {

@@ -179,3 +179,5 @@ tasks.verifyGoogleJavaFormat {
     exclude 'annotated'
     exclude 'benchmarks'
 }
+
+tasks.test.dependsOn 'verifyGoogleJavaFormat'

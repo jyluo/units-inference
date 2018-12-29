@@ -31,7 +31,6 @@ import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.TypesUtils;
 import org.checkerframework.javacutil.UserError;
-
 import units.qual.BaseUnit;
 import units.qual.UnitsAlias;
 import units.qual.UnitsInternal;

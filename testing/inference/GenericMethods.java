@@ -7,6 +7,7 @@ class GenericMethods {
     }
 
     public <T extends Number> T idTwo(T param) {
+        T localVar = null;
         return param;
     }
 

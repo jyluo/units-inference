@@ -42,7 +42,7 @@ cd "$WORKING_DIR"
 
 infer_cmd="python $DLJC/dljc -t inference --guess --crashExit \
 --checker $CHECKER --solver $SOLVER --solverArgs=$SOLVERARGS \
--o logs -m INFER -afud $WORKING_DIR/annotated -- $build_cmd "
+-o logs -m ROUNDTRIP -afud $WORKING_DIR/annotated -- $build_cmd "
 
 # debug_onlyCompile="--onlyCompileBytecodeBase true"
 # TODO:see how ontology uses testminimizer

@@ -27,6 +27,9 @@ IS_HACK=true
 export CLASSPATH=$UIPATH:.
 export external_checker_classpath=$UIPATH
 
+# NOTE: ROUNDTRIP mode actually writes out files to annotated, INFER mode only
+# performs inference without writing to annotated
+
 # Inference
 if [ -n "$1" ] && [ $1 = "GJE" ]; then
     $CFI/scripts/inference-dev -m ROUNDTRIP --checker "$CHECKER" \

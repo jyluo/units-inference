@@ -44,7 +44,7 @@ declare -a projects=($(ls -d */ | sort))
 pad=$(printf '%0.1s' " "{1..60})
 padlength=30
 
-# Print header row
+# Print header row =============================================================
 declare -a headers=(
     'Project' \
     'inference-failed' \
@@ -77,7 +77,19 @@ done
 
 printf '\n'
 
-# Print each project
+# Helper functions =============================================================
+
+# count_basic key file [file2 ...]
+function count_basic() {
+    key="$1"
+    shift
+    files=$@
+
+    count=$(grep -w "$key" $files | wc -l)
+    printf '%s\t' "$count"
+}
+
+# Print each project ===========================================================
 for project in "${projects[@]}"; do
     # remove trailing slash in project name
     project=$(printf '%*.*s' 0 $((${#project} - 1)) "$project")
@@ -87,14 +99,11 @@ for project in "${projects[@]}"; do
     InferenceLogFile=$project/logs/infer.log
     if [ -f $InferenceLogFile ]; then
         # inference success?
-        count=$(grep -w "!!! The set of constraints is unsatisfiable! !!!" "$InferenceLogFile" | wc -l)
-        printf '%s\t' "$count"
+        count_basic "!!! The set of constraints is unsatisfiable! !!!" "$InferenceLogFile"
         # number of sub-projects
-        count=$(grep -w "Running java" "$InferenceLogFile" | wc -l)
-        printf '%s\t' "$count"
+        count_basic "Running java" "$InferenceLogFile"
         # number of successful sub-projects
-        count=$(grep -w "Statistics have been written to" "$InferenceLogFile" | wc -l)
-        printf '%s\t' "$count"
+        count_basic "Statistics have been written to" "$InferenceLogFile"
     else
         printf '%s\t' "1"
         printf '%s\t' "0"
@@ -104,7 +113,7 @@ for project in "${projects[@]}"; do
     InferenceStatsFile=$project/statistics.txt
     if [ -f $InferenceStatsFile ]; then
         for key in "${statsTimeKeys[@]}"; do
-            # sift through the log files to find all the statistics values, sum them up and print it
+            # stats file might have more than 1 matching row, sum them up and print it
             grep -w "$key" "$InferenceStatsFile" | cut -d ':' -f 2 | \
                 awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
         done
@@ -126,17 +135,13 @@ for project in "${projects[@]}"; do
     ConstraintsStatsFile=$project/z3ConstraintsGlob.smt
     if [ -f $ConstraintsStatsFile ]; then
         # number of z3 bools
-        count=$(grep "declare-fun.*Bool" "$ConstraintsStatsFile" | wc -l)
-        printf '%s\t' "$count"
+        count_basic "declare-fun.*Bool" "$ConstraintsStatsFile"
         # number of z3 ints
-        count=$(grep "declare-fun.*Int" "$ConstraintsStatsFile" | wc -l)
-        printf '%s\t' "$count"
+        count_basic "declare-fun.*Int" "$ConstraintsStatsFile"
         # number of z3 asserts
-        count=$(grep -w "assert" "$ConstraintsStatsFile" | wc -l)
-        printf '%s\t' "$count"
+        count_basic "assert" "$ConstraintsStatsFile"
         # number of z3 assert-softs
-        count=$(grep -w "assert-soft" "$ConstraintsStatsFile" | wc -l)
-        printf '%s\t' "$count"
+        count_basic "assert-soft" "$ConstraintsStatsFile"
     else
         printf '%s\t' "0"
         printf '%s\t' "0"
@@ -146,7 +151,7 @@ for project in "${projects[@]}"; do
 
     if [ -f $InferenceStatsFile ]; then
         for key in "${statsKeys[@]}"; do
-            # sift through the log files to find all the statistics values, sum them up and print it
+            # stats file might have more than 1 matching row, sum them up and print it
             grep -w "$key" "$InferenceStatsFile" | cut -d ':' -f 2 | \
                 awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
         done
@@ -160,13 +165,10 @@ for project in "${projects[@]}"; do
     SOLUTIONSPrefix="Annotation: @"
     if [ -f $InferenceSolutionsFile ]; then
         for key in "${constantSlotsOutputKeys[@]}"; do
-            # sift through the log files to find all the constant slot output values, sum them up and print it
-            grep -w "$SOLUTIONSPrefix$key" "$InferenceSolutionsFile" | wc -l | \
-                awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
+            count_basic "$SOLUTIONSPrefix$key" "$InferenceSolutionsFile"
         done
 
-        grep "Annotation: @UnitsRep(" "$InferenceSolutionsFile" | wc -l | \
-            awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
+        count_basic "Annotation: @UnitsRep(" "$InferenceSolutionsFile"
     else
         for key in "${constantSlotsOutputKeys[@]}"; do
             printf '%s\t' "0"
@@ -177,16 +179,12 @@ for project in "${projects[@]}"; do
 
     INSERTKey=insert-annotation
     QUALPrefix=@units.qual.
-    # printf "$JAIFFiles"
     if [ -f "$project/logs/infer_result_0.jaif" ]; then
-        # echo "$JAIFFiles" | xargs printf '%s\t'
-
-        count=$(grep -w "$INSERTKey" $project/logs/infer_result_*.jaif | wc -l)
-        printf '%s\t' "$count"
+        # there can be more than 1 result jaif file
+        count_basic "$INSERTKey" $project/logs/infer_result_*.jaif
 
         for key in "${insertedAnnotationKeys[@]}"; do
-            grep -w "$INSERTKey.*$QUALPrefix$key" $project/logs/infer_result_*.jaif | wc -l | \
-                awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
+            count_basic "$INSERTKey.*$QUALPrefix$key" $project/logs/infer_result_*.jaif
         done
     else
         printf '%s\t' "0"
@@ -194,8 +192,6 @@ for project in "${projects[@]}"; do
             printf '%s\t' "0"
         done
     fi
-    # insertedAnnotationKeys
-    # infer_result_0.jaif
 
     printf '\n'
 done

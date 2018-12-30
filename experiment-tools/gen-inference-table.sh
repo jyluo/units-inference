@@ -25,11 +25,19 @@ declare -a constantSlotsNameKeys=(
     "ms" "ns" "mPERs" "deg" "rad" "other")
 
 declare -a constantSlotsOutputKeys=(
-    "Annotation: @UnknownUnits" \
-    "Annotation: @Dimensionless" "Annotation: @UnitsBottom" \
-    "Annotation: @m" "Annotation: @m2" "Annotation: @s" "Annotation: @ms" \
-    "Annotation: @ns" "Annotation: @mPERs" "Annotation: @deg" \
-    "Annotation: @rad")
+    "UnknownUnits" \
+    "Dimensionless" "UnitsBottom" \
+    "m" "m2" "s" "ms" \
+    "ns" "mPERs" "deg" \
+    "rad")
+
+declare -a insertedAnnotationKeys=(
+    "UnknownUnits" \
+    "Dimensionless" "UnitsBottom" \
+    "m" "m2" "s" "ms" \
+    "ns" "mPERs" "deg" \
+    "rad" \
+    "UnitsRep")
 
 declare -a projects=($(ls -d */ | sort))
 
@@ -61,6 +69,12 @@ done
 for key in "${constantSlotsNameKeys[@]}"; do
     printf '%s\t' "$key"
 done
+
+printf '%s\t' "inserted-annotations"
+for key in "${insertedAnnotationKeys[@]}"; do
+    printf '%s\t' "$key"
+done
+
 printf '\n'
 
 # Print each project
@@ -143,10 +157,11 @@ for project in "${projects[@]}"; do
     fi
 
     InferenceSolutionsFile=$project/solutions.txt
+    SOLUTIONSPrefix="Annotation: @"
     if [ -f $InferenceSolutionsFile ]; then
         for key in "${constantSlotsOutputKeys[@]}"; do
             # sift through the log files to find all the constant slot output values, sum them up and print it
-            grep -w "$key" "$InferenceSolutionsFile" | wc -l | \
+            grep -w "$SOLUTIONSPrefix$key" "$InferenceSolutionsFile" | wc -l | \
                 awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
         done
 
@@ -159,6 +174,28 @@ for project in "${projects[@]}"; do
 
         printf '%s\t' "0"
     fi
+
+    INSERTKey=insert-annotation
+    QUALPrefix=@units.qual.
+    # printf "$JAIFFiles"
+    if [ -f "$project/logs/infer_result_0.jaif" ]; then
+        # echo "$JAIFFiles" | xargs printf '%s\t'
+
+        count=$(grep -w "$INSERTKey" $project/logs/infer_result_*.jaif | wc -l)
+        printf '%s\t' "$count"
+
+        for key in "${insertedAnnotationKeys[@]}"; do
+            grep -w "$INSERTKey.*$QUALPrefix$key" $project/logs/infer_result_*.jaif | wc -l | \
+                awk -v tab="\t" '{sum += $1} END {printf sum+0 tab}'
+        done
+    else
+        printf '%s\t' "0"
+        for key in "${insertedAnnotationKeys[@]}"; do
+            printf '%s\t' "0"
+        done
+    fi
+    # insertedAnnotationKeys
+    # infer_result_0.jaif
 
     printf '\n'
 done

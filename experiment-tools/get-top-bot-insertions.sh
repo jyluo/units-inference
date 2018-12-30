@@ -26,8 +26,10 @@ for project in "${projects[@]}"; do
     INSERTKey=insert-annotation
     QUALPrefix=@units.qual.
     if [ -f "$project/logs/infer_result_0.jaif" ]; then
-        # there can be more than 1 result jaif file
-        grep -oh "insert-annotation.*UnknownUnits" $project/logs/infer_result_*.jaif | sort | uniq
+        for key in "${insertedAnnotationKeys[@]}"; do
+            # there can be more than 1 result jaif file
+            grep -oh "insert-annotation.*$key" $project/logs/infer_result_*.jaif | sort | uniq
+        done
     fi
 
     printf '\n'

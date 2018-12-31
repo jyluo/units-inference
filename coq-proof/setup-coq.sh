@@ -21,7 +21,7 @@ ROOT=$(cd ${myDir} && pwd)
 echo "Installing ocaml and camlp5 packages via sudo apt-get, enter password if prompted"
 sudo apt-get install ocaml camlp5
 
-COQ_TAR_FILE=V8.8.0.tar.gz
+COQ_TAR_FILE=V8.8.2.tar.gz
 
 # download coq sources
 if [ -e $ROOT/$COQ_TAR_FILE ] ; then
@@ -38,7 +38,7 @@ if [ ! -d $ROOT/coq-source ] ; then
 fi
 if [ ! -e $ROOT/coq-source/Makefile ] ; then
     echo "Extracting sources to $ROOT/coq-source"
-    tar -xzf V8.8.0.tar.gz
+    tar -xzf $COQ_TAR_FILE
     mv $ROOT/coq-*/* $ROOT/coq-source
 fi
 
@@ -48,7 +48,7 @@ cd $ROOT/coq-source
 if [ ! -e $ROOT/coq-source/bin/coqc ] ; then
     echo "Configuring coq for local installation"
     ./configure -local
-    
+
     echo "Compiling coq"
     make
 fi

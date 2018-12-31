@@ -11,7 +11,7 @@ testdata/
 
 # coq source files
 coq-proof/coq-source
-coq-proof/V8.8.0.tar.gz
+coq-proof/V*.tar.gz
 
 # coq proof output files
 coq-proof/*.aux

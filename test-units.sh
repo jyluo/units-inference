@@ -23,6 +23,9 @@ fi
 # Running test suite
 ./gradlew test --console=plain
 
+# Check Units Proof
+./coq-proof/compile.sh
+
 # Running Units Inference on working benchmarks
 ./benchmarks/run-travis-benchmarks.sh travis
 

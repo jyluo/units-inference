@@ -69,7 +69,7 @@ Qed.
 
 (* ======================================================= *)
 (* assuming Coq's set is unordered *)
-Fixpoint mulSetBCElem(bc1 : BaseComponent)(s : set BaseComponent) : BaseComponent :=
+Fixpoint mulSetBCElem(bc1 : BaseUnitComponent)(s : set BaseUnitComponent) : BaseUnitComponent :=
   match s with
     | bc2 :: s' =>
       match bc1, bc2 with
@@ -89,7 +89,7 @@ Example example2 : mulSetBCElem (bc meter 1) [(bc second 1)] = (bc meter 1).
 Proof. simpl. rewrite -> (baseUnit_eq_dec_false meter second). reflexivity. discriminate. Qed.
 End MulSetBCElem_Test.
 
-Fixpoint mulSetBC(s1 s2 : set BaseComponent) : set BaseComponent :=
+Fixpoint mulSetBC(s1 s2 : set BaseUnitComponent) : set BaseUnitComponent :=
   match s1 with
     | bc1 :: s1' => mulSetBCElem bc1 s2 :: mulSetBC s1' s2
     | empty_set => empty_set
@@ -104,7 +104,7 @@ End MulSetBC_Test.
 
 Definition mulNormalizedUnit(nu1 nu2 : NormalizedUnit) : NormalizedUnit :=
   match nu1, nu2 with
-  | normUnit pc1 s1, normUnit pc2 s2 => 
+  | normUnit pc1 s1, normUnit pc2 s2 =>
     match pc1, pc2 with
       | pc ten p1, pc ten p2 => normUnit (pc ten (p1 + p2)) (mulSetBC s1 s2)
     end

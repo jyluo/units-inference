@@ -7,7 +7,7 @@ Require Import Lists.ListSet.
 
 (* Print Visibility. *)
 
-(* Base units *)
+(* Base units, here we instantiate with all 7 base SI units *)
 Inductive BaseUnit : Type :=
   | meter : BaseUnit
   | second : BaseUnit
@@ -17,18 +17,21 @@ Inductive BaseUnit : Type :=
   | candela : BaseUnit
   | mole : BaseUnit.
 
-Inductive BaseComponent : Type :=
-  | bc : BaseUnit -> nat -> BaseComponent.
+Inductive BaseUnitComponent : Type :=
+  | bc : BaseUnit -> nat -> BaseUnitComponent.
 
+(* Base 10 prefix *)
 Inductive PrefixBases : Type :=
   | ten : PrefixBases.
 
 Inductive PrefixComponent : Type :=
   | pc : PrefixBases -> nat -> PrefixComponent.
 
+(* A normalized unit is a prefix component + a set of base unit components *)
 Inductive NormalizedUnit : Type :=
-  | normUnit: PrefixComponent -> set BaseComponent -> NormalizedUnit.
+  | normUnit: PrefixComponent -> set BaseUnitComponent -> NormalizedUnit.
 
+(* Some example definitions of units *)
 Definition m := normUnit (pc ten 0) [bc meter 1 ; bc second 0 ; bc gram 0].
 Definition km := normUnit (pc ten 3) [bc meter 1 ; bc second 0 ; bc gram 0].
 Definition m2 := normUnit (pc ten 0) [bc meter 2 ; bc second 0 ; bc gram 0].
@@ -52,7 +55,8 @@ Example test2 : meter <> gram. discriminate. Qed.
 End buEqualTest.
 
 Theorem baseUnit_eq_dec :
-  forall bu1 bu2 : BaseUnit, {bu1 = bu2} + {bu1 <> bu2}.
+  forall bu1 bu2 : BaseUnit,
+  {bu1 = bu2} + {bu1 <> bu2}.
 Proof.
   intros.
   induction bu1, bu2; subst;
@@ -89,8 +93,9 @@ Example test2 : (bc meter 5) <> (bc meter 4). intros contra. inversion contra. Q
 Example test3 : (bc meter 5) <> (bc second 5). intros contra. inversion contra. Qed.
 End bcEqualTest.
 
-Theorem baseComponent_eq_dec :
-  forall bc1 bc2 : BaseComponent, {bc1 = bc2} + {bc1 <> bc2}.
+Theorem baseUnitComponent_eq_dec :
+  forall bc1 bc2 : BaseUnitComponent,
+  {bc1 = bc2} + {bc1 <> bc2}.
 Proof.
   intros.
   destruct bc1, bc2; simpl; subst.
@@ -104,20 +109,23 @@ Proof.
       apply HnNEQ. apply H1.
 Qed.
 
-Theorem baseComponent_eq_dec_true :
-  forall (bc : BaseComponent) (T : Type) (t f : T), (if baseComponent_eq_dec bc bc then t else f) = t.
+Theorem baseUnitComponent_eq_dec_true :
+  forall (bc : BaseUnitComponent) (T : Type) (t f : T),
+  (if baseUnitComponent_eq_dec bc bc then t else f) = t.
 Proof.
   intros.
-  destruct baseComponent_eq_dec.
+  destruct baseUnitComponent_eq_dec.
     reflexivity.
     contradiction n. reflexivity.
 Qed.
 
-Theorem baseComponent_eq_dec_false :
-  forall (bc1 bc2 : BaseComponent) (T : Type) (t f : T), bc1 <> bc2 -> (if baseComponent_eq_dec bc1 bc2 then t else f) = f.
+Theorem baseUnitComponent_eq_dec_false :
+  forall (bc1 bc2 : BaseUnitComponent) (T : Type) (t f : T),
+  bc1 <> bc2 ->
+  (if baseUnitComponent_eq_dec bc1 bc2 then t else f) = f.
 Proof.
   intros.
-  destruct baseComponent_eq_dec; subst.
+  destruct baseUnitComponent_eq_dec; subst.
     contradiction H. reflexivity.
     reflexivity.
 Qed.
@@ -133,16 +141,18 @@ Example test5 : [bc meter 1 ; bc second 0 ; bc gram 0] <> [bc meter 1 ; bc secon
 End setBcEqualTest.
 
 Theorem baseComponentSet_eq_dec :
-  forall bcs1 bcs2 : set BaseComponent, {bcs1 = bcs2} + {bcs1 <> bcs2}.
+  forall bcs1 bcs2 : set BaseUnitComponent,
+  {bcs1 = bcs2} + {bcs1 <> bcs2}.
 Proof.
   intros.
-  destruct (list_eq_dec baseComponent_eq_dec bcs1 bcs2) as [Heq | Hneq]; subst.
+  destruct (list_eq_dec baseUnitComponent_eq_dec bcs1 bcs2) as [Heq | Hneq]; subst.
     left. reflexivity.
     right. apply Hneq.
 Qed.
 
 Theorem baseComponentSet_eq_dec_true :
-  forall (bcs : set BaseComponent) (T : Type) (t f : T), (if baseComponentSet_eq_dec bcs bcs then t else f) = t.
+  forall (bcs : set BaseUnitComponent) (T : Type) (t f : T),
+  (if baseComponentSet_eq_dec bcs bcs then t else f) = t.
 Proof.
   intros.
   destruct baseComponentSet_eq_dec.
@@ -151,7 +161,9 @@ Proof.
 Qed.
 
 Theorem baseComponentSet_eq_dec_false :
-  forall (bcs1 bcs2 : set BaseComponent) (T : Type) (t f : T), bcs1 <> bcs2 -> (if baseComponentSet_eq_dec bcs1 bcs2 then t else f) = f.
+  forall (bcs1 bcs2 : set BaseUnitComponent) (T : Type) (t f : T),
+  bcs1 <> bcs2 ->
+  (if baseComponentSet_eq_dec bcs1 bcs2 then t else f) = f.
 Proof.
   intros.
   destruct baseComponentSet_eq_dec; subst.
@@ -167,7 +179,8 @@ Example test2 : (pc ten 5) <> (pc ten 4). intros contra. inversion contra. Qed.
 End pcEqualTest.
 
 Theorem prefixComponent_eq_dec :
-  forall pc1 pc2 : PrefixComponent, {pc1 = pc2} + {pc1 <> pc2}.
+  forall pc1 pc2 : PrefixComponent,
+  {pc1 = pc2} + {pc1 <> pc2}.
 Proof.
   intros.
   destruct pc1, pc2; simpl; subst.
@@ -178,7 +191,8 @@ Proof.
 Qed.
 
 Theorem prefixComponent_eq_dec_true :
-  forall (pc : PrefixComponent) (T : Type) (t f : T), (if prefixComponent_eq_dec pc pc then t else f) = t.
+  forall (pc : PrefixComponent) (T : Type) (t f : T),
+  (if prefixComponent_eq_dec pc pc then t else f) = t.
 Proof.
   intros.
   destruct prefixComponent_eq_dec.
@@ -187,7 +201,8 @@ Proof.
 Qed.
 
 Theorem prefixComponent_eq_dec_false :
-  forall (pc1 pc2 : PrefixComponent) (T : Type) (t f : T), pc1 <> pc2 -> (if prefixComponent_eq_dec pc1 pc2 then t else f) = f.
+  forall (pc1 pc2 : PrefixComponent) (T : Type) (t f : T),
+  pc1 <> pc2 -> (if prefixComponent_eq_dec pc1 pc2 then t else f) = f.
 Proof.
   intros.
   destruct prefixComponent_eq_dec; subst.
@@ -205,7 +220,8 @@ Example test4 : g <> dimensionless. intros contra. inversion contra. Qed.
 End nuEqualTest.
 
 Theorem normalizedUnit_eq_dec :
-  forall nu1 nu2 : NormalizedUnit, {nu1 = nu2} + {nu1 <> nu2}.
+  forall nu1 nu2 : NormalizedUnit,
+  {nu1 = nu2} + {nu1 <> nu2}.
 Proof.
   intros.
   destruct nu1, nu2; simpl.
@@ -217,7 +233,8 @@ Proof.
 Qed.
 
 Theorem normalizedUnit_eq_dec_true :
-  forall (nu : NormalizedUnit) (T : Type) (t f : T), (if normalizedUnit_eq_dec nu nu then t else f) = t.
+  forall (nu : NormalizedUnit) (T : Type) (t f : T),
+  (if normalizedUnit_eq_dec nu nu then t else f) = t.
 Proof.
   intros.
   destruct normalizedUnit_eq_dec.
@@ -250,7 +267,8 @@ Example test10: (declaredUnit m) <> (declaredUnit g). intros contra. inversion c
 End uEqualTest.
 
 Theorem unit_eq_dec :
-  forall u1 u2 : Unit, {u1 = u2} + {u1 <> u2}.
+  forall u1 u2 : Unit,
+  {u1 = u2} + {u1 <> u2}.
 Proof.
   intros.
   destruct u1, u2; subst.
@@ -269,7 +287,8 @@ Proof.
 Qed.
 
 Theorem unit_eq_dec_true :
-  forall (u : Unit) (T : Type) (t f : T), (if unit_eq_dec u u then t else f) = t.
+  forall (u : Unit) (T : Type) (t f : T),
+  (if unit_eq_dec u u then t else f) = t.
 Proof.
   intros.
   destruct unit_eq_dec.
@@ -278,7 +297,9 @@ Proof.
 Qed.
 
 Theorem unit_eq_dec_false :
-  forall (T : Type) (u1 u2 : Unit) (t f : T), u1 <> u2 -> (if unit_eq_dec u1 u2 then t else f) = f.
+  forall (T : Type) (u1 u2 : Unit) (t f : T),
+  u1 <> u2 ->
+  (if unit_eq_dec u1 u2 then t else f) = f.
 Proof.
   intros.
   destruct unit_eq_dec; subst.
@@ -291,13 +312,16 @@ Definition unit_beq (u1 u2 : Unit) : bool :=
 Hint Unfold unit_beq.
 
 Theorem unit_beq_true :
-  forall (u : Unit), unit_beq u u = true.
+  forall (u : Unit),
+  unit_beq u u = true.
 Proof.
   intros. unfold unit_beq. apply unit_eq_dec_true.
 Qed.
 
 Theorem unit_beq_false :
-  forall (u1 u2 : Unit), u1 <> u2 -> unit_beq u1 u2 = false.
+  forall (u1 u2 : Unit),
+  u1 <> u2 ->
+  unit_beq u1 u2 = false.
 Proof.
   intros. unfold unit_beq. apply unit_eq_dec_false. apply H.
 Qed.

@@ -7,7 +7,6 @@ Require Import MapsDefs.
 we use Coq's built in pair data structure
 h = f -> Tf, (Tv, n)
 *)
-
 Definition HeapValue : Type := prod Unit Value.
 
 Definition HeapValue_beq ( hv1 hv2 : HeapValue ) : bool :=

@@ -24,6 +24,7 @@ fi
 ./gradlew test --console=plain
 
 # Check Units Proof
+./coq-proof/setup-coq.sh
 ./coq-proof/compile.sh
 
 # Running Units Inference on working benchmarks

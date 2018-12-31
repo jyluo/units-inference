@@ -24,8 +24,9 @@ fi
 ./gradlew test --console=plain
 
 # Check Units Proof
-./coq-proof/setup-coq.sh
-./coq-proof/compile.sh
+# TODO: This requires ocaml and camlp5 in travis environment, which means we need to build a docker
+# ./coq-proof/setup-coq.sh
+# ./coq-proof/compile.sh
 
 # Running Units Inference on working benchmarks
 ./benchmarks/run-travis-benchmarks.sh travis

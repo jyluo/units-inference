@@ -85,6 +85,7 @@ public class UnitsZ3SmtEncoderUtils {
         // return ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()),
         // ctx.mkNot(unit.getUnitsBottom()));
 
+        // truthtable xor (xor ((not x and not y), x), y)
         // TODO: more preferable to not have to encode exponent == 0 in
         // wellformedness, but currently we must do so in order to have exponent
         // variable declarations outputted for the z3 files
@@ -96,6 +97,11 @@ public class UnitsZ3SmtEncoderUtils {
                 ctx.mkAnd(unit.getUnknownUnits(), allPrefixesAreZero),
                 ctx.mkAnd(unit.getUnitsBottom(), allPrefixesAreZero));
         /* @formatter:on // this is for eclipse formatter */
+
+        // simplify xor (xor ((not x and not y), x), y)
+        // // Simplified version:
+        // return ctx.mkNot(ctx.mkAnd(unit.getUnknownUnits(), unit.getUnitsBottom()));
+        // return ctx.mkOr(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom()));
     }
 
     /** Slot preference constraint: that the slot == dimensionless */

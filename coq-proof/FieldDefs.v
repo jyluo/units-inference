@@ -116,10 +116,10 @@ Proof.
       intros f' HGf'.
       inversion HGH; subst.
       destruct H2 with f' as [Tf']. apply HGf'. clear H2. destruct H3 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.
-      destruct (id_eq_dec f' f).
+      destruct (id_eq_dec f' f); subst.
       (* Case: f = f' : in h', the value of f' is T T z *)
         exists T, T, z.
-        rewrite -> e in H2. assert (T = Tf'). eapply Gamma_Get_Content_Eq. apply H1. apply H2. subst.
+        assert (T = Tf'). eapply Gamma_Get_Content_Eq. apply H1. apply H2. subst.
         split. apply H1.
         split. apply Heap_Update_FieldType_Eq.
         split. apply subtype_reflexive.

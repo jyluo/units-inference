@@ -7,6 +7,9 @@ Require Import HeapDefs.
 
 (* ======================================================= *)
 
+(* If gamma contains a field f, then there exists Tv and Tf such that Tv <: Tf,
+    and Gamma(f) = FieldType(h, f) = Tf, FieldValue(h, f) = Tv z for some z. *)
+
 Reserved Notation "'gh:' g '|-' h 'OK'" (at level 40).
 Inductive Gamma_Heap_OK : Gamma -> Heap -> Prop :=
   | GH_Correspondence : forall (g : Gamma) (h : Heap),

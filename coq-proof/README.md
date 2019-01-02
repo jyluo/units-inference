@@ -34,9 +34,9 @@ run `./cleanup.sh` to remove coq output files
 
 `UnitsArithmetics.v` defines and proves properties for the arithmetic functions add, multiply, and modulo between units; including the subtype consistent lemmas discussed in the paper.
 
-`FieldsDefs.v` contains the definitions and the proof of progress and preservation helper lemmas for field declarations **_fd_** in our language.
+`FieldDefs.v` contains the definitions and the proof of progress and preservation helper lemmas for field declarations **_fd_** in our language.
 
-`ExpressionsDefs.v` contains the definitions and the proof of progress and preservation helper lemmas for expressions **_e_** in our language.
+`ExpressionDefs.v` contains the definitions and the proof of progress and preservation helper lemmas for expressions **_e_** in our language.
 
 `StatementDefs.v` contains the definitions and the proof of progress and preservation helper lemmas for assignment statements **_s_** in our language.
 

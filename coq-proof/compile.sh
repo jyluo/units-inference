@@ -45,8 +45,8 @@ $COQC GammaHeapCorrespondence.v
 
 $COQC UnitsArithmetics.v
 
-$COQC FieldsDefs.v
-$COQC ExpressionsDefs.v
+$COQC FieldDefs.v
+$COQC ExpressionDefs.v
 $COQC StatementDefs.v
 $COQC ProgramDefs.v
 

@@ -15,25 +15,25 @@ Require Import ValueDefs.
 Require Import GammaDefs.
 Require Import HeapDefs.
 Require Import GammaHeapCorrespondence.
-Require Import ExpressionsDefs.
+Require Import ExpressionDefs.
 
 (* ======================================================= *)
-Inductive Statement : Type :=
-  | STMT_Empty : Statement
-  | STMT_Assign : ID -> Expression -> Statement -> Statement. (* f = e ; s *)
+Inductive Statements : Type :=
+  | STMT_Empty : Statements
+  | STMT_Assign : ID -> Expression -> Statements -> Statements. (* f = e ; s *)
 Tactic Notation "stmt_cases" tactic(first) ident(c) :=
   first;
   [ Case_aux c "STMT_Empty"
   | Case_aux c "STMT_Assign"
   ].
-Hint Constructors Statement.
+Hint Constructors Statements.
 
 (* ======================================================= *)
 Reserved Notation "'stmt:' g '|-' s " (at level 40).
-Inductive stmt_has_type : Gamma -> Statement -> Prop :=
+Inductive stmt_has_type : Gamma -> Statements -> Prop :=
   | T_STMT_Empty : forall (g : Gamma),
     stmt: g |- STMT_Empty
-  | T_STMT_Assign : forall (g : Gamma) (f : ID) (Tf Te : Unit) (e : Expression) (s2 : Statement),
+  | T_STMT_Assign : forall (g : Gamma) (f : ID) (Tf Te : Unit) (e : Expression) (s2 : Statements),
     Gamma_Contains g f = true ->
     Gamma_Get g f = Some Tf ->
     Te <: Tf = true ->
@@ -51,12 +51,12 @@ Hint Constructors stmt_has_type.
 (* ======================================================= *)
 
 Reserved Notation " s1 'stmt==>' s2 " (at level 8).
-Inductive stmt_small_step : prod Heap Statement -> prod Heap Statement -> Prop :=
-  | ST_STMT_Assign_Val : forall (h : Heap) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statement),
+Inductive stmt_small_step : prod Heap Statements -> prod Heap Statements -> Prop :=
+  | ST_STMT_Assign_Val : forall (h : Heap) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
     FieldType h f = Tf ->
     Tv <: Tf = true ->
     ( h, STMT_Assign f (E_Value (Val Tv z)) s2 ) stmt==> ( (Heap_Update h f Tf Tv z), s2 )
-  | ST_STMT_Assign_Exp : forall (h : Heap) (f : ID) (e e' : Expression) (s2 : Statement),
+  | ST_STMT_Assign_Exp : forall (h : Heap) (f : ID) (e e' : Expression) (s2 : Statements),
     ( h, e ) expr==> e' ->
     ( h, STMT_Assign f e s2 ) stmt==> ( h, STMT_Assign f e' s2 )
 where " s1 'stmt==>' s2 " := (stmt_small_step s1 s2).
@@ -70,7 +70,7 @@ Hint Constructors stmt_small_step.
 (* ======================================================= *)
 (* step is deterministic *)
 Theorem stmt_small_step_deterministic:
-  forall (s s1 s2 : prod Heap Statement),
+  forall (s s1 s2 : prod Heap Statements),
     s stmt==> s1 ->
     s stmt==> s2 ->
     s1 = s2.
@@ -85,20 +85,20 @@ Proof.
   Case "ST_STMT_Assign_Exp".
     intros s3 Hs3; inversion Hs3; subst.
       inversion H.
-      assert (e' = e'0). apply expr_small_step_deterministic with h e. 
+      assert (e' = e'0). apply expr_small_step_deterministic with h e.
         apply H. apply H5.
       subst. reflexivity.
 Qed.
 
 (* ======================================================= *)
-Inductive STMT_Normal_Form : Statement -> Prop :=
+Inductive STMT_Normal_Form : Statements -> Prop :=
   | V_STMT_Value : STMT_Normal_Form STMT_Empty.
 
 (* ======================================================= *)
-Theorem stmt_progress : forall (g : Gamma) (s : Statement) (h : Heap),
+Theorem stmt_progress : forall (g : Gamma) (s : Statements) (h : Heap),
   stmt: g |- s ->
   gh: g |- h OK ->
-  STMT_Normal_Form s \/ exists (h' : Heap) (s' : Statement), (h, s) stmt==> (h', s').
+  STMT_Normal_Form s \/ exists (h' : Heap) (s' : Statements), (h, s) stmt==> (h', s').
 Proof.
   intros g s h HT HGH.
   stmt_has_type_cases (induction HT) Case; subst.
@@ -125,11 +125,11 @@ Proof.
 Qed.
 
 (* ======================================================= *)
-Theorem stmt_preservation : forall (g : Gamma) (s s' : Statement) (h h' : Heap),
+Theorem stmt_preservation : forall (g : Gamma) (s s' : Statements) (h h' : Heap),
   stmt: g |- s ->
   gh: g |- h OK ->
   (h, s) stmt==> (h', s') ->
-  gh: g |- h' OK /\ stmt: g |- s'. (* add gh: g |- h' OK as an extra requirement in conclusion *) 
+  gh: g |- h' OK /\ stmt: g |- s'. (* add gh: g |- h' OK as an extra requirement in conclusion *)
 Proof.
   (* by induction on typing of stmts *)
   intros g s s' h h' HT HGH HS.

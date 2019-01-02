@@ -53,7 +53,7 @@ Hint Constructors stmt_has_type.
 Reserved Notation " s1 'stmt==>' s2 " (at level 8).
 Inductive stmt_small_step : prod Heap Statements -> prod Heap Statements -> Prop :=
   | ST_STMT_Assign_Val : forall (h : Heap) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
-    FieldType h f = Tf ->
+    FieldType h f = Some Tf ->
     Tv <: Tf = true ->
     ( h, STMT_Assign f (E_Value (Val Tv z)) s2 ) stmt==> ( (Heap_Update h f Tf Tv z), s2 )
   | ST_STMT_Assign_Exp : forall (h : Heap) (f : ID) (e e' : Expression) (s2 : Statements),
@@ -80,14 +80,12 @@ Proof.
   stmt_small_step_cases (induction Hs1) Case.
   Case "ST_STMT_Assign_Val".
     intros s3 Hs3; inversion Hs3; subst.
-      reflexivity.
+      assert (Tf = Tf0). eapply FieldType_Content_Eq; eauto. subst. reflexivity.
       inversion H6.
   Case "ST_STMT_Assign_Exp".
     intros s3 Hs3; inversion Hs3; subst.
       inversion H.
-      assert (e' = e'0). apply expr_small_step_deterministic with h e.
-        apply H. apply H5.
-      subst. reflexivity.
+      assert (e' = e'0). apply expr_small_step_deterministic with h e; eauto. subst. reflexivity.
 Qed.
 
 (* ======================================================= *)
@@ -107,21 +105,17 @@ Proof.
   Case "T_STMT_Assign".
     right.
     inversion HGH; subst.
-    destruct H3 with f. destruct H5 as [Tf']. destruct H5 as [Tv']. destruct H5 as [z'].
-      destruct H5. destruct H6. destruct H7.
-    assert (Tf = Tf').
-      eapply Gamma_Get_Content_Eq. apply H0. apply H5. subst.
-    assert (expr_normal_form e \/ exists e', (h, e) expr==> e').
-      apply expr_progress with g Te.
-        apply H2. apply HGH.
-    inversion H6; subst.
+    destruct H3 with f as [Tf']. apply H. clear H3. destruct H4 as [Tv']. destruct H3 as [z']. Tactics.destruct_pairs.
+    assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
+    assert (expr_normal_form e \/ exists e', (h, e) expr==> e'). apply expr_progress with g Te. apply H2. apply HGH.
+    inversion H7; subst.
     (* Case : e is normal form -> step by ST_STMT_Assign_Val *)
-      destruct H9; subst. inversion H2; subst. exists (Heap_Update h f (FieldType h f) Te z). exists s2.
+      destruct H8; subst. inversion H2; subst. exists (Heap_Update h f Tf' Te z), s2.
       eapply ST_STMT_Assign_Val.
-        reflexivity.
+        apply H4.
         apply H1.
     (* Case : e can take a step -> step by ST_STMT_Assign_Exp *)
-      destruct H9 as [e']; subst. exists h. exists (STMT_Assign f e' s2). apply ST_STMT_Assign_Exp. apply H9.
+      destruct H8 as [e']; subst. exists h, (STMT_Assign f e' s2). apply ST_STMT_Assign_Exp. apply H8.
 Qed.
 
 (* ======================================================= *)
@@ -144,25 +138,24 @@ Proof.
       (* first prove that g |- h' OK *)
         inversion H2; subst.
         apply GH_Correspondence.
-        intros f'.
+        intros f' HGf'.
         inversion HGH; subst.
-        destruct H3 with f'. destruct H5 as [Tf']. destruct H5 as [Tv']. destruct H5 as [z'].
-          destruct H5. destruct H6. destruct H7.
-        split. apply H4.
+        destruct H3 with f' as [Tf']. apply HGf'. clear H3. destruct H4 as [Tv']. destruct H3 as [z']. Tactics.destruct_pairs.
         destruct (id_eq_dec f' f).
         (* Case: f = f' : in h', the value of f' is Tf Te z *)
-          exists Tf, Te, z. rewrite -> e in H5.
-          assert (Tf = Tf'). eapply Gamma_Get_Content_Eq. apply H0. apply H5. subst.
-          split. apply H5.
+          exists Tf, Te, z. rewrite -> e in H3.
+          assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
+          assert (Tf' = Tf0). eapply FieldType_Content_Eq; eauto. subst.
+          split. apply H3.
           split. apply Heap_Update_FieldType_Eq.
           split. apply H1.
           apply Heap_Update_FieldValue_Eq.
         (* Case: f <> f' : in h' the value of f' is some Tf' Tv' z' *)
           exists Tf', Tv', z'. subst.
-          split. apply H5.
-          split. apply Heap_Update_FieldType_Neq. apply n.
-          split. apply H7.
-          rewrite <- H8. apply Heap_Update_FieldValue_Neq. apply n.
+          split. apply H3.
+          split. rewrite <- H4. apply Heap_Update_FieldType_Neq. apply n.
+          split. apply H6.
+          rewrite <- H7. apply Heap_Update_FieldValue_Neq. apply n.
       (* then prove that g |- s' *)
         apply HT.
     SCase "ST_STMT_Assign_Exp". (* f = e ; s2 , e --> e' *)

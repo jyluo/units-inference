@@ -61,8 +61,9 @@ Hint Constructors expr_has_type.
 (* ======================================================= *)
 Reserved Notation " he1 'expr==>' e2 " (at level 8).
 Inductive expr_small_step : prod Heap Expression -> Expression -> Prop :=
-  | ST_Field_Lookup : forall (h : Heap) (f : ID),
-    ( h, E_Field_Lookup f ) expr==> (E_Value (FieldValue h f))
+  | ST_Field_Lookup : forall (h : Heap) (f : ID) (T : Unit) (z : nat),
+    FieldValue h f = Some (Val T z) ->
+    ( h, E_Field_Lookup f ) expr==> (E_Value (Val T z))
   | ST_Arith_Values : forall (h : Heap) (T1 T2 : Unit) (z1 z2 : nat) (op : OpKind),
     ( h, E_Arith (E_Value (Val T1 z1)) op (E_Value (Val T2 z2)) ) expr==> (E_Value (Val (computeUnit op T1 T2) (computeNat op z1 z2)) )
   | ST_Arith_Left_Reduce : forall (h : Heap) (e1 e1' e2 : Expression) (op : OpKind),
@@ -93,7 +94,9 @@ Proof.
   generalize dependent e2.
   expr_small_step_cases (induction He1) Case.
   Case "ST_Field_Lookup".
-    intros e2 He2. inversion He2; subst. reflexivity.
+    intros e2 He2. inversion He2; subst.
+    assert (Val T z = Val T0 z0). eapply FieldValue_Content_Eq; eauto.
+    destruct H0. reflexivity.
   Case "ST_Arith_Values".
     intros e2 He2. inversion He2; subst.
       reflexivity.
@@ -127,7 +130,11 @@ Proof.
   Case "T_Value".
     left. apply V_Expr_Value.
   Case "T_Field_Lookup".
-    right. exists (E_Value (FieldValue h f)). apply ST_Field_Lookup.
+    right.
+    inversion HGH; subst.
+    destruct H1 with f as [Tf']. apply H. clear H1. destruct H2 as [Tv]. destruct H1 as [z]. Tactics.destruct_pairs.
+    assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
+    exists (E_Value (Val Tv z)). apply ST_Field_Lookup. apply H4.
   Case "T_Arith".
     right.
     destruct IHHT1 as [He1NF |He1STEP]. apply HGH.
@@ -158,12 +165,12 @@ Proof.
   Case "T_Field_Lookup".
     inversion HS; subst.
     inversion HGH; subst.
-    destruct H1 with f. destruct H3 as [Tf']. destruct H3 as [Tv']. destruct H3 as [z']. destruct H3. destruct H4. destruct H5.
-    assert (Tf = Tf').
-      eapply Gamma_Get_Content_Eq. apply H0. apply H3. subst.
+    destruct H1 with f as [Tf']. apply H. destruct H2 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.
+    assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
+    assert (Val T z = Val Tv' z'). eapply FieldValue_Content_Eq; eauto. inversion H7. subst.
     exists Tv'. split.
       apply H5.
-      rewrite -> H6. apply T_Value.
+      apply T_Value.
   Case "T_Arith".
     inversion HS; subst. (* e1 op e2 ==> e' in one of 3 ways *)
     SCase "ST_Arith_Values". (* v1 op v2 ==> v *)

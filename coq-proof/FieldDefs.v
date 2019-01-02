@@ -113,24 +113,23 @@ Proof.
     split.
     (* first prove that g2 |- h' OK *)
       apply GH_Correspondence.
-      intros f'.
+      intros f' HGf'.
       inversion HGH; subst.
-      destruct H2 with f'. destruct H4 as [Tf']. destruct H4 as [Tv']. destruct H4 as [z']. Tactics.destruct_pairs.
-      split. apply H3.
+      destruct H2 with f' as [Tf']. apply HGf'. clear H2. destruct H3 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.
       destruct (id_eq_dec f' f).
       (* Case: f = f' : in h', the value of f' is T T z *)
         exists T, T, z.
-        rewrite -> e in H4. assert (T = Tf'). eapply Gamma_Get_Content_Eq. apply H1. apply H4. subst.
+        rewrite -> e in H2. assert (T = Tf'). eapply Gamma_Get_Content_Eq. apply H1. apply H2. subst.
         split. apply H1.
         split. apply Heap_Update_FieldType_Eq.
         split. apply subtype_reflexive.
         apply Heap_Update_FieldValue_Eq.
       (* Case: f <> f' : in h' the value of f' is some Tv' z' *)
         exists Tf', Tv', z'.
+        split. apply H2.
+        split. rewrite <- H3. apply Heap_Update_FieldType_Neq. apply n.
         split. apply H4.
-        split. rewrite <- H5. apply Heap_Update_FieldType_Neq. apply n.
-        split. apply H6.
-        rewrite <- H7. apply Heap_Update_FieldValue_Neq. apply n.
+        rewrite <- H5. apply Heap_Update_FieldValue_Neq. apply n.
     (* then prove that fds: Gamma_Extend g1 f T |- fds' in g2 *)
       simpl. apply HT.
 Qed.

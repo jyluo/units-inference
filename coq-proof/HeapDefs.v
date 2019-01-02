@@ -39,37 +39,37 @@ Qed.
   if f exists in the heap, it returns the type
   otherwise it returns None
  *)
-Definition FieldType (h : Heap) (f : ID) : Unit :=
+Definition FieldType (h : Heap) (f : ID) : option Unit :=
   match Heap_Get h f with
-  | Some (pair u v) => u
-  | None => bottom (* this case should never happen *)
+  | Some (pair u v) => Some u
+  | None => None
   end.
 
 Theorem FieldType_Content_Eq:
   forall (h : Heap) (f : ID) (T1 T2 : Unit),
-  FieldType h f = T1 ->
-  FieldType h f = T2 ->
+  FieldType h f = Some T1 ->
+  FieldType h f = Some T2 ->
   T1 = T2.
 Proof.
   intros.
-  rewrite -> H in H0. apply H0.
+  rewrite -> H in H0. inversion H0. reflexivity.
 Qed.
 
 (* function for looking up the field value of a field *)
-Definition FieldValue (h : Heap) (f : ID) : Value :=
+Definition FieldValue (h : Heap) (f : ID) : option Value :=
   match Heap_Get h f with
-  | Some (pair u v) => v
-  | None => Val bottom 0 (* this case should never happen *)
+  | Some (pair u v) => Some v
+  | None => None
   end.
 
 Theorem FieldValue_Content_Eq:
   forall (h : Heap) (f : ID) (v1 v2 : Value),
-  FieldValue h f = v1 ->
-  FieldValue h f = v2 ->
+  FieldValue h f = Some v1 ->
+  FieldValue h f = Some v2 ->
   v1 = v2.
 Proof.
   intros.
-  rewrite -> H in H0. apply H0.
+  rewrite -> H in H0. inversion H0. reflexivity.
 Qed.
 
 Theorem Heap_Contains_Implies_Get :
@@ -90,32 +90,32 @@ Qed.
 Theorem Heap_Contains_Implies_FieldType :
   forall (h : Heap) (f : ID),
   Heap_Contains h f = true ->
-  exists (Tf : Unit), FieldType h f = Tf.
+  exists (Tf : Unit), FieldType h f = Some Tf.
 Proof.
   intros.
   unfold FieldType.
   apply Heap_Contains_Implies_Get in H.
-  inversion H. inversion H0. inversion H1.
+  inversion H as [Tf]. inversion H0 as [Tv]. inversion H1 as [z].
   rewrite -> H2.
-  exists x. reflexivity.
+  exists Tf. reflexivity.
 Qed.
 
 Theorem Heap_Contains_Implies_FieldValue :
   forall (h : Heap) (f : ID),
   Heap_Contains h f = true ->
-  exists (Tv : Unit) (z : nat), FieldValue h f = Val Tv z.
+  exists (Tv : Unit) (z : nat), FieldValue h f = Some (Val Tv z).
 Proof.
   intros.
   unfold FieldValue.
   apply Heap_Contains_Implies_Get in H.
-  inversion H. inversion H0. inversion H1.
+  inversion H as [Tf]. inversion H0 as [Tv]. inversion H1 as [z].
   rewrite -> H2.
-  exists x0. exists x1. reflexivity.
+  exists Tv, z. reflexivity.
 Qed.
 
 Theorem Heap_Update_FieldType_Eq :
   forall (h : Heap) (f : ID) (Tf Tv : Unit) (z : nat),
-  FieldType (Heap_Update h f Tf Tv z) f = Tf.
+  FieldType (Heap_Update h f Tf Tv z) f = Some Tf.
 Proof.
   intros.
   unfold FieldType. unfold Heap_Update. unfold Heap_Get.
@@ -164,7 +164,7 @@ Qed.
 
 Theorem Heap_Update_FieldValue_Eq :
   forall (h : Heap) (f : ID) (Tf Tv : Unit) (z : nat),
-  FieldValue (Heap_Update h f Tf Tv z) f = Val Tv z.
+  FieldValue (Heap_Update h f Tf Tv z) f = Some (Val Tv z).
 Proof.
   intros.
   unfold FieldValue. unfold Heap_Update. unfold Heap_Get.

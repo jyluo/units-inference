@@ -122,10 +122,7 @@ Qed.
 
 Definition Gamma_Extend_Prog (g : Gamma) (p : Program) : Gamma :=
   match p with
-  | program fds s => match First_FD fds with
-                    | Some (T, f, z) => Gamma_Extend g f T
-                    | None => g
-                    end
+  | program fds s => Gamma_Extend_Fields g fds
   end.
 
 (* ======================================================= *)
@@ -153,12 +150,11 @@ Proof.
         (* first prove that post_gamma |- h' OK *)
           apply H.
         (* then prove that prog: (Gamma_Extend_Prog empty_gamma p) |- p' in post_gamma. *)
-          simpl. apply T_Program.
+          apply T_Program.
             apply H1.
             apply H0.
         apply HGH.
         apply H2.
-        simpl. reflexivity.
     SCase "ST_PROG_Statementss_Step".
       simpl. (* in statement step, the input gamma to type p' does not change *)
         eapply stmt_preservation in H0.
@@ -166,7 +162,9 @@ Proof.
         (* first prove that post_gamma |- h' OK *)
           apply H0.
         (* then prove that prog: g |- {FD_Empty s'} in post_gamma *)
-          apply T_Program. apply H. apply H0.
+          apply T_Program.
+            apply H.
+            apply H0.
         apply HGH.
         apply H2.
 Qed.

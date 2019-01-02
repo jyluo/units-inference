@@ -88,37 +88,34 @@ Qed.
 
 (* ======================================================= *)
 
-(* Returns the first field definition in the list of field definitions fds, or None if the list is empty *)
-Definition First_FD (fds : Field_Declarations) : option (prod (prod Unit ID) nat) :=
+(* Extends g with the first field declaration in fds, or returns g unchanged if fds is empty *)
+Definition Gamma_Extend_Fields (g : Gamma) (fds : Field_Declarations) : Gamma :=
   match fds with
-  | FD_Decl T f z fds => Some (T, f, z)
-  | FD_Empty => None
+  | FD_Decl T f z fds => Gamma_Extend g f T
+  | FD_Empty => g
   end.
 
 (* ======================================================= *)
 
-Theorem fds_preservation : forall (g1 g2 : Gamma) (h h' : Heap) (fds fds' : Field_Declarations) (T : Unit) (f : ID) (z : nat),
+Theorem fds_preservation : forall (g1 g2 : Gamma) (h h' : Heap) (fds fds' : Field_Declarations),
   fds: g1 |- fds in g2 ->
   gh: g2 |- h OK ->
   (h, fds) fds==> (h', fds') ->
-  First_FD fds = Some (T, f, z) ->
-  gh: g2 |- h' OK /\ fds: Gamma_Extend g1 f T |- fds' in g2.
+  gh: g2 |- h' OK /\ fds: Gamma_Extend_Fields g1 fds |- fds' in g2.
 Proof.
-  intros g1 g2 h h' fds fds' T f z HT HGH HS Hfst.
+  intros g1 g2 h h' fds fds' HT HGH HS.
   generalize dependent fds'. generalize dependent h'.
   fds_has_type_cases (induction HT) Case; intros h' fds' HS; subst.
   Case "T_FD_Empty".
     inversion HS.
   Case "T_FD".
     inversion HS; subst.
-    inversion Hfst; subst.
     split.
     (* first prove that g2 |- h' OK *)
       apply GH_Correspondence.
       intros f'.
       inversion HGH; subst.
-      destruct H2 with f'. destruct H4 as [Tf']. destruct H4 as [Tv']. destruct H4 as [z'].
-        destruct H4. destruct H5. destruct H6.
+      destruct H2 with f'. destruct H4 as [Tf']. destruct H4 as [Tv']. destruct H4 as [z']. Tactics.destruct_pairs.
       split. apply H3.
       destruct (id_eq_dec f' f).
       (* Case: f = f' : in h', the value of f' is T T z *)
@@ -132,7 +129,8 @@ Proof.
         exists Tf', Tv', z'.
         split. apply H4.
         split. rewrite <- H5. apply Heap_Update_FieldType_Neq. apply n.
-        split. apply H6. rewrite <- H7. apply Heap_Update_FieldValue_Neq. apply n.
+        split. apply H6.
+        rewrite <- H7. apply Heap_Update_FieldValue_Neq. apply n.
     (* then prove that fds: Gamma_Extend g1 f T |- fds' in g2 *)
-      apply HT.
+      simpl. apply HT.
 Qed.

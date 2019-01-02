@@ -29,7 +29,7 @@ Proof.
 Qed.
 
 Theorem id_eq_true :
-  forall (T:Type) (id : ID) (p q : T),
+  forall {T:Type} (id : ID) (p q : T),
   (if id_eq_dec id id then p else q) = p.
 Proof.
   intros.
@@ -41,7 +41,7 @@ Proof.
 Qed.
 
 Theorem id_eq_false :
-  forall (T:Type) (id1 id2 : ID) (p q : T),
+  forall {T:Type} (id1 id2 : ID) (p q : T),
     id1 <> id2 ->
     (if id_eq_dec id1 id2 then p else q) = q.
 Proof.
@@ -77,7 +77,7 @@ Proof.
   try assumption.
 Qed.
 
-Theorem id_beq_true : forall (T:Type) (id : ID) (p q : T),
+Theorem id_beq_true : forall {T:Type} (id : ID) (p q : T),
   (if id_beq id id then p else q) = p.
 Proof.
   intros.
@@ -85,11 +85,31 @@ Proof.
   rewrite -> id_eq_true. reflexivity.
 Qed.
 
-Theorem id_beq_false : forall (T:Type) (id1 id2 : ID) (p q : T),
+Theorem id_beq_false : forall {T:Type} (id1 id2 : ID) (p q : T),
   id1 <> id2 ->
   (if id_beq id1 id2 then p else q) = q.
 Proof.
   intros.
   unfold id_beq.
   rewrite -> id_eq_false. reflexivity. apply H.
+Qed.
+
+Theorem id_beq_true_eq : forall (id1 id2 : ID),
+  id_beq id1 id2 = true <-> id1 = id2.
+Proof.
+  intros id1 id2. split; intros H.
+    unfold id_beq in H. destruct (id_eq_dec id1 id2) as [HnEQ | HnNEQ].
+      auto.
+      inversion H.
+    subst. unfold id_beq. rewrite -> id_eq_true. reflexivity.
+Qed.
+
+Theorem id_beq_false_not_eq : forall (id1 id2 : ID),
+  id_beq id1 id2 = false <-> id1 <> id2.
+Proof.
+  intros id1 id2. split; intros H.
+    unfold id_beq in H. destruct (id_eq_dec id1 id2) as [HnEQ | HnNEQ].
+      inversion H.
+      auto.
+    unfold id_beq. rewrite -> id_eq_false; auto.
 Qed.

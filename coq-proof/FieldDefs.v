@@ -80,10 +80,9 @@ Proof.
   Case "T_FD_Empty".
     left. apply V_FD_Empty.
   Case "T_FD".
+  (* fds is T = f z ; tail *)
     right.
-    destruct IHHT.
-      inversion H2. exists (Heap_Update h f T T z). exists FD_Empty. apply ST_FD.
-      exists (Heap_Update h f T T z). exists tail. apply ST_FD.
+    exists (Heap_Update h f T T z), tail. apply ST_FD.
 Qed.
 
 (* ======================================================= *)
@@ -97,15 +96,178 @@ Definition Gamma_Extend_Fields (g : Gamma) (fds : Field_Declarations) : Gamma :=
 
 (* ======================================================= *)
 
+Theorem fds_heap_correspond_to_original_gamma : forall (g1 g2 : Gamma) (h h' : Heap) (fds fds' : Field_Declarations),
+  fds: g1 |- fds in g2 ->
+  gh: g1 |- h OK ->
+  (h, fds) fds==> (h', fds') ->
+  gh: g1 |- h' OK.
+Proof.
+  intros g1 g2 h h' fds fds' HT HGH HS.
+  generalize dependent fds'. generalize dependent h'.
+  fds_has_type_cases (induction HT) Case; intros h' fds' HS; subst.
+  Case "T_FD_Empty".
+    inversion HS.
+  Case "T_FD".
+    inversion HS; subst.
+    apply GH_Correspondence.
+    intros f' HGf'.
+    destruct (id_eq_dec f' f).
+    (* Case: f = f' *)
+      subst. rewrite -> H in HGf'. inversion HGf'.
+    (* Case: f <> f' *)
+      inversion HGH; subst.
+      destruct H2 with f' as [Tf']. apply HGf'. clear H2. destruct H3 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.
+      exists Tf', Tv', z'.
+      split. apply H2.
+      split. rewrite <- H3. apply Heap_Update_FieldType_Neq. apply n.
+      split. apply H4.
+      rewrite <- H5. apply Heap_Update_FieldValue_Neq. apply n.
+Qed.
+
+Theorem fds_gamma_contains_all_original_fields : forall (g1 g2 : Gamma) (f : ID) (fds : Field_Declarations),
+  Gamma_Contains g1 f = true ->
+  fds: g1 |- fds in g2 ->
+  Gamma_Contains g2 f = true.
+Proof.
+  intros g1 g2 f fds HGF HT.
+  fds_has_type_cases (induction HT) Case; subst.
+  Case "T_FD_Empty".
+    apply HGF.
+  Case "T_FD".
+    destruct (id_eq_dec f0 f).
+    (* Case: f = f0 *)
+      subst. apply H0.
+    (* Case: f <> f0 *)
+      apply IHHT. apply Gamma_Extend_Contains. apply HGF.
+Qed.
+
+
+Theorem fds_gamma_contains_all_original_fields' : forall (g g1 g2 : Gamma) (f f' : ID) (fds : Field_Declarations) (T' : Unit) (z' : nat),
+  fds: g |- fds in g1 ->
+  fds: g1 |- FD_Decl T' f' z' fds in g2 ->
+  Gamma_Contains g2 f = true ->
+  f' <> f ->
+  Gamma_Contains g1 f = true.
+Proof.
+  intros.
+  generalize d
+
+  generalize dependent f.
+  induction H.
+    intros f HGF HFF'; subst.
+      auto.
+    intros f2 HGF2 HF2F'; subst.
+      eapply IHfds_has_type in HGF2; auto.
+      destruct (id_eq_dec f f2); subst.
+        rewrite -> Gamma_Contains_Extend_Same in HGF2.
+      rewrite <- HGF2. symmetry. eapply Gamma_Contains_Extend_Same. apply Gamma_Contains_Extend_Not_Same.
+Qed.
+
 Theorem fds_preservation : forall (g1 g2 : Gamma) (h h' : Heap) (fds fds' : Field_Declarations),
+  fds: g1 |- fds in g2 ->
+  gh: g1 |- h OK ->
+  (h, fds) fds==> (h', fds') ->
+  gh: g2 |- h' OK /\ fds: Gamma_Extend_Fields g1 fds |- fds' in g2.
+Proof.
+  intros g1 g2 h h' fds fds' HT HGH HS.
+  generalize dependent fds'. generalize dependent h'. generalize dependent h.
+  fds_has_type_cases (induction HT) Case; intros h HGH h' fds' HS; subst.
+  Case "T_FD_Empty".
+    inversion HS.
+  Case "T_FD".
+    assert (gh: g1 |- h' OK). eapply fds_heap_correspond_to_original_gamma. apply T_FD; eauto. apply HGH. apply HS.
+    rename H2 into HGH'.
+    inversion HS; subst.
+    split.
+    apply GH_Correspondence.
+    intros f' HGf'.
+    destruct (id_eq_dec f' f).
+    (* Case: f = f' *)
+      subst. exists T, T, z.
+      split. auto.
+      split. apply Heap_Update_FieldType_Eq.
+      split. apply subtype_reflexive.
+      apply Heap_Update_FieldValue_Eq.
+    (* Case: f <> f' *)
+      inversion HGH'; subst.
+      destruct H2 with f' as [Tf'].
+      
+
+
+
+apply 
+
+Case "T_FD_Empty".
+    inversion HS.
+  Case "T_FD".
+    inversion HS; subst.
+    apply GH_Correspondence.
+    intros f' HGf'.
+    destruct (id_eq_dec f' f).
+    (* Case: f = f' *)
+      subst. rewrite -> H in HGf'. inversion HGf'.
+    (* Case: f <> f' *)
+      inversion HGH; subst.
+      destruct H2 with f' as [Tf']. apply HGf'. clear H2. destruct H3 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.
+      exists Tf', Tv', z'.
+      split. apply H2.
+      split. rewrite <- H3. apply Heap_Update_FieldType_Neq. apply n.
+      split. apply H4.
+      rewrite <- H5. apply Heap_Update_FieldValue_Neq. apply n.
+
+
+    eapply IHHT.
+
+    split.
+    (* first prove that g2 |- h' OK *)
+      eapply IHHT.
+        apply GH_Correspondence.
+        intros f' HGf'.
+        inversion HGH'; subst. destruct H2 with f' as [Tf'].
+          destruct (id_eq_dec f' f); subst. rewrite -> Gamma_Contains_Extend_Same in HGf'. simpl in HGf'.
+
+        (* Case: f = f' : in h', the value of f' is T T z *)
+          subst.
+          exists T, T, z.
+          split. apply Gamma_Get_Extend_Same.
+
+
+      apply GH_Correspondence.
+      intros f' HGf'.
+      destruct (id_eq_dec f' f).
+      (* Case: f = f' : in h', the value of f' is T T z *)
+        subst.
+        exists T, T, z.
+        split. apply Gamma_Get_Extend_Same.
+        split. apply Heap_Update_FieldType_Eq.
+        split. apply subtype_reflexive.
+        apply Heap_Update_FieldValue_Eq.
+      (* Case: f <> f' : in h' the value of f' is some Tv' z' *)
+        inversion HGH'; subst. destruct H2 with f' as [Tf].
+        eapply fds_gamma_contains_all_original_fields. apply HGf'.
+
+        eapply Gamma_Contains_Implies_Get in HGf'. destruct HGf' as [Tf'].
+        exists Tf', Tf', z.
+        split. apply H2.
+
+      inversion HGH; subst.
+      destruct H2 with f' as [Tf'].
+
+
+  apply HT.
+
+Qed.
+
+
+Theorem fds_preservation' : forall (g1 g2 : Gamma) (h h' : Heap) (fds fds' : Field_Declarations),
   fds: g1 |- fds in g2 ->
   gh: g2 |- h OK ->
   (h, fds) fds==> (h', fds') ->
   gh: g2 |- h' OK /\ fds: Gamma_Extend_Fields g1 fds |- fds' in g2.
 Proof.
   intros g1 g2 h h' fds fds' HT HGH HS.
-  generalize dependent fds'. generalize dependent h'.
-  fds_has_type_cases (induction HT) Case; intros h' fds' HS; subst.
+  generalize dependent fds'. generalize dependent h'. generalize dependent h.
+  fds_has_type_cases (induction HT) Case; intros h HGH h' fds' HS; subst.
   Case "T_FD_Empty".
     inversion HS.
   Case "T_FD".

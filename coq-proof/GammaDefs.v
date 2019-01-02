@@ -7,7 +7,7 @@ Require Import MapsDefs.
 
 Definition Gamma := Map ID Unit.
 Definition empty_gamma := Empty_Map ID Unit.
-Definition Gamma_Extend (g : Gamma) (f : ID) (T : Unit) : Gamma := Map_Add id_beq g f T.
+Definition Gamma_Extend (g : Gamma) (f : ID) (T : Unit) : Gamma := Map_Append id_beq g f T.
 Definition Gamma_Get (g : Gamma) (f : ID) : option Unit := Map_Get id_beq g f.
 Definition Gamma_Contains (g : Gamma) (f : ID) : bool := Map_Contains id_beq g f.
 Definition Gamma_IsSTbMap (g1 g2 : Gamma) : bool := Map_IsSubMap id_beq unit_beq g1 g2.
@@ -28,6 +28,17 @@ Proof.
   inversion H1. reflexivity.
 Qed.
 
+
+Theorem Gamma_Get_No_Shadow:
+  forall (g : Gamma) (f : ID) (T1 T2 : Unit),
+  Gamma_Extend (Gamma_Extend g f T1) f T2 = Gamma_Extend g f T1.
+Proof.
+  intros.
+  unfold Gamma_Extend.
+  apply Map_Append_No_Shadow. apply id_eq_true.
+Qed.
+
+(*
 Theorem Gamma_Get_Extend_Same :
   forall (g : Gamma) (f : ID) (T : Unit),
   Gamma_Get (Gamma_Extend g f T) f = Some T.
@@ -41,6 +52,24 @@ Proof.
       simpl. rewrite -> id_beq_true. simpl. rewrite -> id_beq_true. reflexivity.
       simpl. rewrite -> id_beq_false. simpl. rewrite -> id_beq_false. apply IHg.
         apply n. apply n.
+Qed.
+*)
+
+Theorem Gamma_Get_Extend_Not_Same :
+  forall (g : Gamma) (f f' : ID) (T' : Unit),
+  f <> f' ->
+  Gamma_Get (Gamma_Extend g f' T') f = Gamma_Get g f.
+Proof.
+  intros.
+  unfold Gamma_Get. unfold Gamma_Extend.
+  induction g; subst.
+    simpl. apply id_beq_false. apply H.
+    destruct a as [fa Ta]; subst.
+    destruct (id_eq_dec f fa); subst.
+      simpl. rewrite -> id_beq_false. simpl. rewrite -> id_beq_true. rewrite -> id_beq_true. reflexivity. intuition.
+      destruct (id_eq_dec f' fa); subst.
+        simpl. rewrite -> id_beq_true. simpl. rewrite -> id_beq_false. reflexivity. auto.
+        simpl. rewrite -> id_beq_false. simpl. rewrite -> id_beq_false. rewrite -> id_beq_false. apply IHg. auto. auto. auto.
 Qed.
 
 Theorem Gamma_Contains_Extend_Same :
@@ -58,9 +87,26 @@ Proof.
         apply n. apply n.
 Qed.
 
+Theorem Gamma_Contains_Extend_Not_Same :
+  forall (g : Gamma) (f f' : ID) (T' : Unit),
+  f <> f' ->
+  Gamma_Contains (Gamma_Extend g f' T') f = Gamma_Contains g f.
+Proof.
+  intros.
+  unfold Gamma_Contains. unfold Gamma_Extend. unfold Map_Contains.
+  induction g; subst.
+    simpl. rewrite -> id_beq_false. reflexivity. apply H.
+    destruct a as [fa Ta]; subst.
+    destruct (id_eq_dec f fa); subst.
+      simpl. rewrite -> id_beq_false. simpl. rewrite -> id_beq_true. rewrite -> id_beq_true. reflexivity. intuition.
+      destruct (id_eq_dec f' fa); subst.
+        simpl. rewrite -> id_beq_true. simpl. rewrite -> id_beq_false. reflexivity. auto.
+        simpl. rewrite -> id_beq_false. simpl. rewrite -> id_beq_false. rewrite -> id_beq_false. apply IHg. auto. auto. auto.
+Qed.
+
 Theorem Gamma_Contains_Implies_Get :
   forall (g : Gamma) (f : ID),
-  Gamma_Contains g f = true ->
+  Gamma_Contains g f = true <->
   exists (T : Unit), Gamma_Get g f = Some T.
 Proof.
   unfold Gamma_Contains.
@@ -68,6 +114,7 @@ Proof.
   apply Map_Contains_Implies_Get.
 Qed.
 
+(*
 Theorem Gamma_Extend_Shadow :
   forall (g : Gamma) (f : ID) (T1 T2 : Unit),
   Gamma_Extend (Gamma_Extend g f T1) f T2 = Gamma_Extend g f T2.
@@ -81,4 +128,16 @@ Proof.
       simpl. rewrite -> id_beq_true. rewrite -> id_beq_true. simpl. rewrite -> id_beq_true. reflexivity.
       simpl. rewrite -> id_beq_false. rewrite -> id_beq_false. simpl. rewrite -> id_beq_false. rewrite -> IHg. reflexivity.
         apply n. apply n. apply n.
+Qed.
+*)
+
+Theorem Gamma_Extend_Contains :
+  forall (g : Gamma) (f f' : ID) (T' : Unit),
+  Gamma_Contains g f = true ->
+  Gamma_Contains (Gamma_Extend g f' T') f = true.
+Proof.
+  intros.
+  destruct (id_eq_dec f' f); subst.
+    apply Gamma_Contains_Extend_Same.
+    rewrite <- H. apply Gamma_Contains_Extend_Not_Same. intuition.
 Qed.

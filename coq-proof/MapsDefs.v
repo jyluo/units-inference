@@ -13,10 +13,33 @@ Theorem key_eq_dec :
   forall {K : Type} (key_eq : K -> K -> bool) (k1 k2 : K),
   {key_eq k1 k2 = true} + {key_eq k1 k2 <> true}.
 Proof.
+  decide equality.
+Qed.
+
+Theorem key_eq_true :
+  forall {K : Type} {T:Type} (key_eq : K -> K -> bool) (k : K) (p q : T),
+  key_eq k k = true ->
+  (if key_eq_dec key_eq k k then p else q) = p.
+Proof.
   intros.
-  destruct (key_eq k1 k2).
-    left. reflexivity.
-    right. discriminate.
+  destruct (key_eq_dec key_eq).
+  (* Case "k = k" *)
+    reflexivity.
+  (* Case "k <> k" *)
+    contradiction.
+Qed.
+
+Theorem key_eq_false :
+  forall {K : Type} {T:Type} (key_eq : K -> K -> bool) (k1 k2 : K) (p q : T),
+  key_eq k1 k2 = false ->
+  (if key_eq_dec key_eq k1 k2 then p else q) = q.
+Proof.
+  intros.
+  destruct (key_eq_dec key_eq).
+  (* Case "k1 = k2" *)
+    rewrite -> H in e. inversion e.
+  (* Case "k <> k" *)
+    reflexivity.
 Qed.
 
 (* Inserts or replaces k -> v into map m, given key_eq as a comparison function *)
@@ -29,13 +52,36 @@ Fixpoint Map_Add {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) (v
                         (k1, v1) :: Map_Add key_eq m' k v
   end.
 
+(* Appends k -> v into map m, iff k isn't already mapped to something in m, given key_eq as a comparison function *)
+Fixpoint Map_Append {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) (v : V) : Map K V :=
+  match m with
+  | [] => [ (k, v) ]
+  | (k1, v1) :: m' => if key_eq k k1 then
+                        (k1, v1) :: m'
+                      else
+                        (k1, v1) :: Map_Append key_eq m' k v
+  end.
+
+Theorem Map_Append_No_Shadow:
+  forall {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) (v1 v2 : V),
+  key_eq k k = true ->
+  Map_Append key_eq (Map_Append key_eq m k v1) k v2 = Map_Append key_eq m k v1.
+Proof.
+  intros.
+  induction m.
+    simpl. rewrite -> H. reflexivity.
+    destruct a as [k' v']. simpl.
+    destruct (key_eq_dec key_eq k k').
+      rewrite -> e. simpl. rewrite -> e. reflexivity.
+      apply not_true_is_false in n. rewrite -> n. simpl. rewrite -> n. rewrite -> IHm. reflexivity.
+Qed.
+
 (* Gets the value v for given key k if k -> v is in the map, otherwise returns None *)
 Fixpoint Map_Get {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) : option V :=
   match m with
   | [] => None
   | (k1, v1) :: m' => if key_eq k k1 then Some v1 else Map_Get key_eq m' k
   end.
-
 
 Theorem Map_Get_Value_Eq :
   forall {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) (v1 v2 : option V),
@@ -55,14 +101,18 @@ Definition Map_Contains {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k 
 
 Theorem Map_Contains_Implies_Get :
   forall {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K),
-  Map_Contains key_eq m k = true ->
+  Map_Contains key_eq m k = true <->
   exists (v : V), Map_Get key_eq m k = Some v.
 Proof.
-  intros.
-  unfold Map_Contains in H.
-  destruct (Map_Get key_eq m k).
-    exists v. reflexivity.
-    inversion H.
+  intros. split; intros.
+    unfold Map_Contains in H.
+      destruct (Map_Get key_eq m k).
+        exists v. reflexivity.
+        inversion H.
+    unfold Map_Contains.
+      destruct (Map_Get key_eq m k).
+        reflexivity.
+        inversion H. inversion H0.
 Qed.
 
 Fixpoint Map_IsSubMap {K V : Type} (key_eq : K -> K -> bool) (val_eq : V -> V -> bool) (mSub mSuper : Map K V) : bool :=

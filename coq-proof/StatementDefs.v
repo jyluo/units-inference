@@ -103,18 +103,19 @@ Proof.
   Case "T_STMT_Empty".
     left. apply V_STMT_Value.
   Case "T_STMT_Assign".
+    (* Case: f = e *)
     right.
     inversion HGH; subst.
     destruct H3 with f as [Tf']. apply H. clear H3. destruct H4 as [Tv']. destruct H3 as [z']. Tactics.destruct_pairs.
     assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
     assert (expr_normal_form e \/ exists e', (h, e) expr==> e'). apply expr_progress with g Te. apply H2. apply HGH.
     inversion H7; subst.
-    (* Case : e is normal form -> step by ST_STMT_Assign_Val *)
+    (* Subcase: e is a value -> step by ST_STMT_Assign_Val *)
       destruct H8; subst. inversion H2; subst. exists (Heap_Update h f Tf' Te z), s2.
       eapply ST_STMT_Assign_Val.
         apply H4.
         apply H1.
-    (* Case : e can take a step -> step by ST_STMT_Assign_Exp *)
+    (* Subcase : e can take a step -> step by ST_STMT_Assign_Exp *)
       destruct H8 as [e']; subst. exists h, (STMT_Assign f e' s2). apply ST_STMT_Assign_Exp. apply H8.
 Qed.
 
@@ -160,7 +161,9 @@ Proof.
         apply HT.
     SCase "ST_STMT_Assign_Exp". (* f = e ; s2 , e --> e' *)
       split.
+      (* first prove that g |- h' OK *)
         apply HGH.
+      (* then prove that g |- f = e' ; s2 *)
         eapply expr_preservation in H2.
           destruct H2 as [T']. destruct H2.
           eapply T_STMT_Assign.

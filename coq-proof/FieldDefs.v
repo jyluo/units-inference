@@ -70,12 +70,12 @@ Inductive FD_Normal_Form : Field_Declarations -> Prop :=
   | V_FD_Empty : FD_Normal_Form FD_Empty.
 
 (* ======================================================= *)
-Theorem fds_progress : forall (fds : Field_Declarations) (g1 g2 : Gamma) (h : Heap),
+Theorem fds_progress : forall (g1 g2 : Gamma) (h : Heap) (fds : Field_Declarations),
   fds: g1 |- fds in g2 ->
   FD_Normal_Form fds \/ exists h' fds', (h, fds) fds==> (h', fds').
 Proof.
   (* by induction on typing of fds *)
-  intros fds g1 g2 h HT.
+  intros g1 g2 h fds HT.
   fds_has_type_cases (induction HT) Case; subst.
   Case "T_FD_Empty".
     left. apply V_FD_Empty.

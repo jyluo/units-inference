@@ -95,12 +95,12 @@ Inductive STMT_Normal_Form : Statements -> Prop :=
   | V_STMT_Value : STMT_Normal_Form STMT_Empty.
 
 (* ======================================================= *)
-Theorem stmt_progress : forall (g : Gamma) (s : Statements) (h : Heap),
+Theorem stmt_progress : forall (g : Gamma) (h : Heap) (s : Statements),
   stmt: g |- s ->
   gh: g |- h OK ->
   STMT_Normal_Form s \/ exists (h' : Heap) (s' : Statements), (h, s) stmt==> (h', s').
 Proof.
-  intros g s h HT HGH.
+  intros g h s HT HGH.
   stmt_has_type_cases (induction HT) Case; subst.
   Case "T_STMT_Empty".
     left. apply V_STMT_Value.

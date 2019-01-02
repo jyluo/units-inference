@@ -116,13 +116,13 @@ Inductive expr_normal_form : Expression -> Prop :=
   | V_Expr_Value : forall (T : Unit) (z : nat), expr_normal_form (E_Value (Val T z)).
 
 (* ======================================================= *)
-Theorem expr_progress : forall (g : Gamma) (e : Expression) (T : Unit) (h : Heap),
+Theorem expr_progress : forall (g : Gamma) (h : Heap) (e : Expression) (T : Unit),
   expr: g |- e in T ->
   gh: g |- h OK ->
   expr_normal_form e \/ exists e', (h, e) expr==> e'.
 Proof.
   (* by induction on typing of expr *)
-  intros g e T h HT HGH.
+  intros g h e T HT HGH.
   expr_has_type_cases (induction HT) Case; subst.
   Case "T_Value".
     left. apply V_Expr_Value.

@@ -90,13 +90,13 @@ Inductive prog_normal_form : Program -> Prop :=
   | V_PROG_NF : prog_normal_form (program FD_Empty STMT_Empty).
 
 (* ======================================================= *)
-Theorem prog_progress : forall (g1 g2 : Gamma) (p : Program) (h : Heap),
+Theorem prog_progress : forall (g1 g2 : Gamma) (h : Heap) (p : Program),
   prog: g1 |- p in g2 ->
   gh: g2 |- h OK ->
   prog_normal_form p \/ exists (h' : Heap) (p' : Program), (h, p) prog==> (h', p').
 Proof.
   (* by induction on typing of prog *)
-  intros g1 g2 p h HT HGH.
+  intros g1 g2 h p HT HGH.
   prog_has_type_cases (induction HT) Case; subst.
   Case "T_Program".
     assert (FD_Normal_Form fds \/ exists heap' fds', (h, fds) fds==> (heap', fds')).

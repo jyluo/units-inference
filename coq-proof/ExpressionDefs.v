@@ -124,28 +124,38 @@ Theorem expr_progress : forall (g : Gamma) (h : Heap) (e : Expression) (T : Unit
   gh: g |- h OK ->
   expr_normal_form e \/ exists e', (h, e) expr==> e'.
 Proof.
-  (* by induction on typing of expr *)
+  (* by induction on typing of e *)
   intros g h e T HT HGH.
   expr_has_type_cases (induction HT) Case; subst.
   Case "T_Value".
+    (* Case: e is a value v, and v is normal form. *)
     left. apply V_Expr_Value.
   Case "T_Field_Lookup".
+    (* Case: e is a field lookup expression f. Since g |- e : Tf and g |- h OK,
+       there exists a value in heap h for f, and f takes a step by looking up
+       the value. *)
     right.
     inversion HGH; subst.
     destruct H1 with f as [Tf']. apply H. clear H1. destruct H2 as [Tv]. destruct H1 as [z]. Tactics.destruct_pairs.
     assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
     exists (E_Value (Val Tv z)). apply ST_Field_Lookup. apply H4.
   Case "T_Arith".
+    (* Case: e is an arithmetic expression e1 op e2 for some op. We proceed by
+       sub-case analysis on whether e1 is normal form or not *)
     right.
     destruct IHHT1 as [He1NF |He1STEP]. apply HGH.
-    (* Case: e1 is normal form *)
+    (* Case: e1 is normal form, we proceed by subcase analysis on whether e2 is
+       normal form or not *)
       inversion He1NF; subst.
+      inversion HT1; subst. rename z into z1.
       destruct IHHT2 as [He2NF | He2STEP]. apply HGH.
-      (* Case: e2 is normal form *)
-        inversion He2NF; subst. exists (E_Value (Val (computeUnit op T T0) (computeNat op z z0))). apply ST_Arith_Values.
-      (* Case: e2 can take a step *)
-        inversion He2STEP as [e2']; subst. exists (E_Arith (E_Value (Val T z)) op e2'). apply ST_Arith_Right_Reduce. apply H.
-    (* Case: e1 can take a step *)
+      (* Case: e2 is normal form, then there exists a value
+         (T1 op T2) (z1 op z2) which e1 op e2 steps to *)
+        inversion He2NF; subst. inversion HT2; subst. rename z into z2.
+        exists (E_Value (Val (computeUnit op T1 T2) (computeNat op z1 z2))). apply ST_Arith_Values.
+      (* Case: e2 can take a step to e2', then e1 op e2 steps to e1 op e2' *)
+        inversion He2STEP as [e2']; subst. exists (E_Arith (E_Value (Val T1 z1)) op e2'). apply ST_Arith_Right_Reduce. apply H.
+    (* Case: e1 can take a step to e1', then e1 op e2 steps to e1' op e2 *)
     inversion He1STEP as [e1']; subst. exists (E_Arith e1' op e2). apply ST_Arith_Left_Reduce. apply H.
 Qed.
 
@@ -156,13 +166,17 @@ Theorem expr_preservation : forall (g : Gamma) (h : Heap) (e e' : Expression) (T
   (h, e) expr==> e' ->
   exists (T' : Unit), T' <: T = true /\ expr: g |- e' in T'.
 Proof.
-  (* by induction on typing of exprs *)
+  (* by induction on typing of e *)
   intros g h e e' T HT HGH HS.
   generalize dependent e'.
   expr_has_type_cases (induction HT) Case; intros e' HS; subst.
   Case "T_Value".
-    inversion HS. (* empty expr list does not step *)
+    (* values do not step *)
+    inversion HS.
   Case "T_Field_Lookup".
+    (* given that h, f expr==> Tv' z' by looking up the value from heap h,
+       we know from g |- h OK that Tv' <: Tf and thus g |- Tv' z' : Tv' as
+       required *)
     inversion HS; subst.
     inversion HGH; subst.
     destruct H1 with f as [Tf']. apply H. destruct H2 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.

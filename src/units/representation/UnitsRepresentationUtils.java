@@ -1,5 +1,6 @@
 package units.representation;
 
+import checkers.inference.model.ConstantSlot;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,7 +90,17 @@ public class UnitsRepresentationUtils {
     /** The set of base units */
     private final Map<String, Class<? extends Annotation>> baseUnits = new TreeMap<>();
 
+    /** All base units provided by the checker or user */
     private Set<String> baseUnitNames;
+
+    /** All base units actually used in the program, which should be serialized into z3 */
+    private Set<String> serializeableBaseUnitNames;
+
+    /** Whether to serialize the prefix exponent or not */
+    private boolean serializePrefix;
+
+    /** All base units not used in the program */
+    // private Set<String> nonserializeableBaseUnitNames;
 
     /** The set of alias units defined as qualifiers */
     private final Set<Class<? extends Annotation>> aliasUnits = createSortedBaseUnitSet();
@@ -158,6 +169,20 @@ public class UnitsRepresentationUtils {
         }
         return baseUnitNames;
     }
+
+    public Set<String> serializableBaseUnits() {
+        assert serializeableBaseUnitNames != null;
+        return serializeableBaseUnitNames;
+    }
+
+    public boolean serializePrefix() {
+        return serializePrefix;
+    }
+
+    //    public Set<String> nonserializeableBaseUnits() {
+    //        assert nonserializeableBaseUnitNames != null;
+    //        return nonserializeableBaseUnitNames;
+    //    }
 
     public Set<Class<? extends Annotation>> surfaceUnitsSet() {
         return surfaceUnitsSet;
@@ -567,5 +592,48 @@ public class UnitsRepresentationUtils {
         builder.setValue("prefixExponent", prefixExponent);
         builder.setValue("baseUnitComponents", expos);
         return builder.build();
+    }
+
+    public void setSerializedBaseUnits(Set<ConstantSlot> constantSlots) {
+        // TODO: prefix
+
+        if (serializeableBaseUnitNames != null) {
+            return;
+        }
+
+        // tabulate whether there's any appearance of prefix != 0
+        serializePrefix = false; // assumption
+
+        // tabulate the number of appearance of base unit exponents != 0
+        serializeableBaseUnitNames = new HashSet<>();
+
+        for (ConstantSlot slot : constantSlots) {
+            TypecheckUnit unit = createTypecheckUnit(slot.getValue());
+            System.err.println(unit);
+
+            serializePrefix = serializePrefix || (unit.getPrefixExponent() != 0);
+
+            for (Entry<String, Integer> baseUnitExponents : unit.getExponents().entrySet()) {
+                String bu = baseUnitExponents.getKey();
+                boolean exponentUsed = baseUnitExponents.getValue() != 0;
+                if (exponentUsed) {
+                    serializeableBaseUnitNames.add(bu);
+                }
+            }
+        }
+
+        System.err.println("prefix: " + serializePrefix);
+
+        for (String bu : serializeableBaseUnitNames) {
+            System.err.println("bu: " + bu);
+        }
+
+        // assert nonserializeableBaseUnitNames == null;
+        // nonserializeableBaseUnitNames = new HashSet<>(baseUnits());
+        // nonserializeableBaseUnitNames.removeAll(serializeableBaseUnitNames);
+        //
+        // for (String bu : nonserializeableBaseUnitNames) {
+        // System.err.println("unused bu: " + bu);
+        // }
     }
 }

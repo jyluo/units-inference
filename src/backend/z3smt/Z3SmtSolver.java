@@ -236,14 +236,116 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         // write a copy in append mode to stats file for later bulk analysis
         FileUtils.appendFile(new File(constraintsStatsFile), fileContents);
     }
+    //
+    //    private String generateZ3Constraint(BoolExpr serializedConstraint, String constraintSource) {
+    //        Expr simplifiedConstraint = serializedConstraint.simplify();
+    //
+    //        if (simplifiedConstraint.isTrue()) {
+    //            // This only works if the BoolExpr is directly the value Z3True.
+    //            // Still a good
+    //            // filter, but doesn't filter enough.
+    //            // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0
+    //            // 0))
+    //            // Skip tautology.
+    //            // System.err.println(" simplified to tautology.");
+    //            return "";
+    //        }
+    //
+    //        if (simplifiedConstraint.isFalse()) {
+    //            throw new BugInCF("impossible constraint: " + constraintSource);
+    //        }
+    //
+    //        // TODO: properly support adding wellformedness constraint as a debug output option for unsat dump
+    //
+    //        return generateZ3Constraint(simplifiedConstraint.toString());
+    //    }
+    //
+    //    private String generateZ3Constraint(String clause) {
+    //        return "(assert " + clause + ")" + System.lineSeparator();
+    //    }
+    //
+    //    private String generateZ3UnsatCoreConstraint(String clause, String constraintName) {
+    //        return "(assert (! " + clause + " :named " + constraintName + "))" + System.lineSeparator();
+    //    }
+    //
+    //    private void addConstraint(BoolExpr serializedConstraint, Constraint constraint) {
+    //        Expr simplifiedConstraint = serializedConstraint.simplify();
+    //
+    //        if (simplifiedConstraint.isTrue()) {
+    //            // This only works if the BoolExpr is directly the value Z3True.
+    //            // Still a good
+    //            // filter, but doesn't filter enough.
+    //            // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0
+    //            // 0))
+    //            // Skip tautology.
+    //            // System.err.println(" simplified to tautology.");
+    //            return;
+    //        }
+    //
+    //        if (simplifiedConstraint.isFalse()) {
+    //            final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
+    //            throw new BugInCF(
+    //                    "impossible constraint: "
+    //                            + constraint.serialize(toStringSerializer)
+    //                            + "\nSerialized:\n"
+    //                            + serializedConstraint);
+    //        }
+    //
+    //        solver.Assert(serializedConstraint);
+    //    }
+    //
+    //    private void addSoftConstraint(Constraint constraint, BoolExpr serializedConstraint) {
+    //        Expr simplifiedConstraint = serializedConstraint.simplify();
+    //
+    //        if (simplifiedConstraint.isTrue()) {
+    //            // This only works if the BoolExpr is directly the value Z3True.
+    //            // Still a good
+    //            // filter, but doesn't filter enough.
+    //            // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0
+    //            // 0))
+    //            // Skip tautology.
+    //            // System.err.println(" simplified to tautology.");
+    //            return;
+    //        }
+    //
+    //        if (simplifiedConstraint.isFalse()) {
+    //            final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
+    //            throw new BugInCF(
+    //                    "impossible constraint: "
+    //                            + constraint.serialize(toStringSerializer)
+    //                            + "\nSerialized:\n"
+    //                            + serializedConstraint);
+    //        }
+    //
+    //        solver.AssertSoft(serializedConstraint);
+    //    }
 
     protected void encodeAllSlots() {
+        // preprocess slots
+        formatTranslator.preAnalyzeSlots(slots);
+
+        //        StringBuilder z3SlotDefinitions = new StringBuilder();
+        //
+        //        // generate slot definitions
+        //        for (Slot slot : slots) {
+        //            if (slot.isVariable()) {
+        //                String slotDefinition =
+        //                        formatTranslator.generateZ3SlotDeclaration((VariableSlot) slot);
+        //                System.err.println(slotDefinition);
+        //                z3SlotDefinitions.append(slotDefinition);
+        //            }
+        //        }
+
+        // generate slot constraints
         for (Slot slot : slots) {
-            if (slot instanceof VariableSlot) {
+            if (slot.isVariable()) {
                 VariableSlot varSlot = (VariableSlot) slot;
 
-                solver.Assert(formatTranslator.encodeSlotWellformnessConstraint(varSlot));
+                BoolExpr wfConstraint = formatTranslator.encodeSlotWellformnessConstraint(varSlot);
 
+                if (!wfConstraint.simplify().isTrue()) {
+                    solver.Assert(wfConstraint);
+                }
                 if (optimizingMode) {
                     // empty string means no optimization group
                     solver.AssertSoft(

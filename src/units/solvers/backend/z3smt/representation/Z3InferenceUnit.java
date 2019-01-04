@@ -12,6 +12,8 @@ import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
  * A data structure class to encapsulate a set of Z3 variables representing a unit for inference.
  */
 public class Z3InferenceUnit {
+    // TODO: long term clean up, strip out the use of z3 Java API and construct raw
+    // strings for each of the variables?
     private final Context ctx;
     private final int slotID;
 
@@ -41,7 +43,7 @@ public class Z3InferenceUnit {
         // default prefixExponent is 0
         slot.prefixExponent = slot.intZero;
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
             // default exponents are 0
             slot.exponents.put(baseUnit, slot.intZero);
         }
@@ -65,7 +67,7 @@ public class Z3InferenceUnit {
                         UnitsZ3SmtEncoderUtils.z3VarName(
                                 slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
             slot.exponents.put(
                     baseUnit, ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
         }
@@ -115,9 +117,10 @@ public class Z3InferenceUnit {
         sb.append(" : UU = " + uu.toString());
         sb.append(" UB = " + ub.toString());
         sb.append(" Prefix = " + prefixExponent.toString());
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
+        // TODO: printout unused base units?
         return sb.toString();
     }
 

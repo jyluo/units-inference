@@ -89,13 +89,13 @@ public class UnitsZ3SmtEncoderUtils {
         // TODO: more preferable to not have to encode exponent == 0 in
         // wellformedness, but currently we must do so in order to have exponent
         // variable declarations outputted for the z3 files
-        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
+        BoolExpr allExponentsAreZero = allExponentsAreZero(ctx, unit);
         /* @formatter:off // this is for eclipse formatter */
         return UnitsZ3SmtEncoderUtils.mkOneHot(
                 ctx,
                 ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom())),
-                ctx.mkAnd(unit.getUnknownUnits(), allPrefixesAreZero),
-                ctx.mkAnd(unit.getUnitsBottom(), allPrefixesAreZero));
+                ctx.mkAnd(unit.getUnknownUnits(), allExponentsAreZero),
+                ctx.mkAnd(unit.getUnitsBottom(), allExponentsAreZero));
         /* @formatter:on // this is for eclipse formatter */
 
         // simplify xor (xor ((not x and not y), x), y)
@@ -109,10 +109,13 @@ public class UnitsZ3SmtEncoderUtils {
         return mustBeDimensionless(ctx, unit);
     }
 
-    private static BoolExpr allPrefixesAreZero(Context ctx, Z3InferenceUnit unit) {
+    private static BoolExpr allExponentsAreZero(Context ctx, Z3InferenceUnit unit) {
         IntNum zero = ctx.mkInt(0);
-        BoolExpr result = ctx.mkEq(unit.getPrefixExponent(), zero);
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        BoolExpr result = ctx.mkTrue();
+        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
+            result = ctx.mkEq(unit.getPrefixExponent(), zero);
+        }
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
             /* @formatter:off // this is for eclipse formatter */
             result = ctx.mkAnd(result, ctx.mkEq(unit.getExponent(baseUnit), zero));
             /* @formatter:on // this is for eclipse formatter */
@@ -121,12 +124,12 @@ public class UnitsZ3SmtEncoderUtils {
     }
 
     private static BoolExpr mustBeDimensionless(Context ctx, Z3InferenceUnit unit) {
-        BoolExpr allPrefixesAreZero = allPrefixesAreZero(ctx, unit);
+        BoolExpr allExponentsAreZero = allExponentsAreZero(ctx, unit);
         /* @formatter:off // this is for eclipse formatter */
         return ctx.mkAnd(
                 ctx.mkNot(unit.getUnknownUnits()),
                 ctx.mkNot(unit.getUnitsBottom()),
-                allPrefixesAreZero);
+                allExponentsAreZero);
         /* @formatter:on // this is for eclipse formatter */
     }
 
@@ -139,9 +142,14 @@ public class UnitsZ3SmtEncoderUtils {
         BoolExpr equalityEncoding =
                 ctx.mkAnd(
                         ctx.mkEq(fst.getUnknownUnits(), snd.getUnknownUnits()),
-                        ctx.mkEq(fst.getUnitsBottom(), snd.getUnitsBottom()),
-                        ctx.mkEq(fst.getPrefixExponent(), snd.getPrefixExponent()));
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                        ctx.mkEq(fst.getUnitsBottom(), snd.getUnitsBottom()));
+        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
+            equalityEncoding =
+                    ctx.mkAnd(
+                            equalityEncoding,
+                            ctx.mkEq(fst.getPrefixExponent(), snd.getPrefixExponent()));
+        }
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
             equalityEncoding =
                     ctx.mkAnd(
                             equalityEncoding,
@@ -197,11 +205,15 @@ public class UnitsZ3SmtEncoderUtils {
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent + rhs_exponent
-        BoolExpr exponents =
-                ctx.mkEq(
-                        res.getPrefixExponent(),
-                        ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+
+        BoolExpr exponents = ctx.mkTrue();
+        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
+            exponents =
+                    ctx.mkEq(
+                            res.getPrefixExponent(),
+                            ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
+        }
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
             exponents =
                     ctx.mkAnd(
                             exponents,
@@ -260,11 +272,15 @@ public class UnitsZ3SmtEncoderUtils {
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent - rhs_exponent
-        BoolExpr exponents =
-                ctx.mkEq(
-                        res.getPrefixExponent(),
-                        ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+
+        BoolExpr exponents = ctx.mkTrue();
+        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
+            exponents =
+                    ctx.mkEq(
+                            res.getPrefixExponent(),
+                            ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
+        }
+        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
             exponents =
                     ctx.mkAnd(
                             exponents,

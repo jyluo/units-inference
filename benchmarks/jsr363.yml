@@ -2,6 +2,7 @@ projects:
 # Projects for typechecking / inferring jsr363 code
 
   # Used to cause crash in CF, still need to implement existential constraint to fully support this system
+  # This uses the older JSR-275 API, with similar concepts but weird naming
   hombucha:
     giturl: https://github.com/jyluo-benchmarks/hombucha.git
     build: mvn -B -DskipTests compile

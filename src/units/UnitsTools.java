@@ -5,6 +5,9 @@ import units.qual.*;
 @SuppressWarnings("units")
 public class UnitsTools {
     // Static Constants
+    public static final @g int g = 1;
+    public static final @kg int kg = 1;
+
     public static final @m int m = 1;
     public static final @km int km = 1;
 

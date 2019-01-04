@@ -92,3 +92,22 @@ class String implements Serializable, Comparable<String>, CharSequence {
     static String valueOf(@UnknownUnits double arg0);
     String intern();
 }
+
+package java.util;
+
+class Objects {
+    // TODO: enforce comparable constraint
+    static boolean equals(@UnknownUnits Object arg0, @UnknownUnits Object arg1);
+    // TODO: enforce comparable constraint
+    static boolean deepEquals(@UnknownUnits Object arg0, @UnknownUnits Object arg1);
+    static int hashCode(@UnknownUnits Object arg0);
+    static int hash(@UnknownUnits Object[] arg0);
+    static String toString(@UnknownUnits Object arg0);
+    static String toString(@UnknownUnits Object arg0, String arg1);
+    static <T extends @UnknownUnits Object> int compare(T arg0, T arg1, Comparator<? super @UnitsBottom T> arg2);
+    static <T extends @UnknownUnits Object> T requireNonNull(T arg0);
+    static <T extends @UnknownUnits Object> T requireNonNull(T arg0, String arg1);
+    static boolean isNull(@UnknownUnits Object arg0);
+    static boolean nonNull(@UnknownUnits Object arg0);
+    static <T extends @UnknownUnits Object> T requireNonNull(T arg0, Supplier<String> arg1);
+}

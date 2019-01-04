@@ -7,12 +7,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Gram.
+ * A kilogram.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-@BaseUnit
+@UnitsAlias(
+    prefixExponent = 3,
+    baseUnitComponents = {@BUC(unit = "g", exponent = 1)}
+)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface g {}
+public @interface kg {}

@@ -7,6 +7,27 @@ class System {
     static @ns long nanoTime();
 }
 
+class Throwable implements Serializable {
+    Throwable();
+    Throwable(String arg0);
+    Throwable(String arg0, Throwable arg1);
+    Throwable(Throwable arg0);
+    protected Throwable(String arg0, Throwable arg1, boolean arg2, boolean arg3);
+    String getMessage();
+    String getLocalizedMessage();
+    Throwable getCause();
+    Throwable initCause(Throwable arg0);
+    String toString();
+    void printStackTrace(@UnknownUnits Throwable this);
+    void printStackTrace(@UnknownUnits Throwable this, PrintStream arg0);
+    void printStackTrace(@UnknownUnits Throwable this, PrintWriter arg0);
+    Throwable fillInStackTrace();
+    StackTraceElement[] getStackTrace();
+    void setStackTrace(StackTraceElement[] arg0);
+    void addSuppressed(Throwable arg0);
+    Throwable[] getSuppressed();
+}
+
 class String implements Serializable, Comparable<String>, CharSequence {
     static final Comparator<String> CASE_INSENSITIVE_ORDER;
     String();

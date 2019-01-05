@@ -75,6 +75,9 @@ for key in "${insertedAnnotationKeys[@]}"; do
     printf '%s\t' "$key"
 done
 
+printf '%s\t' "prefix-encoded"
+printf '%s\t' "baseunits-encoded"
+
 printf '\n'
 
 # Helper functions =============================================================
@@ -192,6 +195,41 @@ for project in "${projects[@]}"; do
             printf '%s\t' "0"
         done
     fi
+
+    InferenceLogFile=$project/logs/infer.log
+    if [ -f $InferenceLogFile ]; then
+        # prefix encoded?
+        count_basic "prefix: true" "$InferenceLogFile"
+        # number of base units encoded
+        count_basic "bu:" "$InferenceLogFile"
+    else
+        printf '%s\t' "0"
+        printf '%s\t' "0"
+    fi
+
+    if [ -f $InferenceStatsFile ]; then
+        # stats file might have more than 1 matching row, sum them up and print it
+        grep -w "serialize_prefix" "$InferenceStatsFile" | cut -d ':' -f 2 | \
+            awk '{printf $1 "|"}'
+        printf '\t'
+        grep -w "serialize_baseunits" "$InferenceStatsFile" | cut -d ':' -f 2 | \
+            awk '{printf $1 "|"}'
+        printf '\t'
+    else
+        printf '%s\t' "0"
+        printf '%s\t' "0"
+    fi
+
+    # InferenceLogFile=$project/logs/infer.log
+    # if [ -f $InferenceLogFile ]; then
+    #     # prefix encoded?
+    #     count_basic "prefix: true" "$InferenceLogFile"
+    #     # number of base units encoded
+    #     count_basic "bu:" "$InferenceLogFile"
+    # else
+    #     printf '%s\t' "0"
+    #     printf '%s\t' "0"
+    # fi
 
     printf '\n'
 done

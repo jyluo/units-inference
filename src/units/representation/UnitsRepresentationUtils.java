@@ -595,12 +595,6 @@ public class UnitsRepresentationUtils {
     }
 
     public void setSerializedBaseUnits(Set<ConstantSlot> constantSlots) {
-        // TODO: prefix
-
-        if (serializeableBaseUnitNames != null) {
-            return;
-        }
-
         // tabulate whether there's any appearance of prefix != 0
         serializePrefix = false; // assumption
 
@@ -620,12 +614,6 @@ public class UnitsRepresentationUtils {
                     serializeableBaseUnitNames.add(bu);
                 }
             }
-        }
-
-        System.err.println("prefix: " + serializePrefix);
-
-        for (String bu : serializeableBaseUnitNames) {
-            System.err.println("bu: " + bu);
         }
 
         // assert nonserializeableBaseUnitNames == null;

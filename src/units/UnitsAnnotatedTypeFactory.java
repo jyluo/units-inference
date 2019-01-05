@@ -149,6 +149,15 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     @Override
+    protected void addUncheckedCodeDefaults(QualifierDefaults defs) {
+        // TODO:
+        // experiment with:
+        //   top param, bot return for inference, explain unsat
+        //   bot param, top return for tightest api restriction??
+        super.addUncheckedCodeDefaults(defs);
+    }
+
+    @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new UnitsQualifierHierarchy(factory);
     }

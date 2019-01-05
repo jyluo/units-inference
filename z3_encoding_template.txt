@@ -1,0 +1,11 @@
+(declare-fun |5-m| () Int)
+(declare-fun |5-s| () Int)
+(declare-fun |5-BOT| () Bool)
+(declare-fun |5-TOP| () Bool)
+(declare-fun |6-m| () Int)
+(declare-fun |6-s| () Int)
+(declare-fun |6-BOT| () Bool)
+(declare-fun |6-TOP| () Bool)
+
+(assert-soft (and (not |71-TOP|) (not |71-BOT|) true (= |71-s| 0) (= |71-m| 0)) :weight 1)
+

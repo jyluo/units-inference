@@ -1,0 +1,13 @@
+projects:
+
+  # Unsat
+  JLargeArrays:
+    giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
+    build: mvn -B compile
+    clean: mvn -B clean
+
+  # Unsat
+  jReactPhysics3D:
+    giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
+    build: mvn -B install
+    clean: mvn -B clean

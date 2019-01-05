@@ -6,7 +6,6 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.solver.util.Statistics;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.IntExpr;
 import java.util.ArrayList;
@@ -162,10 +161,6 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         unitsRepUtils.setSerializedBaseUnits(constantSlots);
-
-        Statistics.addOrIncrementEntry("serialize_prefix", unitsRepUtils.serializePrefix() ? 1 : 0);
-        Statistics.addOrIncrementEntry(
-                "serialize_baseunits", unitsRepUtils.serializableBaseUnits().size());
 
         // System.err.println("prefix: " + unitsRepUtils.serializePrefix());
         // System.err.println("bu: " + unitsRepUtils.serializableBaseUnits().size());

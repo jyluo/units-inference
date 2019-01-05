@@ -1,6 +1,7 @@
 package units.representation;
 
 import checkers.inference.model.ConstantSlot;
+import checkers.inference.solver.util.Statistics;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -595,6 +596,13 @@ public class UnitsRepresentationUtils {
     }
 
     public void setSerializedBaseUnits(Set<ConstantSlot> constantSlots) {
+
+        if (serializeableBaseUnitNames != null) {
+            // this case occurs when re-running inference for unsat core, no need to set
+            // units again
+            return;
+        }
+
         // tabulate whether there's any appearance of prefix != 0
         serializePrefix = false; // assumption
 
@@ -616,12 +624,11 @@ public class UnitsRepresentationUtils {
             }
         }
 
-        // assert nonserializeableBaseUnitNames == null;
-        // nonserializeableBaseUnitNames = new HashSet<>(baseUnits());
-        // nonserializeableBaseUnitNames.removeAll(serializeableBaseUnitNames);
-        //
-        // for (String bu : nonserializeableBaseUnitNames) {
-        // System.err.println("unused bu: " + bu);
-        // }
+        Statistics.addOrIncrementEntry(
+                "serialize_prefix",
+                UnitsRepresentationUtils.getInstance().serializePrefix() ? 1 : 0);
+        Statistics.addOrIncrementEntry(
+                "serialize_baseunits",
+                UnitsRepresentationUtils.getInstance().serializableBaseUnits().size());
     }
 }

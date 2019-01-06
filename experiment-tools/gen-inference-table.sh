@@ -29,13 +29,6 @@ declare -a constantSlotsOutputKeys=(
     "Dimensionless" "UnitsBottom" \
     "m" "m2" "s" "ms" \
     "ns" "mPERs" "deg" \
-    "rad")
-
-declare -a insertedAnnotationKeys=(
-    "UnknownUnits" \
-    "Dimensionless" "UnitsBottom" \
-    "m" "m2" "s" "ms" \
-    "ns" "mPERs" "deg" \
     "rad" \
     "UnitsRep")
 
@@ -71,7 +64,7 @@ for key in "${constantSlotsNameKeys[@]}"; do
 done
 
 printf '%s\t' "inserted-annotations"
-for key in "${insertedAnnotationKeys[@]}"; do
+for key in "${constantSlotsOutputKeys[@]}"; do
     printf '%s\t' "$key"
 done
 
@@ -170,14 +163,10 @@ for project in "${projects[@]}"; do
         for key in "${constantSlotsOutputKeys[@]}"; do
             count_basic "$SOLUTIONSPrefix$key" "$InferenceSolutionsFile"
         done
-
-        count_basic "Annotation: @UnitsRep(" "$InferenceSolutionsFile"
     else
         for key in "${constantSlotsOutputKeys[@]}"; do
             printf '%s\t' "0"
         done
-
-        printf '%s\t' "0"
     fi
 
     INSERTKey=insert-annotation
@@ -186,12 +175,12 @@ for project in "${projects[@]}"; do
         # there can be more than 1 result jaif file
         count_basic "$INSERTKey" $project/logs/infer_result_*.jaif
 
-        for key in "${insertedAnnotationKeys[@]}"; do
+        for key in "${constantSlotsOutputKeys[@]}"; do
             count_basic "$INSERTKey.*$QUALPrefix$key" $project/logs/infer_result_*.jaif
         done
     else
         printf '%s\t' "0"
-        for key in "${insertedAnnotationKeys[@]}"; do
+        for key in "${constantSlotsOutputKeys[@]}"; do
             printf '%s\t' "0"
         done
     fi

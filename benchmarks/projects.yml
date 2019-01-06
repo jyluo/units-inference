@@ -22,8 +22,11 @@ projects:
     build: mvn -B compile
     clean: mvn -B clean
 
+  # Converted to use units
+  # TODO: revert to unsat version
   jblas:
     giturl: https://github.com/jyluo-benchmarks/jblas.git
+    # use more up to date https://github.com/mikiobraun/jblas.git in the future
     build: mvn -B install
     clean: mvn -B clean
 

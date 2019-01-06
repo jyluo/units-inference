@@ -2,6 +2,21 @@ import units.qual.*;
 
 package java.lang;
 
+class Object {
+    Object();
+    Class<?> getClass();
+    int hashCode();
+    boolean equals(Object arg0);
+    protected Object clone() throws CloneNotSupportedException;
+    @Dimensionless String toString(@UnknownUnits Object this);
+    void notify();
+    void notifyAll();
+    void wait(long arg0) throws InterruptedException;
+    void wait(long arg0, int arg1) throws InterruptedException;
+    void wait() throws InterruptedException;
+    protected void finalize() throws Throwable;
+}
+
 class System {
     static @ms long currentTimeMillis();
     static @ns long nanoTime();
@@ -123,8 +138,8 @@ class Objects {
     static boolean deepEquals(@UnknownUnits Object arg0, @UnknownUnits Object arg1);
     static int hashCode(@UnknownUnits Object arg0);
     static int hash(@UnknownUnits Object[] arg0);
-    static String toString(@UnknownUnits Object arg0);
-    static String toString(@UnknownUnits Object arg0, String arg1);
+    static @Dimensionless String toString(@UnknownUnits Object arg0);
+    static @Dimensionless String toString(@UnknownUnits Object arg0, String arg1);
     static <T extends @UnknownUnits Object> int compare(T arg0, T arg1, Comparator<? super @UnitsBottom T> arg2);
     static <T extends @UnknownUnits Object> T requireNonNull(T arg0);
     static <T extends @UnknownUnits Object> T requireNonNull(T arg0, String arg1);

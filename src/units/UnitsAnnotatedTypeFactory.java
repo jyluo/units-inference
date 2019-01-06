@@ -150,11 +150,16 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
     @Override
     protected void addUncheckedCodeDefaults(QualifierDefaults defs) {
-        // TODO:
-        // experiment with:
-        //   top param, bot return for inference, explain unsat
-        //   bot param, top return for tightest api restriction??
         super.addUncheckedCodeDefaults(defs);
+
+        // experiment with:
+        // This seems to have no effect thus far in inference
+        // top param, receiver, bot return for inference, explain unsat
+        defs.addUncheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.RECEIVER);
+        defs.addUncheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.PARAMETER);
+        defs.addUncheckedCodeDefault(unitsRepUtils.BOTTOM, TypeUseLocation.RETURN);
+
+        // bot param, top return for tightest api restriction??
     }
 
     @Override

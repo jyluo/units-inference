@@ -34,7 +34,11 @@ def main(argv):
     for project_name, project_attrs in projects.iteritems():
         project_dir = os.path.join(BENCHMARK_DIR, project_name)
         if not os.path.exists(project_dir):
-            git("clone", project_attrs["giturl"], "--depth", "1")
+            # clone the branch if it is defined
+            if "branch" in project_attrs and project_attrs["branch"]:
+                git("clone", project_attrs["giturl"], "--depth", "1", "--branch", project_attrs["branch"])
+            else:
+                git("clone", project_attrs["giturl"], "--depth", "1")
 
     print "----- Fetching corpus done. -----"
 
@@ -77,7 +81,9 @@ def main(argv):
     sys.exit(rtn_code)
 
 def git(*args):
-    return subprocess.check_call(['git'] + list(args))
+    git_command = ['git'] + list(args)
+    print("Running " + " ".join(git_command))
+    return subprocess.check_call(git_command)
 
 if __name__ == "__main__":
     main(sys.argv)

@@ -29,8 +29,9 @@ class GenericClass<T> {
         return q == r;
     }
 
+    // TODO: make it so users don't have to manually state @UnknownUnits this
     @Override
-    public String toString() {
+    public String toString(@UnknownUnits GenericClass<T> this) {
         return "<Q=" + q + " R=" + r + ">";
     }
 }
@@ -64,8 +65,9 @@ class GenericClassTwo<T extends Number> {
         return q == r;
     }
 
+    // TODO: make it so users don't have to manually state @UnknownUnits this
     @Override
-    public String toString() {
+    public String toString(@UnknownUnits GenericClassTwo<T> this) {
         return "<Q=" + q + " R=" + r + ">";
     }
 }

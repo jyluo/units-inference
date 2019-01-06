@@ -36,6 +36,52 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         super(checker, ichecker, factory, infer);
     }
 
+    // TODO: https://github.com/opprop/checker-framework-inference/issues/202
+    //    @Override
+    //    protected void commonAssignmentCheck(
+    //            AnnotatedTypeMirror varType,
+    //            AnnotatedTypeMirror valueType,
+    //            Tree valueTree,
+    //            @CompilerMessageKey String errorKey) {
+    //
+    //        if (infer) {
+    //            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
+    //            InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
+    //            System.err.println("===== ");
+    //            System.err.println(" infer mode: " + infer);
+    //            AnnotationMirror varAM = valueType.getAnnotationInHierarchy(iatf.getVarAnnot());
+    //            System.err.println(" varType: " + varType + " real am: " + slotManager.getSlot(varAM));
+    //
+    //            AnnotationMirror valAM = valueType.getAnnotationInHierarchy(iatf.getVarAnnot());
+    //            System.err.println(
+    //                    " valueType: " + valueType + " real am: " + slotManager.getSlot(valAM));
+    //        } else {
+    //            System.err.println(
+    //                    " varType: "
+    //                            + varType
+    //                            + " real am: "
+    //                            + varType.getAnnotationInHierarchy(
+    //                                    atypeFactory
+    //                                            .getQualifierHierarchy()
+    //                                            .getTopAnnotations()
+    //                                            .iterator()
+    //                                            .next()));
+    //            System.err.println(
+    //                    " valueType: "
+    //                            + valueType
+    //                            + " real am: "
+    //                            + valueType.getAnnotationInHierarchy(
+    //                                    atypeFactory
+    //                                            .getQualifierHierarchy()
+    //                                            .getTopAnnotations()
+    //                                            .iterator()
+    //                                            .next()));
+    //        }
+    //        System.err.println(" valueTree: " + valueTree);
+    //
+    //        super.commonAssignmentCheck(varType, valueType, valueTree, errorKey);
+    //    }
+
     @Override
     public Void visitUnary(UnaryTree node, Void p) {
         // TODO: make this more sensitive? ie make it only apply in inference mode?

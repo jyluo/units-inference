@@ -611,7 +611,7 @@ public class UnitsRepresentationUtils {
 
         for (ConstantSlot slot : constantSlots) {
             TypecheckUnit unit = createTypecheckUnit(slot.getValue());
-            System.err.println(unit);
+            // System.err.println(unit);
 
             serializePrefix = serializePrefix || (unit.getPrefixExponent() != 0);
 

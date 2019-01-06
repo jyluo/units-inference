@@ -139,7 +139,8 @@ afterEvaluate {
     }
 }
 
-task dist(dependsOn: shadowJar, type: Copy) {
+// [assemble, shadowJar]
+task dist(dependsOn: assemble, type: Copy) {
     // description = "If your Checker Framework project is fully built, this task " +
     //         "will build checker-framework-inference.jar, copy all the relevant runtime jars into " +
     //         "the dist directory."

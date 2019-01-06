@@ -105,7 +105,8 @@ class Math {
     // returns the value of a ^ b, for specific cases of a having the units of
     // m, mm, and km we return m2, mm2, and km2, for everything else we return
     // UnknownUnits
-    static double pow(@UnknownUnits double a, @UnknownUnits double b);
+    // TODO: special support in inference
+    static @UnitsBottom double pow(@UnknownUnits double a, @UnknownUnits double b);
 
     // calculates e^a == e * e * e .... which is a unitless scalar
     static double exp(@UnknownUnits double a);

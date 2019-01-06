@@ -83,8 +83,9 @@ class Math {
     // return the square root and cubic root of any supported units eg m2, km3
     // if the user wants to take the square root of just the magnitude without
     // affecting the unit, then they can surpress the warning
-    static double sqrt(@UnknownUnits double a);
-    static double cbrt(@UnknownUnits double a);
+    // TODO: special support in inference
+    static @UnitsBottom double sqrt(@UnknownUnits double a);
+    static @UnitsBottom double cbrt(@UnknownUnits double a);
 
     static @PolyUnit double ceil(@PolyUnit double a);
     static @PolyUnit double floor(@PolyUnit double a);

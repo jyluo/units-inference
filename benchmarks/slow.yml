@@ -8,7 +8,6 @@ projects:
 
   la4j:
     giturl: https://github.com/jyluo-benchmarks/la4j.git
-    # git-ref: db204167aa6161cd2104ce845e62518cae451d70
     build: mvn -B compile
     clean: mvn -B clean
 
@@ -19,6 +18,5 @@ projects:
 
   react:
     giturl: https://github.com/jyluo-benchmarks/react.git
-    # git-ref: e8f7ee5ec666d2d1783c8a16b9cbd49bc11f037c
     build: mvn -B compile
     clean: mvn -B clean

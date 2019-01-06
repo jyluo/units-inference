@@ -2,18 +2,15 @@ projects:
 
   react:
     giturl: https://github.com/jyluo-benchmarks/react.git
-    # git-ref: e8f7ee5ec666d2d1783c8a16b9cbd49bc11f037c
     build: mvn -B compile
     clean: mvn -B clean
 
   FaceDetection:
     giturl: https://github.com/jyluo-benchmarks/FaceDetection.git
-    # git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
     build: mvn -B compile
     clean: mvn -B clean
 
   jama:
     giturl: https://github.com/jyluo-benchmarks/jama.git
-    # git-ref: d6b3e3d192bb901aec5e16a084c824d8db336d74
     build: mvn -B compile
     clean: mvn -B clean

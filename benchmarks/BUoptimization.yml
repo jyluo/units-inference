@@ -2,5 +2,6 @@ projects:
 
   exp4j:
     giturl: https://github.com/jyluo-benchmarks/exp4j.git
+    branch: inference_fix
     build: mvn -B install
     clean: mvn -B clean

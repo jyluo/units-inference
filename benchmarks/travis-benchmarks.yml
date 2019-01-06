@@ -2,14 +2,11 @@ projects:
   # size: ~800 slots ~1000 constraints
   imgscalr:
     giturl: https://github.com/jyluo-benchmarks/imgscalr.git
-    # git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
     build: mvn -B compile
     clean: mvn -B clean
 
   # size: ~1400 slots ~2300 constraints
   jump:
     giturl: https://github.com/jyluo-benchmarks/jump.git
-    # giturl: https://github.com/aas-integration/jump.git
-    # git-ref: e05cac7b1b584a493978d6861cbc7fa762816f34
     build: ant jar
     clean: ant clean

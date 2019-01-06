@@ -9,19 +9,16 @@ projects:
 
   FaceDetection:
     giturl: https://github.com/jyluo-benchmarks/FaceDetection.git
-    # git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
     build: mvn -B compile
     clean: mvn -B clean
 
   imgscalr:
     giturl: https://github.com/jyluo-benchmarks/imgscalr.git # try using latest from source?
-    # git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
     build: mvn -B compile
     clean: mvn -B clean
 
   jama:
     giturl: https://github.com/jyluo-benchmarks/jama.git
-    # git-ref: d6b3e3d192bb901aec5e16a084c824d8db336d74
     build: mvn -B compile
     clean: mvn -B clean
 
@@ -32,12 +29,12 @@ projects:
 
   # Unsat
   JLargeArrays:
-    # giturl: https://gitlab.com/ICM-VisLab/JLargeArrays.git # would be nice to run on in the future, currently has typecheck errors
+    # giturl: https://gitlab.com/ICM-VisLab/JLargeArrays.git # this version would be nice to run on in the future, currently has typecheck errors
     giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
     build: mvn -B compile
     clean: mvn -B clean
 
-  # Unsat
+  # Converted to use units
   jReactPhysics3D:
     giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
     build: mvn -B install
@@ -45,14 +42,11 @@ projects:
 
   jump:
     giturl: https://github.com/jyluo-benchmarks/jump.git
-    # giturl: https://github.com/aas-integration/jump.git
-    # git-ref: e05cac7b1b584a493978d6861cbc7fa762816f34
     build: ant jar
     clean: ant clean
 
   la4j:
     giturl: https://github.com/jyluo-benchmarks/la4j.git
-    # git-ref: db204167aa6161cd2104ce845e62518cae451d70
     build: mvn -B compile
     clean: mvn -B clean
 
@@ -63,7 +57,6 @@ projects:
 
   react:
     giturl: https://github.com/jyluo-benchmarks/react.git
-    # git-ref: e8f7ee5ec666d2d1783c8a16b9cbd49bc11f037c
     build: mvn -B compile
     clean: mvn -B clean
 
@@ -85,6 +78,5 @@ projects:
   # Does not use any of the methods we've annotated, no arithmetic
   # Facer:
   #   giturl: https://github.com/jyluo-benchmarks/Facer.git
-  #   # git-ref: 6ce45ce52310fc820173a12b72b29261acdf3181
   #   build: ant
   #   clean: ant clean

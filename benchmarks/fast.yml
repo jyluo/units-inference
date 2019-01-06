@@ -4,24 +4,22 @@ projects:
   # Converted to use units
   exp4j:
     giturl: https://github.com/jyluo-benchmarks/exp4j.git
+    branch: inference_fix
     build: mvn -B install
     clean: mvn -B clean
 
   FaceDetection:
     giturl: https://github.com/jyluo-benchmarks/FaceDetection.git
-    # git-ref: 1a8c91328f96e90cc2c8270d6adce9e663793bc0
     build: mvn -B compile
     clean: mvn -B clean
 
   imgscalr:
     giturl: https://github.com/jyluo-benchmarks/imgscalr.git # try using latest from source?
-    # git-ref: e1e1da77c12570f5c21d2f6ef42f0ce80c3fa092
     build: mvn -B compile
     clean: mvn -B clean
 
   jama:
     giturl: https://github.com/jyluo-benchmarks/jama.git
-    # git-ref: d6b3e3d192bb901aec5e16a084c824d8db336d74
     build: mvn -B compile
     clean: mvn -B clean
 
@@ -31,15 +29,13 @@ projects:
     build: mvn -B compile
     clean: mvn -B clean
 
-  # Unsat
-  # jReactPhysics3D:
-  #   giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
-  #   build: mvn -B install
-  #   clean: mvn -B clean
+  jReactPhysics3D:
+    giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
+    branch: inference_fix
+    build: mvn -B install
+    clean: mvn -B clean
 
   jump:
     giturl: https://github.com/jyluo-benchmarks/jump.git
-    # giturl: https://github.com/aas-integration/jump.git
-    # git-ref: e05cac7b1b584a493978d6861cbc7fa762816f34
     build: ant jar
     clean: ant clean

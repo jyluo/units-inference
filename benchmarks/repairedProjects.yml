@@ -1,0 +1,29 @@
+projects:
+
+# Confirmed to work:
+  # Converted to use units
+  exp4j:
+    giturl: https://github.com/jyluo-benchmarks/exp4j.git
+    branch: inference_fix
+    build: mvn -B install
+    clean: mvn -B clean
+
+  # Converted to use units
+  jblas:
+    giturl: https://github.com/jyluo-benchmarks/jblas.git
+    # use more up to date https://github.com/mikiobraun/jblas.git in the future
+    build: mvn -B install
+    clean: mvn -B clean
+
+  # # Unsat
+  # JLargeArrays:
+  #   giturl: https://github.com/jyluo-benchmarks/JLargeArrays.git
+  #   build: mvn -B compile
+  #   clean: mvn -B clean
+
+  # Converted to use units
+  jReactPhysics3D:
+    giturl: https://github.com/jyluo-benchmarks/jReactPhysics3D.git
+    branch: inference_fix
+    build: mvn -B install
+    clean: mvn -B clean

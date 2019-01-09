@@ -57,9 +57,9 @@ class Constructors {
     }
 
     void nonPolyConstructorTest() {
-        // :: error: (argument.type.incompatible) :: error:
-        // (constructor.invocation.invalid) :: error:
-        // (assignment.type.incompatible)
+        // :: error: (argument.type.incompatible)
+        // :: error: (constructor.invocation.invalid)
+        // :: error: (assignment.type.incompatible)
         @m MeterClass mc1 = new MeterClass(5);
         // :: error: (argument.type.incompatible)
         @m MeterClass mc2 = new @m MeterClass(5);

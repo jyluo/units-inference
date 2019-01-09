@@ -2,20 +2,20 @@ import units.qual.*;
 
 package java.lang;
 
-class Object {
-    Object();
-    Class<?> getClass();
-    int hashCode();
-    boolean equals(Object arg0);
-    protected Object clone() throws CloneNotSupportedException;
-    @Dimensionless String toString(@UnknownUnits Object this);
-    void notify();
-    void notifyAll();
-    void wait(long arg0) throws InterruptedException;
-    void wait(long arg0, int arg1) throws InterruptedException;
-    void wait() throws InterruptedException;
-    protected void finalize() throws Throwable;
-}
+//class Object {
+//    Object();
+//    Class<?> getClass();
+//    int hashCode();
+//    boolean equals(Object arg0);
+//    protected Object clone() throws CloneNotSupportedException;
+//    String toString(Object this);
+//    void notify();
+//    void notifyAll();
+//    void wait(long arg0) throws InterruptedException;
+//    void wait(long arg0, int arg1) throws InterruptedException;
+//    void wait() throws InterruptedException;
+//    protected void finalize() throws Throwable;
+//}
 
 class System {
     static @ms long currentTimeMillis();

@@ -63,6 +63,11 @@ projects:
     build: mvn -B compile
     clean: mvn -B clean
 
+  spring-framework:
+    giturl: https://github.com/jyluo-benchmarks/spring-framework.git
+    build: ./gradlew build
+    clean: gradle clean
+
 # Typechecking only:
   # sis:
   #   giturl: https://github.com/jyluo-benchmarks/sis.git

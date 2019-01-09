@@ -47,4 +47,6 @@ else
         --solver "$SOLVER" --solverArgs="$SOLVERARGS" \
         --logLevel "INFO" \
         --hacks="$IS_HACK" -afud ./annotated "$@"
+
+            # --cfArgs "-doe" \
 fi

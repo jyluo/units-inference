@@ -1,5 +1,7 @@
 projects:
 
+  # weird Iterator fix... CFI or units bug?
+  # unsat, rerun with no stub for raw performance
   ode4j:
     giturl: https://github.com/jyluo-benchmarks/ode4j.git
     build: mvn -B -DskipTests compile

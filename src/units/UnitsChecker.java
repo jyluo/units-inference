@@ -19,7 +19,7 @@ import units.representation.UnitsRepresentationUtils;
     "JavaMathTrig.astub",
     "JavaThread.astub",
     "JavaUtilRandom.astub",
-    // "JavaUtilConcurrent.astub", // for hombucha
+    "JavaUtilConcurrent.astub", // for ode4j, not yet annotated for hombucha
     "JavaUtilConcurrentTimeUnit.astub",
     "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
     "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays

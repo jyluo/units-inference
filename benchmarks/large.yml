@@ -1,0 +1,36 @@
+projects:
+
+  nd4j:
+    giturl: https://github.com/opprop-benchmarks/nd4j.git
+    build: mvn install
+    clean: mvn clean
+
+  ejml:
+    giturl: https://github.com/opprop-benchmarks/ejml.git
+    build: gradle build
+    clean: gradle clean
+
+  ojAlgo:
+    giturl: https://github.com/opprop-benchmarks/ojAlgo.git
+    build: mvn install
+    clean: mvn clean
+
+  jscience:
+    giturl: https://github.com/opprop-benchmarks/jscience.git
+    build: mvn install
+    clean: mvn clean
+
+  scijava-common:
+    giturl: https://github.com/opprop-benchmarks/scijava-common.git
+    build: mvn install
+    clean: mvn clean
+
+  imagej:
+    giturl: https://github.com/opprop-benchmarks/imagej.git
+    build: mvn install
+    clean: mvn clean
+
+  scifio:
+    giturl: https://github.com/opprop-benchmarks/scifio.git
+    build: mvn install
+    clean: mvn clean

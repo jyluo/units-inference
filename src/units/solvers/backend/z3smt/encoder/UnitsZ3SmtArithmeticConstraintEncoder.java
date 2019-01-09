@@ -9,27 +9,28 @@ import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.encoder.ArithmeticConstraintEncoder;
 import checkers.inference.solver.frontend.Lattice;
-import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.TypecheckUnit;
+import units.solvers.backend.z3smt.representation.Z3EquationSet;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 import units.util.UnitsTypecheckUtils;
 
 public class UnitsZ3SmtArithmeticConstraintEncoder
-        extends Z3SmtAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
-        implements ArithmeticConstraintEncoder<BoolExpr> {
+        extends Z3SmtAbstractConstraintEncoder<Z3InferenceUnit, Z3EquationSet, TypecheckUnit>
+        implements ArithmeticConstraintEncoder<Z3EquationSet> {
 
     public UnitsZ3SmtArithmeticConstraintEncoder(
             Lattice lattice,
             Context ctx,
-            Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
+            Z3SmtFormatTranslator<Z3InferenceUnit, Z3EquationSet, TypecheckUnit>
+                    z3SmtFormatTranslator) {
         super(lattice, ctx, z3SmtFormatTranslator);
     }
 
     // Encoding for var-var, var-const, const-var combos of add/sub, and also const-const for
     // mul/div/mod
-    protected BoolExpr encode(
+    protected Z3EquationSet encode(
             ArithmeticOperationKind operation,
             Slot leftOperand,
             Slot rightOperand,
@@ -42,15 +43,8 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                 Z3InferenceUnit left = leftOperand.serialize(z3SmtFormatTranslator);
                 Z3InferenceUnit right = rightOperand.serialize(z3SmtFormatTranslator);
                 Z3InferenceUnit res = result.serialize(z3SmtFormatTranslator);
-                return ctx.mkAnd(
-                        UnitsZ3SmtEncoderUtils.subtype(ctx, left, res),
-                        UnitsZ3SmtEncoderUtils.subtype(ctx, right, res));
 
-                // // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
-                // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
-                // leftOperand.serialize(z3SmtFormatTranslator),
-                // rightOperand.serialize(z3SmtFormatTranslator),
-                // result.serialize(z3SmtFormatTranslator));
+                return UnitsZ3SmtEncoderUtils.addSub(ctx, left, right, res);
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or
@@ -90,7 +84,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeVariable_Variable(
+    public Z3EquationSet encodeVariable_Variable(
             ArithmeticOperationKind operation,
             VariableSlot leftOperand,
             VariableSlot rightOperand,
@@ -99,7 +93,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeVariable_Constant(
+    public Z3EquationSet encodeVariable_Constant(
             ArithmeticOperationKind operation,
             VariableSlot leftOperand,
             ConstantSlot rightOperand,
@@ -108,7 +102,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeConstant_Variable(
+    public Z3EquationSet encodeConstant_Variable(
             ArithmeticOperationKind operation,
             ConstantSlot leftOperand,
             VariableSlot rightOperand,
@@ -117,7 +111,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
     }
 
     @Override
-    public BoolExpr encodeConstant_Constant(
+    public Z3EquationSet encodeConstant_Constant(
             ArithmeticOperationKind operation,
             ConstantSlot leftOperand,
             ConstantSlot rightOperand,

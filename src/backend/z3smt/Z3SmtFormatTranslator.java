@@ -19,8 +19,8 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
 // AbstractFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
-public abstract class Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>
-        extends AbstractFormatTranslator<SlotEncodingT, BoolExpr, SlotSolutionT> {
+public abstract class Z3SmtFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
+        extends AbstractFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT> {
 
     protected Context ctx;
 

@@ -5,6 +5,7 @@ import com.microsoft.z3.Context;
 import com.microsoft.z3.IntNum;
 import org.checkerframework.javacutil.Pair;
 import units.representation.UnitsRepresentationUtils;
+import units.solvers.backend.z3smt.representation.Z3EquationSet;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
 /**
@@ -137,7 +138,7 @@ public class UnitsZ3SmtEncoderUtils {
 
     // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
-    public static BoolExpr equality(Context ctx, Z3InferenceUnit fst, Z3InferenceUnit snd) {
+    public static Z3EquationSet equality(Context ctx, Z3InferenceUnit fst, Z3InferenceUnit snd) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr equalityEncoding =
                 ctx.mkAnd(
@@ -166,7 +167,7 @@ public class UnitsZ3SmtEncoderUtils {
     // x <: top
     // top <: top
     // x <: x
-    public static BoolExpr subtype(Context ctx, Z3InferenceUnit subT, Z3InferenceUnit superT) {
+    public static Z3EquationSet subtype(Context ctx, Z3InferenceUnit subT, Z3InferenceUnit superT) {
         /* @formatter:off // this is for eclipse formatter */
         BoolExpr subtypeEncoding =
                 ctx.mkOr(
@@ -195,13 +196,34 @@ public class UnitsZ3SmtEncoderUtils {
     }
 
     // For Addition and Subtraction
-    public static BoolExpr tripleEquality(
+    public static Z3EquationSet tripleEquality(
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         // set lhs == rhs, and rhs == res, transitively lhs == res
         return ctx.mkAnd(equality(ctx, lhs, rhs), equality(ctx, rhs, res));
     }
 
-    public static BoolExpr multiply(
+    public static Z3EquationSet comparable(Context ctx, Z3InferenceUnit fst, Z3InferenceUnit snd) {
+
+        // fst <: snd or snd <: fst
+        return ctx.mkOr(
+                UnitsZ3SmtEncoderUtils.subtype(ctx, fst, snd),
+                UnitsZ3SmtEncoderUtils.subtype(ctx, snd, fst));
+    }
+
+    public static Z3EquationSet addSub(
+            Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
+        return ctx.mkAnd(
+                UnitsZ3SmtEncoderUtils.subtype(ctx, lhs, res),
+                UnitsZ3SmtEncoderUtils.subtype(ctx, rhs, res));
+
+        // // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
+        // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
+        // leftOperand.serialize(z3SmtFormatTranslator),
+        // rightOperand.serialize(z3SmtFormatTranslator),
+        // result.serialize(z3SmtFormatTranslator));
+    }
+
+    public static Z3EquationSet multiply(
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent + rhs_exponent
@@ -268,7 +290,7 @@ public class UnitsZ3SmtEncoderUtils {
         //        exponents);
     }
 
-    public static BoolExpr divide(
+    public static Z3EquationSet divide(
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         /* @formatter:off // this is for eclipse formatter */
         // Forall base units, r_exponent = lhs_exponent - rhs_exponent

@@ -3,7 +3,6 @@ package backend.z3smt.encoder;
 import backend.z3smt.Z3SmtFormatTranslator;
 import checkers.inference.solver.backend.encoder.AbstractConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
-import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 
 /**
@@ -13,15 +12,18 @@ import com.microsoft.z3.Context;
  *
  * @see checkers.inference.solver.backend.encoder.ConstraintEncoderFactory
  */
-public abstract class Z3SmtConstraintEncoderFactory<SlotEncodingT, SlotSolutionT>
+public abstract class Z3SmtConstraintEncoderFactory<
+                SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
         extends AbstractConstraintEncoderFactory<
-                BoolExpr, Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT>> {
+                ConstraintEncodingT,
+                Z3SmtFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>> {
     protected final Context ctx;
 
     public Z3SmtConstraintEncoderFactory(
             Lattice lattice,
             Context ctx,
-            Z3SmtFormatTranslator<SlotEncodingT, SlotSolutionT> z3SmtFormatTranslator) {
+            Z3SmtFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
+                    z3SmtFormatTranslator) {
         super(lattice, z3SmtFormatTranslator);
         this.ctx = ctx;
     }

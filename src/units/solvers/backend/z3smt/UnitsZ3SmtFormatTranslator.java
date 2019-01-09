@@ -23,10 +23,11 @@ import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtConstraintEncoderFactory;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
+import units.solvers.backend.z3smt.representation.Z3EquationSet;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 
 public class UnitsZ3SmtFormatTranslator
-        extends Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> {
+        extends Z3SmtFormatTranslator<Z3InferenceUnit, Z3EquationSet, TypecheckUnit> {
 
     public static BoolExpr Z3TRUE;
     public static BoolExpr Z3FALSE;
@@ -48,7 +49,7 @@ public class UnitsZ3SmtFormatTranslator
     }
 
     @Override
-    protected ConstraintEncoderFactory<BoolExpr> createConstraintEncoderFactory() {
+    protected ConstraintEncoderFactory<Z3EquationSet> createConstraintEncoderFactory() {
         return new UnitsZ3SmtConstraintEncoderFactory(lattice, ctx, this);
     }
 

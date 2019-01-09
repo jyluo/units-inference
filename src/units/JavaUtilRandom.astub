@@ -1,0 +1,30 @@
+import units.qual.*;
+
+package java.util;
+
+class Random implements Serializable {
+    Random();
+    Random(@UnknownUnits long arg0);
+    void setSeed(@UnknownUnits long arg0);
+    protected int next(int arg0);
+    void nextBytes(byte[] arg0);
+    int nextInt();
+    int nextInt(int arg0);
+    long nextLong();
+    boolean nextBoolean();
+    float nextFloat();
+    double nextDouble();
+    double nextGaussian();
+    IntStream ints(long arg0);
+    IntStream ints();
+    IntStream ints(long arg0, int arg1, int arg2);
+    IntStream ints(int arg0, int arg1);
+    LongStream longs(long arg0);
+    LongStream longs();
+    LongStream longs(long arg0, long arg1, long arg2);
+    LongStream longs(long arg0, long arg1);
+    DoubleStream doubles(long arg0);
+    DoubleStream doubles();
+    DoubleStream doubles(long arg0, double arg1, double arg2);
+    DoubleStream doubles(double arg0, double arg1);
+}

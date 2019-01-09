@@ -1,9 +1,28 @@
 projects:
 
-  spring-framework:
-    giturl: https://github.com/jyluo-benchmarks/spring-framework.git
-    build: ./gradlew build
-    clean: gradle clean
+  ode4j:
+    giturl: https://github.com/jyluo-benchmarks/ode4j.git
+    build: mvn -B -DskipTests compile
+    clean: mvn -B clean
+
+  # # apache commons BCEL
+  # # crashes in CFI
+  # commons-bcel:
+  #   giturl: https://github.com/opprop-benchmarks/commons-bcel.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn -B clean
+
+  # # apache commons math
+  # # crashes in CFI
+  # commons-math:
+  #   giturl: https://github.com/jyluo-benchmarks/commons-math.git
+  #   build: mvn -B -DskipTests compile
+  #   clean: mvn -B clean
+
+  # spring-framework:
+  #   giturl: https://github.com/jyluo-benchmarks/spring-framework.git
+  #   build: ./gradlew build
+  #   clean: gradle clean
 
   # ejml:
   #   giturl: https://github.com/opprop-benchmarks/ejml.git
@@ -44,3 +63,11 @@ projects:
   #   giturl: https://github.com/deeplearning4j/deeplearning4j.git
   #   build: mvn -DskipTests compile
   #   clean: mvn clean
+
+  #jdepend
+
+  #jdeb
+
+  # ode4j
+
+  # apache TomEE

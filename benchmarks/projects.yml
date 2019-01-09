@@ -1,7 +1,7 @@
 projects:
 
 # Confirmed to work:
-  # Converted to use units
+  # Converted to use units (see repairedProjects.yml)
   exp4j:
     giturl: https://github.com/jyluo-benchmarks/exp4j.git
     build: mvn -B install
@@ -63,10 +63,11 @@ projects:
     build: mvn -B compile
     clean: mvn -B clean
 
-  spring-framework:
+# large size projects
+  spring-framework: #620859 LOC Java, requires gradle 4.10.3
     giturl: https://github.com/jyluo-benchmarks/spring-framework.git
-    build: ./gradlew build
-    clean: gradle clean
+    build: gradle --console=plain classes
+    clean: gradle --console=plain clean
 
 # Typechecking only:
   # sis:

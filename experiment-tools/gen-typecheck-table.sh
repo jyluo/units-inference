@@ -10,7 +10,8 @@ cd $1
 
 declare -a statsKeys=("error: \[assignment.type.incompatible" \
     "error: \[argument.type.incompatible" \
-    "error: \[return.type.incompatible" )
+    "error: \[return.type.incompatible" \
+    "error: \[comparison.unit.mismatch" )
 
 declare -a projects=($(ls -d */ | sort))
 

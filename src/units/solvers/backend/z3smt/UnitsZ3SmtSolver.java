@@ -16,7 +16,6 @@ import checkers.inference.solver.util.SolverEnvironment;
 import com.microsoft.z3.Expr;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -463,8 +462,12 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
         return pathToProject + constraintsUnsatCoreFilePrefix + key + smtExtension;
     }
 
+    /**
+     * Solutions decoded at {@link UnitsZ3SmtFormatTranslator#decodeSolution(Collection, Set,
+     * javax.annotation.processing.ProcessingEnvironment)}
+     */
     @Override
-    protected Set<String> runZ3Solver() {
+    protected Iterable<String> runZ3Solver() {
         List<String[]> commands = new ArrayList<>();
 
         if (!(mode == Mode.GetUnsatCore)) {
@@ -479,7 +482,12 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
         }
 
         int initialCapacity = slots.size() * (unitsRep.numOfIntegerPlanes() + 2);
+
+        // set removes more duplicate definitions of top & bot
         Set<String> results = new HashSet<>(initialCapacity);
+        // List<String> results = new ArrayList<>(initialCapacity);
+
+        // List<String> resultsDebug = new ArrayList<>();
 
         for (String[] command : commands) {
             List<String> partialResults = runZ3Solver(command);
@@ -489,22 +497,22 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
                 return null;
             } else {
                 results.addAll(partialResults);
+                // Collections.sort(partialResults);
+                // resultsDebug.addAll(partialResults);
+                // resultsDebug.add("====");
             }
         }
 
-        String[] resultsDebug = results.toArray(new String[0]);
-        Arrays.sort(resultsDebug);
-
-        FileUtils.writeFile(
-                new File(pathToProject + "/solutionsDetails.txt"),
-                String.join(System.lineSeparator(), resultsDebug));
+        // FileUtils.writeFile(
+        // new File(pathToProject + "/solutionsDetails.txt"),
+        // String.join(System.lineSeparator(), resultsDebug));
 
         return results;
     }
 
     // run a single z3 instance
     private List<String> runZ3Solver(String[] command) {
-        System.err.println("now running " + String.join(" ", command));
+        // System.err.println("now running " + String.join(" ", command));
 
         // stores results from z3 program output
         final List<String> results = new ArrayList<>();

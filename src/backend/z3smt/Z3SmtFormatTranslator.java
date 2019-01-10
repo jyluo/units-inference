@@ -13,7 +13,6 @@ import com.microsoft.z3.Context;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 
@@ -83,5 +82,5 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, ConstraintEncodingT, 
     public abstract ConstraintEncodingT encodeSlotPreferenceConstraint(VariableSlot slot);
 
     public abstract Map<Integer, AnnotationMirror> decodeSolution(
-            Collection<Slot> slots, Set<String> model, ProcessingEnvironment processingEnv);
+            Collection<Slot> slots, Iterable<String> model, ProcessingEnvironment processingEnv);
 }

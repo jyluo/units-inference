@@ -161,7 +161,6 @@ public class UnitsZ3SmtFormatTranslator
             encodedSlot.setUnitsBottom(true);
         } else {
             encodedSlot.setPrefixExponent(unit.getPrefixExponent());
-            Map<String, Integer> expos = unit.getExponents();
             for (String bu : unitsRepUtils.serializableBaseUnits()) {
                 encodedSlot.setExponent(bu, unit.getExponent(bu));
             }
@@ -239,7 +238,7 @@ public class UnitsZ3SmtFormatTranslator
     // Decode overall solutions from Z3
     @Override
     public Map<Integer, AnnotationMirror> decodeSolution(
-            Collection<Slot> slots, Set<String> model, ProcessingEnvironment processingEnv) {
+            Collection<Slot> slots, Iterable<String> model, ProcessingEnvironment processingEnv) {
 
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
@@ -295,7 +294,7 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         for (Integer slotID : solutionSlots.keySet()) {
-            result.put(slotID, decodeSolution(solutionSlots.get(slotID), processingEnv));
+            result.replace(slotID, decodeSolution(solutionSlots.get(slotID), processingEnv));
         }
 
         return result;

@@ -29,8 +29,8 @@ class Subtraction {
     }
 
     void units() {
-        int a = m - m;
-        double b = Math.PI - m;
+        @m int a = m - m;
+        @UnknownUnits double b = Math.PI - m;
 
         // unsat cases:
         // @s int ua = m - m;

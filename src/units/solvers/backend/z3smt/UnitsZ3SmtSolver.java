@@ -478,7 +478,7 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
             }
         }
 
-        int initialCapacity = slots.size() * unitsRep.numOfIntegerPlanes() + 2;
+        int initialCapacity = slots.size() * (unitsRep.numOfIntegerPlanes() + 2);
         Set<String> results = new HashSet<>(initialCapacity);
 
         for (String[] command : commands) {

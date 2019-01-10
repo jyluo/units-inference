@@ -98,9 +98,11 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
     public Map<Integer, AnnotationMirror> solve() {
         Map<Integer, AnnotationMirror> result;
 
-        // serialize based on user choice of running in optimizing or non-optimizing mode
+        // serialize based on user choice of running in optimizing or non-optimizing
+        // mode
         if (solverEnvironment.getBoolArg(Z3SolverEngineArg.optimizingMode)) {
             mode = Mode.OptimizingMode;
+            System.err.println(" === running in optimizing mode ! ===");
         }
 
         serializeSMTFileContents();

@@ -194,7 +194,7 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
         // debug dump of just slot definitions
         for (Entry<String, StringBuffer> entry : fileContents.entrySet()) {
             FileUtils.appendFile(
-                    new File(pathToProject + "/slots" + entry.getKey() + smtExtension),
+                    new File(pathToProject + "/slots-" + entry.getKey() + smtExtension),
                     entry.getValue().toString());
         }
     }
@@ -450,7 +450,7 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
         // debug dump of slot and constraint definitions
         for (Entry<String, StringBuffer> entry : fileContents.entrySet()) {
             FileUtils.appendFile(
-                    new File(pathToProject + "/constraints" + entry.getKey() + smtExtension),
+                    new File(pathToProject + "/constraints-" + entry.getKey() + smtExtension),
                     entry.getValue().toString());
         }
     }

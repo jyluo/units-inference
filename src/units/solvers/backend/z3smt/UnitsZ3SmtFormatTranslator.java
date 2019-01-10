@@ -64,7 +64,7 @@ public class UnitsZ3SmtFormatTranslator
         if (unitsRepUtils.serializeOnlyTopAndBot()) {
             slotDeclarations.put(
                     Z3EquationSet.topAndBottomKey,
-                    String.join(System.lineSeparator(), topDeclaration, botDeclaration));
+                    String.join(System.lineSeparator(), topDeclaration, botDeclaration, ""));
         }
 
         if (unitsRepUtils.serializePrefix()) {
@@ -74,7 +74,8 @@ public class UnitsZ3SmtFormatTranslator
                             System.lineSeparator(),
                             topDeclaration,
                             botDeclaration,
-                            addZ3IntDefinition(encodedSlot.getPrefixExponent())));
+                            addZ3IntDefinition(encodedSlot.getPrefixExponent()),
+                            ""));
         }
 
         for (String baseUnit : unitsRepUtils.serializableBaseUnits()) {
@@ -84,7 +85,8 @@ public class UnitsZ3SmtFormatTranslator
                             System.lineSeparator(),
                             topDeclaration,
                             botDeclaration,
-                            addZ3IntDefinition(encodedSlot.getExponent(baseUnit))));
+                            addZ3IntDefinition(encodedSlot.getExponent(baseUnit)),
+                            ""));
         }
 
         return slotDeclarations;

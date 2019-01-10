@@ -2,7 +2,6 @@ package units.solvers.backend.z3smt.encoder;
 
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import com.microsoft.z3.IntNum;
 import org.checkerframework.javacutil.Pair;
 import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.representation.Z3EquationSet;
@@ -85,6 +84,15 @@ public class UnitsZ3SmtEncoderUtils {
         return result;
     }
 
+    private static BoolExpr wellformedBaseUnit(
+            Context ctx, Z3InferenceUnit unit, BoolExpr allExponentsAreZero) {
+        return mkOneHot(
+                ctx,
+                ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom())),
+                ctx.mkAnd(unit.getUnknownUnits(), allExponentsAreZero),
+                ctx.mkAnd(unit.getUnitsBottom(), allExponentsAreZero));
+    }
+
     /** Slot well-formedness constraint: that either uu = true, ub = true, or uu == ub = false */
     public static Z3EquationSet slotWellformedness(Context ctx, Z3InferenceUnit unit) {
         // for GJE experiment
@@ -93,6 +101,7 @@ public class UnitsZ3SmtEncoderUtils {
 
         Z3EquationSet result = new Z3EquationSet();
 
+        // option 1: simpler
         BoolExpr wf = ctx.mkNot(ctx.mkAnd(unit.getUnknownUnits(), unit.getUnitsBottom()));
 
         if (unitsRepUtils().serializeOnlyTopAndBot()) {
@@ -106,6 +115,30 @@ public class UnitsZ3SmtEncoderUtils {
         for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
             result.addEquation(baseUnit, wf);
         }
+
+        // option 2: exponents also zero
+        // IntNum zero = ctx.mkInt(0);
+        //
+        // // BoolExpr wf = ctx.mkNot(ctx.mkAnd(unit.getUnknownUnits(),
+        // // unit.getUnitsBottom()));
+        //
+        // if (unitsRepUtils().serializeOnlyTopAndBot()) {
+        // result.addEquation(
+        // Z3EquationSet.topAndBottomKey,
+        // ctx.mkNot(ctx.mkAnd(unit.getUnknownUnits(), unit.getUnitsBottom())));
+        // }
+        //
+        // if (unitsRepUtils().serializePrefix()) {
+        // result.addEquation(
+        // Z3EquationSet.prefixExponentKey,
+        // wellformedBaseUnit(ctx, unit, ctx.mkEq(unit.getPrefixExponent(), zero)));
+        // }
+        //
+        // for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+        // result.addEquation(
+        // baseUnit,
+        // wellformedBaseUnit(ctx, unit, ctx.mkEq(unit.getExponent(baseUnit), zero)));
+        // }
 
         return result;
 
@@ -134,23 +167,29 @@ public class UnitsZ3SmtEncoderUtils {
 
         BoolExpr notTopAndNotBot =
                 ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom()));
-        IntNum zero = ctx.mkInt(0);
+        // IntNum zero = ctx.mkInt(0);
 
         if (unitsRepUtils().serializeOnlyTopAndBot()) {
             result.addEquation(Z3EquationSet.topAndBottomKey, notTopAndNotBot);
         }
 
         if (unitsRepUtils().serializePrefix()) {
-            BoolExpr prefixIsZero = ctx.mkEq(unit.getPrefixExponent(), zero);
+            // option 1: pref == dimensionless (not as often sat)
+            // BoolExpr prefixIsZero = ctx.mkEq(unit.getPrefixExponent(), zero);
+            // result.addEquation(
+            // Z3EquationSet.prefixExponentKey, ctx.mkAnd(notTopAndNotBot, prefixIsZero));
 
-            result.addEquation(
-                    Z3EquationSet.prefixExponentKey, ctx.mkAnd(notTopAndNotBot, prefixIsZero));
+            // option 2: (more often sat) pref != top && pref != bot
+            result.addEquation(Z3EquationSet.prefixExponentKey, notTopAndNotBot);
         }
 
         for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
-            BoolExpr baseUnitIsZero = ctx.mkEq(unit.getExponent(baseUnit), zero);
+            // option 1: pref == dimensionless (not as often sat)
+            // BoolExpr baseUnitIsZero = ctx.mkEq(unit.getExponent(baseUnit), zero);
+            // result.addEquation(baseUnit, ctx.mkAnd(notTopAndNotBot, baseUnitIsZero));
 
-            result.addEquation(baseUnit, ctx.mkAnd(notTopAndNotBot, baseUnitIsZero));
+            // option 2: (more often sat) pref != top && pref != bot
+            result.addEquation(baseUnit, notTopAndNotBot);
         }
 
         return result;

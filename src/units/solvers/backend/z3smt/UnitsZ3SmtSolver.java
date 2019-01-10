@@ -315,11 +315,8 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
                 simplifiedConstraintsForAllBaseUnits.put(baseUnit, simplifiedConstraintForBaseUnit);
             }
 
-            int requiredCount = unitsRep.serializePrefix() ? 1 : 0;
-            requiredCount += unitsRep.serializableBaseUnits().size();
-
             // if all are true, skip tautology
-            if (numOfTrue == requiredCount) {
+            if (numOfTrue == unitsRep.numOfIntegerPlanes()) {
                 continue;
             }
 
@@ -478,13 +475,27 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
             }
         }
 
-        String[] command;
+        int initialCapacity = slots.size() * unitsRep.numOfIntegerPlanes() + 2;
+        List<String> results = new ArrayList<>(initialCapacity);
 
-        return null;
+        for (String[] command : commands) {
+            List<String> partialResults = runZ3Solver(command);
+
+            if (partialResults == null) {
+                // unsat, no need to run the next batch
+                return null;
+            } else {
+                results.addAll(partialResults);
+            }
+        }
+
+        return results;
     }
 
     // run a single z3 instance
     private List<String> runZ3Solver(String[] command) {
+        System.err.println("now running " + String.join(" ", command));
+
         // stores results from z3 program output
         final List<String> results = new ArrayList<>();
 

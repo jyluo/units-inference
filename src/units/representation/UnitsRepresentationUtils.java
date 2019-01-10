@@ -186,6 +186,11 @@ public class UnitsRepresentationUtils {
         return !serializePrefix() && serializableBaseUnits().isEmpty();
     }
 
+    /** returns num of serializable base units, + 1 if prefix is also serialized */
+    public int numOfIntegerPlanes() {
+        return (serializePrefix() ? 1 : 0) + serializableBaseUnits().size();
+    }
+
     //    public Set<String> nonserializeableBaseUnits() {
     //        assert nonserializeableBaseUnitNames != null;
     //        return nonserializeableBaseUnitNames;
@@ -630,11 +635,7 @@ public class UnitsRepresentationUtils {
             }
         }
 
-        Statistics.addOrIncrementEntry(
-                "serialize_prefix",
-                UnitsRepresentationUtils.getInstance().serializePrefix() ? 1 : 0);
-        Statistics.addOrIncrementEntry(
-                "serialize_baseunits",
-                UnitsRepresentationUtils.getInstance().serializableBaseUnits().size());
+        Statistics.addOrIncrementEntry("serialize_prefix", serializePrefix() ? 1 : 0);
+        Statistics.addOrIncrementEntry("serialize_baseunits", serializableBaseUnits().size());
     }
 }

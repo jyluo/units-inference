@@ -27,7 +27,8 @@ public class Z3EquationSet {
 
     public void addEquation(String key, BoolExpr equation) {
         // TODO: base unit set or serializableBaseUnits set?
-        if (!(key == prefixExponentKey
+        if (!(key == topAndBottomKey
+                || key == prefixExponentKey
                 || UnitsRepresentationUtils.getInstance().serializableBaseUnits().contains(key))) {
             throw new BugInCF("Trying to add an equation for unsupported key " + key);
         }

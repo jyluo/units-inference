@@ -17,7 +17,6 @@ import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.Pair;
 import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
@@ -288,20 +287,17 @@ public class UnitsZ3SmtFormatTranslator
 
             Map<String, String> components = slotSolution.get(slotID);
 
-            // ensure no already assigned components get replaced by a different value
-            if (components.containsKey(component)
-                    && !(components.get(component).contentEquals(value))) {
-                throw new BugInCF(
-                        "replacing slot "
-                                + slotID
-                                + "'s component "
-                                + component
-                                + " from "
-                                + components.get(component)
-                                + " to "
-                                + value);
-            } else {
+            if (!components.containsKey(component)) {
+                // first assignment of any component is ok
                 components.put(component, value);
+            } else {
+                // second assignment can only lift false values to true
+                // we do not replace a true value with a false as the order of
+                // which base unit plane requires a value to be top or bottom
+                // is non-deterministic
+                if (Boolean.parseBoolean(value)) {
+                    components.put(component, value);
+                }
             }
         }
 

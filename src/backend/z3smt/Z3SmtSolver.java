@@ -42,12 +42,12 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
     protected final Map<String, Constraint> serializedConstraints = new HashMap<>();
     protected final List<String> unsatConstraintIDs = new ArrayList<>();
 
-    // file is written at projectRootFolder/constraints.smt
+    // file is written at projectRootFolder/xxx.smt
     protected static final String pathToProject =
             new File(new File("").getAbsolutePath()).toString();
-    protected static final String constraintsFilePrefix = "/z3Constraints";
-    protected static final String constraintsUnsatCoreFilePrefix = "/z3ConstraintsUnsatCore";
-    protected static final String constraintsStatsFilePrefix = "/z3ConstraintsGlob";
+    protected static final String constraintsFilePrefix = "/z3Constraints-";
+    protected static final String constraintsUnsatCoreFilePrefix = "/z3ConstraintsUnsatCore-";
+    protected static final String constraintsStatsFilePrefix = "/z3ConstraintsGlob-";
 
     // protected static final String constraintsFile = pathToProject +
     // "/z3Constraints.smt";
@@ -100,12 +100,6 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
         // serialize based on user choice of running in optimizing or non-optimizing mode
         if (solverEnvironment.getBoolArg(Z3SolverEngineArg.optimizingMode)) {
             mode = Mode.OptimizingMode;
-        }
-
-        if (mode == Mode.OptimizingMode) {
-            System.err.println("Encoding for optimizing mode");
-        } else {
-            System.err.println("Encoding for non-optimizing mode");
         }
 
         serializeSMTFileContents();
@@ -169,7 +163,6 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
     public Collection<Constraint> explainUnsatisfiable() {
         mode = Mode.GetUnsatCore;
 
-        System.err.println("Now encoding for unsat core dump.");
         serializeSMTFileContents();
 
         solvingStart = System.currentTimeMillis();
@@ -200,12 +193,6 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
         return unsatConstraints;
     }
 
-    protected abstract void serializeSMTFileContents();
-
-    protected abstract void writeConstraintsToSMTFile();
-
-    protected abstract void encodeAllSlots();
-
     protected String z3Assert(Expr clause) {
         return "(assert " + clause.toString() + ")" + System.lineSeparator();
     }
@@ -231,6 +218,12 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
     protected String z3SoftAssert(Expr clause) {
         return z3SoftAssert(clause, 1);
     }
+
+    protected abstract void serializeSMTFileContents();
+
+    protected abstract void writeConstraintsToSMTFile();
+
+    protected abstract void encodeAllSlots();
 
     protected abstract List<String> runZ3Solver();
 

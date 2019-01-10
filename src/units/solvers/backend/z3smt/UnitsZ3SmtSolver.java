@@ -46,6 +46,14 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
 
     @Override
     protected void serializeSMTFileContents() {
+        if (mode == Mode.GetUnsatCore) {
+            System.err.println("Encoding for unsat core dump.");
+        } else if (mode == Mode.OptimizingMode) {
+            System.err.println("Encoding for optimizing mode");
+        } else {
+            System.err.println("Encoding for non-optimizing mode");
+        }
+
         serializationStart = System.currentTimeMillis();
         encodeAllSlots();
         encodeAllConstraints();
@@ -126,7 +134,8 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
                 Map<String, String> slotDeclarations =
                         formatTranslator.generateZ3SlotDeclaration((VariableSlot) slot);
 
-                System.err.println(slotDeclarations);
+                // debug: print out the declarations
+                // System.err.println(slotDeclarations);
 
                 if (unitsRep.serializeOnlyTopAndBot()) {
                     appendSlotDeclaration(slotDeclarations, Z3EquationSet.topAndBottomKey);

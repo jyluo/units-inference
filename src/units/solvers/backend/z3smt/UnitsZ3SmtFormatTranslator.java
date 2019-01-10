@@ -12,10 +12,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.Pair;
 import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
@@ -243,11 +245,16 @@ public class UnitsZ3SmtFormatTranslator
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
 
+        // maps SlotID -> {Component -> Value}
+        Map<Integer, Map<String, String>> slotSolution = new HashMap<>(slots.size());
+
         // initially set every result slot to dimensionless
         for (Slot slot : slots) {
             if (slot.isVariable()) {
                 VariableSlot varSlot = (VariableSlot) slot;
-                result.put(varSlot.getId(), unitsRepUtils.DIMENSIONLESS);
+                int slotID = varSlot.getId();
+                result.put(slotID, unitsRepUtils.DIMENSIONLESS);
+                slotSolution.put(slotID, new HashMap<>());
             }
         }
 
@@ -263,6 +270,31 @@ public class UnitsZ3SmtFormatTranslator
             int slotID = slot.first;
             String component = slot.second;
 
+            Map<String, String> components = slotSolution.get(slotID);
+
+            // ensure no already assigned components get replaced by a different value
+            if (components.containsKey(component)
+                    && !(components.get(component).contentEquals(value))) {
+                throw new BugInCF(
+                        "replacing slot "
+                                + slotID
+                                + "'s component "
+                                + component
+                                + " from "
+                                + components.get(component)
+                                + " to "
+                                + value);
+            } else {
+                components.put(component, value);
+            }
+        }
+
+        // create typecheck variables for the solution
+        for (Entry<Integer, Map<String, String>> entry : slotSolution.entrySet()) {
+
+            int slotID = entry.getKey();
+            Map<String, String> components = entry.getValue();
+
             // Create a fresh solution slot if needed in the map
             if (!solutionSlots.containsKey(slotID)) {
                 // Note: fresh TypecheckUnit has all exponents = 0 by default
@@ -272,27 +304,34 @@ public class UnitsZ3SmtFormatTranslator
             }
 
             TypecheckUnit z3Slot = solutionSlots.get(slotID);
-            if (component.contentEquals(UnitsZ3SmtEncoderUtils.uuSlotName)) {
-                z3Slot.setUnknownUnits(Boolean.parseBoolean(value));
-            } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.ubSlotName)) {
-                z3Slot.setUnitsBottom(Boolean.parseBoolean(value));
-            } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.prefixSlotName)) {
-                z3Slot.setPrefixExponent(Integer.parseInt(value));
-            } else {
-                // assumes it is a base unit exponent
-                z3Slot.setExponent(component, Integer.parseInt(value));
-            }
 
-            // DEBUG:
-            // System.err.println(" " + varName + " => " + value);
-            // 10-s => -3
-            // 10-m => 1
-            // 10-Prefix => 0
-            // 10-UnitsBottom => false
-            // 10-UnknownUnits => true
-            // 10 : UU = true UB = false p = 0 m = 1 s = -3
+            for (Entry<String, String> componentEntry : components.entrySet()) {
+                String component = componentEntry.getKey();
+                String value = componentEntry.getValue();
+
+                if (component.contentEquals(UnitsZ3SmtEncoderUtils.uuSlotName)) {
+                    z3Slot.setUnknownUnits(Boolean.parseBoolean(value));
+                } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.ubSlotName)) {
+                    z3Slot.setUnitsBottom(Boolean.parseBoolean(value));
+                } else if (component.contentEquals(UnitsZ3SmtEncoderUtils.prefixSlotName)) {
+                    z3Slot.setPrefixExponent(Integer.parseInt(value));
+                } else {
+                    // assumes it is a base unit exponent
+                    z3Slot.setExponent(component, Integer.parseInt(value));
+                }
+
+                // DEBUG:
+                // System.err.println(" " + component + " => " + value);
+                // 10-s => -3
+                // 10-m => 1
+                // 10-Prefix => 0
+                // 10-UnitsBottom => false
+                // 10-UnknownUnits => true
+                // 10 : UU = true UB = false p = 0 m = 1 s = -3
+            }
         }
 
+        // replace solutions with the AnnotationMirror converted from TypecheckUnits
         for (Integer slotID : solutionSlots.keySet()) {
             result.replace(slotID, decodeSolution(solutionSlots.get(slotID), processingEnv));
         }

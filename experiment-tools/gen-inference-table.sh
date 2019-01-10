@@ -128,22 +128,24 @@ for project in "${projects[@]}"; do
         printf '%s\t' "0"
     fi
 
-    ConstraintsStatsFile=$project/z3ConstraintsGlob.smt
-    if [ -f $ConstraintsStatsFile ]; then
+
+    if ls $project/z3ConstraintsGlob-*.smt 1> /dev/null 2>&1; then
+        # there can be more than 1 glob smt file
         # number of z3 bools
-        count_basic "declare-fun.*Bool" "$ConstraintsStatsFile"
+        count_basic "declare-fun.*Bool" $project/z3ConstraintsGlob-*.smt
         # number of z3 ints
-        count_basic "declare-fun.*Int" "$ConstraintsStatsFile"
-        # number of z3 asserts
-        count_basic "assert" "$ConstraintsStatsFile"
+        count_basic "declare-fun.*Int" $project/z3ConstraintsGlob-*.smt
+        # number of z3 asserts (space is not a mistake here)
+        count_basic "assert " $project/z3ConstraintsGlob-*.smt
         # number of z3 assert-softs
-        count_basic "assert-soft" "$ConstraintsStatsFile"
+        count_basic "assert-soft" $project/z3ConstraintsGlob-*.smt
     else
         printf '%s\t' "0"
         printf '%s\t' "0"
         printf '%s\t' "0"
         printf '%s\t' "0"
     fi
+
 
     if [ -f $InferenceStatsFile ]; then
         for key in "${statsKeys[@]}"; do
@@ -171,7 +173,7 @@ for project in "${projects[@]}"; do
 
     INSERTKey=insert-annotation
     QUALPrefix=@units.qual.
-    if [ -f "$project/logs/infer_result_0.jaif" ]; then
+    if ls $project/logs/infer_result_*.jaif 1> /dev/null 2>&1; then
         # there can be more than 1 result jaif file
         count_basic "$INSERTKey" $project/logs/infer_result_*.jaif
 

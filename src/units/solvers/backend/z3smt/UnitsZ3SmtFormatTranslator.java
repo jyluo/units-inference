@@ -11,7 +11,6 @@ import com.microsoft.z3.IntExpr;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -240,11 +239,20 @@ public class UnitsZ3SmtFormatTranslator
     // Decode overall solutions from Z3
     @Override
     public Map<Integer, AnnotationMirror> decodeSolution(
-            List<String> model, ProcessingEnvironment processingEnv) {
+            Collection<Slot> slots, Set<String> model, ProcessingEnvironment processingEnv) {
 
         Map<Integer, AnnotationMirror> result = new HashMap<>();
         Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
 
+        // initially set every result slot to dimensionless
+        for (Slot slot : slots) {
+            if (slot.isVariable()) {
+                VariableSlot varSlot = (VariableSlot) slot;
+                result.put(varSlot.getId(), unitsRepUtils.DIMENSIONLESS);
+            }
+        }
+
+        // decode the solutions from z3
         for (String line : model) {
             // each line is "varName value"
             String[] parts = line.split(" ");

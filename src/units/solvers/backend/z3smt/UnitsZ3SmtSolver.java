@@ -16,11 +16,14 @@ import checkers.inference.solver.util.SolverEnvironment;
 import com.microsoft.z3.Expr;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.TypecheckUnit;
 import units.representation.UnitsRepresentationUtils;
@@ -461,7 +464,7 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
     }
 
     @Override
-    protected List<String> runZ3Solver() {
+    protected Set<String> runZ3Solver() {
         List<String[]> commands = new ArrayList<>();
 
         if (!(mode == Mode.GetUnsatCore)) {
@@ -476,7 +479,7 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
         }
 
         int initialCapacity = slots.size() * unitsRep.numOfIntegerPlanes() + 2;
-        List<String> results = new ArrayList<>(initialCapacity);
+        Set<String> results = new HashSet<>(initialCapacity);
 
         for (String[] command : commands) {
             List<String> partialResults = runZ3Solver(command);
@@ -488,6 +491,13 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
                 results.addAll(partialResults);
             }
         }
+
+        String[] resultsDebug = results.toArray(new String[0]);
+        Arrays.sort(resultsDebug);
+
+        FileUtils.writeFile(
+                new File(pathToProject + "/solutionsDetails.txt"),
+                String.join(System.lineSeparator(), resultsDebug));
 
         return results;
     }

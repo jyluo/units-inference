@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 
 // TODO: make this an abstract class with common features
@@ -106,7 +107,7 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
 
         solvingStart = System.currentTimeMillis();
         // in Units, if the status is SAT then there must be output in the model
-        List<String> results = runZ3Solver();
+        Set<String> results = runZ3Solver();
         solvingEnd = System.currentTimeMillis();
 
         Statistics.addOrIncrementEntry(
@@ -150,7 +151,7 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
         if (results != null) {
             result =
                     formatTranslator.decodeSolution(
-                            results, solverEnvironment.processingEnvironment);
+                            slots, results, solverEnvironment.processingEnvironment);
         } else {
             System.err.println("\n\n!!! The set of constraints is unsatisfiable! !!!");
             result = null;
@@ -225,7 +226,7 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
 
     protected abstract void encodeAllSlots();
 
-    protected abstract List<String> runZ3Solver();
+    protected abstract Set<String> runZ3Solver();
 
     // Sample satisfying output format:
     /* @formatter:off // this is for eclipse formatter */

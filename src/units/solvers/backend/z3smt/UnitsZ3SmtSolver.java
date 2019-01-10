@@ -174,20 +174,38 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
                 }
 
                 if (mode == Mode.OptimizingMode) {
-                    final Z3EquationSet prefConstraints =
-                            formatTranslator.encodeSlotPreferenceConstraint(varSlot);
+                    final Z3EquationSet notTopBotPrefConstraint =
+                            formatTranslator.encodeSlotNotTopBotPreferenceConstraint(varSlot);
 
                     if (unitsRep.serializeOnlyTopAndBot()) {
-                        appendSoftConstraintToFile(prefConstraints, Z3EquationSet.topAndBottomKey);
+                        appendSoftConstraintToFile(
+                                notTopBotPrefConstraint, Z3EquationSet.topAndBottomKey, 2);
                     }
 
                     if (unitsRep.serializePrefix()) {
                         appendSoftConstraintToFile(
-                                prefConstraints, Z3EquationSet.prefixExponentKey);
+                                notTopBotPrefConstraint, Z3EquationSet.prefixExponentKey, 2);
                     }
 
                     for (String baseUnit : unitsRep.serializableBaseUnits()) {
-                        appendSoftConstraintToFile(prefConstraints, baseUnit);
+                        appendSoftConstraintToFile(notTopBotPrefConstraint, baseUnit, 2);
+                    }
+
+                    final Z3EquationSet isDimensionlessPrefConstraint =
+                            formatTranslator.encodeSlotIsDimensionlessPreferenceConstraint(varSlot);
+
+                    if (unitsRep.serializeOnlyTopAndBot()) {
+                        appendSoftConstraintToFile(
+                                isDimensionlessPrefConstraint, Z3EquationSet.topAndBottomKey, 2);
+                    }
+
+                    if (unitsRep.serializePrefix()) {
+                        appendSoftConstraintToFile(
+                                isDimensionlessPrefConstraint, Z3EquationSet.prefixExponentKey, 2);
+                    }
+
+                    for (String baseUnit : unitsRep.serializableBaseUnits()) {
+                        appendSoftConstraintToFile(isDimensionlessPrefConstraint, baseUnit, 2);
                     }
                 }
             }
@@ -221,11 +239,15 @@ public class UnitsZ3SmtSolver extends Z3SmtSolver<Z3InferenceUnit, Z3EquationSet
         }
     }
 
-    void appendSoftConstraintToFile(Z3EquationSet constraints, String key) {
+    void appendSoftConstraintToFile(Z3EquationSet constraints, String key, int weight) {
         Expr constraint = constraints.getEquation(key).simplify();
         if (!constraint.isTrue()) {
-            fileContents.get(key).append(z3SoftAssert(constraint));
+            fileContents.get(key).append(z3SoftAssert(constraint, weight));
         }
+    }
+
+    void appendSoftConstraintToFile(Z3EquationSet constraints, String key) {
+        appendSoftConstraintToFile(constraints, key, 1);
     }
 
     // =======================================================================================

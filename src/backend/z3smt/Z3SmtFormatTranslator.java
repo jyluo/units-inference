@@ -79,7 +79,10 @@ public abstract class Z3SmtFormatTranslator<SlotEncodingT, ConstraintEncodingT, 
 
     public abstract ConstraintEncodingT encodeSlotWellformnessConstraint(VariableSlot slot);
 
-    public abstract ConstraintEncodingT encodeSlotPreferenceConstraint(VariableSlot slot);
+    public abstract ConstraintEncodingT encodeSlotNotTopBotPreferenceConstraint(VariableSlot slot);
+
+    public abstract ConstraintEncodingT encodeSlotIsDimensionlessPreferenceConstraint(
+            VariableSlot slot);
 
     public abstract Map<Integer, AnnotationMirror> decodeSolution(
             Collection<Slot> slots, Iterable<String> model, ProcessingEnvironment processingEnv);

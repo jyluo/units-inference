@@ -222,7 +222,7 @@ public class UnitsZ3SmtFormatTranslator
     }
 
     @Override
-    public Z3EquationSet encodeSlotPreferenceConstraint(VariableSlot slot) {
+    public Z3EquationSet encodeSlotNotTopBotPreferenceConstraint(VariableSlot slot) {
         if (slot instanceof ConstantSlot) {
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
@@ -234,7 +234,23 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         Z3InferenceUnit serializedSlot = slot.serialize(this);
-        return UnitsZ3SmtEncoderUtils.slotPreference(ctx, serializedSlot);
+        return UnitsZ3SmtEncoderUtils.slotNotTopBotPreference(ctx, serializedSlot);
+    }
+
+    @Override
+    public Z3EquationSet encodeSlotIsDimensionlessPreferenceConstraint(VariableSlot slot) {
+        if (slot instanceof ConstantSlot) {
+            ConstantSlot cs = (ConstantSlot) slot;
+            AnnotationMirror anno = cs.getValue();
+            // encode PolyAll and PolyUnit as constant trues
+            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
+                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
+                return createAlwaysTrueEQSet();
+            }
+        }
+
+        Z3InferenceUnit serializedSlot = slot.serialize(this);
+        return UnitsZ3SmtEncoderUtils.slotIsDimensionlessPreference(ctx, serializedSlot);
     }
 
     // Decode overall solutions from Z3

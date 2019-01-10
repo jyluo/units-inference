@@ -4,16 +4,13 @@ import checkers.inference.model.ArithmeticConstraint;
 import checkers.inference.model.ArithmeticConstraint.ArithmeticOperationKind;
 import checkers.inference.model.Constraint;
 import checkers.inference.model.Slot;
-import checkers.inference.model.VariableSlot;
 import checkers.inference.solver.backend.Solver;
 import checkers.inference.solver.frontend.Lattice;
-import checkers.inference.solver.util.ExternalSolverUtils;
-import checkers.inference.solver.util.FileUtils;
 import checkers.inference.solver.util.SolverArg;
 import checkers.inference.solver.util.SolverEnvironment;
 import checkers.inference.solver.util.Statistics;
-import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
+import com.microsoft.z3.Expr;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -29,35 +26,50 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
         extends Solver<Z3SmtFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>> {
 
     public enum Z3SolverEngineArg implements SolverArg {
-        /** option to use optimizing mode or not */
+        /** command line option to use optimizing mode or not */
         optimizingMode
     }
 
     protected final Context ctx;
-    protected com.microsoft.z3.Optimize solver;
-    protected StringBuffer smtFileContents;
 
     protected static final String z3Program = "z3";
-    protected boolean optimizingMode;
-    protected boolean getUnsatCore;
+    protected static final String smtExtension = ".smt";
 
-    // used in non-optimizing mode to find unsat constraints
+    // Used in non-optimizing mode to find unsat constraints
+    // Note that the z3 terms across the base units share the same unsat core
+    // constraint name. As long as one of the base units with this constraint name
+    // is unsat, then the whole constraint set is unsat.
     protected final Map<String, Constraint> serializedConstraints = new HashMap<>();
     protected final List<String> unsatConstraintIDs = new ArrayList<>();
 
     // file is written at projectRootFolder/constraints.smt
     protected static final String pathToProject =
             new File(new File("").getAbsolutePath()).toString();
-    protected static final String constraintsFile = pathToProject + "/z3Constraints.smt";
-    protected static final String constraintsUnsatCoreFile =
-            pathToProject + "/z3ConstraintsUnsatCore.smt";
-    protected static final String constraintsStatsFile = pathToProject + "/z3ConstraintsGlob.smt";
+    protected static final String constraintsFilePrefix = "/z3Constraints";
+    protected static final String constraintsUnsatCoreFilePrefix = "/z3ConstraintsUnsatCore";
+    protected static final String constraintsStatsFilePrefix = "/z3ConstraintsGlob";
+
+    // protected static final String constraintsFile = pathToProject +
+    // "/z3Constraints.smt";
+    // protected static final String constraintsUnsatCoreFile =
+    // pathToProject + "/z3ConstraintsUnsatCore.smt";
+    // protected static final String constraintsStatsFile = pathToProject +
+    // "/z3ConstraintsGlob.smt";
 
     // timing statistics variables
     protected long serializationStart;
     protected long serializationEnd;
     protected long solvingStart;
     protected long solvingEnd;
+
+    protected enum Mode {
+        SatMode,
+        GetUnsatCore,
+        OptimizingMode,
+    }
+
+    /** Z3 solver's encoding mode */
+    protected Mode mode = Mode.SatMode;
 
     public Z3SmtSolver(
             SolverEnvironment solverEnvironment,
@@ -86,10 +98,11 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
         Map<Integer, AnnotationMirror> result;
 
         // serialize based on user choice of running in optimizing or non-optimizing mode
-        optimizingMode = solverEnvironment.getBoolArg(Z3SolverEngineArg.optimizingMode);
-        getUnsatCore = false;
+        if (solverEnvironment.getBoolArg(Z3SolverEngineArg.optimizingMode)) {
+            mode = Mode.OptimizingMode;
+        }
 
-        if (optimizingMode) {
+        if (mode == Mode.OptimizingMode) {
             System.err.println("Encoding for optimizing mode");
         } else {
             System.err.println("Encoding for non-optimizing mode");
@@ -154,8 +167,7 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
 
     @Override
     public Collection<Constraint> explainUnsatisfiable() {
-        optimizingMode = false;
-        getUnsatCore = true;
+        mode = Mode.GetUnsatCore;
 
         System.err.println("Now encoding for unsat core dump.");
         serializeSMTFileContents();
@@ -188,206 +200,39 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
         return unsatConstraints;
     }
 
-    private void serializeSMTFileContents() {
-        // make a fresh solver to contain encodings of the slots
-        solver = ctx.mkOptimize();
-        // make a new buffer to store the serialized smt file contents
-        smtFileContents = new StringBuffer();
+    protected abstract void serializeSMTFileContents();
 
-        // only enable in non-optimizing mode
-        if (!optimizingMode && getUnsatCore) {
-            smtFileContents.append("(set-option :produce-unsat-cores true)\n");
-        }
+    protected abstract void writeConstraintsToSMTFile();
 
-        serializationStart = System.currentTimeMillis();
-        encodeAllSlots();
-        encodeAllConstraints();
-        serializationEnd = System.currentTimeMillis();
+    protected abstract void encodeAllSlots();
 
-        System.err.println("Encoding constraints done!");
-
-        smtFileContents.append("(check-sat)\n");
-        if (!optimizingMode && getUnsatCore) {
-            smtFileContents.append("(get-unsat-core)\n");
-        } else {
-            smtFileContents.append("(get-model)\n");
-        }
-
-        System.err.println("Writing constraints to file: " + constraintsFile);
-
-        writeConstraintsToSMTFile();
+    protected String z3Assert(Expr clause) {
+        return "(assert " + clause.toString() + ")" + System.lineSeparator();
     }
 
-    private void writeConstraintsToSMTFile() {
-        String fileContents = smtFileContents.toString();
-
-        if (!getUnsatCore) {
-            // write the constraints to the file for external solver use
-            FileUtils.writeFile(new File(constraintsFile), fileContents);
-        } else {
-            // write the constraints to the file for external solver use
-            FileUtils.writeFile(new File(constraintsUnsatCoreFile), fileContents);
-        }
-        // write a copy in append mode to stats file for later bulk analysis
-        FileUtils.appendFile(new File(constraintsStatsFile), fileContents);
-    }
-    //
-    //    private String generateZ3Constraint(BoolExpr serializedConstraint, String constraintSource) {
-    //        Expr simplifiedConstraint = serializedConstraint.simplify();
-    //
-    //        if (simplifiedConstraint.isTrue()) {
-    //            // This only works if the BoolExpr is directly the value Z3True.
-    //            // Still a good
-    //            // filter, but doesn't filter enough.
-    //            // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0
-    //            // 0))
-    //            // Skip tautology.
-    //            // System.err.println(" simplified to tautology.");
-    //            return "";
-    //        }
-    //
-    //        if (simplifiedConstraint.isFalse()) {
-    //            throw new BugInCF("impossible constraint: " + constraintSource);
-    //        }
-    //
-    //        // TODO: properly support adding wellformedness constraint as a debug output option for unsat dump
-    //
-    //        return generateZ3Constraint(simplifiedConstraint.toString());
-    //    }
-    //
-    //    private String generateZ3Constraint(String clause) {
-    //        return "(assert " + clause + ")" + System.lineSeparator();
-    //    }
-    //
-    //    private String generateZ3UnsatCoreConstraint(String clause, String constraintName) {
-    //        return "(assert (! " + clause + " :named " + constraintName + "))" + System.lineSeparator();
-    //    }
-    //
-    //    private void addConstraint(BoolExpr serializedConstraint, Constraint constraint) {
-    //        Expr simplifiedConstraint = serializedConstraint.simplify();
-    //
-    //        if (simplifiedConstraint.isTrue()) {
-    //            // This only works if the BoolExpr is directly the value Z3True.
-    //            // Still a good
-    //            // filter, but doesn't filter enough.
-    //            // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0
-    //            // 0))
-    //            // Skip tautology.
-    //            // System.err.println(" simplified to tautology.");
-    //            return;
-    //        }
-    //
-    //        if (simplifiedConstraint.isFalse()) {
-    //            final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
-    //            throw new BugInCF(
-    //                    "impossible constraint: "
-    //                            + constraint.serialize(toStringSerializer)
-    //                            + "\nSerialized:\n"
-    //                            + serializedConstraint);
-    //        }
-    //
-    //        solver.Assert(serializedConstraint);
-    //    }
-    //
-    //    private void addSoftConstraint(Constraint constraint, BoolExpr serializedConstraint) {
-    //        Expr simplifiedConstraint = serializedConstraint.simplify();
-    //
-    //        if (simplifiedConstraint.isTrue()) {
-    //            // This only works if the BoolExpr is directly the value Z3True.
-    //            // Still a good
-    //            // filter, but doesn't filter enough.
-    //            // EG: (and (= false false) (= false false) (= 0 0) (= 0 0) (= 0
-    //            // 0))
-    //            // Skip tautology.
-    //            // System.err.println(" simplified to tautology.");
-    //            return;
-    //        }
-    //
-    //        if (simplifiedConstraint.isFalse()) {
-    //            final ToStringSerializer toStringSerializer = new ToStringSerializer(false);
-    //            throw new BugInCF(
-    //                    "impossible constraint: "
-    //                            + constraint.serialize(toStringSerializer)
-    //                            + "\nSerialized:\n"
-    //                            + serializedConstraint);
-    //        }
-    //
-    //        solver.AssertSoft(serializedConstraint);
-    //    }
-
-    protected void encodeAllSlots() {
-        // preprocess slots
-        formatTranslator.preAnalyzeSlots(slots);
-
-        //        StringBuilder z3SlotDefinitions = new StringBuilder();
-        //
-        //        // generate slot definitions
-        //        for (Slot slot : slots) {
-        //            if (slot.isVariable()) {
-        //                String slotDefinition =
-        //                        formatTranslator.generateZ3SlotDeclaration((VariableSlot) slot);
-        //                System.err.println(slotDefinition);
-        //                z3SlotDefinitions.append(slotDefinition);
-        //            }
-        //        }
-
-        // generate slot constraints
-        for (Slot slot : slots) {
-            if (slot.isVariable()) {
-                VariableSlot varSlot = (VariableSlot) slot;
-
-                BoolExpr wfConstraint = formatTranslator.encodeSlotWellformnessConstraint(varSlot);
-
-                if (!wfConstraint.simplify().isTrue()) {
-                    solver.Assert(wfConstraint);
-                }
-                if (optimizingMode) {
-                    // empty string means no optimization group
-                    solver.AssertSoft(
-                            formatTranslator.encodeSlotPreferenceConstraint(varSlot), 1, "");
-                }
-            }
-        }
-
-        // solver.toString() also includes "(check-sat)" as the last line,
-        // remove it
-        String slotDefinitionsAndConstraints = solver.toString();
-        int truncateIndex = slotDefinitionsAndConstraints.lastIndexOf("(check-sat)");
-        assert truncateIndex != -1;
-
-        // append slot definitions to overall smt file
-        smtFileContents.append(slotDefinitionsAndConstraints.substring(0, truncateIndex));
-
-        // debug use:
-        // Write Slots to file
-        FileUtils.appendFile(new File(pathToProject + "/slots.smt"), solver.toString());
+    protected String z3UnsatCoreAssert(Expr clause, String constraintName) {
+        return "(assert (! "
+                + clause.toString()
+                + " :named "
+                + constraintName
+                + "))"
+                + System.lineSeparator();
     }
 
-    private List<String> runZ3Solver() {
-        // TODO: add z3 stats?
-        String[] command;
-        if (!getUnsatCore) {
-            command = new String[] {z3Program, constraintsFile};
-        } else {
-            command = new String[] {z3Program, constraintsUnsatCoreFile};
-        }
-
-        // TODO: build Typecheckunits here?
-        // Map<Integer, TypecheckUnit> solutionSlots = new HashMap<>();
-
-        // stores results from z3 program output
-        final List<String> results = new ArrayList<>();
-
-        // Run command
-        // TODO: check that stdErr has no errors
-        int exitStatus =
-                ExternalSolverUtils.runExternalSolver(
-                        command,
-                        stdOut -> parseStdOut(stdOut, results),
-                        stdErr -> ExternalSolverUtils.printStdStream(System.err, stdErr));
-        // if exit status from z3 is not 0, then it is unsat
-        return exitStatus == 0 ? results : null;
+    protected String z3SoftAssert(Expr clause, int weight) {
+        return "(assert-soft "
+                + clause.toString()
+                + " :weight "
+                + weight
+                + ")"
+                + System.lineSeparator();
     }
+
+    protected String z3SoftAssert(Expr clause) {
+        return z3SoftAssert(clause, 1);
+    }
+
+    protected abstract List<String> runZ3Solver();
 
     // Sample satisfying output format:
     /* @formatter:off // this is for eclipse formatter */
@@ -418,7 +263,7 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
 
     // parses the STD output from the z3 process and handles SAT and UNSAT
     // outputs
-    private void parseStdOut(BufferedReader stdOut, List<String> results) {
+    protected void parseStdOut(BufferedReader stdOut, List<String> results) {
         String line = "";
 
         boolean declarationLine = true;
@@ -431,7 +276,7 @@ public abstract class Z3SmtSolver<SlotEncodingT, ConstraintEncodingT, SlotSoluti
             while ((line = stdOut.readLine()) != null) {
                 line = line.trim();
 
-                if (getUnsatCore) {
+                if (mode == Mode.GetUnsatCore) {
                     // UNSAT Cases ====================
                     if (line.contentEquals("unsat")) {
                         unsat = true;

@@ -2,71 +2,50 @@ package units.solvers.backend.z3smt.representation;
 
 import com.microsoft.z3.BoolExpr;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.checkerframework.dataflow.util.HashCodeUtils;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.UnitsRepresentationUtils;
 
 public class Z3EquationSet {
 
+    // TODO: better shorter key names
+    public static final String topAndBottomKey = "topAndBottom";
     public static final String prefixExponentKey = "prefixExponent";
 
-    // Map<Dimension, Set<BoolExpr>>
-    private final Map<String, Set<BoolExpr>> eqSet = new HashMap<>();
+    // Keys include topAndBottomKey
+    // and potentially prefixExponentKey and the base units
+    private final Map<String, BoolExpr> eqSet;
 
-    public Z3EquationSet() {}
-
-    public Map<String, Set<BoolExpr>> getEquationSet() {
-        return eqSet;
+    public Z3EquationSet() {
+        eqSet = new HashMap<>();
     }
 
-    Set<BoolExpr> getZ3Constraints(String key) {
+    public BoolExpr getEquation(String key) {
         return eqSet.get(key);
     }
 
-    public boolean isEmpty() {
-        return eqSet.isEmpty();
-    }
-
     public void addEquation(String key, BoolExpr equation) {
+        // TODO: base unit set or serializableBaseUnits set?
         if (!(key == prefixExponentKey
-                || UnitsRepresentationUtils.getInstance().baseUnits().contains(key))) {
+                || UnitsRepresentationUtils.getInstance().serializableBaseUnits().contains(key))) {
             throw new BugInCF("Trying to add an equation for unsupported key " + key);
         }
 
-        if (!eqSet.containsKey(key)) {
-            eqSet.put(key, new HashSet<>());
+        if (eqSet.containsKey(key)) {
+            throw new BugInCF("Trying to replace an equation " + key);
         }
 
-        eqSet.get(key).add(equation);
+        eqSet.put(key, equation);
     }
-
-    public void union(Z3EquationSet otherSet) {
-        for (Entry<String, Set<BoolExpr>> otherEntry : otherSet.eqSet.entrySet()) {
-            String key = otherEntry.getKey();
-            if (!eqSet.containsKey(key)) {
-                eqSet.put(key, new HashSet<>());
-            }
-            Set<BoolExpr> myEquations = eqSet.get(key);
-            for (BoolExpr equation : otherEntry.getValue()) {
-                myEquations.add(equation);
-            }
-        }
-    }
-
-    // TODO: add a consistency check to ensure same # of equations per
-    // dimension??
 
     // Example format:
     // [
-    //  s -> [2 1 2 -1 3 0]
-    //  prefixExponent -> [2 1 2 -1 3 0]
-    //  rad -> [2 1 2 -1 3 0]
-    //  deg -> [2 1 2 -1 3 0]
-    //  m -> [2 1 2 -1 3 0]
+    //  s -> [eq]
+    //  prefixExponent -> [eq]
+    //  rad -> [eq]
+    //  deg -> [eq]
+    //  m -> [eq]
     // ]
     @Override
     public String toString() {
@@ -74,7 +53,7 @@ public class Z3EquationSet {
         sb.append("[" + System.lineSeparator());
         for (String key : eqSet.keySet()) {
             sb.append(" " + key + " -> [");
-            sb.append(String.join(", ", eqSet.get(key).toString()));
+            sb.append(String.join(", ", eqSet.get(key).simplify().toString()));
             sb.append("]" + System.lineSeparator());
         }
         sb.append("]" + System.lineSeparator());

@@ -44,7 +44,7 @@ public class UnitsZ3SmtArithmeticConstraintEncoder
                 Z3InferenceUnit right = rightOperand.serialize(z3SmtFormatTranslator);
                 Z3InferenceUnit res = result.serialize(z3SmtFormatTranslator);
 
-                return UnitsZ3SmtEncoderUtils.addSub(ctx, left, right, res);
+                return UnitsZ3SmtEncoderUtils.additionSubtraction(ctx, left, right, res);
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot, is the sum of the
                 // component exponents unless either leftOperand or rightOperand is UnknownUnits or

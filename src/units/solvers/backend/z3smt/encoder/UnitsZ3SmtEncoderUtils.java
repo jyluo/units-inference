@@ -19,6 +19,11 @@ public class UnitsZ3SmtEncoderUtils {
     public static final String ubSlotName = "BOT";
     public static final String prefixSlotName = "PREFIX";
 
+    // for syntax friendliness
+    private static UnitsRepresentationUtils unitsRepUtils() {
+        return UnitsRepresentationUtils.getInstance();
+    }
+
     public static String z3VarName(int slotID, String component) {
         return slotID + String.valueOf(idComponentSeparator) + component;
     }
@@ -81,22 +86,40 @@ public class UnitsZ3SmtEncoderUtils {
     }
 
     /** Slot well-formedness constraint: that either uu = true, ub = true, or uu == ub = false */
-    public static BoolExpr slotWellformedness(Context ctx, Z3InferenceUnit unit) {
+    public static Z3EquationSet slotWellformedness(Context ctx, Z3InferenceUnit unit) {
         // for GJE experiment
         // return ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()),
         // ctx.mkNot(unit.getUnitsBottom()));
+
+        Z3EquationSet result = new Z3EquationSet();
+
+        BoolExpr wf = ctx.mkNot(ctx.mkAnd(unit.getUnknownUnits(), unit.getUnitsBottom()));
+
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(Z3EquationSet.topAndBottomKey, wf);
+        }
+
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(Z3EquationSet.prefixExponentKey, wf);
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(baseUnit, wf);
+        }
+
+        return result;
 
         // truthtable xor (xor ((not x and not y), x), y)
         // TODO: more preferable to not have to encode exponent == 0 in
         // wellformedness, but currently we must do so in order to have exponent
         // variable declarations outputted for the z3 files
-        BoolExpr allExponentsAreZero = allExponentsAreZero(ctx, unit);
-        /* @formatter:off // this is for eclipse formatter */
-        return UnitsZ3SmtEncoderUtils.mkOneHot(
-                ctx,
-                ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom())),
-                ctx.mkAnd(unit.getUnknownUnits(), allExponentsAreZero),
-                ctx.mkAnd(unit.getUnitsBottom(), allExponentsAreZero));
+        //        BoolExpr allExponentsAreZero = allExponentsAreZero(ctx, unit);
+        //        /* @formatter:off // this is for eclipse formatter */
+        //        return UnitsZ3SmtEncoderUtils.mkOneHot(
+        //                ctx,
+        //                ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom())),
+        //                ctx.mkAnd(unit.getUnknownUnits(), allExponentsAreZero),
+        //                ctx.mkAnd(unit.getUnitsBottom(), allExponentsAreZero));
         /* @formatter:on // this is for eclipse formatter */
 
         // simplify xor (xor ((not x and not y), x), y)
@@ -106,32 +129,31 @@ public class UnitsZ3SmtEncoderUtils {
     }
 
     /** Slot preference constraint: that the slot == dimensionless */
-    public static BoolExpr slotPreference(Context ctx, Z3InferenceUnit unit) {
-        return mustBeDimensionless(ctx, unit);
-    }
+    public static Z3EquationSet slotPreference(Context ctx, Z3InferenceUnit unit) {
+        Z3EquationSet result = new Z3EquationSet();
 
-    private static BoolExpr allExponentsAreZero(Context ctx, Z3InferenceUnit unit) {
+        BoolExpr notTopAndNotBot =
+                ctx.mkAnd(ctx.mkNot(unit.getUnknownUnits()), ctx.mkNot(unit.getUnitsBottom()));
         IntNum zero = ctx.mkInt(0);
-        BoolExpr result = ctx.mkTrue();
-        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
-            result = ctx.mkEq(unit.getPrefixExponent(), zero);
-        }
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
-            /* @formatter:off // this is for eclipse formatter */
-            result = ctx.mkAnd(result, ctx.mkEq(unit.getExponent(baseUnit), zero));
-            /* @formatter:on // this is for eclipse formatter */
-        }
-        return result;
-    }
 
-    private static BoolExpr mustBeDimensionless(Context ctx, Z3InferenceUnit unit) {
-        BoolExpr allExponentsAreZero = allExponentsAreZero(ctx, unit);
-        /* @formatter:off // this is for eclipse formatter */
-        return ctx.mkAnd(
-                ctx.mkNot(unit.getUnknownUnits()),
-                ctx.mkNot(unit.getUnitsBottom()),
-                allExponentsAreZero);
-        /* @formatter:on // this is for eclipse formatter */
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(Z3EquationSet.topAndBottomKey, notTopAndNotBot);
+        }
+
+        if (unitsRepUtils().serializePrefix()) {
+            BoolExpr prefixIsZero = ctx.mkEq(unit.getPrefixExponent(), zero);
+
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey, ctx.mkAnd(notTopAndNotBot, prefixIsZero));
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            BoolExpr baseUnitIsZero = ctx.mkEq(unit.getExponent(baseUnit), zero);
+
+            result.addEquation(baseUnit, ctx.mkAnd(notTopAndNotBot, baseUnitIsZero));
+        }
+
+        return result;
     }
 
     // =========================================================================================
@@ -139,25 +161,56 @@ public class UnitsZ3SmtEncoderUtils {
     // fst = snd iff the bool and int component values are equal
     // For Equality, and also Modulo
     public static Z3EquationSet equality(Context ctx, Z3InferenceUnit fst, Z3InferenceUnit snd) {
-        /* @formatter:off // this is for eclipse formatter */
-        BoolExpr equalityEncoding =
+        Z3EquationSet result = new Z3EquationSet();
+
+        BoolExpr topsAndBottoms =
                 ctx.mkAnd(
                         ctx.mkEq(fst.getUnknownUnits(), snd.getUnknownUnits()),
                         ctx.mkEq(fst.getUnitsBottom(), snd.getUnitsBottom()));
-        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
-            equalityEncoding =
-                    ctx.mkAnd(
-                            equalityEncoding,
-                            ctx.mkEq(fst.getPrefixExponent(), snd.getPrefixExponent()));
+
+        // this needs to be generated if we don't serialize prefix or any units,
+        // otherwise omit as it is solved as part of all number planes (in prefix or a
+        // base unit)
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(Z3EquationSet.topAndBottomKey, topsAndBottoms);
         }
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
-            equalityEncoding =
+
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey,
                     ctx.mkAnd(
-                            equalityEncoding,
-                            ctx.mkEq(fst.getExponent(baseUnit), snd.getExponent(baseUnit)));
+                            topsAndBottoms,
+                            ctx.mkEq(fst.getPrefixExponent(), snd.getPrefixExponent())));
         }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(
+                    baseUnit,
+                    ctx.mkAnd(
+                            topsAndBottoms,
+                            ctx.mkEq(fst.getExponent(baseUnit), snd.getExponent(baseUnit))));
+        }
+
+        return result;
+    }
+
+    private static BoolExpr subtype(
+            Context ctx, Z3InferenceUnit subT, Z3InferenceUnit superT, BoolExpr equality) {
+
+        /* @formatter:off // this is for eclipse formatter */
+        return ctx.mkOr(
+                // sub = bot
+                subT.getUnitsBottom(),
+                // super = top
+                superT.getUnknownUnits(),
+                // if neither is top or bottom then they must be equal: sub = super
+                ctx.mkAnd(
+                        ctx.mkNot(subT.getUnknownUnits()),
+                        ctx.mkNot(subT.getUnitsBottom()),
+                        ctx.mkNot(superT.getUnknownUnits()),
+                        ctx.mkNot(superT.getUnitsBottom()),
+                        equality));
         /* @formatter:on // this is for eclipse formatter */
-        return equalityEncoding;
     }
 
     // sub <: super has 6 cases:
@@ -168,22 +221,53 @@ public class UnitsZ3SmtEncoderUtils {
     // top <: top
     // x <: x
     public static Z3EquationSet subtype(Context ctx, Z3InferenceUnit subT, Z3InferenceUnit superT) {
-        /* @formatter:off // this is for eclipse formatter */
-        BoolExpr subtypeEncoding =
-                ctx.mkOr(
-                        // sub = bot
-                        subT.getUnitsBottom(),
-                        // super = top
-                        superT.getUnknownUnits(),
-                        // if neither is top or bottom then they must be equal: sub = super
-                        ctx.mkAnd(
-                                ctx.mkNot(subT.getUnknownUnits()),
-                                ctx.mkNot(subT.getUnitsBottom()),
-                                ctx.mkNot(superT.getUnknownUnits()),
-                                ctx.mkNot(superT.getUnitsBottom()),
-                                equality(ctx, subT, superT)));
-        /* @formatter:on // this is for eclipse formatter */
-        return subtypeEncoding;
+        Z3EquationSet result = new Z3EquationSet();
+
+        Z3EquationSet equality = equality(ctx, subT, superT);
+
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(
+                    Z3EquationSet.topAndBottomKey,
+                    subtype(
+                            ctx,
+                            subT,
+                            superT,
+                            equality.getEquation(Z3EquationSet.topAndBottomKey)));
+        }
+
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey,
+                    subtype(
+                            ctx,
+                            subT,
+                            superT,
+                            equality.getEquation(Z3EquationSet.prefixExponentKey)));
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(
+                    baseUnit, subtype(ctx, subT, superT, equality.getEquation(baseUnit)));
+        }
+
+        return result;
+
+        //        /* @formatter:off // this is for eclipse formatter */
+        //        BoolExpr subtypeEncoding =
+        //                ctx.mkOr(
+        //                        // sub = bot
+        //                        subT.getUnitsBottom(),
+        //                        // super = top
+        //                        superT.getUnknownUnits(),
+        //                        // if neither is top or bottom then they must be equal: sub = super
+        //                        ctx.mkAnd(
+        //                                ctx.mkNot(subT.getUnknownUnits()),
+        //                                ctx.mkNot(subT.getUnitsBottom()),
+        //                                ctx.mkNot(superT.getUnknownUnits()),
+        //                                ctx.mkNot(superT.getUnitsBottom()),
+        //                                equality(ctx, subT, superT)));
+        //        /* @formatter:on // this is for eclipse formatter */
+        //        return subtypeEncoding;
 
         // old subtype encoding, which potentially enforced equality even when unnecessary
         // ctx.mkOr(
@@ -199,22 +283,114 @@ public class UnitsZ3SmtEncoderUtils {
     public static Z3EquationSet tripleEquality(
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
         // set lhs == rhs, and rhs == res, transitively lhs == res
-        return ctx.mkAnd(equality(ctx, lhs, rhs), equality(ctx, rhs, res));
+
+        Z3EquationSet result = new Z3EquationSet();
+
+        Z3EquationSet equalityLR = equality(ctx, lhs, rhs);
+
+        Z3EquationSet equalityRS = equality(ctx, rhs, res);
+
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(
+                    Z3EquationSet.topAndBottomKey,
+                    ctx.mkAnd(
+                            equalityLR.getEquation(Z3EquationSet.topAndBottomKey),
+                            equalityRS.getEquation(Z3EquationSet.topAndBottomKey)));
+        }
+
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey,
+                    ctx.mkAnd(
+                            equalityLR.getEquation(Z3EquationSet.prefixExponentKey),
+                            equalityRS.getEquation(Z3EquationSet.prefixExponentKey)));
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(
+                    baseUnit,
+                    ctx.mkAnd(equalityLR.getEquation(baseUnit), equalityRS.getEquation(baseUnit)));
+        }
+
+        return result;
+        // return ctx.mkAnd(equality(ctx, lhs, rhs), equality(ctx, rhs, res));
     }
 
     public static Z3EquationSet comparable(Context ctx, Z3InferenceUnit fst, Z3InferenceUnit snd) {
 
         // fst <: snd or snd <: fst
-        return ctx.mkOr(
-                UnitsZ3SmtEncoderUtils.subtype(ctx, fst, snd),
-                UnitsZ3SmtEncoderUtils.subtype(ctx, snd, fst));
+
+        Z3EquationSet result = new Z3EquationSet();
+
+        Z3EquationSet subtypeFS = subtype(ctx, fst, snd);
+
+        Z3EquationSet subtypeSF = subtype(ctx, snd, fst);
+
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(
+                    Z3EquationSet.topAndBottomKey,
+                    ctx.mkOr(
+                            subtypeFS.getEquation(Z3EquationSet.topAndBottomKey),
+                            subtypeSF.getEquation(Z3EquationSet.topAndBottomKey)));
+        }
+
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey,
+                    ctx.mkOr(
+                            subtypeFS.getEquation(Z3EquationSet.prefixExponentKey),
+                            subtypeSF.getEquation(Z3EquationSet.prefixExponentKey)));
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(
+                    baseUnit,
+                    ctx.mkOr(subtypeFS.getEquation(baseUnit), subtypeSF.getEquation(baseUnit)));
+        }
+
+        return result;
+
+        // return ctx.mkOr(
+        // UnitsZ3SmtEncoderUtils.subtype(ctx, fst, snd),
+        // UnitsZ3SmtEncoderUtils.subtype(ctx, snd, fst));
     }
 
-    public static Z3EquationSet addSub(
+    public static Z3EquationSet additionSubtraction(
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
-        return ctx.mkAnd(
-                UnitsZ3SmtEncoderUtils.subtype(ctx, lhs, res),
-                UnitsZ3SmtEncoderUtils.subtype(ctx, rhs, res));
+
+        Z3EquationSet result = new Z3EquationSet();
+
+        Z3EquationSet subtypeLRe = subtype(ctx, lhs, res);
+
+        Z3EquationSet subtypeRRe = subtype(ctx, rhs, res);
+
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(
+                    Z3EquationSet.topAndBottomKey,
+                    ctx.mkAnd(
+                            subtypeLRe.getEquation(Z3EquationSet.topAndBottomKey),
+                            subtypeRRe.getEquation(Z3EquationSet.topAndBottomKey)));
+        }
+
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey,
+                    ctx.mkAnd(
+                            subtypeLRe.getEquation(Z3EquationSet.prefixExponentKey),
+                            subtypeRRe.getEquation(Z3EquationSet.prefixExponentKey)));
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(
+                    baseUnit,
+                    ctx.mkAnd(subtypeLRe.getEquation(baseUnit), subtypeRRe.getEquation(baseUnit)));
+        }
+
+        return result;
+
+        // return ctx.mkAnd(
+        // UnitsZ3SmtEncoderUtils.subtype(ctx, lhs, res),
+        // UnitsZ3SmtEncoderUtils.subtype(ctx, rhs, res));
 
         // // 3 way equality (ie leftOperand == rightOperand, and rightOperand == result).
         // return UnitsZ3SmtEncoderUtils.tripleEquality(ctx,
@@ -223,57 +399,108 @@ public class UnitsZ3SmtEncoderUtils {
         // result.serialize(z3SmtFormatTranslator));
     }
 
-    public static Z3EquationSet multiply(
-            Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
-        /* @formatter:off // this is for eclipse formatter */
-        // Forall base units, r_exponent = lhs_exponent + rhs_exponent
-
-        BoolExpr exponents = ctx.mkTrue();
-        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
-            exponents =
-                    ctx.mkEq(
-                            res.getPrefixExponent(),
-                            ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
-        }
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
-            exponents =
-                    ctx.mkAnd(
-                            exponents,
-                            ctx.mkEq(
-                                    res.getExponent(baseUnit),
-                                    ctx.mkAdd(
-                                            lhs.getExponent(baseUnit), rhs.getExponent(baseUnit))));
-        }
-
+    private static BoolExpr multiplyDivideTopAndBottom(
+            Context ctx,
+            Z3InferenceUnit lhs,
+            Z3InferenceUnit rhs,
+            Z3InferenceUnit res,
+            BoolExpr exponents) {
         // r = x * y
         // (((x=top || y=top) && r=top) ||
         // (x=bot && !y=top && r=bot) ||
         // (!x=top && y=bot && r=bot) ||
         // (!x=top && !x=bot && !y=top && !y=bot && exponents))
 
-        BoolExpr multiplyEncoding =
-                ctx.mkOr(
-                        ctx.mkAnd(
-                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits()),
-                                res.getUnknownUnits()),
-                        ctx.mkAnd(
-                                lhs.getUnitsBottom(),
-                                ctx.mkNot(rhs.getUnknownUnits()),
-                                res.getUnitsBottom()),
-                        ctx.mkAnd(
-                                ctx.mkNot(lhs.getUnknownUnits()),
-                                rhs.getUnitsBottom(),
-                                res.getUnitsBottom()),
-                        ctx.mkAnd(
-                                ctx.mkNot(lhs.getUnknownUnits()),
-                                ctx.mkNot(lhs.getUnitsBottom()),
-                                ctx.mkNot(rhs.getUnknownUnits()),
-                                ctx.mkNot(rhs.getUnitsBottom()),
-                                ctx.mkNot(res.getUnknownUnits()),
-                                ctx.mkNot(res.getUnitsBottom()),
-                                exponents));
+        /* @formatter:off // this is for eclipse formatter */
+        return ctx.mkOr(
+                ctx.mkAnd(
+                        ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits()),
+                        res.getUnknownUnits()),
+                ctx.mkAnd(
+                        lhs.getUnitsBottom(),
+                        ctx.mkNot(rhs.getUnknownUnits()),
+                        res.getUnitsBottom()),
+                ctx.mkAnd(
+                        ctx.mkNot(lhs.getUnknownUnits()),
+                        rhs.getUnitsBottom(),
+                        res.getUnitsBottom()),
+                ctx.mkAnd(
+                        ctx.mkNot(lhs.getUnknownUnits()),
+                        ctx.mkNot(lhs.getUnitsBottom()),
+                        ctx.mkNot(rhs.getUnknownUnits()),
+                        ctx.mkNot(rhs.getUnitsBottom()),
+                        ctx.mkNot(res.getUnknownUnits()),
+                        ctx.mkNot(res.getUnitsBottom()),
+                        exponents));
         /* @formatter:on // this is for eclipse formatter */
-        return multiplyEncoding;
+    }
+
+    public static Z3EquationSet multiply(
+            Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
+
+        Z3EquationSet result = new Z3EquationSet();
+
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(
+                    Z3EquationSet.topAndBottomKey,
+                    multiplyDivideTopAndBottom(ctx, lhs, rhs, res, ctx.mkTrue()));
+        }
+
+        // Forall base units, r_exponent = lhs_exponent + rhs_exponent
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey,
+                    multiplyDivideTopAndBottom(
+                            ctx,
+                            lhs,
+                            rhs,
+                            res,
+                            ctx.mkEq(
+                                    res.getPrefixExponent(),
+                                    ctx.mkAdd(lhs.getPrefixExponent(), rhs.getPrefixExponent()))));
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(
+                    baseUnit,
+                    multiplyDivideTopAndBottom(
+                            ctx,
+                            lhs,
+                            rhs,
+                            res,
+                            ctx.mkEq(
+                                    res.getExponent(baseUnit),
+                                    ctx.mkAdd(
+                                            lhs.getExponent(baseUnit),
+                                            rhs.getExponent(baseUnit)))));
+        }
+
+        return result;
+        //
+        //
+        //        BoolExpr multiplyEncoding =
+        //                ctx.mkOr(
+        //                        ctx.mkAnd(
+        //                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits()),
+        //                                res.getUnknownUnits()),
+        //                        ctx.mkAnd(
+        //                                lhs.getUnitsBottom(),
+        //                                ctx.mkNot(rhs.getUnknownUnits()),
+        //                                res.getUnitsBottom()),
+        //                        ctx.mkAnd(
+        //                                ctx.mkNot(lhs.getUnknownUnits()),
+        //                                rhs.getUnitsBottom(),
+        //                                res.getUnitsBottom()),
+        //                        ctx.mkAnd(
+        //                                ctx.mkNot(lhs.getUnknownUnits()),
+        //                                ctx.mkNot(lhs.getUnitsBottom()),
+        //                                ctx.mkNot(rhs.getUnknownUnits()),
+        //                                ctx.mkNot(rhs.getUnitsBottom()),
+        //                                ctx.mkNot(res.getUnknownUnits()),
+        //                                ctx.mkNot(res.getUnitsBottom()),
+        //                                exponents));
+        //
+        //        return multiplyEncoding;
 
         // old encoding: which always computed exponents
         // res component = lhs component + rhs component
@@ -292,48 +519,87 @@ public class UnitsZ3SmtEncoderUtils {
 
     public static Z3EquationSet divide(
             Context ctx, Z3InferenceUnit lhs, Z3InferenceUnit rhs, Z3InferenceUnit res) {
-        /* @formatter:off // this is for eclipse formatter */
-        // Forall base units, r_exponent = lhs_exponent - rhs_exponent
+        Z3EquationSet result = new Z3EquationSet();
 
-        BoolExpr exponents = ctx.mkTrue();
-        if (UnitsRepresentationUtils.getInstance().serializePrefix()) {
-            exponents =
-                    ctx.mkEq(
-                            res.getPrefixExponent(),
-                            ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
+        if (unitsRepUtils().serializeOnlyTopAndBot()) {
+            result.addEquation(
+                    Z3EquationSet.topAndBottomKey,
+                    multiplyDivideTopAndBottom(ctx, lhs, rhs, res, ctx.mkTrue()));
         }
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
-            exponents =
-                    ctx.mkAnd(
-                            exponents,
+
+        // Forall base units, r_exponent = lhs_exponent + rhs_exponent
+        if (unitsRepUtils().serializePrefix()) {
+            result.addEquation(
+                    Z3EquationSet.prefixExponentKey,
+                    multiplyDivideTopAndBottom(
+                            ctx,
+                            lhs,
+                            rhs,
+                            res,
+                            ctx.mkEq(
+                                    res.getPrefixExponent(),
+                                    ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent()))));
+        }
+
+        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+            result.addEquation(
+                    baseUnit,
+                    multiplyDivideTopAndBottom(
+                            ctx,
+                            lhs,
+                            rhs,
+                            res,
                             ctx.mkEq(
                                     res.getExponent(baseUnit),
                                     ctx.mkSub(
-                                            lhs.getExponent(baseUnit), rhs.getExponent(baseUnit))));
+                                            lhs.getExponent(baseUnit),
+                                            rhs.getExponent(baseUnit)))));
         }
-        BoolExpr divideEncoding =
-                ctx.mkOr(
-                        ctx.mkAnd(
-                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits()),
-                                res.getUnknownUnits()),
-                        ctx.mkAnd(
-                                lhs.getUnitsBottom(),
-                                ctx.mkNot(rhs.getUnknownUnits()),
-                                res.getUnitsBottom()),
-                        ctx.mkAnd(
-                                ctx.mkNot(lhs.getUnknownUnits()),
-                                rhs.getUnitsBottom(),
-                                res.getUnitsBottom()),
-                        ctx.mkAnd(
-                                ctx.mkNot(lhs.getUnknownUnits()),
-                                ctx.mkNot(lhs.getUnitsBottom()),
-                                ctx.mkNot(rhs.getUnknownUnits()),
-                                ctx.mkNot(rhs.getUnitsBottom()),
-                                ctx.mkNot(res.getUnknownUnits()),
-                                ctx.mkNot(res.getUnitsBottom()),
-                                exponents));
-        /* @formatter:on // this is for eclipse formatter */
-        return divideEncoding;
+
+        return result;
+
+        //        /* @formatter:off // this is for eclipse formatter */
+        //        // Forall base units, r_exponent = lhs_exponent - rhs_exponent
+        //
+        //        BoolExpr exponents = ctx.mkTrue();
+        //        if (unitsRepUtils().serializePrefix()) {
+        //            exponents =
+        //                    ctx.mkEq(
+        //                            res.getPrefixExponent(),
+        //                            ctx.mkSub(lhs.getPrefixExponent(), rhs.getPrefixExponent()));
+        //        }
+        //        for (String baseUnit : unitsRepUtils().serializableBaseUnits()) {
+        //            exponents =
+        //                    ctx.mkAnd(
+        //                            exponents,
+        //                            ctx.mkEq(
+        //                                    res.getExponent(baseUnit),
+        //                                    ctx.mkSub(
+        //                                            lhs.getExponent(baseUnit), rhs.getExponent(baseUnit))));
+        //        }
+        //        BoolExpr divideEncoding =
+        //                ctx.mkOr(
+        //                        ctx.mkAnd(
+        //                                ctx.mkOr(lhs.getUnknownUnits(), rhs.getUnknownUnits()),
+        //                                res.getUnknownUnits()),
+        //                        ctx.mkAnd(
+        //                                lhs.getUnitsBottom(),
+        //                                ctx.mkNot(rhs.getUnknownUnits()),
+        //                                res.getUnitsBottom()),
+        //                        ctx.mkAnd(
+        //                                ctx.mkNot(lhs.getUnknownUnits()),
+        //                                rhs.getUnitsBottom(),
+        //                                res.getUnitsBottom()),
+        //                        ctx.mkAnd(
+        //                                ctx.mkNot(lhs.getUnknownUnits()),
+        //                                ctx.mkNot(lhs.getUnitsBottom()),
+        //                                ctx.mkNot(rhs.getUnknownUnits()),
+        //                                ctx.mkNot(rhs.getUnitsBottom()),
+        //                                ctx.mkNot(res.getUnknownUnits()),
+        //                                ctx.mkNot(res.getUnitsBottom()),
+        //                                exponents));
+        //        /* @formatter:on // this is for eclipse formatter */
+        //        return divideEncoding;
 
         // old encoding: which always computed exponents
         // res component = lhs component - rhs component

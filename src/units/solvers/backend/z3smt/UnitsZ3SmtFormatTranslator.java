@@ -8,7 +8,6 @@ import checkers.inference.solver.backend.encoder.ConstraintEncoderFactory;
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.IntExpr;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,22 +53,41 @@ public class UnitsZ3SmtFormatTranslator
     }
 
     @Override
-    public String generateZ3SlotDeclaration(VariableSlot slot) {
+    public Map<String, String> generateZ3SlotDeclaration(VariableSlot slot) {
         Z3InferenceUnit encodedSlot = serializeVarSlot(slot);
 
-        List<String> slotDeclaration = new ArrayList<>();
+        Map<String, String> slotDeclarations = new HashMap<>();
 
-        slotDeclaration.add(addZ3BoolDefinition(encodedSlot.getUnknownUnits()));
-        slotDeclaration.add(addZ3BoolDefinition(encodedSlot.getUnitsBottom()));
+        String topDeclaration = addZ3BoolDefinition(encodedSlot.getUnknownUnits());
+        String botDeclaration = addZ3BoolDefinition(encodedSlot.getUnitsBottom());
+
+        if (unitsRepUtils.serializeOnlyTopAndBot()) {
+            slotDeclarations.put(
+                    Z3EquationSet.topAndBottomKey,
+                    String.join(System.lineSeparator(), topDeclaration, botDeclaration));
+        }
 
         if (unitsRepUtils.serializePrefix()) {
-            slotDeclaration.add(addZ3IntDefinition(encodedSlot.getPrefixExponent()));
-        }
-        for (String baseUnit : unitsRepUtils.serializableBaseUnits()) {
-            slotDeclaration.add(addZ3IntDefinition(encodedSlot.getExponent(baseUnit)));
+            slotDeclarations.put(
+                    Z3EquationSet.prefixExponentKey,
+                    String.join(
+                            System.lineSeparator(),
+                            topDeclaration,
+                            botDeclaration,
+                            addZ3IntDefinition(encodedSlot.getPrefixExponent())));
         }
 
-        return String.join(System.lineSeparator(), slotDeclaration);
+        for (String baseUnit : unitsRepUtils.serializableBaseUnits()) {
+            slotDeclarations.put(
+                    baseUnit,
+                    String.join(
+                            System.lineSeparator(),
+                            topDeclaration,
+                            botDeclaration,
+                            addZ3IntDefinition(encodedSlot.getExponent(baseUnit))));
+        }
+
+        return slotDeclarations;
     }
 
     private String addZ3BoolDefinition(BoolExpr z3BoolVariable) {
@@ -167,15 +185,33 @@ public class UnitsZ3SmtFormatTranslator
         // System.err.println("bu: " + unitsRepUtils.serializableBaseUnits().size());
     }
 
+    private Z3EquationSet createAlwaysTrueEQSet() {
+        Z3EquationSet result = new Z3EquationSet();
+
+        if (unitsRepUtils.serializeOnlyTopAndBot()) {
+            result.addEquation(Z3EquationSet.topAndBottomKey, ctx.mkTrue());
+        }
+
+        if (unitsRepUtils.serializePrefix()) {
+            result.addEquation(Z3EquationSet.prefixExponentKey, ctx.mkTrue());
+        }
+
+        for (String baseUnit : unitsRepUtils.serializableBaseUnits()) {
+            result.addEquation(baseUnit, ctx.mkTrue());
+        }
+
+        return result;
+    }
+
     @Override
-    public BoolExpr encodeSlotWellformnessConstraint(VariableSlot slot) {
+    public Z3EquationSet encodeSlotWellformnessConstraint(VariableSlot slot) {
         if (slot instanceof ConstantSlot) {
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode PolyAll and PolyUnit as constant trues
             if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
                     || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
-                return ctx.mkTrue();
+                return createAlwaysTrueEQSet();
             }
         }
 
@@ -184,14 +220,14 @@ public class UnitsZ3SmtFormatTranslator
     }
 
     @Override
-    public BoolExpr encodeSlotPreferenceConstraint(VariableSlot slot) {
+    public Z3EquationSet encodeSlotPreferenceConstraint(VariableSlot slot) {
         if (slot instanceof ConstantSlot) {
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode PolyAll and PolyUnit as constant trues
             if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
                     || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
-                return ctx.mkTrue();
+                return createAlwaysTrueEQSet();
             }
         }
 

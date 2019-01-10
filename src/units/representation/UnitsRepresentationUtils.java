@@ -180,6 +180,12 @@ public class UnitsRepresentationUtils {
         return serializePrefix;
     }
 
+    // no integers are encoded in z3 if we are not serializing prefix and are not
+    // serializing any base units
+    public boolean serializeOnlyTopAndBot() {
+        return !serializePrefix() && serializableBaseUnits().isEmpty();
+    }
+
     //    public Set<String> nonserializeableBaseUnits() {
     //        assert nonserializeableBaseUnitNames != null;
     //        return nonserializeableBaseUnitNames;

@@ -27,12 +27,20 @@ echo "digraph G {
     fontname = \"Helvetica-Outline\",
     fontsize = 10];"
 
+# ↧  hexcode 21a7, char code 8615
 grep "<:" $FILENAME | \
-  sed -r 's/[ ]*([0-9]+[a-zA-Z0-9 @]*) <: ([0-9]+[a-zA-Z0-9 @]*)$/  "\2" -> "\1"/p' \
+  perl -CS -pe 's/[ ]*([0-9]+[[\]\N{U+21a7}a-zA-Z0-9 @]*) <: ([0-9]+[[\]\N{U+21a7}a-zA-Z0-9 @]*)$/  "\2" -> "\1"/p' \
   | sort | uniq
 
 grep " == " $FILENAME | \
-  sed -r 's/[ ]*([0-9]+[a-zA-Z0-9 @]*) == ([0-9]+[a-zA-Z0-9 @]*)$/  "\2" -> "\1" [arrowhead=none]/p' \
+  perl -CS -pe 's/[ ]*([0-9]+[[\]\N{U+21a7}a-zA-Z0-9 @]*) <: ([0-9]+[[\]\N{U+21a7}a-zA-Z0-9 @]*)$/  "\2" -> "\1" [arrowhead=none]/p' \
+  | sort | uniq
+
+# TODO: better arithmetic
+# 33 = ( 25 * 10 @Dimensionless )
+
+grep " = " $FILENAME | \
+  perl -CS -pe 's/[ ]*([0-9]+[[\]a-zA-Z0-9 @]*) = (\(.*\))$/  "\2" -> "\1" [arrowhead=none]/p' \
   | sort | uniq
 
 echo "}"

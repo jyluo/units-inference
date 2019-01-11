@@ -1,21 +1,19 @@
-package units.qual;
+package units.notusedquals;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import units.qual.BaseUnit;
 
 /**
- * A microsecond.
+ * Kelvin.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-@UnitsAlias(
-    prefixExponent = -6,
-    baseUnitComponents = {@BUC(unit = "s", exponent = 1)}
-)
+@BaseUnit
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface us {}
+public @interface K {}

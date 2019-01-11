@@ -1,4 +1,4 @@
-package units.qual;
+package units.notusedquals;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -6,13 +6,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import units.qual.BUC;
+import units.qual.UnitsAlias;
+
 /**
- * Angle in Degrees.
+ * A square meter.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-@BaseUnit
+@UnitsAlias(baseUnitComponents = {@BUC(unit = "m", exponent = 2)})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface deg {}
+public @interface m2 {}

@@ -1,5 +1,15 @@
 package units;
 
+import units.notusedquals.deg;
+import units.notusedquals.g;
+import units.notusedquals.kg;
+import units.notusedquals.km;
+import units.notusedquals.m;
+import units.notusedquals.ms;
+import units.notusedquals.ns;
+import units.notusedquals.rad;
+import units.notusedquals.s;
+import units.notusedquals.us;
 import units.qual.*;
 
 @SuppressWarnings("units")

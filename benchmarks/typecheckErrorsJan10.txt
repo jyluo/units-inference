@@ -1,0 +1,13 @@
+Project	error: \[assignment.type.incompatible	error: \[argument.type.incompatible	error: \[return.type.incompatible	error: \[comparison.unit.mismatch	
+exp4j	0	8	3	0	
+FaceDetection	0	0	1	0	
+imgscalr	0	9	0	0	
+jama	0	0	0	0	
+jblas	2	32	8	0	
+JLargeArrays	11	2	0	0	
+jReactPhysics3D	0	0	1	0	
+jump	0	0	0	0	
+la4j	0	0	0	0	
+matrix-toolkits-java	0	0	0	0	
+react	0	1	2	0	
+

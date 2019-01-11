@@ -15,20 +15,10 @@ CFI:    /home/jeff/jsr308/checker-framework-inference
 
 BUILD SUCCESSFUL in 0s
 3 actionable tasks: 3 up-to-date
-Cloning into 'jump'...
-Cloning into 'matrix-toolkits-java'...
-Cloning into 'jReactPhysics3D'...
-Cloning into 'FaceDetection'...
-Cloning into 'jblas'...
-Cloning into 'exp4j'...
-Cloning into 'react'...
-Cloning into 'jama'...
-Cloning into 'imgscalr'...
-Cloning into 'JLargeArrays'...
-Cloning into 'la4j'...
 Buildfile: /home/jeff/jsr308/units-inference/benchmarks/projects/jump/build.xml
 
 clean:
+   [delete] Deleting directory /home/jeff/jsr308/units-inference/benchmarks/projects/jump/build
 
 BUILD SUCCESSFUL
 Total time: 0 seconds
@@ -69,8 +59,8 @@ Total time: 0 seconds
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.194 s
-[INFO] Finished at: 2019-01-10T15:28:40-05:00
+[INFO] Total time: 0.202 s
+[INFO] Finished at: 2019-01-11T01:10:01-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -83,16 +73,16 @@ Total time: 0 seconds
 [INFO] --- maven-resources-plugin:2.5:resources (default-resources) @ mtj ---
 [debug] execute contextualize
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
-[INFO] Copying 5 resources
+[INFO] Copying 218 resources
 [INFO] Copying 0 resource
 [INFO] 
 [INFO] --- maven-compiler-plugin:2.3.2:compile (default-compile) @ mtj ---
-[INFO] Compiling 129 source files to /home/jeff/jsr308/units-inference/benchmarks/projects/matrix-toolkits-java/target/classes
+[INFO] Nothing to compile - all classes are up to date
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.197 s
-[INFO] Finished at: 2019-01-10T15:28:42-05:00
+[INFO] Total time: 0.420 s
+[INFO] Finished at: 2019-01-11T01:10:02-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -101,14 +91,24 @@ Total time: 0 seconds
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ jReactPhysics3D ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/target
 [INFO] 
 [INFO] --- license-maven-plugin:2.6:format (default) @ jReactPhysics3D ---
 [INFO] Updating license headers...
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/z3ConstraintsGlob.smt
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/inferTiming.log
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/z3Constraints.smt
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/logs/dljc.cache
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/logs/infer.log
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/logs/toplevel.log
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/z3ConstraintsUnsatCore.smt
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/constraints.smt
+[WARNING] Unknown file extension: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D/slots.smt
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.336 s
-[INFO] Finished at: 2019-01-10T15:28:43-05:00
+[INFO] Total time: 0.332 s
+[INFO] Finished at: 2019-01-11T01:10:03-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -125,8 +125,8 @@ Total time: 0 seconds
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.580 s
-[INFO] Finished at: 2019-01-10T15:28:45-05:00
+[INFO] Total time: 1.024 s
+[INFO] Finished at: 2019-01-11T01:10:05-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [WARNING] 
@@ -143,11 +143,12 @@ Total time: 0 seconds
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ FaceDetection ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/FaceDetection/target
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.137 s
-[INFO] Finished at: 2019-01-10T15:28:46-05:00
+[INFO] Total time: 0.153 s
+[INFO] Finished at: 2019-01-11T01:10:06-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [WARNING] 
@@ -174,8 +175,8 @@ Total time: 0 seconds
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.753 s
-[INFO] Finished at: 2019-01-10T15:28:48-05:00
+[INFO] Total time: 0.765 s
+[INFO] Finished at: 2019-01-11T01:10:07-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -184,11 +185,12 @@ Total time: 0 seconds
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ jblas ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/jblas/target
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.187 s
-[INFO] Finished at: 2019-01-10T15:28:49-05:00
+[INFO] Total time: 0.172 s
+[INFO] Finished at: 2019-01-11T01:10:08-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -248,8 +250,8 @@ generate-float:
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.849 s
-[INFO] Finished at: 2019-01-10T15:28:52-05:00
+[INFO] Total time: 1.970 s
+[INFO] Finished at: 2019-01-11T01:10:11-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [WARNING] 
@@ -266,11 +268,12 @@ generate-float:
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ exp4j ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/exp4j/target
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.220 s
-[INFO] Finished at: 2019-01-10T15:28:53-05:00
+[INFO] Total time: 0.260 s
+[INFO] Finished at: 2019-01-11T01:10:12-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [WARNING] 
@@ -296,8 +299,8 @@ generate-float:
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.761 s
-[INFO] Finished at: 2019-01-10T15:28:54-05:00
+[INFO] Total time: 0.780 s
+[INFO] Finished at: 2019-01-11T01:10:14-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -306,14 +309,15 @@ generate-float:
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ react ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/react/target
 [INFO] 
 [INFO] --- maven-license-plugin:1.10.b1:format (default) @ react ---
 [INFO] Updating license headers...
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.286 s
-[INFO] Finished at: 2019-01-10T15:28:55-05:00
+[INFO] Total time: 0.295 s
+[INFO] Finished at: 2019-01-11T01:10:15-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -335,8 +339,8 @@ generate-float:
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.160 s
-[INFO] Finished at: 2019-01-10T15:28:57-05:00
+[INFO] Total time: 1.112 s
+[INFO] Finished at: 2019-01-11T01:10:17-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -345,11 +349,12 @@ generate-float:
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ jama ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/jama/target
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.136 s
-[INFO] Finished at: 2019-01-10T15:28:58-05:00
+[INFO] Total time: 0.157 s
+[INFO] Finished at: 2019-01-11T01:10:18-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -367,8 +372,8 @@ generate-float:
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.716 s
-[INFO] Finished at: 2019-01-10T15:28:59-05:00
+[INFO] Total time: 0.751 s
+[INFO] Finished at: 2019-01-11T01:10:19-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -377,11 +382,12 @@ generate-float:
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ imgscalr-lib ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/imgscalr/target
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.219 s
-[INFO] Finished at: 2019-01-10T15:29:00-05:00
+[INFO] Total time: 0.204 s
+[INFO] Finished at: 2019-01-11T01:10:20-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] 
@@ -401,8 +407,42 @@ generate-float:
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.762 s
-[INFO] Finished at: 2019-01-10T15:29:02-05:00
+[INFO] Total time: 0.799 s
+[INFO] Finished at: 2019-01-11T01:10:22-05:00
+[INFO] ------------------------------------------------------------------------
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------------< org.la4j:la4j >----------------------------
+[INFO] Building la4j 0.6.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ la4j ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/la4j/target
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 0.214 s
+[INFO] Finished at: 2019-01-11T01:10:23-05:00
+[INFO] ------------------------------------------------------------------------
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------------< org.la4j:la4j >----------------------------
+[INFO] Building la4j 0.6.0
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ la4j ---
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ la4j ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/jeff/jsr308/units-inference/benchmarks/projects/la4j/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ la4j ---
+[INFO] Compiling 86 source files to /home/jeff/jsr308/units-inference/benchmarks/projects/la4j/target/classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1.190 s
+[INFO] Finished at: 2019-01-11T01:10:25-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] Inspecting build with total of 1 modules...
@@ -414,11 +454,12 @@ generate-float:
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
 [INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ JLargeArrays ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/JLargeArrays/target
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.383 s
-[INFO] Finished at: 2019-01-10T15:29:03-05:00
+[INFO] Total time: 0.436 s
+[INFO] Finished at: 2019-01-11T01:10:26-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
 [INFO] Inspecting build with total of 1 modules...
@@ -438,55 +479,252 @@ generate-float:
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.159 s
-[INFO] Finished at: 2019-01-10T15:29:05-05:00
+[INFO] Total time: 1.242 s
+[INFO] Finished at: 2019-01-11T01:10:28-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
+[WARNING] The project org.ode4j:parent:pom:0.4.1-SNAPSHOT uses prerequisites which is only intended for maven-plugin projects but not for non maven-plugin projects. For such purposes you should use the maven-enforcer-plugin. See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
 [INFO] 
-[INFO] ---------------------------< org.la4j:la4j >----------------------------
-[INFO] Building la4j 0.6.0
+[INFO] ODE for Java                                                       [pom]
+[INFO] core                                                               [jar]
+[INFO] core-cpp                                                           [jar]
+[INFO] demo                                                               [jar]
+[INFO] demo-cpp                                                           [jar]
+[INFO] 
+[INFO] --------------------------< org.ode4j:parent >--------------------------
+[INFO] Building ODE for Java 0.4.1-SNAPSHOT                               [1/5]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ parent ---
+[INFO] 
+[INFO] ---------------------------< org.ode4j:core >---------------------------
+[INFO] Building core 0.4.1-SNAPSHOT                                       [2/5]
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
-[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ la4j ---
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ core ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core/target
+[INFO] 
+[INFO] -------------------------< org.ode4j:core-cpp >-------------------------
+[INFO] Building core-cpp 0.4.1-SNAPSHOT                                   [3/5]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ core-cpp ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core-cpp/target
+[INFO] 
+[INFO] ---------------------------< org.ode4j:demo >---------------------------
+[INFO] Building demo 0.4.1-SNAPSHOT                                       [4/5]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ demo ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/demo/target
+[INFO] 
+[INFO] -------------------------< org.ode4j:demo-cpp >-------------------------
+[INFO] Building demo-cpp 0.4.1-SNAPSHOT                                   [5/5]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:3.0.0:clean (default-clean) @ demo-cpp ---
+[INFO] Deleting /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/demo-cpp/target
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] 
+[INFO] ODE for Java 0.4.1-SNAPSHOT ........................ SUCCESS [  0.116 s]
+[INFO] core ............................................... SUCCESS [  0.019 s]
+[INFO] core-cpp ........................................... SUCCESS [  0.003 s]
+[INFO] demo ............................................... SUCCESS [  0.006 s]
+[INFO] demo-cpp 0.4.1-SNAPSHOT ............................ SUCCESS [  0.005 s]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 0.193 s
-[INFO] Finished at: 2019-01-10T15:29:06-05:00
+[INFO] Total time: 0.244 s
+[INFO] Finished at: 2019-01-11T01:10:29-05:00
 [INFO] ------------------------------------------------------------------------
 [INFO] Scanning for projects...
+[WARNING] The project org.ode4j:parent:pom:0.4.1-SNAPSHOT uses prerequisites which is only intended for maven-plugin projects but not for non maven-plugin projects. For such purposes you should use the maven-enforcer-plugin. See https://maven.apache.org/enforcer/enforcer-rules/requireMavenVersion.html
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
 [INFO] 
-[INFO] ---------------------------< org.la4j:la4j >----------------------------
-[INFO] Building la4j 0.6.0
+[INFO] ODE for Java                                                       [pom]
+[INFO] core                                                               [jar]
+[INFO] core-cpp                                                           [jar]
+[INFO] demo                                                               [jar]
+[INFO] demo-cpp                                                           [jar]
+[INFO] 
+[INFO] --------------------------< org.ode4j:parent >--------------------------
+[INFO] Building ODE for Java 0.4.1-SNAPSHOT                               [1/5]
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ parent ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-rules) @ parent ---
+[INFO] 
+[INFO] ---------------------------< org.ode4j:core >---------------------------
+[INFO] Building core 0.4.1-SNAPSHOT                                       [2/5]
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
-[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ la4j ---
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ core ---
 [INFO] 
-[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ la4j ---
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-rules) @ core ---
+[INFO] 
+[INFO] --- maven-resources-plugin:3.0.0:resources (default-resources) @ core ---
 [INFO] Using 'UTF-8' encoding to copy filtered resources.
-[INFO] skip non existing resourceDirectory /home/jeff/jsr308/units-inference/benchmarks/projects/la4j/src/main/resources
+[INFO] skip non existing resourceDirectory /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core/src/main/resources
 [INFO] 
-[INFO] --- maven-compiler-plugin:2.5.1:compile (default-compile) @ la4j ---
-[INFO] Compiling 86 source files to /home/jeff/jsr308/units-inference/benchmarks/projects/la4j/target/classes
+[INFO] --- maven-compiler-plugin:3.7.0:compile (default-compile) @ core ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 250 source files to /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core/target/classes
+[INFO] /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core/src/main/java/org/ode4j/ode/internal/libccd/CCDList.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core/src/main/java/org/ode4j/ode/internal/libccd/CCDList.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] -------------------------< org.ode4j:core-cpp >-------------------------
+[INFO] Building core-cpp 0.4.1-SNAPSHOT                                   [3/5]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ core-cpp ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-rules) @ core-cpp ---
+[INFO] 
+[INFO] --- maven-resources-plugin:3.0.0:resources (default-resources) @ core-cpp ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core-cpp/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.7.0:compile (default-compile) @ core-cpp ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 16 source files to /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core-cpp/target/classes
+[INFO] /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core-cpp/src/main/java/org/ode4j/cpp/internal/ApiCppOther.java: /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core-cpp/src/main/java/org/ode4j/cpp/internal/ApiCppOther.java uses unchecked or unsafe operations.
+[INFO] /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/core-cpp/src/main/java/org/ode4j/cpp/internal/ApiCppOther.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] ---------------------------< org.ode4j:demo >---------------------------
+[INFO] Building demo 0.4.1-SNAPSHOT                                       [4/5]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ demo ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-rules) @ demo ---
+[INFO] 
+[INFO] --- maven-nativedependencies-plugin:0.0.7:copy (unpacknatives) @ demo ---
+[INFO] Saving natives in /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/demo/target/natives
+[INFO] G:org.lwjgl.lwjgl - A:lwjgl-platform - C:natives-windows
+[info] Copying natives from lwjgl-platform-2.9.3-natives-windows.jar
+[info] Copying native - META-INF/
+[info] Copying native - META-INF/MANIFEST.MF
+[info] Copying native - OpenAL32.dll
+[info] Copying native - OpenAL64.dll
+[info] Copying native - lwjgl.dll
+[info] Copying native - lwjgl64.dll
+[INFO] G:org.lwjgl.lwjgl - A:lwjgl-platform - C:natives-linux
+[info] Copying natives from lwjgl-platform-2.9.3-natives-linux.jar
+[info] Copying native - META-INF/
+[info] Copying native - META-INF/MANIFEST.MF
+[info] Copying native - liblwjgl.so
+[info] Copying native - liblwjgl64.so
+[info] Copying native - libopenal.so
+[info] Copying native - libopenal64.so
+[INFO] G:org.lwjgl.lwjgl - A:lwjgl-platform - C:natives-osx
+[info] Copying natives from lwjgl-platform-2.9.3-natives-osx.jar
+[info] Copying native - META-INF/
+[info] Copying native - META-INF/MANIFEST.MF
+[info] Copying native - liblwjgl.dylib
+[info] Copying native - openal.dylib
+[INFO] G:net.java.jinput - A:jinput-platform - C:natives-linux
+[info] Copying natives from jinput-platform-2.0.5-natives-linux.jar
+[info] Copying native - libjinput-linux.so
+[info] Copying native - libjinput-linux64.so
+[INFO] G:net.java.jinput - A:jinput-platform - C:natives-windows
+[info] Copying natives from jinput-platform-2.0.5-natives-windows.jar
+[info] Copying native - jinput-dx8.dll
+[info] Copying native - jinput-dx8_64.dll
+[info] Copying native - jinput-raw.dll
+[info] Copying native - jinput-raw_64.dll
+[info] Copying native - jinput-wintab.dll
+[INFO] G:net.java.jinput - A:jinput-platform - C:natives-osx
+[info] Copying natives from jinput-platform-2.0.5-natives-osx.jar
+[info] Copying native - libjinput-osx.jnilib
+[INFO] 
+[INFO] --- maven-resources-plugin:3.0.0:resources (default-resources) @ demo ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] ignoreDelta true
+[INFO] Copying 4 resources
+[INFO] Copying file org/ode4j/demo/drawstuff/textures/sky.ppm
+[INFO] Copying file org/ode4j/demo/drawstuff/textures/checkered.ppm
+[INFO] Copying file org/ode4j/demo/drawstuff/textures/wood.ppm
+[INFO] Copying file org/ode4j/demo/drawstuff/textures/ground.ppm
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.7.0:compile (default-compile) @ demo ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 59 source files to /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/demo/target/classes
+[INFO] 
+[INFO] -------------------------< org.ode4j:demo-cpp >-------------------------
+[INFO] Building demo-cpp 0.4.1-SNAPSHOT                                   [5/5]
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-maven) @ demo-cpp ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.0:enforce (enforce-rules) @ demo-cpp ---
+[INFO] 
+[INFO] --- maven-nativedependencies-plugin:0.0.7:copy (unpacknatives) @ demo-cpp ---
+[INFO] Saving natives in /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/demo-cpp/target/natives
+[INFO] G:org.lwjgl.lwjgl - A:lwjgl-platform - C:natives-windows
+[info] Copying natives from lwjgl-platform-2.9.3-natives-windows.jar
+[info] Copying native - META-INF/
+[info] Copying native - META-INF/MANIFEST.MF
+[info] Copying native - OpenAL32.dll
+[info] Copying native - OpenAL64.dll
+[info] Copying native - lwjgl.dll
+[info] Copying native - lwjgl64.dll
+[INFO] G:org.lwjgl.lwjgl - A:lwjgl-platform - C:natives-linux
+[info] Copying natives from lwjgl-platform-2.9.3-natives-linux.jar
+[info] Copying native - META-INF/
+[info] Copying native - META-INF/MANIFEST.MF
+[info] Copying native - liblwjgl.so
+[info] Copying native - liblwjgl64.so
+[info] Copying native - libopenal.so
+[info] Copying native - libopenal64.so
+[INFO] G:org.lwjgl.lwjgl - A:lwjgl-platform - C:natives-osx
+[info] Copying natives from lwjgl-platform-2.9.3-natives-osx.jar
+[info] Copying native - META-INF/
+[info] Copying native - META-INF/MANIFEST.MF
+[info] Copying native - liblwjgl.dylib
+[info] Copying native - openal.dylib
+[INFO] G:net.java.jinput - A:jinput-platform - C:natives-linux
+[info] Copying natives from jinput-platform-2.0.5-natives-linux.jar
+[info] Copying native - libjinput-linux.so
+[info] Copying native - libjinput-linux64.so
+[INFO] G:net.java.jinput - A:jinput-platform - C:natives-windows
+[info] Copying natives from jinput-platform-2.0.5-natives-windows.jar
+[info] Copying native - jinput-dx8.dll
+[info] Copying native - jinput-dx8_64.dll
+[info] Copying native - jinput-raw.dll
+[info] Copying native - jinput-raw_64.dll
+[info] Copying native - jinput-wintab.dll
+[INFO] G:net.java.jinput - A:jinput-platform - C:natives-osx
+[info] Copying natives from jinput-platform-2.0.5-natives-osx.jar
+[info] Copying native - libjinput-osx.jnilib
+[INFO] 
+[INFO] --- maven-resources-plugin:3.0.0:resources (default-resources) @ demo-cpp ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] skip non existing resourceDirectory /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/demo-cpp/src/main/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.7.0:compile (default-compile) @ demo-cpp ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 34 source files to /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j/demo-cpp/target/classes
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] 
+[INFO] ODE for Java 0.4.1-SNAPSHOT ........................ SUCCESS [  0.155 s]
+[INFO] core ............................................... SUCCESS [  1.859 s]
+[INFO] core-cpp ........................................... SUCCESS [  0.080 s]
+[INFO] demo ............................................... SUCCESS [  0.603 s]
+[INFO] demo-cpp 0.4.1-SNAPSHOT ............................ SUCCESS [  0.265 s]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time: 1.183 s
-[INFO] Finished at: 2019-01-10T15:29:08-05:00
+[INFO] Total time: 3.063 s
+[INFO] Finished at: 2019-01-11T01:10:33-05:00
 [INFO] ------------------------------------------------------------------------
 ----- Fetching corpus... -----
 Enter corpus dir /home/jeff/jsr308/units-inference/benchmarks/projects.
-Running git clone https://github.com/jyluo-benchmarks/jump.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/matrix-toolkits-java.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/jReactPhysics3D.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/FaceDetection.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/jblas.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/exp4j.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/react.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/jama.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/imgscalr.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/JLargeArrays.git --depth 1
-Running git clone https://github.com/jyluo-benchmarks/la4j.git --depth 1
 ----- Fetching corpus done. -----
 ----- Compiling corpus... -----
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/jump
@@ -494,70 +732,76 @@ Cleaning project...
 Cleaning done.
 Running command: ant jar
 Return code is 0.
-Time taken by jump: 	0.811635017395	 seconds
+Time taken by jump: 	0.847154140472	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/matrix-toolkits-java
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by matrix-toolkits-java: 	1.91954708099	 seconds
+Time taken by matrix-toolkits-java: 	1.16929507256	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/jReactPhysics3D
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by jReactPhysics3D: 	2.33849692345	 seconds
+Time taken by jReactPhysics3D: 	1.80884289742	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/FaceDetection
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by FaceDetection: 	1.51488304138	 seconds
+Time taken by FaceDetection: 	1.53074598312	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/jblas
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by jblas: 	2.63233494759	 seconds
+Time taken by jblas: 	2.75469613075	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/exp4j
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by exp4j: 	1.53623104095	 seconds
+Time taken by exp4j: 	1.60750389099	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/react
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by react: 	1.94502782822	 seconds
+Time taken by react: 	1.88553786278	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/jama
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by jama: 	1.48842597008	 seconds
+Time taken by jama: 	1.54337000847	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/imgscalr
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by imgscalr: 	1.55596208572	 seconds
-Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/JLargeArrays
-Cleaning project...
-Cleaning done.
-Running command: mvn -B -DskipTests compile
-Return code is 0.
-Time taken by JLargeArrays: 	1.89271187782	 seconds
+Time taken by imgscalr: 	1.56071591377	 seconds
 Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/la4j
 Cleaning project...
 Cleaning done.
 Running command: mvn -B -DskipTests compile
 Return code is 0.
-Time taken by la4j: 	1.96770596504	 seconds
------ Compilation succeeded on all 11 projects. -----
+Time taken by la4j: 	1.97244310379	 seconds
+Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/JLargeArrays
+Cleaning project...
+Cleaning done.
+Running command: mvn -B -DskipTests compile
+Return code is 0.
+Time taken by JLargeArrays: 	2.02730107307	 seconds
+Enter directory: /home/jeff/jsr308/units-inference/benchmarks/projects/ode4j
+Cleaning project...
+Cleaning done.
+Running command: mvn -B -DskipTests compile
+Return code is 0.
+Time taken by ode4j: 	3.92958593369	 seconds
+----- Compilation succeeded on all 12 projects. -----
 ----- Compiling corpus done. -----
 
-real	0m44.403s
-user	1m10.896s
-sys	0m15.593s
+real	0m34.572s
+user	1m19.991s
+sys	0m17.460s

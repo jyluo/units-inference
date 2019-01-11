@@ -8,9 +8,11 @@ import checkers.inference.model.ConstraintManager;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import org.checkerframework.framework.qual.StubFiles;
+
 import units.representation.UnitsRepresentationUtils;
 
-//@StubFiles({
+@StubFiles({
 //    "JavaBoxedPrimitives.astub",
 //    "JavaLang.astub",
 //    "JavaIOPrintstream.astub",
@@ -18,11 +20,11 @@ import units.representation.UnitsRepresentationUtils;
 //    "JavaMathTrig.astub",
 //    "JavaThread.astub",
 //    "JavaUtilRandom.astub",
-//    "JavaUtilConcurrent.astub", // for ode4j, not yet annotated for hombucha
+    "JavaUtilConcurrent.astub", // for ode4j, not yet annotated for hombucha
 //    "JavaUtilConcurrentTimeUnit.astub",
 //    "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
 //    "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays
-//})
+})
 public class UnitsChecker extends BaseInferrableChecker {
 
     @Override

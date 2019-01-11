@@ -2,6 +2,8 @@ package units.representation;
 
 import java.util.Map;
 
+import org.checkerframework.javacutil.BugInCF;
+
 /**
  * A data structure class to encapsulate a set of java variables representing a unit for type
  * checking.
@@ -63,12 +65,16 @@ public class TypecheckUnit {
     }
 
     public void setExponent(String unit, int exp) {
-        assert exponents.containsKey(unit);
+        if (!exponents.containsKey(unit)) {
+            throw new BugInCF("Inserting exponent for base unit " + unit + " which does not exist");
+        }
         exponents.replace(unit, exp);
     }
 
     public int getExponent(String unit) {
-        assert exponents.containsKey(unit);
+        if (!exponents.containsKey(unit)) {
+            throw new BugInCF("Getting exponent for base unit " + unit + " which does not exist");
+        }
         return exponents.get(unit);
     }
 

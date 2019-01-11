@@ -26,9 +26,9 @@ grep -r "insert-annotation.*@units" --include=*.jaif | cut -d : -f2 | rev | cut 
 
 echo ""
 
-echo "Non-dimensionless locations"
+echo "Non-dimensionless/top/bot locations"
 
-grep -r "insert-annotation.*@units" --include=*.jaif | grep -v "Dimensionless" | cut -d : -f2 | rev | cut -d , -f 1 | rev | sed 's/insert-annotation//g' | sort | uniq -c | sort -nr | sed -r 's/[ ]*([0-9]+)(.*)$/\1 \t \2/p' | uniq | head -10
+grep -r "insert-annotation.*@units" --include=*.jaif | grep -v "Dimensionless" | grep -v "UnknownUnits" | grep -v "UnitsBottom" | cut -d : -f2 | rev | cut -d , -f 1 | rev | sed 's/insert-annotation//g' | sort | uniq -c | sort -nr | sed -r 's/[ ]*([0-9]+)(.*)$/\1 \t \2/p' | uniq | head -10
 
 echo ""
 

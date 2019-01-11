@@ -63,6 +63,12 @@ projects:
     build: mvn -B -DskipTests compile
     clean: mvn -B clean
 
+  # unsat, rerun with no stub for raw performance
+  ode4j:
+    giturl: https://github.com/jyluo-benchmarks/ode4j.git
+    build: mvn -B -DskipTests compile
+    clean: mvn -B clean
+
 # large size projects
   # crashes in CFI
   # spring-framework: #620859 LOC Java, requires gradle 4.10.3

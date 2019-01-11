@@ -8,7 +8,6 @@ import checkers.inference.model.ConstraintManager;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
-import org.checkerframework.framework.qual.StubFiles;
 import units.representation.UnitsRepresentationUtils;
 
 //@StubFiles({

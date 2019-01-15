@@ -1,7 +1,6 @@
 package units.representation;
 
 import java.util.Map;
-
 import org.checkerframework.javacutil.BugInCF;
 
 /**
@@ -66,18 +65,16 @@ public class TypecheckUnit {
 
     public void setExponent(String unit, int exp) {
         if (!exponents.containsKey(unit)) {
-            return;     // for pure performance experiment
-            // throw new BugInCF("Inserting exponent for base unit " + unit + " which does
-            // not exist");
+            // return; // for pure performance experiment
+            throw new BugInCF("Inserting exponent for base unit " + unit + " which does not exist");
         }
         exponents.replace(unit, exp);
     }
 
     public int getExponent(String unit) {
         if (!exponents.containsKey(unit)) {
-            return 0;   // for pure performance experiment
-            // throw new BugInCF("Getting exponent for base unit " + unit + " which does not
-            // exist");
+            // return 0; // for pure performance experiment
+            throw new BugInCF("Getting exponent for base unit " + unit + " which does not exist");
         }
         return exponents.get(unit);
     }

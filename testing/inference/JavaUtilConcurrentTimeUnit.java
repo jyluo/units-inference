@@ -20,13 +20,13 @@ class JavaUtilConcurrentTimeUnit {
 
         TimeUnit ns = NANOSECONDS;
 
-        long seconds = s.convert(10L, TimeUnit.NANOSECONDS);
+        @s long seconds = s.convert(10L, NANOSECONDS);
 
         // convert 10 minutes to milliseconds
-        long milliseconds = ms.convert(10L, TimeUnit.MINUTES);
+        @ms long milliseconds = ms.convert(10L, TimeUnit.MINUTES);
 
-        long microsec = us.convert(10L, TimeUnit.HOURS);
+        @us long microsec = us.convert(10L, TimeUnit.HOURS);
 
-        long nanosec = ns.convert(10L, TimeUnit.DAYS);
+        @ns long nanosec = ns.convert(10L, TimeUnit.DAYS);
     }
 }

@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Name;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.qual.LiteralKind;
@@ -29,7 +28,6 @@ import org.checkerframework.framework.util.defaults.QualifierDefaults;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
-import org.checkerframework.javacutil.TypesUtils;
 import org.checkerframework.javacutil.UserError;
 import units.qual.BaseUnit;
 import units.qual.UnitsAlias;
@@ -337,37 +335,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             addLiteralKind(LiteralKind.LONG, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.FLOAT, unitsRepUtils.DIMENSIONLESS);
             addLiteralKind(LiteralKind.DOUBLE, unitsRepUtils.DIMENSIONLESS);
-        }
-
-        /**
-         * HACK: Replace the types of the enum constants in {@link java.util.concurrent.TimeUnit}.
-         *
-         * <p>TODO: the cleaner way would be to support annotating enum constants via stubs;
-         * currently unavailable as a feature.
-         */
-        @Override
-        void replaceEnumConstantType(Name name, AnnotatedTypeMirror atm) {
-            if (TypesUtils.isDeclaredOfName(
-                    atm.getUnderlyingType(),
-                    java.util.concurrent.TimeUnit.class.getCanonicalName())) {
-                switch (name.toString()) {
-                    case "NANOSECONDS":
-                        atm.replaceAnnotation(unitsRepUtils.NANOSECOND);
-                        break;
-                    case "MICROSECONDS":
-                        atm.replaceAnnotation(unitsRepUtils.MICROSECOND);
-                        break;
-                    case "MILLISECONDS":
-                        atm.replaceAnnotation(unitsRepUtils.MILLISECOND);
-                        break;
-                    case "SECONDS":
-                        atm.replaceAnnotation(unitsRepUtils.SECOND);
-                        break;
-                    default:
-                        // TODO: MINUTES, HOURS, DAYS
-                        break;
-                }
-            }
         }
     }
 

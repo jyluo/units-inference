@@ -44,7 +44,6 @@ import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
-import org.checkerframework.javacutil.TypesUtils;
 import org.checkerframework.javacutil.UserError;
 import units.representation.UnitsRepresentationUtils;
 
@@ -313,41 +312,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // in inference mode, we do not implicitly set dimensionless for the number
             // literals as we want to treat them as polymorphic. A "cast" is inferred for
             // each literal
-        }
-
-        /**
-         * HACK: Replace the types of the enum constants in {@link java.util.concurrent.TimeUnit}.
-         *
-         * <p>TODO: the cleaner way would be to support annotating enum constants via stubs;
-         * currently unavailable as a feature.
-         */
-        @Override
-        void replaceEnumConstantType(Name name, AnnotatedTypeMirror atm) {
-            if (TypesUtils.isDeclaredOfName(
-                    atm.getUnderlyingType(),
-                    java.util.concurrent.TimeUnit.class.getCanonicalName())) {
-                switch (name.toString()) {
-                    case "NANOSECONDS":
-                        atm.replaceAnnotation(
-                                slotManager.createEquivalentVarAnno(unitsRepUtils.NANOSECOND));
-                        break;
-                    case "MICROSECONDS":
-                        atm.replaceAnnotation(
-                                slotManager.createEquivalentVarAnno(unitsRepUtils.MICROSECOND));
-                        break;
-                    case "MILLISECONDS":
-                        atm.replaceAnnotation(
-                                slotManager.createEquivalentVarAnno(unitsRepUtils.MILLISECOND));
-                        break;
-                    case "SECONDS":
-                        atm.replaceAnnotation(
-                                slotManager.createEquivalentVarAnno(unitsRepUtils.SECOND));
-                        break;
-                    default:
-                        // TODO: MINUTES, HOURS, DAYS
-                        break;
-                }
-            }
         }
     }
 

@@ -9,21 +9,20 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.StubFiles;
-
 import units.representation.UnitsRepresentationUtils;
 
 @StubFiles({
-//    "JavaBoxedPrimitives.astub",
-//    "JavaLang.astub",
-//    "JavaIOPrintstream.astub",
-//    "JavaMath.astub",
-//    "JavaMathTrig.astub",
-//    "JavaThread.astub",
-//    "JavaUtilRandom.astub",
+    "JavaBoxedPrimitives.astub",
+    "JavaLang.astub",
+    "JavaIOPrintstream.astub",
+    "JavaMath.astub",
+    "JavaMathTrig.astub",
+    "JavaThread.astub",
+    "JavaUtilRandom.astub",
     "JavaUtilConcurrent.astub", // for ode4j, not yet annotated for hombucha
-//    "JavaUtilConcurrentTimeUnit.astub",
-//    "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
-//    "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays
+    "JavaUtilConcurrentTimeUnit.astub",
+    "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
+    "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays
 })
 public class UnitsChecker extends BaseInferrableChecker {
 

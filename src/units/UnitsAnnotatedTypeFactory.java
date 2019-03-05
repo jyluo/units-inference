@@ -3,10 +3,10 @@ package units;
 import com.sun.source.tree.BinaryTree;
 import com.sun.source.tree.Tree.Kind;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
@@ -174,58 +174,94 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         @Override
         protected void finish(
                 QualifierHierarchy qualHierarchy,
-                Map<AnnotationMirror, Set<AnnotationMirror>> fullMap,
+                Map<AnnotationMirror, Set<AnnotationMirror>> supertypesMap,
                 Map<AnnotationMirror, AnnotationMirror> polyQualifiers,
                 Set<AnnotationMirror> tops,
                 Set<AnnotationMirror> bottoms,
                 Object... args) {
-            super.finish(qualHierarchy, fullMap, polyQualifiers, tops, bottoms, args);
+            super.finish(qualHierarchy, supertypesMap, polyQualifiers, tops, bottoms, args);
 
-            // System.out.println(" === ATF ");
-            // System.out.println(" pre - fullMap " + fullMap);
+            // System.err.println(" === ATF ");
+            // System.err.println(" supertypesMap {");
+            // for (Entry<?, ?> e : supertypesMap.entrySet()) {
+            // System.err.println(" " + e.getKey() + " -> " + e.getValue());
+            // }
+            // System.err.println(" }");
+            // System.err.println(" polyQualifiers " + polyQualifiers);
+            // System.err.println(" tops " + tops);
+            // System.err.println(" bottoms " + bottoms);
 
             // swap every instance of RAWUNITSINTERNAL with TOP
-            assert fullMap.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
+
             // Set direct supertypes of TOP
-            fullMap.put(unitsRepUtils.TOP, fullMap.get(unitsRepUtils.RAWUNITSINTERNAL));
-            fullMap.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            for (Entry<AnnotationMirror, Set<AnnotationMirror>> e : supertypesMap.entrySet()) {
+                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.RAWUNITSINTERNAL)) {
+                    supertypesMap.put(unitsRepUtils.TOP, e.getValue());
+                    supertypesMap.remove(e.getKey());
+                    break;
+                }
+            }
 
             // Set direct supertypes of PolyAll
-            Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
-            polyAllSupers.addAll(fullMap.get(unitsRepUtils.POLYALL));
-            polyAllSupers.add(unitsRepUtils.TOP);
-            polyAllSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            fullMap.put(unitsRepUtils.POLYALL, Collections.unmodifiableSet(polyAllSupers));
+            // replace raw @UnitsRep with UnitsTop in super of PolyAll
+            for (Entry<AnnotationMirror, Set<AnnotationMirror>> e : supertypesMap.entrySet()) {
+                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.POLYALL)) {
+                    Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
+                    polyAllSupers.addAll(e.getValue());
+                    polyAllSupers.add(unitsRepUtils.TOP);
+                    polyAllSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+                    supertypesMap.put(e.getKey(), polyAllSupers);
+                    break;
+                }
+            }
 
             // Set direct supertypes of PolyUnit
-            Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
-            polyUnitSupers.addAll(fullMap.get(unitsRepUtils.POLYUNIT));
-            polyUnitSupers.add(unitsRepUtils.TOP);
-            polyUnitSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            fullMap.put(unitsRepUtils.POLYUNIT, Collections.unmodifiableSet(polyUnitSupers));
+            // replace raw @UnitsRep with UnitsTop in super of PolyUnit
+            for (Entry<AnnotationMirror, Set<AnnotationMirror>> e : supertypesMap.entrySet()) {
+                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.POLYUNIT)) {
+                    Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
+                    polyUnitSupers.addAll(e.getValue());
+                    polyUnitSupers.add(unitsRepUtils.TOP);
+                    polyUnitSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+                    supertypesMap.put(e.getKey(), polyUnitSupers);
+                    break;
+                }
+            }
 
             // Set direct supertypes of BOTTOM
-            Set<AnnotationMirror> bottomSupers = AnnotationUtils.createAnnotationSet();
-            bottomSupers.addAll(fullMap.get(unitsRepUtils.BOTTOM));
-            // bottom already has top in its super set
-            bottomSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            fullMap.put(unitsRepUtils.BOTTOM, Collections.unmodifiableSet(bottomSupers));
+            for (Entry<AnnotationMirror, Set<AnnotationMirror>> e : supertypesMap.entrySet()) {
+                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.BOTTOM)) {
+                    Set<AnnotationMirror> bottomSupers = AnnotationUtils.createAnnotationSet();
+                    bottomSupers.addAll(e.getValue());
+                    // bottom already has top in its super set
+                    bottomSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+                    supertypesMap.put(e.getKey(), bottomSupers);
+                    break;
+                }
+            }
 
             // Update polyQualifiers
-            assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
-            polyQualifiers.put(
-                    unitsRepUtils.TOP, polyQualifiers.get(unitsRepUtils.RAWUNITSINTERNAL));
-            polyQualifiers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            for (Entry<AnnotationMirror, AnnotationMirror> e : polyQualifiers.entrySet()) {
+                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.RAWUNITSINTERNAL)) {
+                    polyQualifiers.put(unitsRepUtils.TOP, e.getValue());
+                    polyQualifiers.remove(e.getKey());
+                    break;
+                }
+            }
 
             // Update tops
             tops.remove(unitsRepUtils.RAWUNITSINTERNAL);
             tops.add(unitsRepUtils.TOP);
 
-            // System.out.println(" === ATF ");
-            // System.out.println(" fullMap " + fullMap);
-            // System.out.println(" polyQualifiers " + polyQualifiers);
-            // System.out.println(" tops " + tops);
-            // System.out.println(" bottoms " + bottoms);
+            // System.err.println(" === Typecheck ATF ");
+            // System.err.println(" supertypesMap {");
+            // for (Entry<?, ?> e : supertypesMap.entrySet()) {
+            // System.err.println(" " + e.getKey() + " -> " + e.getValue());
+            // }
+            // System.err.println(" }");
+            // System.err.println(" polyQualifiers " + polyQualifiers);
+            // System.err.println(" tops " + tops);
+            // System.err.println(" bottoms " + bottoms);
         }
 
         @Override

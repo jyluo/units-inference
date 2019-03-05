@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
-import org.checkerframework.dataflow.util.HashCodeUtils;
 import org.checkerframework.javacutil.BugInCF;
 import units.representation.UnitsRepresentationUtils;
 
@@ -99,7 +99,7 @@ public class GJEEquationSet {
 
     @Override
     public int hashCode() {
-        return HashCodeUtils.hash(isContradiction, eqSet);
+        return Objects.hash(isContradiction, eqSet);
     }
 
     @Override

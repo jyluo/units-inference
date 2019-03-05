@@ -2,45 +2,18 @@ import units.qual.*;
 
 package java.io;
 
-class PrintStream extends FilterOutputStream implements Appendable, Closeable {
-    PrintStream(OutputStream arg0);
-    PrintStream(OutputStream arg0, boolean arg1);
-    PrintStream(OutputStream arg0, boolean arg1, String arg2) throws UnsupportedEncodingException;
-    PrintStream(String arg0) throws FileNotFoundException;
-    PrintStream(String arg0, String arg1) throws FileNotFoundException,UnsupportedEncodingException;
-    PrintStream(File arg0) throws FileNotFoundException;
-    PrintStream(File arg0, String arg1) throws FileNotFoundException,UnsupportedEncodingException;
-    void flush();
-    void close();
-    boolean checkError();
-    protected void setError();
-    protected void clearError();
-    void write(int arg0);
-    void write(byte[] arg0, int arg1, int arg2);
-    void print(boolean arg0);
-    void print(char arg0);
+class PrintStream {
     void print(@UnknownUnits int arg0);
     void print(@UnknownUnits long arg0);
     void print(@UnknownUnits float arg0);
     void print(@UnknownUnits double arg0);
-    void print(char[] arg0);
-    void print(String arg0);
     void print(@UnknownUnits Object arg0);
-    void println();
-    void println(boolean arg0);
-    void println(char arg0);
     void println(@UnknownUnits int arg0);
     void println(@UnknownUnits long arg0);
     void println(@UnknownUnits float arg0);
     void println(@UnknownUnits double arg0);
-    void println(char[] arg0);
-    void println(String arg0);
-    void println(Object arg0);
     PrintStream printf(String arg0, @UnknownUnits Object[] arg1);
     PrintStream printf(Locale arg0, String arg1, @UnknownUnits Object[] arg2);
     PrintStream format(String arg0, @UnknownUnits Object[] arg1);
     PrintStream format(Locale arg0, String arg1, @UnknownUnits Object[] arg2);
-    PrintStream append(CharSequence arg0);
-    PrintStream append(CharSequence arg0, int arg1, int arg2);
-    PrintStream append(char arg0);
 }

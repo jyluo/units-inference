@@ -1,6 +1,8 @@
 package units.representation;
 
 import java.util.Map;
+import java.util.Objects;
+
 import org.checkerframework.javacutil.BugInCF;
 
 /**
@@ -97,13 +99,8 @@ public class TypecheckUnit {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((exponents == null) ? 0 : exponents.hashCode());
-        result = prime * result + prefixExponent;
-        result = prime * result + (ub ? 1231 : 1237);
-        result = prime * result + (uu ? 1231 : 1237);
-        return result;
+        return Objects.hash(this.getClass().getCanonicalName(), uu, ub, prefixExponent,
+                exponents);
     }
 
     @Override
@@ -111,25 +108,11 @@ public class TypecheckUnit {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         TypecheckUnit other = (TypecheckUnit) obj;
-        if (ub != other.ub) {
-            return false;
-        }
-        if (uu != other.uu) {
-            return false;
-        }
-        if (prefixExponent != other.prefixExponent) {
-            return false;
-        }
-        if (!exponents.equals(other.exponents)) {
-            return false;
-        }
-        return true;
+        return uu = other.uu && ub == other.ub && prefixExponent == other.prefixExponent
+                && exponents.equals(other.exponents); 
     }
 }

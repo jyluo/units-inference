@@ -2,44 +2,53 @@ import units.qual.*;
 
 package java.util.concurrent;
 
+enum TimeUnit {
+    @ns NANOSECONDS,
+    @us MICROSECONDS,
+    @ms MILLISECONDS,
+    @s SECONDS,
+    MINUTES,
+    HOURS,
+    DAYS;
+
+    // For example, to convert 10 minutes to milliseconds, use:
+    // TimeUnit.MILLISECONDS.convert(10L, TimeUnit.MINUTES)
+    // TODO: enforce source value and unit are equal
+    @PolyUnit long convert(@PolyUnit TimeUnit this, @UnknownUnits long sourceDuration,
+            @UnknownUnits TimeUnit sourceUnit);
+
+    // TODO: add dimensional bound on duration to be a time value
+    @ns long toNanos(@UnknownUnits long duration);
+
+    @us long toMicros(@UnknownUnits long duration);
+
+    @ms long toMillis(@UnknownUnits long duration);
+
+    @s long toSeconds(@UnknownUnits long duration);
+
+    long toMinutes(@UnknownUnits long duration);
+
+    long toHours(@UnknownUnits long duration);
+
+    long toDays(@UnknownUnits long duration);
+
+    // TODO: enforce "this" has same unit as "timeout"
+    void timedWait(@UnknownUnits TimeUnit this, Object obj, @UnknownUnits long timeout);
+
+    // TODO: enforce "this" has same unit as "timeout"
+    void timedJoin(@UnknownUnits TimeUnit this, Thread thread, @UnknownUnits long timeout);
+
+    // TODO: enforce "this" has same unit as "timeout"
+    void sleep(@UnknownUnits TimeUnit this, @UnknownUnits long timeout);
+}
+
 class ThreadPoolExecutor extends AbstractExecutorService {
     // TODO: arg2 should have same units as arg3
     ThreadPoolExecutor(int arg0, int arg1, @UnknownUnits long arg2, @UnknownUnits TimeUnit arg3, BlockingQueue<Runnable> arg4);
     ThreadPoolExecutor(int arg0, int arg1, @UnknownUnits long arg2, @UnknownUnits TimeUnit arg3, BlockingQueue<Runnable> arg4, ThreadFactory arg5);
     ThreadPoolExecutor(int arg0, int arg1, @UnknownUnits long arg2, @UnknownUnits TimeUnit arg3, BlockingQueue<Runnable> arg4, RejectedExecutionHandler arg5);
     ThreadPoolExecutor(int arg0, int arg1, @UnknownUnits long arg2, @UnknownUnits TimeUnit arg3, BlockingQueue<Runnable> arg4, ThreadFactory arg5, RejectedExecutionHandler arg6);
-    void execute(Runnable arg0);
-    void shutdown();
-    List<Runnable> shutdownNow();
-    boolean isShutdown();
-    boolean isTerminating();
-    boolean isTerminated();
     boolean awaitTermination(@UnknownUnits long arg0, @UnknownUnits TimeUnit arg1) throws InterruptedException;
-    protected void finalize();
-    void setThreadFactory(ThreadFactory arg0);
-    ThreadFactory getThreadFactory();
-    void setRejectedExecutionHandler(RejectedExecutionHandler arg0);
-    RejectedExecutionHandler getRejectedExecutionHandler();
-    void setCorePoolSize(int arg0);
-    int getCorePoolSize();
-    boolean prestartCoreThread();
-    int prestartAllCoreThreads();
-    boolean allowsCoreThreadTimeOut();
-    void allowCoreThreadTimeOut(boolean arg0);
-    void setMaximumPoolSize(int arg0);
-    int getMaximumPoolSize();
     void setKeepAliveTime(@UnknownUnits long arg0, @UnknownUnits TimeUnit arg1);
     long getKeepAliveTime(@UnknownUnits TimeUnit arg0);
-    BlockingQueue<Runnable> getQueue();
-    boolean remove(Runnable arg0);
-    void purge();
-    int getPoolSize();
-    int getActiveCount();
-    int getLargestPoolSize();
-    long getTaskCount();
-    long getCompletedTaskCount();
-    String toString();
-    protected void beforeExecute(Thread arg0, Runnable arg1);
-    protected void afterExecute(Runnable arg0, Throwable arg1);
-    protected void terminated();
 }

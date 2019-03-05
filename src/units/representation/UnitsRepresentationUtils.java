@@ -50,7 +50,7 @@ public class UnitsRepresentationUtils {
     public AnnotationMirror POLYUNIT;
 
     /** An instance of {@link UnitsRep} with no values in its elements */
-    public AnnotationMirror RAWUNITSINTERNAL;
+    public AnnotationMirror RAWUNITSREP;
 
     /** Instances of {@link UnitsRep} with values to represent UnknownUnits and UnitsBottom */
     public AnnotationMirror TOP;
@@ -215,7 +215,7 @@ public class UnitsRepresentationUtils {
         POLYALL = AnnotationBuilder.fromClass(elements, PolyAll.class);
         POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
 
-        RAWUNITSINTERNAL = AnnotationBuilder.fromClass(elements, UnitsRep.class);
+        RAWUNITSREP = AnnotationBuilder.fromClass(elements, UnitsRep.class);
 
         Map<String, Integer> zeroBaseDimensions = createZeroFilledBaseUnitsMap();
         TOP = createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);

@@ -13,14 +13,13 @@ import units.representation.UnitsRepresentationUtils;
 
 @StubFiles({
     "JavaBoxedPrimitives.astub",
-    "JavaLang.astub",
     "JavaIOPrintstream.astub",
+    "JavaLang.astub",
     "JavaMath.astub",
     "JavaMathTrig.astub",
     "JavaThread.astub",
-    "JavaUtilRandom.astub",
+    "JavaUtil.astub",
     "JavaUtilConcurrent.astub", // for ode4j, not yet annotated for hombucha
-    "JavaUtilConcurrentTimeUnit.astub",
     "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
     "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays
 })

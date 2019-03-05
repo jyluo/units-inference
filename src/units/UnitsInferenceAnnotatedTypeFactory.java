@@ -111,13 +111,13 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     // In Inference ATF, this returns the alias for a given real qualifier
     @Override
-    public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
+    public AnnotationMirror canonicalAnnotation(AnnotationMirror anno) {
         // TODO: cache results
-        AnnotationMirror result = realTypeFactory.aliasedAnnotation(anno);
+        AnnotationMirror result = realTypeFactory.canonicalAnnotation(anno);
         // System.err.println(" === Aliasing: " + anno.toString() + " ==> " + result);
 
         if (result == null) {
-            result = super.aliasedAnnotation(anno);
+            result = super.canonicalAnnotation(anno);
         }
         return result;
     }
@@ -137,7 +137,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         protected Set<AnnotationMirror> findBottoms(
                 Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {
             Set<AnnotationMirror> newBottoms = super.findBottoms(supertypes);
-            newBottoms.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            newBottoms.remove(unitsRepUtils.RAWUNITSREP);
             return newBottoms;
         }
 

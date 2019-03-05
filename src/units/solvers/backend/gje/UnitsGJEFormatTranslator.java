@@ -105,7 +105,7 @@ public class UnitsGJEFormatTranslator
 
         // if for some reason a raw internal appears, then treat it as
         // dimensionless
-        if (AnnotationUtils.areSame(anno, unitsRepUtils.RAWUNITSINTERNAL)) {
+        if (AnnotationUtils.areSame(anno, unitsRepUtils.RAWUNITSREP)) {
             // TODO: maybe raise error?
             anno = unitsRepUtils.DIMENSIONLESS;
         }

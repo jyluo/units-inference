@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
@@ -81,7 +82,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     @Override
-    public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
+    public AnnotationMirror canonicalAnnotation(AnnotationMirror anno) {
         // check to see if it is an internal units annotation
         if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             // fill in missing base units
@@ -103,7 +104,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
 
-        return super.aliasedAnnotation(anno);
+        return super.canonicalAnnotation(anno);
     }
 
     // Make sure only @UnitsRep annotations with all base units defined are considered supported
@@ -183,7 +184,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         protected Set<AnnotationMirror> findBottoms(
                 Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {
             Set<AnnotationMirror> newBottoms = super.findBottoms(supertypes);
-            newBottoms.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            newBottoms.remove(unitsRepUtils.RAWUNITSREP);
             newBottoms.add(unitsRepUtils.BOTTOM);
 
             // set direct supertypes of bottom
@@ -208,11 +209,11 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // System.err.println(" === ATF ");
             // System.err.println(" pre - fullMap " + fullMap);
 
-            // swap every instance of RAWUNITSINTERNAL with TOP
-            assert supertypesMap.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
+            // swap every instance of RAWUNITSREP with TOP
+            assert supertypesMap.containsKey(unitsRepUtils.RAWUNITSREP);
             // Set direct supertypes of TOP
-            supertypesMap.put(unitsRepUtils.TOP, supertypesMap.get(unitsRepUtils.RAWUNITSINTERNAL));
-            supertypesMap.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            supertypesMap.put(unitsRepUtils.TOP, supertypesMap.get(unitsRepUtils.RAWUNITSREP));
+            supertypesMap.remove(unitsRepUtils.RAWUNITSREP);
 
             // Set direct supertypes of PolyAll
             // replace raw @UnitsRep with UnitsTop in super of PolyAll
@@ -220,7 +221,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
             polyAllSupers.addAll(supertypesMap.get(unitsRepUtils.POLYALL));
             polyAllSupers.add(unitsRepUtils.TOP);
-            polyAllSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            polyAllSupers.remove(unitsRepUtils.RAWUNITSREP);
             supertypesMap.put(unitsRepUtils.POLYALL, Collections.unmodifiableSet(polyAllSupers));
 
             // Set direct supertypes of PolyUnit
@@ -229,34 +230,35 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
             polyUnitSupers.addAll(supertypesMap.get(unitsRepUtils.POLYUNIT));
             polyUnitSupers.add(unitsRepUtils.TOP);
-            polyUnitSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            polyUnitSupers.remove(unitsRepUtils.RAWUNITSREP);
             supertypesMap.put(unitsRepUtils.POLYUNIT, Collections.unmodifiableSet(polyUnitSupers));
 
             // Set direct supertypes of BOTTOM
             Set<AnnotationMirror> bottomSupers = AnnotationUtils.createAnnotationSet();
             bottomSupers.addAll(supertypesMap.get(unitsRepUtils.BOTTOM));
             // bottom already has top in its super set
-            bottomSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            bottomSupers.remove(unitsRepUtils.RAWUNITSREP);
             supertypesMap.put(unitsRepUtils.BOTTOM, Collections.unmodifiableSet(bottomSupers));
 
             // Update polyQualifiers
-            assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
+            assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSREP);
             polyQualifiers.put(
-                    unitsRepUtils.TOP, polyQualifiers.get(unitsRepUtils.RAWUNITSINTERNAL));
-            polyQualifiers.remove(unitsRepUtils.RAWUNITSINTERNAL);
+                    unitsRepUtils.TOP, polyQualifiers.get(unitsRepUtils.RAWUNITSREP));
+            polyQualifiers.remove(unitsRepUtils.RAWUNITSREP);
 
             // Update tops
-            tops.remove(unitsRepUtils.RAWUNITSINTERNAL);
+            tops.remove(unitsRepUtils.RAWUNITSREP);
             tops.add(unitsRepUtils.TOP);
 
             // System.err.println(" === Typecheck ATF ");
-            // System.err.println(" supertypesMap ");
-            // for (Entry<?, ?> e : supertypesMap.entrySet()) {
-            // System.err.println(" " + e.getKey() + " -> " + e.getValue());
-            // }
-            // System.err.println(" polyQualifiers " + polyQualifiers);
-            // System.err.println(" tops " + tops);
-            // System.err.println(" bottoms " + bottoms);
+            System.err.println(" supertypesMap {");
+            for (Entry<?, ?> e : supertypesMap.entrySet()) {
+                System.err.println("  " + e.getKey() + " -> " + e.getValue());
+            }
+            System.err.println(" }");
+            System.err.println(" polyQualifiers " + polyQualifiers);
+            System.err.println(" tops " + tops);
+            System.err.println(" bottoms " + bottoms);
         }
 
         @Override
@@ -267,10 +269,10 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
 
             // replace raw @UnitsRep with Dimensionless
             // for some reason this shows up in inference mode when building the lattice
-            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.RAWUNITSINTERNAL)) {
+            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.RAWUNITSREP)) {
                 subAnno = unitsRepUtils.DIMENSIONLESS;
             }
-            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.RAWUNITSINTERNAL)) {
+            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.RAWUNITSREP)) {
                 superAnno = unitsRepUtils.DIMENSIONLESS;
             }
 
@@ -297,7 +299,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // Case: @UnitsRep(x) <: @UnitsRep(y)
             if (AnnotationUtils.areSameByClass(subAnno, UnitsRep.class)
                     && AnnotationUtils.areSameByClass(superAnno, UnitsRep.class)
-                    && AnnotationUtils.areSameIgnoringValues(subAnno, superAnno)) {
+                    && AnnotationUtils.areSameByName(subAnno, superAnno)) {
 
                 boolean result = UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
 

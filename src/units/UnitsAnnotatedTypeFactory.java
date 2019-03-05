@@ -79,7 +79,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     }
 
     @Override
-    public AnnotationMirror aliasedAnnotation(AnnotationMirror anno) {
+    public AnnotationMirror canonicalAnnotation(AnnotationMirror anno) {
         // check to see if it is an internal units annotation
         if (AnnotationUtils.areSameByClass(anno, UnitsInternal.class)) {
             // fill in missing base units
@@ -101,7 +101,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
         }
 
-        return super.aliasedAnnotation(anno);
+        return super.canonicalAnnotation(anno);
     }
 
     // Make sure only UnitsInternal annotations with all base units defined are considered supported
@@ -266,7 +266,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // Case: @UnitsInternal(x) <: @UnitsInternal(y)
             if (AnnotationUtils.areSameByClass(subAnno, UnitsInternal.class)
                     && AnnotationUtils.areSameByClass(superAnno, UnitsInternal.class)
-                    && AnnotationUtils.areSameIgnoringValues(subAnno, superAnno)) {
+                    && AnnotationUtils.areSameByName(subAnno, superAnno)) {
 
                 boolean result = UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
 

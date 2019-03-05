@@ -1,8 +1,8 @@
 package units.solvers.backend.gje.representation;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
-import org.checkerframework.dataflow.util.HashCodeUtils;
 import units.representation.UnitsRepresentationUtils;
 
 /**
@@ -123,7 +123,7 @@ public class GJEInferenceUnit {
 
     @Override
     public int hashCode() {
-        return HashCodeUtils.hash(cfiSlotID, kind, uu, ub, prefixExponent, exponents);
+        return Objects.hash(cfiSlotID, kind, uu, ub, prefixExponent, exponents);
     }
 
     @Override

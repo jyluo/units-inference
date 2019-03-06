@@ -2,9 +2,6 @@
 /// The same text does in Randoop's build.gradle file.
 plugins {
     id 'com.github.johnrengelman.shadow' version '2.0.4'
-    // Plugin that applies Google-Java-format to the Java files in the project.
-    // https://github.com/sherter/google-java-format-gradle-plugin
-    id 'com.github.sherter.google-java-format' version '0.6'
 }
 
 apply plugin: 'java'
@@ -17,11 +14,12 @@ repositories {
 ext {
     assert JavaVersion.current() == JavaVersion.VERSION_1_8: "Set JAVA_HOME to JDK 8. Current version is ${JavaVersion.current()}"
     jsr308 = System.getenv('JSR308') ?: file(new File("..")).absolutePath
-    cfPath = "${jsr308}/checker-framework"
-    cfiPath = "${jsr308}/checker-framework-inference"
-    jsr308langtoolsPath = "${jsr308}/jsr308-langtools"
+    cf = "${jsr308}/checker-framework"
+    cfi = "${jsr308}/checker-framework-inference"
+    jsr308langtools = "${jsr308}/jsr308-langtools"
     afu = "${jsr308}/annotation-tools/annotation-file-utilities"
-    unitsPath = "${jsr308}/units-inference"
+    units = "${jsr308}/units-inference"
+    formatScripts = "${units}/scripts/.run-google-java-format"
 }
 
 println '==================================='
@@ -32,21 +30,21 @@ println '-------------------------------'
 println 'Important Environment Variables'
 println '-------------------------------'
 println 'JSR308: ' + jsr308
-println 'CF:     ' + cfPath
-println 'CFI:    ' + cfiPath
+println 'CF:     ' + cf
+println 'CFI:    ' + cfi
 
 
 dependencies {
-    compile fileTree(dir: "${cfPath}/checker/dist", include: "checker.jar")
-    compile fileTree(dir: "${cfiPath}/dist", include: "checker-framework-inference.jar")
+    compile fileTree(dir: "${cf}/checker/dist", include: "checker.jar")
+    compile fileTree(dir: "${cfi}/dist", include: "checker-framework-inference.jar")
     // sat4j solver dependency
     compile 'org.ow2.sat4j:org.ow2.sat4j.core:2.3.4'
     compile 'org.ow2.sat4j:org.ow2.sat4j.maxsat:2.3.4'
     // z3 solver dependency
-    compile fileTree(dir: "${cfiPath}/lib", include: "com.microsoft.z3.jar")
+    compile fileTree(dir: "${cfi}/lib", include: "com.microsoft.z3.jar")
 
     // CF test lib dependency
-    testCompile fileTree(dir: "${cfPath}/framework-test/build/libs", include: "framework-test-*.jar")
+    testCompile fileTree(dir: "${cf}/framework-test/build/libs", include: "framework-test-*.jar")
     testCompile 'junit:junit:4.12'
 }
 
@@ -65,7 +63,7 @@ sourceSets {
     test {
         java {
             // TODO: we shouldn't need source level dependency on CFITest
-            srcDirs = ["tests", "${cfiPath}/tests/checkers/inference/test"]
+            srcDirs = ["tests", "${cfi}/tests/checkers/inference/test"]
         }
     }
 }
@@ -80,7 +78,7 @@ compileJava {
 
 afterEvaluate {
     // Create a task for each JUnit test class whose name is the same as the JUnit class name.
-    sourceSets.test.allJava.filter { it.path.contains("${unitsPath}/tests") }.forEach { file ->
+    sourceSets.test.allJava.filter { it.path.contains("${units}/tests") }.forEach { file ->
         String junitClassName = file.name.replaceAll(".java", "")
         String testName = junitClassName.replaceAll("Test", "")
         tasks.create(name: "${junitClassName}", type: Test) {
@@ -94,12 +92,12 @@ afterEvaluate {
         group 'Verification'
 
         systemProperties 'path.afu.scripts': "${afu}/scripts",
-                'path.inference.script': "${cfiPath}/scripts/inference",
-                JDK_JAR: "${cfPath}/checker/dist/jdk8.jar"
+                'path.inference.script': "${cfi}/scripts/inference",
+                JDK_JAR: "${cf}/checker/dist/jdk8.jar"
 
-        environment "external_checker_classpath", "${unitsPath}/build/classes/java/main:${unitsPath}/build/resources/main"
+        environment "external_checker_classpath", "${units}/build/classes/java/main:${units}/build/resources/main"
 
-        jvmArgs "-Xbootclasspath/p:${cfiPath}/dist/javac.jar"
+        jvmArgs "-Xbootclasspath/p:${cfi}/dist/javac.jar"
 
         testLogging {
             // Always run the tests
@@ -163,35 +161,91 @@ tasks.clean {
 }
 tasks.clean.dependsOn 'cleanTestOutput'
 
-// Commented out because plugins section is commented out
-/* Configuration for formatting */
-googleJavaFormat {
-    // toolVersion '1.3'
-    options style: 'AOSP'
-}
-tasks.googleJavaFormat {
-    group 'Formatting'
-    description = "Reformat Java source code with Google-Java-format"
-    exclude 'experiment-tools'
-    exclude 'testing'
-    exclude 'testdata'
-    exclude 'manual-tests/typecheck'
-    exclude 'manual-tests/inference'
-    exclude 'manual-tests/CF-Tests'
-    exclude 'annotated'
-    exclude 'benchmarks'
-}
-tasks.verifyGoogleJavaFormat {
-    group 'Formatting'
-    description = "Check Java source code is in Google-Java-format"
-    exclude 'experiment-tools'
-    exclude 'testing'
-    exclude 'testdata'
-    exclude 'manual-tests/typecheck'
-    exclude 'manual-tests/inference'
-    exclude 'manual-tests/CF-Tests'
-    exclude 'annotated'
-    exclude 'benchmarks'
+task getCodeFormatScripts() {
+    description 'Obtain or update the run-google-java-format scripts'
+    if (file(formatScripts).exists()) {
+        exec {
+            workingDir formatScripts
+            executable 'git'
+            args = ['pull', '-q']
+            ignoreExitValue = true
+        }
+    } else {
+        exec {
+            workingDir "${formatScripts}/../"
+            executable 'git'
+            args = ['clone', '-q', 'https://github.com/plume-lib/run-google-java-format.git', '.run-google-java-format']
+        }
+    }
 }
 
-tasks.test.dependsOn 'verifyGoogleJavaFormat'
+task pythonIsInstalled(type: Exec) {
+  description "Check that the python executable is installed."
+  executable = "python"
+  args "--version"
+}
+
+/**
+ * Returns a list of all the Java files that should be formatted for the given project. These are:
+ *
+ * All java files in the main sourceSet.
+ * All java files in the tests directory that compile.
+ *
+ * @param projectName name of the project to format
+ * @return a list of all Java files that should be formatted for projectName
+ */
+List<String> getJavaFilesToFormat() {
+    List<File> javaFiles = new ArrayList<>();
+    sourceSets.forEach { set ->
+        javaFiles.addAll(set.java.files)
+    }
+    // Collect all java files in tests directory
+    fileTree("${units}/testing").visit { details ->
+        if (details.name.endsWith('java')) {
+            javaFiles.add(details.file)
+        }
+    }
+    fileTree("${units}/manual-tests").visit { details ->
+        if (!(details.path.contains("typecheck") ||
+            details.path.contains("inference") ||
+            details.path.contains("CF-Tests")) &&
+            details.name.endsWith('java')) {
+            javaFiles.add(details.file)
+        }
+    }
+
+    List<String> args = new ArrayList<>();
+    for (File f : javaFiles) {
+        args += f.absolutePath
+    }
+    return args
+}
+
+task checkFormat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], group: 'Format') {
+    description 'Check whether the source code is properly formatted'
+    executable 'python'
+    doFirst {
+        args += "${formatScripts}/check-google-java-format.py"
+        args += "--aosp" // 4 space indentation
+        args += getJavaFilesToFormat()
+    }
+    ignoreExitValue = true
+    doLast {
+        if (execResult.exitValue != 0) {
+            throw new RuntimeException('Found improper formatting, try running:  ./gradlew reformat"')
+        }
+    }
+}
+
+task reformat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], group: 'Format') {
+    description 'Format the Java source code'
+    // jdk8 and checker-qual have no source, so skip
+    executable 'python'
+    doFirst {
+        args += "${formatScripts}/run-google-java-format.py"
+        args += "--aosp" // 4 space indentation
+        args += getJavaFilesToFormat()
+    }
+}
+
+tasks.test.dependsOn 'checkFormat'

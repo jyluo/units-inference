@@ -1,7 +1,5 @@
-import units.UnitsTools;
-import units.qual.*;
-
 import java.util.*;
+import units.qual.*;
 
 class WhileLoopIterator {
 
@@ -13,7 +11,7 @@ class WhileLoopIterator {
         @ms int i = (int) it.next();
 
         while (it.hasNext()) {
-            @ms int j = (int) it.next();    // here
+            @ms int j = (int) it.next(); // here
         }
     }
 
@@ -26,7 +24,7 @@ class WhileLoopIterator {
         @ms int i = (int) it.next();
 
         while (it.hasNext()) {
-            @ms int j = (int) it.next();    // here
+            @ms int j = (int) it.next(); // here
         }
     }
 }

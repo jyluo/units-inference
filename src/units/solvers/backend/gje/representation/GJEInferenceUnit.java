@@ -2,7 +2,6 @@ package units.solvers.backend.gje.representation;
 
 import java.util.Map;
 import java.util.Objects;
-
 import units.representation.UnitsRepresentationUtils;
 
 /**

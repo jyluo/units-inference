@@ -1,10 +1,6 @@
-import units.qual.*;
-
-/**
-* @skip-test
-*/
-
+/** @skip-test */
 import java.util.Iterator;
+import units.qual.*;
 
 // from ode4j
 
@@ -47,14 +43,17 @@ class MyIterator<T> {
     private MyList<T> pos;
     private MyList<T> n;
     private final MyList<T> head;
+
     MyIterator(MyList<T> head) {
         this.head = head;
         this.pos = head.next;
         this.n = pos.next;
     }
+
     boolean hasNext() {
         return pos != head;
     }
+
     T next() {
         T prevPos = pos.o;
         pos = n;

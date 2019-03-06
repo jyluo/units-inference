@@ -1,7 +1,7 @@
+import static java.lang.Math.*;
+
 import units.UnitsTools;
 import units.qual.*;
-
-import static java.lang.Math.*;
 
 class StaticFinalConstants {
 

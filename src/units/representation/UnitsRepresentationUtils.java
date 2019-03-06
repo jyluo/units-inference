@@ -418,9 +418,7 @@ public class UnitsRepresentationUtils {
         // update swappedMap if there's differences in value set size
         if (unitsAnnotationMirrorMap.values().size() != swappedMap.keySet().size()) {
             swappedMap.putAll(
-                    unitsAnnotationMirrorMap
-                            .entrySet()
-                            .stream()
+                    unitsAnnotationMirrorMap.entrySet().stream()
                             .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
         }
         return immutableSwappedMap;

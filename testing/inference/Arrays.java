@@ -7,8 +7,7 @@ import units.qual.m;
 // need to be able to set default array component qualifier, and fix some crazy
 // bug
 
-@UnknownUnits
-class Arrays {
+@UnknownUnits class Arrays {
 
     void arrays() {
         @m int[] arrayOfMeters1 = null;
@@ -17,9 +16,9 @@ class Arrays {
 
         @m int[] arrayOfMeters3 = new @m int @Dimensionless [5];
 
-        @m int[] arrayOfMeters4 = new int @Dimensionless [] { UnitsTools.m, UnitsTools.m };
+        @m int[] arrayOfMeters4 = new int @Dimensionless [] {UnitsTools.m, UnitsTools.m};
 
-        @m int[] arrayOfMeters5 = new @m int @Dimensionless [] { UnitsTools.m, UnitsTools.m };
+        @m int[] arrayOfMeters5 = new @m int @Dimensionless [] {UnitsTools.m, UnitsTools.m};
 
         // @m int[] arrayOfMeters6 = {UnitsTools.m, UnitsTools.m};
     }

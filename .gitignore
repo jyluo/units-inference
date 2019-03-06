@@ -9,6 +9,9 @@ dist/
 build/
 testdata/
 
+# format scripts
+scripts/.run-google-java-format/
+
 # coq source files
 coq-proof/coq-source
 coq-proof/V*.tar.gz

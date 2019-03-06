@@ -1,5 +1,5 @@
-import units.qual.*;
 import units.UnitsTools;
+import units.qual.*;
 
 class Speeds {
 
@@ -17,7 +17,7 @@ class Speeds {
         @mPERs int res;
 
         // :: error: (argument.type.incompatible)
-        res = calcSpeed(xInKilometers, jInSeconds);  // error!
+        res = calcSpeed(xInKilometers, jInSeconds); // error!
 
         res = calcSpeed(yInMeters, kInSeconds); // okay
     }

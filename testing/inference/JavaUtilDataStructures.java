@@ -1,7 +1,5 @@
-import units.UnitsTools;
-import units.qual.*;
-
 import java.util.*;
+import units.qual.*;
 
 class JavaUtilDataStructures {
 
@@ -9,5 +7,4 @@ class JavaUtilDataStructures {
         Map rawMap = new HashMap();
         Integer value = (Integer) rawMap.get("key");
     }
-
 }

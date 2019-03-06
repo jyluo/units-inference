@@ -1,4 +1,3 @@
-
 class Exceptions {
 
     void exception() {

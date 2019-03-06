@@ -237,7 +237,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
         FileUtils.appendFile(new File(constraintsStatsFile), fileContents);
     }
     //
-    //    private String generateZ3Constraint(BoolExpr serializedConstraint, String constraintSource) {
+    //    private String generateZ3Constraint(BoolExpr serializedConstraint, String
+    // constraintSource) {
     //        Expr simplifiedConstraint = serializedConstraint.simplify();
     //
     //        if (simplifiedConstraint.isTrue()) {
@@ -255,7 +256,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     //            throw new BugInCF("impossible constraint: " + constraintSource);
     //        }
     //
-    //        // TODO: properly support adding wellformedness constraint as a debug output option for unsat dump
+    //        // TODO: properly support adding wellformedness constraint as a debug output option
+    // for unsat dump
     //
     //        return generateZ3Constraint(simplifiedConstraint.toString());
     //    }
@@ -265,7 +267,8 @@ public class Z3SmtSolver<SlotEncodingT, SlotSolutionT>
     //    }
     //
     //    private String generateZ3UnsatCoreConstraint(String clause, String constraintName) {
-    //        return "(assert (! " + clause + " :named " + constraintName + "))" + System.lineSeparator();
+    //        return "(assert (! " + clause + " :named " + constraintName + "))" +
+    // System.lineSeparator();
     //    }
     //
     //    private void addConstraint(BoolExpr serializedConstraint, Constraint constraint) {

@@ -1,8 +1,7 @@
-import units.UnitsTools;
-import units.qual.*;
+import static java.util.concurrent.TimeUnit.*;
 
 import java.util.concurrent.TimeUnit;
-import static java.util.concurrent.TimeUnit.*;
+import units.qual.*;
 
 class JavaUtilConcurrentTimeUnit {
 

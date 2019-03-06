@@ -30,6 +30,6 @@ class ByteCode {
         // }
         long ptr = 30;
         sun.misc.Unsafe UNSAFE = (sun.misc.Unsafe) theUnsafe;
-        UNSAFE.putByte(ptr + UnitsTools.rad, (byte) 20);    // a case in JLargeArrays
+        UNSAFE.putByte(ptr + UnitsTools.rad, (byte) 20); // a case in JLargeArrays
     }
 }

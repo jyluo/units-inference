@@ -1,26 +1,21 @@
 import org.checkerframework.framework.qual.PolyAll;
-
 import units.UnitsTools;
 import units.qual.*;
 
 @UnknownUnits class PolyAllClass {
-    @PolyAll PolyAllClass(@PolyAll int x) {
-    }
+    @PolyAll PolyAllClass(@PolyAll int x) {}
 }
 
 class PolyUnitClass {
-    @PolyUnit PolyUnitClass(@PolyUnit int x) {
-    }
+    @PolyUnit PolyUnitClass(@PolyUnit int x) {}
 }
 
 class MeterClass {
-    @m MeterClass(@m int x) {
-    }
+    @m MeterClass(@m int x) {}
 }
 
 class NoAnnotClass {
-    NoAnnotClass(int x) {
-    }
+    NoAnnotClass(int x) {}
 }
 
 class Constructors {

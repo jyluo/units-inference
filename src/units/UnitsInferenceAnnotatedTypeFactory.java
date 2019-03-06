@@ -153,8 +153,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 Object... args) {
             super.finish(qualHierarchy, supertypesMap, polyQualifiers, tops, bottoms, args);
 
-            // TODO: this update, which is sensible to keep the inference qual hierarchy clean, causes
-            // crashes in creating constant slots for @PolyUnit
+            // TODO: this update, which is sensible to keep the inference qual hierarchy clean,
+            // causes crashes in creating constant slots for @PolyUnit
             // disabling for now
 
             /*

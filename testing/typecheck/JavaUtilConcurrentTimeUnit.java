@@ -1,13 +1,17 @@
-import units.UnitsTools;
-import units.qual.*;
+import static java.util.concurrent.TimeUnit.*;
 
 import java.util.concurrent.TimeUnit;
-import static java.util.concurrent.TimeUnit.*;
+import units.qual.*;
 
 class JavaUtilConcurrentTimeUnit {
 
-    @SuppressWarnings("units") enum MyTimeUnit {
-        NANOSECONDS, MICROSECONDS, @ms MILLISECONDS, @s SECONDS
+    @SuppressWarnings("units")
+    enum MyTimeUnit {
+        NANOSECONDS,
+        MICROSECONDS,
+        @ms
+        MILLISECONDS,
+        @s SECONDS
     }
 
     void readFromEnumInSource() {

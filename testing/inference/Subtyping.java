@@ -45,20 +45,15 @@ class SubtypingTest {
         @s int s;
         @UnitsBottom int bot;
 
-        void callTop(@UnknownUnits int top) {
-        }
+        void callTop(@UnknownUnits int top) {}
 
-        void callDim(@Dimensionless int dim) {
-        }
+        void callDim(@Dimensionless int dim) {}
 
-        void callM(@m int m) {
-        }
+        void callM(@m int m) {}
 
-        void callS(@s int s) {
-        }
+        void callS(@s int s) {}
 
-        void callBot(@UnitsBottom int bot) {
-        }
+        void callBot(@UnitsBottom int bot) {}
 
         void sat() {
             int inferTop = top;

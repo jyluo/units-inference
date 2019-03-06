@@ -11,8 +11,7 @@ class jBlasCases {
     }
 
     double sinc(double x) {
-        if (x == 0)
-            return 1.0;
+        if (x == 0) return 1.0;
         else
             // :: fixable-error: (argument.type.incompatible)
             return Math.sin(Math.PI * x) / (Math.PI * x);

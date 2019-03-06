@@ -50,7 +50,8 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
     //            System.err.println("===== ");
     //            System.err.println(" infer mode: " + infer);
     //            AnnotationMirror varAM = valueType.getAnnotationInHierarchy(iatf.getVarAnnot());
-    //            System.err.println(" varType: " + varType + " real am: " + slotManager.getSlot(varAM));
+    //            System.err.println(" varType: " + varType + " real am: " +
+    // slotManager.getSlot(varAM));
     //
     //            AnnotationMirror valAM = valueType.getAnnotationInHierarchy(iatf.getVarAnnot());
     //            System.err.println(

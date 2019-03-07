@@ -20,6 +20,9 @@ if [ ! -d ../do-like-javac ] ; then
     (cd $JSR308 && git clone https://github.com/${SLUGOWNER}/do-like-javac.git)
 fi
 
+# Build CFI Test Lib jar
+(cd $JSR308/checker-framework-inference && ./gradlew testLibJar)
+
 # Running test suite
 ./gradlew test --console=plain
 

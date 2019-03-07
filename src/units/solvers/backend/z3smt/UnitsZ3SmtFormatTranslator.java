@@ -126,7 +126,7 @@ public class UnitsZ3SmtFormatTranslator
             anno = unitsRepUtils.DIMENSIONLESS;
         }
 
-        // System.err.println(" ==== creating constant slot for " + anno);
+        // System.err.println(" ==== encoding constant slot for " + anno);
 
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
@@ -264,7 +264,6 @@ public class UnitsZ3SmtFormatTranslator
 
         AnnotationMirror solutionUnit =
                 unitsRepUtils.createInternalUnit(
-                        "",
                         solutionSlot.isUnknownUnits(),
                         solutionSlot.isUnitsBottom(),
                         solutionSlot.getPrefixExponent(),

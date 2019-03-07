@@ -233,7 +233,6 @@ public class UnitsGJEFormatTranslator
 
         AnnotationMirror solutionUnit =
                 unitsRepUtils.createInternalUnit(
-                        "",
                         solutionSlot.isUnknownUnits(),
                         solutionSlot.isUnitsBottom(),
                         solutionSlot.getPrefixExponent(),

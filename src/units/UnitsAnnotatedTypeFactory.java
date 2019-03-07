@@ -297,36 +297,34 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             // replace raw @UnitsRep with Dimensionless
             // for some reason this shows up in inference mode when building the lattice
             if (AnnotationUtils.areSame(subAnno, unitsRepUtils.RAWUNITSREP)) {
-                subAnno = unitsRepUtils.DIMENSIONLESS;
+                return isSubtype(unitsRepUtils.DIMENSIONLESS, superAnno);
             }
             if (AnnotationUtils.areSame(superAnno, unitsRepUtils.RAWUNITSREP)) {
-                superAnno = unitsRepUtils.DIMENSIONLESS;
+                return isSubtype(subAnno, unitsRepUtils.DIMENSIONLESS);
             }
 
             // Case: All units <: Top
             if (AnnotationUtils.areSame(superAnno, unitsRepUtils.TOP)) {
                 return true;
             }
-
             // Case: Bottom <: All units
             if (AnnotationUtils.areSame(subAnno, unitsRepUtils.BOTTOM)) {
                 return true;
             }
 
-            // Case: @PolyAll <: All units
-            // Case: @PolyUnit <: PolyAll and All units
-            // Case: All units <: @PolyAll and @PolyUnit
+            // Case: @PolyAll and @PolyUnit are treated as @UnknownUnits
             if (AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYUNIT)
-                    || AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYALL)
+                    || AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYUNIT)) {
+                return isSubtype(unitsRepUtils.TOP, superAnno);
+            }
+            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYALL)
                     || AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYUNIT)) {
                 return true;
             }
 
             // Case: @UnitsRep(x) <: @UnitsRep(y)
             if (AnnotationUtils.areSameByClass(subAnno, UnitsRep.class)
-                    && AnnotationUtils.areSameByClass(superAnno, UnitsRep.class)
-                    && AnnotationUtils.areSameByName(subAnno, superAnno)) {
+                    && AnnotationUtils.areSameByClass(superAnno, UnitsRep.class)) {
 
                 boolean result = UnitsTypecheckUtils.unitsEqual(subAnno, superAnno);
 

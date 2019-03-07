@@ -218,9 +218,9 @@ public class UnitsRepresentationUtils {
         RAWUNITSREP = AnnotationBuilder.fromClass(elements, UnitsRep.class);
 
         Map<String, Integer> zeroBaseDimensions = createZeroFilledBaseUnitsMap();
-        TOP = createInternalUnit("UnknownUnits", true, false, 0, zeroBaseDimensions);
-        BOTTOM = createInternalUnit("UnitsBottom", false, true, 0, zeroBaseDimensions);
-        DIMENSIONLESS = createInternalUnit("Dimensionless", false, false, 0, zeroBaseDimensions);
+        TOP = createInternalUnit(true, false, 0, zeroBaseDimensions);
+        BOTTOM = createInternalUnit(false, true, 0, zeroBaseDimensions);
+        DIMENSIONLESS = createInternalUnit(false, false, 0, zeroBaseDimensions);
 
         // Map<String, Integer> meterDimensions = createZeroFilledBaseUnitsMap();
         // meterDimensions.put("m", 1);
@@ -252,10 +252,10 @@ public class UnitsRepresentationUtils {
 
         Map<String, Integer> secondBaseMap = createZeroFilledBaseUnitsMap();
         secondBaseMap.put("s", 1);
-        SECOND = createInternalUnit("Second", false, false, 0, secondBaseMap);
-        MILLISECOND = createInternalUnit("Millisecond", false, false, -3, secondBaseMap);
-        MICROSECOND = createInternalUnit("Microsecond", false, false, -6, secondBaseMap);
-        NANOSECOND = createInternalUnit("Nanoecond", false, false, -9, secondBaseMap);
+        SECOND = createInternalUnit(false, false, 0, secondBaseMap);
+        MILLISECOND = createInternalUnit(false, false, -3, secondBaseMap);
+        MICROSECOND = createInternalUnit(false, false, -6, secondBaseMap);
+        NANOSECOND = createInternalUnit(false, false, -9, secondBaseMap);
 
         // for (Entry<AnnotationMirror, AnnotationMirror> entry : unitsAnnotationMirrorMap
         // .entrySet()) {
@@ -278,9 +278,7 @@ public class UnitsRepresentationUtils {
         // set the exponent of the given base unit to 1
         exponents.put(baseUnitClass.getSimpleName(), 1);
         // create the internal unit and add to alias map
-        unitsAnnotationMirrorMap.put(
-                baseUnitAM,
-                createInternalUnit(baseUnitClass.getCanonicalName(), false, false, 0, exponents));
+        unitsAnnotationMirrorMap.put(baseUnitAM, createInternalUnit(false, false, 0, exponents));
     }
 
     /**
@@ -305,9 +303,7 @@ public class UnitsRepresentationUtils {
         int prefix = aliasInfo.prefixExponent();
 
         unitsAnnotationMirrorMap.put(
-                aliasUnitAM,
-                createInternalUnit(
-                        aliasUnitClass.getCanonicalName(), false, false, prefix, exponents));
+                aliasUnitAM, createInternalUnit(false, false, prefix, exponents));
     }
     //
     // /**
@@ -449,7 +445,7 @@ public class UnitsRepresentationUtils {
     }
 
     private final Map<AnnotationMirror, AnnotationMirror> fillMissingBaseUnitsCache =
-            new HashMap<>();
+            AnnotationUtils.createAnnotationMap();
 
     // Builds a fresh AnnotationMirror for the given annotation with any missing base units filled
     // in
@@ -462,8 +458,6 @@ public class UnitsRepresentationUtils {
                 return fillMissingBaseUnitsCache.get(anno);
             }
 
-            String originalName =
-                    AnnotationUtils.getElementValue(anno, "originalName", String.class, true);
             boolean top = AnnotationUtils.getElementValue(anno, "top", Boolean.class, true);
             boolean bot = AnnotationUtils.getElementValue(anno, "bot", Boolean.class, true);
             int prefixExponent =
@@ -480,8 +474,7 @@ public class UnitsRepresentationUtils {
                         AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
             }
 
-            AnnotationMirror filledInAM =
-                    createInternalUnit(originalName, top, bot, prefixExponent, exponents);
+            AnnotationMirror filledInAM = createInternalUnit(top, bot, prefixExponent, exponents);
 
             fillMissingBaseUnitsCache.put(anno, filledInAM);
 
@@ -493,7 +486,8 @@ public class UnitsRepresentationUtils {
     }
 
     // A 1 to 1 mapping between an annotation mirror and its unique typecheck unit.
-    private final Map<AnnotationMirror, TypecheckUnit> typecheckUnitCache = new HashMap<>();
+    private final Map<AnnotationMirror, TypecheckUnit> typecheckUnitCache =
+            AnnotationUtils.createAnnotationMap();
 
     public TypecheckUnit createTypecheckUnit(AnnotationMirror anno) {
         if (typecheckUnitCache.containsKey(anno)) {
@@ -505,13 +499,10 @@ public class UnitsRepresentationUtils {
         // if it is a polyunit annotation, generate top
         if (AnnotationUtils.areSameByClass(anno, PolyUnit.class)
                 || AnnotationUtils.areSameByClass(anno, PolyAll.class)) {
-            unit.setOriginalName("PolyUnit");
             unit.setUnknownUnits(true);
         }
         // if it is a units internal annotation, generate the internal unit
         else if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
-            unit.setOriginalName(
-                    AnnotationUtils.getElementValue(anno, "originalName", String.class, true));
             unit.setUnknownUnits(AnnotationUtils.getElementValue(anno, "top", Boolean.class, true));
             unit.setUnitsBottom(AnnotationUtils.getElementValue(anno, "bot", Boolean.class, true));
             unit.setPrefixExponent(
@@ -522,7 +513,7 @@ public class UnitsRepresentationUtils {
             for (String bu : baseUnits()) {
                 exponents.put(bu, 0);
             }
-            // replace base units with values in annotation
+            // replace base units with values in annotation {@link BUC}
             for (AnnotationMirror bu :
                     AnnotationUtils.getElementValueArray(
                             anno, "baseUnitComponents", AnnotationMirror.class, true)) {
@@ -544,32 +535,15 @@ public class UnitsRepresentationUtils {
     }
 
     public AnnotationMirror createInternalUnit(TypecheckUnit unit) {
-        // see if cache already has a mapping, if so return from cache
-        for (Entry<AnnotationMirror, TypecheckUnit> entry : typecheckUnitCache.entrySet()) {
-            if (unit.equals(entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-
-        // otherwise create an internal unit for the typecheck unit and add to cache
-        AnnotationMirror anno =
-                createInternalUnit(
-                        unit.getOriginalName(),
-                        unit.isUnknownUnits(),
-                        unit.isUnitsBottom(),
-                        unit.getPrefixExponent(),
-                        unit.getExponents());
-
-        typecheckUnitCache.put(anno, unit);
-        return anno;
+        return createInternalUnit(
+                unit.isUnknownUnits(),
+                unit.isUnitsBottom(),
+                unit.getPrefixExponent(),
+                unit.getExponents());
     }
 
     public AnnotationMirror createInternalUnit(
-            String originalName,
-            boolean top,
-            boolean bot,
-            int prefixExponent,
-            Map<String, Integer> exponents) {
+            boolean top, boolean bot, int prefixExponent, Map<String, Integer> exponents) {
         // not allowed to set both a UU and UB to true on the same annotation
         assert !(top && bot);
 
@@ -585,7 +559,6 @@ public class UnitsRepresentationUtils {
         }
 
         // See {@link UnitsRep}
-        // builder.setValue("originalName", originalName); // TODO: set original name
         builder.setValue("top", top);
         builder.setValue("bot", bot);
         builder.setValue("prefixExponent", prefixExponent);

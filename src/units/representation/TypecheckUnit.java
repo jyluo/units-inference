@@ -9,8 +9,6 @@ import org.checkerframework.javacutil.BugInCF;
  * checking.
  */
 public class TypecheckUnit {
-    // note: original name is stored but not currently used in toString, hashcode, or equals
-    private String originalName;
     private boolean uu;
     private boolean ub;
     private int prefixExponent;
@@ -18,8 +16,6 @@ public class TypecheckUnit {
     private final Map<String, Integer> exponents;
 
     public TypecheckUnit() {
-        // default originalName value is "default"
-        originalName = "default";
         // default UU value is false
         uu = false;
         // default UU value is false
@@ -30,17 +26,9 @@ public class TypecheckUnit {
         exponents = UnitsRepresentationUtils.getInstance().createZeroFilledBaseUnitsMap();
     }
 
-    public void setOriginalName(String val) {
-        originalName = val;
-    }
-
-    public String getOriginalName() {
-        return originalName;
-    }
-
     public void setUnknownUnits(boolean val) {
         uu = val;
-        // assert !(uu && ub);
+        assert !(uu && ub);
     }
 
     public boolean isUnknownUnits() {
@@ -49,7 +37,7 @@ public class TypecheckUnit {
 
     public void setUnitsBottom(boolean val) {
         ub = val;
-        // assert !(uu && ub);
+        assert !(uu && ub);
     }
 
     public boolean isUnitsBottom() {
@@ -87,7 +75,7 @@ public class TypecheckUnit {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(" UU = " + uu);
+        sb.append("UU = " + uu);
         sb.append(" UB = " + ub);
         sb.append(" Prefix = " + prefixExponent);
         for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
@@ -110,10 +98,9 @@ public class TypecheckUnit {
             return false;
         }
         TypecheckUnit other = (TypecheckUnit) obj;
-        return uu =
-                other.uu
-                        && ub == other.ub
-                        && prefixExponent == other.prefixExponent
-                        && exponents.equals(other.exponents);
+        return uu == other.uu
+                && ub == other.ub
+                && prefixExponent == other.prefixExponent
+                && exponents.equals(other.exponents);
     }
 }

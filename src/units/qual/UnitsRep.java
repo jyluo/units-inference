@@ -21,9 +21,6 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 public @interface UnitsRep {
 
-    // TODO: remove name
-    String originalName() default "default";
-
     boolean top() default false;
 
     boolean bot() default false;

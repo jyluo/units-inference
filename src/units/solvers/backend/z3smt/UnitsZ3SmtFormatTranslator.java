@@ -141,7 +141,6 @@ public class UnitsZ3SmtFormatTranslator
             encodedSlot.setUnitsBottom(true);
         } else {
             encodedSlot.setPrefixExponent(unit.getPrefixExponent());
-            Map<String, Integer> expos = unit.getExponents();
             for (String bu : unitsRepUtils.serializableBaseUnits()) {
                 encodedSlot.setExponent(bu, unit.getExponent(bu));
             }

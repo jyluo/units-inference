@@ -19,6 +19,7 @@ if [ -d $JSR308/checker-framework-inference ] ; then
     (cd $JSR308/checker-framework-inference && git pull)
 else
     BRANCH=upstream_update_mar_5_2019
+    echo 'Cloning from https://github.com/"$REPO_SITE"/checker-framework-inference.git branch $BRANCH'
     (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/checker-framework-inference.git)
 fi
 
@@ -27,6 +28,7 @@ if [ -d $JSR308/do-like-javac ] ; then
     (cd $JSR308/do-like-javac && git pull)
 else
     BRANCH=master
+    echo 'Cloning from https://github.com/"$REPO_SITE"/do-like-javac.git branch $BRANCH'
     (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/do-like-javac.git)
 fi
 

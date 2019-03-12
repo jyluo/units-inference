@@ -20,8 +20,12 @@ import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.NewClassTree;
 import com.sun.source.tree.Tree;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -48,6 +52,7 @@ import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.UserError;
 import units.utils.UnitsInferenceRepresentationUtils;
+import units.utils.UnitsRepresentationUtils;
 import units.utils.UnitsTypecheckUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
@@ -178,85 +183,97 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             super(multiGraphFactory);
         }
 
-        // In inference mode, the only bottom is VarAnnot
+        @Override
+        protected Set<AnnotationMirror> findTops(
+                Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {
+            Set<AnnotationMirror> tops = super.findTops(supertypes);
+            tops.add(unitsRepUtils.TOP);
+            tops.remove(unitsRepUtils.RAWUNITSREP);
+
+            // remove RAWUNITSREP in supertypes
+            assert supertypes.containsKey(unitsRepUtils.RAWUNITSREP);
+            supertypes.remove(unitsRepUtils.RAWUNITSREP);
+            // add TOP to supertypes
+            supertypes.put(unitsRepUtils.TOP, Collections.emptySet());
+
+            // System.err.println(" supertypes {");
+            // for (Entry<?, ?> e : supertypes.entrySet()) {
+            // System.err.println(" " + e.getKey() + " -> " + e.getValue());
+            // }
+
+            return tops;
+        }
+
         @Override
         protected Set<AnnotationMirror> findBottoms(
                 Map<AnnotationMirror, Set<AnnotationMirror>> supertypes) {
-            Set<AnnotationMirror> newBottoms = super.findBottoms(supertypes);
-            newBottoms.remove(unitsRepUtils.RAWUNITSREP);
-            return newBottoms;
-        }
+            Set<AnnotationMirror> bottoms = super.findBottoms(supertypes);
+            bottoms.add(unitsRepUtils.BOTTOM);
+            bottoms.remove(unitsRepUtils.TOP);
 
-        // In inference mode, the only qualifier is VarAnnot. The poly qualifiers are
-        // PolyAll and any poly qual from the type system.
-        @Override
-        protected void finish(
-                QualifierHierarchy qualHierarchy,
-                Map<AnnotationMirror, Set<AnnotationMirror>> supertypesMap,
-                Map<AnnotationMirror, AnnotationMirror> polyQualifiers,
-                Set<AnnotationMirror> tops,
-                Set<AnnotationMirror> bottoms,
-                Object... args) {
-            super.finish(qualHierarchy, supertypesMap, polyQualifiers, tops, bottoms, args);
+            // set direct supertypes of BOTTOM and add to supertypes
+            Set<AnnotationMirror> bottomSupers = new LinkedHashSet<>();
+            bottomSupers.add(unitsRepUtils.POLYUNIT);
+            bottomSupers.add(unitsRepUtils.POLYALL);
+            bottomSupers.add(unitsRepUtils.TOP);
+            supertypes.put(unitsRepUtils.BOTTOM, bottomSupers);
 
-            // TODO: this update, which is sensible to keep the inference qual hierarchy clean,
-            // causes crashes in creating constant slots for @PolyUnit
-            // disabling for now
-
-            /*
-             * Map before update:
-            supertypesMap
-              @checkers.inference.qual.VarAnnot -> [@org.checkerframework.framework.qual.PolyAll]
-              @org.checkerframework.framework.qual.PolyAll -> [@checkers.inference.qual.VarAnnot, @units.qual.UnitsRep]
-              @units.qual.PolyUnit -> [@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsRep]
-              @units.qual.UnitsRep -> []
-            polyQualifiers {null=@org.checkerframework.framework.qual.PolyAll, @units.qual.UnitsRep=@units.qual.PolyUnit}
-            tops [@checkers.inference.qual.VarAnnot]
-            bottoms [@checkers.inference.qual.VarAnnot]
-             */
-            //
-            // // Remove @UnitsRep from super of PolyAll
-            // assert supertypesMap.containsKey(unitsRepUtils.POLYALL);
-            // Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
-            // polyAllSupers.addAll(supertypesMap.get(unitsRepUtils.POLYALL));
-            // polyAllSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            // supertypesMap.put(unitsRepUtils.POLYALL,
-            // Collections.unmodifiableSet(polyAllSupers));
-            //
-            // // Remove @UnitsRep from super of PolyUnit
-            // assert supertypesMap.containsKey(unitsRepUtils.POLYUNIT);
-            // Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
-            // polyUnitSupers.addAll(supertypesMap.get(unitsRepUtils.POLYUNIT));
-            // polyUnitSupers.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            // supertypesMap.put(unitsRepUtils.POLYUNIT,
-            // Collections.unmodifiableSet(polyUnitSupers));
-            //
-            // // Remove @UnitsRep from map
-            // supertypesMap.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            //
-            // // Remove @UnitsRep from polyQualifiers
-            // assert polyQualifiers.containsKey(unitsRepUtils.RAWUNITSINTERNAL);
-            // polyQualifiers.remove(unitsRepUtils.RAWUNITSINTERNAL);
-            //
-            // System.err.println(" === Inference ATF ");
-            // System.err.println(" supertypesMap ");
-            // for (Entry<?, ?> e : supertypesMap.entrySet()) {
+            // System.err.println(" supertypes {");
+            // for (Entry<?, ?> e : supertypes.entrySet()) {
             // System.err.println(" " + e.getKey() + " -> " + e.getValue());
             // }
+
+            return bottoms;
+        }
+
+        /**
+         * Programmatically set {@link UnitsRepresentationUtils#POLYUNIT} and {@link
+         * UnitsRepresentationUtils#POLYALL} as the polymorphic qualifiers
+         */
+        @Override
+        protected void addPolyRelations(
+                QualifierHierarchy qualHierarchy,
+                Map<AnnotationMirror, Set<AnnotationMirror>> supertypes,
+                Map<AnnotationMirror, AnnotationMirror> polyQualifiers,
+                Set<AnnotationMirror> tops,
+                Set<AnnotationMirror> bottoms) {
+
+            // polyQualifiers {null=@PolyAll, @UnitsRep=@PolyUnit}
+            // replace RAWUNITSREP -> @PolyUnit with TOP -> @PolyUnit
+            // Build up a replacement map by looping through polyQualifiers as it is a simple hash
+            // map. The null key causes crashes if not handled correctly.
+            Map<AnnotationMirror, AnnotationMirror> updatedPolyQualifiers = new HashMap<>();
+            for (Entry<AnnotationMirror, AnnotationMirror> e : polyQualifiers.entrySet()) {
+                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.RAWUNITSREP)) {
+                    updatedPolyQualifiers.put(unitsRepUtils.TOP, e.getValue());
+                } else {
+                    updatedPolyQualifiers.put(e.getKey(), e.getValue());
+                }
+            }
+            polyQualifiers.clear();
+            polyQualifiers.putAll(updatedPolyQualifiers);
+
+            // add @PolyAll -> TOP to supertypes
+            Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
+            polyAllSupers.add(unitsRepUtils.TOP);
+            supertypes.put(unitsRepUtils.POLYALL, Collections.unmodifiableSet(polyAllSupers));
+
+            // add @PolyUnit -> {@PolyAll, TOP} to supertypes
+            Set<AnnotationMirror> polyUnitSupers = AnnotationUtils.createAnnotationSet();
+            polyUnitSupers.add(unitsRepUtils.POLYALL);
+            polyUnitSupers.add(unitsRepUtils.TOP);
+            supertypes.put(unitsRepUtils.POLYUNIT, Collections.unmodifiableSet(polyUnitSupers));
+
+            // System.err.println(" POST ");
+            // System.err.println(" supertypes {");
+            // for (Entry<?, ?> e : supertypes.entrySet()) {
+            // System.err.println(" " + e.getKey() + " -> " + e.getValue());
+            // }
+            // System.err.println(" }");
             // System.err.println(" polyQualifiers " + polyQualifiers);
             // System.err.println(" tops " + tops);
             // System.err.println(" bottoms " + bottoms);
-
-            /*
-            * Map after update:
-            supertypesMap
-              @checkers.inference.qual.VarAnnot -> [@org.checkerframework.framework.qual.PolyAll]
-              @org.checkerframework.framework.qual.PolyAll -> [@checkers.inference.qual.VarAnnot]
-              @units.qual.PolyUnit -> [@org.checkerframework.framework.qual.PolyAll]
-            polyQualifiers {null=@org.checkerframework.framework.qual.PolyAll}
-            tops [@checkers.inference.qual.VarAnnot]
-            bottoms [@checkers.inference.qual.VarAnnot]
-            */
+            // System.err.println();
         }
     }
 

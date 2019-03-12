@@ -18,7 +18,7 @@ public class UnitsGJEEqualityConstraintEncoder extends UnitsGJEAbstractConstrain
 
     // 2 Slots are equal if their components are equal
     protected GJEEquationSet encode(Slot fst, Slot snd) {
-        return UnitsGJEEncoderUtils.equality(
+        return unitsGJEEncoderUtils.equality(
                 fst.serialize(formatTranslator), snd.serialize(formatTranslator));
     }
 

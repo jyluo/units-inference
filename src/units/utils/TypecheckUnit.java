@@ -10,7 +10,7 @@ import org.checkerframework.javacutil.BugInCF;
  */
 public class TypecheckUnit {
     /** reference to the units representation utilities library */
-    protected final UnitsRepresentationUtils unitsRepUtils;
+    private final UnitsRepresentationUtils unitsRepUtils;
 
     private boolean uu;
     private boolean ub;

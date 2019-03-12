@@ -20,7 +20,7 @@ public class UnitsGJEComparableConstraintEncoder extends UnitsGJEAbstractConstra
         // fst <: snd or snd <: fst
         // for GJE, this is fst == snd || snd == fst which simplifies to 1
         // equality constraint
-        return UnitsGJEEncoderUtils.equality(
+        return unitsGJEEncoderUtils.equality(
                 fst.serialize(formatTranslator), snd.serialize(formatTranslator));
     }
 

@@ -1,7 +1,5 @@
 package units.solvers.backend.z3smt.encoder;
 
-import backend.z3smt.Z3SmtFormatTranslator;
-import backend.z3smt.encoder.Z3SmtAbstractConstraintEncoder;
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
@@ -9,23 +7,19 @@ import checkers.inference.solver.backend.encoder.binary.EqualityConstraintEncode
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
-import units.utils.TypecheckUnit;
+import units.solvers.backend.z3smt.UnitsZ3SmtFormatTranslator;
 
-public class UnitsZ3SmtEqualityConstraintEncoder
-        extends Z3SmtAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>
+public class UnitsZ3SmtEqualityConstraintEncoder extends UnitsZ3SmtAbstractConstraintEncoder
         implements EqualityConstraintEncoder<BoolExpr> {
 
     public UnitsZ3SmtEqualityConstraintEncoder(
-            Lattice lattice,
-            Context ctx,
-            Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> z3SmtFormatTranslator) {
-        super(lattice, ctx, z3SmtFormatTranslator);
+            Lattice lattice, Context ctx, UnitsZ3SmtFormatTranslator unitsZ3SmtFormatTranslator) {
+        super(lattice, ctx, unitsZ3SmtFormatTranslator);
     }
 
     // 2 Slots are equal if their components are equal
     protected BoolExpr encode(Slot fst, Slot snd) {
-        return UnitsZ3SmtEncoderUtils.equality(
+        return unitsZ3SmtEncoderUtils.equality(
                 ctx, fst.serialize(z3SmtFormatTranslator), snd.serialize(z3SmtFormatTranslator));
     }
 

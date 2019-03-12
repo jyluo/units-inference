@@ -54,6 +54,7 @@ import units.qual.UnitsRep;
 import units.qual.UnitsSame;
 import units.qual.UnitsSames;
 import units.qual.UnitsSubtraction;
+import units.utils.UnitsInferenceRepresentationUtils;
 import units.utils.UnitsRepresentationUtils;
 import units.utils.UnitsTypecheckUtils;
 
@@ -69,7 +70,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected UnitsAnnotationFormatter unitsAnnotationFormatter;
 
     /** reference to the units representation utilities library */
-    protected final UnitsRepresentationUtils unitsRepUtils;
+    protected final UnitsInferenceRepresentationUtils unitsRepUtils;
 
     /** reference to the units type check utilities library */
     protected final UnitsTypecheckUtils unitsTypecheckUtils;
@@ -77,7 +78,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     public UnitsAnnotatedTypeFactory(BaseTypeChecker checker) {
         super(checker, true);
 
-        unitsRepUtils = new UnitsRepresentationUtils(processingEnv, elements);
+        unitsRepUtils = createUnitsRepresentationUtils();
         unitsAnnotationFormatter.postInit(unitsRepUtils);
 
         postInit();
@@ -85,7 +86,11 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         unitsTypecheckUtils = new UnitsTypecheckUtils(unitsRepUtils);
     }
 
-    public UnitsRepresentationUtils getUnitsRepresentationUtils() {
+    protected UnitsInferenceRepresentationUtils createUnitsRepresentationUtils() {
+        return new UnitsInferenceRepresentationUtils(processingEnv, elements);
+    }
+
+    public UnitsInferenceRepresentationUtils getUnitsRepresentationUtils() {
         return unitsRepUtils;
     }
 

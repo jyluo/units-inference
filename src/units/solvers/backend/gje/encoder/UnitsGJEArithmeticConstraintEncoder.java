@@ -10,7 +10,6 @@ import checkers.inference.solver.frontend.Lattice;
 import org.checkerframework.javacutil.BugInCF;
 import units.solvers.backend.gje.UnitsGJEFormatTranslator;
 import units.solvers.backend.gje.representation.GJEEquationSet;
-import units.utils.UnitsTypecheckUtils;
 
 public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstraintEncoder
         implements ArithmeticConstraintEncoder<GJEEquationSet> {
@@ -31,26 +30,26 @@ public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstra
             case PLUS:
             case MINUS:
                 // Addition or Subtraction between 2 slots resulting in result slot
-                return UnitsGJEEncoderUtils.tripleEquality(
+                return unitsGJEEncoderUtils.tripleEquality(
                         leftOperand.serialize(formatTranslator),
                         rightOperand.serialize(formatTranslator),
                         result.serialize(formatTranslator));
             case MULTIPLY:
                 // Multiplication between 2 slots resulting in result slot
-                return UnitsGJEEncoderUtils.multiply(
+                return unitsGJEEncoderUtils.multiply(
                         leftOperand.serialize(formatTranslator),
                         rightOperand.serialize(formatTranslator),
                         result.serialize(formatTranslator));
             case DIVIDE:
                 // Division between 2 slots resulting in result slot
-                return UnitsGJEEncoderUtils.divide(
+                return unitsGJEEncoderUtils.divide(
                         leftOperand.serialize(formatTranslator),
                         rightOperand.serialize(formatTranslator),
                         result.serialize(formatTranslator));
             case REMAINDER:
                 // Modulus between 2 slots resulting in result slot, is always
                 // an equality between leftOperand and result slots
-                return UnitsGJEEncoderUtils.equality(
+                return unitsGJEEncoderUtils.equality(
                         leftOperand.serialize(formatTranslator),
                         result.serialize(formatTranslator));
             default:
@@ -104,9 +103,10 @@ public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstra
             case MINUS:
                 // if leftOperand == rightOperand, then encode equality between
                 // rightOperand and result
-                return UnitsTypecheckUtils.unitsEqual(
-                                leftOperand.getValue(), rightOperand.getValue())
-                        ? UnitsGJEEncoderUtils.equality(
+                return formatTranslator
+                                .getUnitsTypecheckUtils()
+                                .unitsEqual(leftOperand.getValue(), rightOperand.getValue())
+                        ? unitsGJEEncoderUtils.equality(
                                 rightOperand.serialize(formatTranslator),
                                 result.serialize(formatTranslator))
                         : contradictoryValue;

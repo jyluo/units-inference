@@ -1,29 +1,27 @@
 package units.utils;
 
-import checkers.inference.model.ConstantSlot;
-import checkers.inference.solver.util.Statistics;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.util.Elements;
-import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.PolyAll;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
+import org.checkerframework.framework.util.AnnotationMirrorMap;
 import org.checkerframework.javacutil.AnnotationBuilder;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.BugInCF;
-import units.UnitsAnnotatedTypeFactory;
+import units.UnitsAnnotationClassLoader;
 import units.qual.BUC;
 import units.qual.Dimensionless;
 import units.qual.PolyUnit;
@@ -33,15 +31,13 @@ import units.qual.UnitsRep;
 import units.qual.UnknownUnits;
 
 /**
- * Utility class containing logic for creating and converting internal representations of units
- * between its 3 primary forms: {@link UnitsRep} as annotation mirrors and {@link TypecheckUnit}.
- *
- * <p>TODO: {@code @Unit}, and alias forms.
+ * Utility class containing logic for creating, updating, and converting internal representations of
+ * units between its 2 primary forms: {@link UnitsRep} as annotation mirrors and {@link
+ * TypecheckUnit}.
  */
 public class UnitsRepresentationUtils {
-    private static UnitsRepresentationUtils singletonInstance;
-    private static ProcessingEnvironment processingEnv;
-    private static Elements elements;
+    protected ProcessingEnvironment processingEnv;
+    protected Elements elements;
 
     /** An instance of {@link PolyAll} as an {@link AnnotationMirror} */
     public AnnotationMirror POLYALL;
@@ -52,35 +48,48 @@ public class UnitsRepresentationUtils {
     /** An instance of {@link UnitsRep} with no values in its elements */
     public AnnotationMirror RAWUNITSREP;
 
-    /** Instances of {@link UnitsRep} with values to represent UnknownUnits and UnitsBottom */
+    /** An instance of {@link UnitsRep} with values to represent {@link UnknownUnits} */
     public AnnotationMirror TOP;
 
+    /** An instance of {@link UnitsRep} with values to represent {@link UnitsBottom} */
     public AnnotationMirror BOTTOM;
 
     /**
-     * An instance of {@link UnitsRep} with default values in its elements, which represents
-     * dimensionless
+     * An instance of {@link UnitsRep} with default values in its elements, to represent {@link
+     * Dimensionless}
      */
     public AnnotationMirror DIMENSIONLESS;
 
-    /** Instances of {@link UnknownUnits} and {@link UnitsBottom} for insertion to source; */
-    public AnnotationMirror SURFACE_TOP;
-
-    public AnnotationMirror SURFACE_BOTTOM;
-
-    // /** Instance of {@link VarAnnot} for use in UnitsVisitor in infer mode. */
-    // public AnnotationMirror VARANNOT;
-
-    // public AnnotationMirror METER;
+    /**
+     * A 1 to 1 mapping between a (possibly incomplete) {@link UnitsRep} annotation mirror and its
+     * corresponding {@link UnitsRep} annotation mirror with all base units filled in and set to 0
+     */
+    protected final AnnotationMirrorMap<AnnotationMirror> unitsRepToCompleteUnitsRepMap =
+            new AnnotationMirrorMap<>();
 
     /**
-     * Instances of time units for use with various time APIs, used by {@link
-     * UnitsAnnotatedTypeFactory#UnitsImplicitsTreeAnnotator}
+     * A 1 to 1 mapping between a {@link UnitsRep} annotation mirror and its corresponding typecheck
+     * unit.
      */
-    public AnnotationMirror SECOND, MILLISECOND, MICROSECOND, NANOSECOND;
+    protected final AnnotationMirrorMap<TypecheckUnit> unitsRepAnnoToTypecheckUnitMap =
+            new AnnotationMirrorMap<>();
 
-    // Comparator used to sort annotation classes by their simple class name
-    private static Comparator<Class<? extends Annotation>> annoClassComparator =
+    /**
+     * A 1 to 1 mapping between a {@link UnitsRep} annotation mirror and its corresponding typecheck
+     * unit for pretty printing: the {@link UnitsRep} annotation mirror omits default annotation
+     * values.
+     */
+    protected final AnnotationMirrorMap<TypecheckUnit> prettyPrintUnitsRepAnnoToTypecheckUnitMap =
+            new AnnotationMirrorMap<>();
+
+    /** The set of base units */
+    protected final Map<String, Class<? extends Annotation>> baseUnits = new TreeMap<>();
+
+    /** All base units provided by the checker or user */
+    protected Set<String> baseUnitNames;
+
+    /** Comparator used to sort annotation classes by their simple class name. */
+    protected static Comparator<Class<? extends Annotation>> annoClassComparator =
             new Comparator<Class<? extends Annotation>>() {
                 @Override
                 public int compare(Class<? extends Annotation> a1, Class<? extends Annotation> a2) {
@@ -88,71 +97,71 @@ public class UnitsRepresentationUtils {
                 }
             };
 
-    /** The set of base units */
-    private final Map<String, Class<? extends Annotation>> baseUnits = new TreeMap<>();
+    /** The set of alias units, sorted by their simple class name. */
+    protected final Set<Class<? extends Annotation>> aliasUnits = createSortedBaseUnitSet();
 
-    /** All base units provided by the checker or user */
-    private Set<String> baseUnitNames;
+    /** A map from surface units annotation mirrors to their {@link UnitsRep}s representation. */
+    protected final AnnotationMirrorMap<AnnotationMirror> unitsAnnotationMirrorMap =
+            new AnnotationMirrorMap<>();
 
-    /** All base units actually used in the program, which should be serialized into z3 */
-    private Set<String> serializeableBaseUnitNames;
-
-    /** Whether to serialize the prefix exponent or not */
-    private boolean serializePrefix;
-
-    /** All base units not used in the program */
-    // private Set<String> nonserializeableBaseUnitNames;
-
-    /** The set of alias units defined as qualifiers */
-    private final Set<Class<? extends Annotation>> aliasUnits = createSortedBaseUnitSet();
-
-    /** A map from surface units annotation mirrors to their internal units representation. */
-    private final Map<AnnotationMirror, AnnotationMirror> unitsAnnotationMirrorMap =
-            AnnotationUtils.createAnnotationMap();
-
-    /** An immutable view of {@link #unitsAnnotationMirrorMap}. */
-    private final Map<AnnotationMirror, AnnotationMirror> immutableUnitsAnnotationMirrorMap;
+    public UnitsRepresentationUtils(ProcessingEnvironment processingEnv, Elements elements) {
+        this.processingEnv = processingEnv;
+        this.elements = elements;
+    }
 
     /**
-     * A set of the surface units annotation classes added to the {@link #unitsAnnotationMirrorMap}.
+     * Creates {@link AnnotationMirror}s for all of the annotations in this class
+     *
+     * @param loadedBaseUnits the set of base units loaded by {@link UnitsAnnotationClassLoader}
+     * @param loadedAliasUnits the set of alias units loaded by {@link UnitsAnnotationClassLoader}
      */
-    private final Set<Class<? extends Annotation>> surfaceUnitsSet = new HashSet<>();
+    public void postInit(
+            Set<Class<? extends Annotation>> loadedBaseUnits,
+            Set<Class<? extends Annotation>> loadedAliasUnits) {
 
-    /** The unitsAnnotationMirrorMap with its keys and values swapped. */
-    private final Map<AnnotationMirror, AnnotationMirror> swappedMap =
-            AnnotationUtils.createAnnotationMap();
-    /** An immutable view of {@link #swappedMap}. */
-    private Map<AnnotationMirror, AnnotationMirror> immutableSwappedMap;
-
-    private UnitsRepresentationUtils(ProcessingEnvironment processingEnv, Elements elements) {
-        UnitsRepresentationUtils.processingEnv = processingEnv;
-        UnitsRepresentationUtils.elements = elements;
-
-        immutableUnitsAnnotationMirrorMap = Collections.unmodifiableMap(unitsAnnotationMirrorMap);
-        immutableSwappedMap = Collections.unmodifiableMap(swappedMap);
-    }
-
-    public static UnitsRepresentationUtils getInstance(
-            ProcessingEnvironment processingEnv, Elements elements) {
-        if (singletonInstance == null) {
-            singletonInstance = new UnitsRepresentationUtils(processingEnv, elements);
+        // Create and add annotation mirrors for loaded base units and alias units
+        // First add all the base units so that the size of the base unit exponent map is correct
+        for (Class<? extends Annotation> baseUnit : loadedBaseUnits) {
+            addBaseUnit(baseUnit);
         }
-        return singletonInstance;
-    }
-
-    public static UnitsRepresentationUtils getInstance() {
-        if (singletonInstance == null) {
-            throw new BugInCF(
-                    "getInstance() called without initializing UnitsRepresentationUtils.");
+        // Then create {@link UnitsRep} annotation mirrors for each base unit
+        for (Class<? extends Annotation> baseUnit : loadedBaseUnits) {
+            createInternalBaseUnit(baseUnit);
         }
-        return singletonInstance;
+        // Finally add and create {@link UnitsRep} annotation mirrors for each alias unit
+        for (Class<? extends Annotation> aliasUnit : loadedAliasUnits) {
+            addAliasUnit(aliasUnit);
+            createInternalAliasUnit(aliasUnit);
+        }
+
+        POLYALL = AnnotationBuilder.fromClass(elements, PolyAll.class);
+        POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
+
+        RAWUNITSREP = AnnotationBuilder.fromClass(elements, UnitsRep.class);
+
+        // Create and add annotation mirrors for TOP, BOT, and DIMENSIONLESS
+        Map<String, Integer> zeroBaseDimensions = createZeroFilledBaseUnitsMap();
+        TOP = createUnitsRepAnno(true, false, 0, zeroBaseDimensions);
+        BOTTOM = createUnitsRepAnno(false, true, 0, zeroBaseDimensions);
+        DIMENSIONLESS = createUnitsRepAnno(false, false, 0, zeroBaseDimensions);
+
+        unitsAnnotationMirrorMap.put(
+                AnnotationBuilder.fromClass(elements, UnknownUnits.class), TOP);
+        unitsAnnotationMirrorMap.put(
+                AnnotationBuilder.fromClass(elements, UnitsBottom.class), BOTTOM);
+        unitsAnnotationMirrorMap.put(
+                AnnotationBuilder.fromClass(elements, Dimensionless.class), DIMENSIONLESS);
+
+        // for (Entry<?, ?> entry : unitsAnnotationMirrorMap.entrySet()) {
+        // System.err.println(" == built map " + entry.getKey() + " --> " + entry.getValue());
+        // }
     }
 
-    public static Set<Class<? extends Annotation>> createSortedBaseUnitSet() {
+    public Set<Class<? extends Annotation>> createSortedBaseUnitSet() {
         return new TreeSet<>(annoClassComparator);
     }
 
-    public static <TVal> Map<String, TVal> createSortedBaseUnitMap() {
+    public <TVal> Map<String, TVal> createSortedBaseUnitMap() {
         return new TreeMap<>();
     }
 
@@ -160,33 +169,11 @@ public class UnitsRepresentationUtils {
         baseUnits.put(baseUnit.getSimpleName(), baseUnit);
     }
 
-    // public Class<? extends Annotation> getBaseUnitClass(String simpleClassName) {
-    // return baseUnits.get(simpleClassName);
-    // }
-
     public Set<String> baseUnits() {
         if (baseUnitNames == null) {
             baseUnitNames = Collections.unmodifiableSet(baseUnits.keySet());
         }
         return baseUnitNames;
-    }
-
-    public Set<String> serializableBaseUnits() {
-        assert serializeableBaseUnitNames != null;
-        return serializeableBaseUnitNames;
-    }
-
-    public boolean serializePrefix() {
-        return serializePrefix;
-    }
-
-    //    public Set<String> nonserializeableBaseUnits() {
-    //        assert nonserializeableBaseUnitNames != null;
-    //        return nonserializeableBaseUnitNames;
-    //    }
-
-    public Set<Class<? extends Annotation>> surfaceUnitsSet() {
-        return surfaceUnitsSet;
     }
 
     public void addAliasUnit(Class<? extends Annotation> aliasUnit) {
@@ -205,68 +192,11 @@ public class UnitsRepresentationUtils {
         return map;
     }
 
-    // public Set<Class<? extends Annotation>> aliasUnits() {
-    // return aliasUnits;
-    // }
-
-    // postInit() is called after performing annotation loading to obtain the full list of base
-    // units
-    public void postInit() {
-        POLYALL = AnnotationBuilder.fromClass(elements, PolyAll.class);
-        POLYUNIT = AnnotationBuilder.fromClass(elements, PolyUnit.class);
-
-        RAWUNITSREP = AnnotationBuilder.fromClass(elements, UnitsRep.class);
-
-        Map<String, Integer> zeroBaseDimensions = createZeroFilledBaseUnitsMap();
-        TOP = createInternalUnit(true, false, 0, zeroBaseDimensions);
-        BOTTOM = createInternalUnit(false, true, 0, zeroBaseDimensions);
-        DIMENSIONLESS = createInternalUnit(false, false, 0, zeroBaseDimensions);
-
-        // Map<String, Integer> meterDimensions = createZeroFilledBaseUnitsMap();
-        // meterDimensions.put("m", 1);
-        // METER = createInternalUnit("Meter", false, false, 0, meterDimensions);
-
-        unitsAnnotationMirrorMap.put(
-                AnnotationBuilder.fromClass(elements, UnknownUnits.class), TOP);
-        unitsAnnotationMirrorMap.put(
-                AnnotationBuilder.fromClass(elements, UnitsBottom.class), BOTTOM);
-        unitsAnnotationMirrorMap.put(
-                AnnotationBuilder.fromClass(elements, Dimensionless.class), DIMENSIONLESS);
-
-        surfaceUnitsSet.add(UnknownUnits.class);
-        surfaceUnitsSet.add(UnitsBottom.class);
-        surfaceUnitsSet.add(Dimensionless.class);
-
-        for (Class<? extends Annotation> baseUnit : baseUnits.values()) {
-            createInternalBaseUnit(baseUnit);
-        }
-        surfaceUnitsSet.addAll(baseUnits.values());
-
-        for (Class<? extends Annotation> aliasUnit : aliasUnits) {
-            createInternalAliasUnit(aliasUnit);
-        }
-        surfaceUnitsSet.addAll(aliasUnits);
-
-        SURFACE_TOP = AnnotationBuilder.fromClass(elements, UnknownUnits.class);
-        SURFACE_BOTTOM = AnnotationBuilder.fromClass(elements, UnitsBottom.class);
-
-        Map<String, Integer> secondBaseMap = createZeroFilledBaseUnitsMap();
-        secondBaseMap.put("s", 1);
-        SECOND = createInternalUnit(false, false, 0, secondBaseMap);
-        MILLISECOND = createInternalUnit(false, false, -3, secondBaseMap);
-        MICROSECOND = createInternalUnit(false, false, -6, secondBaseMap);
-        NANOSECOND = createInternalUnit(false, false, -9, secondBaseMap);
-
-        // for (Entry<AnnotationMirror, AnnotationMirror> entry : unitsAnnotationMirrorMap
-        // .entrySet()) {
-        // System.err.println(" == built map " + entry.getKey() + " --> " + entry.getValue());
-        // }
-    }
-
     /**
-     * Creates an internal unit representation for the given base unit and adds it to the alias map.
+     * Creates an {@link UnitsRep} representation for the given base unit and adds it to the alias
+     * map.
      */
-    private void createInternalBaseUnit(Class<? extends Annotation> baseUnitClass) {
+    protected void createInternalBaseUnit(Class<? extends Annotation> baseUnitClass) {
         // check to see if the annotation has already been mapped before
         AnnotationMirror baseUnitAM = AnnotationBuilder.fromClass(elements, baseUnitClass);
         if (unitsAnnotationMirrorMap.containsKey(baseUnitAM)) {
@@ -277,15 +207,15 @@ public class UnitsRepresentationUtils {
 
         // set the exponent of the given base unit to 1
         exponents.put(baseUnitClass.getSimpleName(), 1);
-        // create the internal unit and add to alias map
-        unitsAnnotationMirrorMap.put(baseUnitAM, createInternalUnit(false, false, 0, exponents));
+        // create the {@link UnitsRep} and add to alias map
+        unitsAnnotationMirrorMap.put(baseUnitAM, createUnitsRepAnno(false, false, 0, exponents));
     }
 
     /**
-     * Creates an internal unit representation for the given alias unit and adds it to the alias
+     * Creates an {@link UnitsRep} representation for the given alias unit and adds it to the alias
      * map.
      */
-    private void createInternalAliasUnit(Class<? extends Annotation> aliasUnitClass) {
+    protected void createInternalAliasUnit(Class<? extends Annotation> aliasUnitClass) {
         // check to see if the annotation has already been mapped before
         AnnotationMirror aliasUnitAM = AnnotationBuilder.fromClass(elements, aliasUnitClass);
         if (unitsAnnotationMirrorMap.containsKey(aliasUnitAM)) {
@@ -295,66 +225,25 @@ public class UnitsRepresentationUtils {
         Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
 
         // replace default base unit exponents from anno, and accumulate prefixes
-        UnitsAlias aliasInfo = aliasUnitClass.getAnnotation(UnitsAlias.class);
-        for (BUC baseUnitComponent : aliasInfo.baseUnitComponents()) {
-            exponents.put(baseUnitComponent.unit(), baseUnitComponent.exponent());
+        UnitsAlias unitsRep = aliasUnitClass.getAnnotation(UnitsAlias.class);
+        for (BUC baseUnitComponent : unitsRep.bu()) {
+            exponents.put(baseUnitComponent.u(), baseUnitComponent.e());
         }
 
-        int prefix = aliasInfo.prefixExponent();
+        int prefix = unitsRep.p();
 
         unitsAnnotationMirrorMap.put(
-                aliasUnitAM, createInternalUnit(false, false, prefix, exponents));
+                aliasUnitAM, createUnitsRepAnno(false, false, prefix, exponents));
     }
-    //
-    // /**
-    // * Creates an internal unit representation for the given alias AnnotationMirror and its
-    // * component UnitsAlias meta annotation, adds it to the alias map, and returns the internal
-    // * representation.
-    // *
-    // * @param aliasAnno an {@link AnnotationMirror} of an alias annotation
-    // * @param aliasMetaAnno the {@link UnitsAlias} meta annotation of the given alias annotation
-    // * @return the internal representation unit as an {@link AnnotationMirror}
-    // */
-    // public AnnotationMirror createInternalAliasUnit(AnnotationMirror aliasAnno,
-    // AnnotationMirror aliasMetaAnno) {
-    // // check to see if the annotation has already been mapped before
-    // // we search based on the string name of the annotation
-    // String fullAnnotationName = aliasAnno.toString();
-    // for (AnnotationMirror unit : unitsAnnotationMirrorMap.keySet()) {
-    // if (fullAnnotationName.contentEquals(unit.toString())) {
-    // return unitsAnnotationMirrorMap.get(unit);
-    // }
-    // }
-    //
-    // int prefix = 0;
-    //
-    // Map<String, Integer> exponents = new TreeMap<>();
-    // // default all base units to exponent 0
-    // for (String bu : baseUnits()) {
-    // exponents.put(bu, 0);
-    // }
-    // // replace default base unit exponents from anno
-    // for (AnnotationMirror bu : AnnotationUtils.getElementValueArray(aliasMetaAnno, "value",
-    // AnnotationMirror.class, true)) {
-    // exponents.put(AnnotationUtils.getElementValue(bu, "unit", String.class, false),
-    // AnnotationUtils.getElementValue(bu, "exponent", Integer.class, true));
-    // prefix += AnnotationUtils.getElementValue(bu, "prefix", Integer.class, true);
-    // }
-    //
-    // unitsAnnotationMirrorMap.put(aliasAnno,
-    // createInternalUnit(aliasAnno.toString(), false, false, prefix, exponents));
-    //
-    // return unitsAnnotationMirrorMap.get(aliasAnno);
-    // }
 
     /**
-     * Returns the internal unit representation for the given annotation if it has been created,
-     * null otherwise.
+     * Returns the {@link UnitsRep} representation for the given surface annotation if it has been
+     * created, null otherwise.
      *
      * @param anno an {@link AnnotationMirror} of an annotation
      * @return the internal representation unit as an {@link AnnotationMirror}
      */
-    public AnnotationMirror getInternalAliasUnit(AnnotationMirror anno) {
+    public AnnotationMirror getUnitsRepAnno(AnnotationMirror anno) {
         // check to see if the annotation has already been mapped before
         if (unitsAnnotationMirrorMap.containsKey(anno)) {
             return unitsAnnotationMirrorMap.get(anno);
@@ -368,58 +257,78 @@ public class UnitsRepresentationUtils {
      * available, otherwise returns the given annotation unchanged.
      *
      * @param anno an {@link AnnotationMirror} of a {@link UnitsRep} annotation
-     * @return the surface representation unit if available, otherwise the @UnitsRep annotation
-     *     unchanged
+     * @return the surface representation unit if available, otherwise the {@link UnitsRep}
+     *     annotation unchanged
      */
     public AnnotationMirror getSurfaceUnit(AnnotationMirror anno) {
-        Map<AnnotationMirror, AnnotationMirror> map = getUnitsAliasMapSwapped();
-        // Substitutes known annotations with their surface annotations
-        if (map.containsKey(anno)) {
-            return map.get(anno);
+        for (Entry<AnnotationMirror, AnnotationMirror> pair : unitsAnnotationMirrorMap.entrySet()) {
+            if (AnnotationUtils.areSame(pair.getValue(), anno)) {
+                return pair.getKey();
+            }
+        }
+
+        return anno;
+    }
+
+    /**
+     * Returns a pretty print unit representation for the given {@link UnitsRep} annotation with all
+     * default annotation values omitted, if available, otherwise returns the given annotation
+     * unchanged.
+     *
+     * @param anno an {@link AnnotationMirror} of a {@link UnitsRep} annotation
+     * @return the pretty print representation unit if available, otherwise the {@link UnitsRep}
+     *     annotation unchanged
+     */
+    public AnnotationMirror getPrettyPrintUnit(AnnotationMirror anno) {
+        AnnotationMirror surfaceUnit = getSurfaceUnit(anno);
+        // if surfaceUnit is the same as anno, then remove all default annotation values
+        if (AnnotationUtils.areSameByClass(surfaceUnit, UnitsRep.class)) {
+            TypecheckUnit unit = createTypecheckUnit(surfaceUnit);
+            AnnotationMirror prettyPrintUnit = createPrettyPrintUnitsRepAnno(unit);
+            return prettyPrintUnit;
         } else {
-            return anno;
+            return surfaceUnit;
         }
     }
 
-    /*
-     * It is a units annotation if we have built an alias for it in the past (this includes @m
-     * --> @UnitsRep(..)), or is supported by the qual hierarchy, or it is a @UnitsRep
-     * annotation (with possibly not all base units).
+    /**
+     * The given annotation is a units annotation if we have built an alias for it in the past (this
+     * includes {@code @m --> @UnitsRep(..)}), or is supported by the qual hierarchy, or it is a
+     * {@link UnitsRep} annotation.
+     *
+     * @param atf AnnotatedTypeFactory
+     * @param anno an annotation to check
+     * @return whether the given annotation is a units annotation
      */
-    public boolean isUnitsAnnotation(
-            BaseAnnotatedTypeFactory realTypeFactory, AnnotationMirror anno) {
+    public boolean isUnitsAnnotation(AnnotatedTypeFactory atf, AnnotationMirror anno) {
         return unitsAnnotationMirrorMap.keySet().contains(anno)
-                || realTypeFactory.isSupportedQualifier(anno)
+                || atf.isSupportedQualifier(anno)
                 || AnnotationUtils.areSameByClass(anno, UnitsRep.class);
     }
 
+    /**
+     * the given collection of annotations contains a units annotation if at least one of its
+     * annotation is a units annotation according to {@link #isUnitsAnnotation(AnnotatedTypeFactory,
+     * AnnotationMirror)}
+     *
+     * @param atf
+     * @param annotations a collection of annotations
+     * @return whether the given collection of annotations contains a units annotation
+     */
     public boolean hasUnitsAnnotation(
-            BaseAnnotatedTypeFactory realTypeFactory,
-            Iterable<? extends AnnotationMirror> annotations) {
+            AnnotatedTypeFactory atf, Collection<? extends AnnotationMirror> annotations) {
         for (AnnotationMirror anno : annotations) {
-            if (isUnitsAnnotation(realTypeFactory, anno)) {
+            if (isUnitsAnnotation(atf, anno)) {
                 return true;
             }
         }
         return false;
     }
 
-    /** Returns an immutable map of surface units annotations mapped to their internal units */
-    public Map<AnnotationMirror, AnnotationMirror> getUnitsAliasMap() {
-        return immutableUnitsAnnotationMirrorMap;
-    }
-
-    /** Returns an immutable map of internal units mapped to their surface units annotations */
-    public Map<AnnotationMirror, AnnotationMirror> getUnitsAliasMapSwapped() {
-        // update swappedMap if there's differences in value set size
-        if (unitsAnnotationMirrorMap.values().size() != swappedMap.keySet().size()) {
-            swappedMap.putAll(
-                    unitsAnnotationMirrorMap.entrySet().stream()
-                            .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
-        }
-        return immutableSwappedMap;
-    }
-
+    /**
+     * @return whether the given {@link UnitsRep} annotation expresses an exponent for all base
+     *     units.
+     */
     public boolean hasAllBaseUnits(AnnotationMirror anno) {
         if (!AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             return false;
@@ -428,11 +337,9 @@ public class UnitsRepresentationUtils {
         // add declared base units from the anno to the map, filtering out duplicate base units
         Map<String, Integer> baseUnitsFromAnno = new HashMap<>();
         for (AnnotationMirror buAnno :
-                AnnotationUtils.getElementValueArray(
-                        anno, "baseUnitComponents", AnnotationMirror.class, true)) {
-            String baseUnit = AnnotationUtils.getElementValue(buAnno, "unit", String.class, false);
-            int exponent =
-                    AnnotationUtils.getElementValue(buAnno, "exponent", Integer.class, false);
+                AnnotationUtils.getElementValueArray(anno, "bu", AnnotationMirror.class, true)) {
+            String baseUnit = AnnotationUtils.getElementValue(buAnno, "u", String.class, false);
+            int exponent = AnnotationUtils.getElementValue(buAnno, "e", Integer.class, false);
             // ensure the declared base unit is actually a supported base unit
             if (!baseUnits().contains(baseUnit)) {
                 return false;
@@ -444,162 +351,191 @@ public class UnitsRepresentationUtils {
         return baseUnitsFromAnno.size() == baseUnits().size();
     }
 
-    private final Map<AnnotationMirror, AnnotationMirror> fillMissingBaseUnitsCache =
-            AnnotationUtils.createAnnotationMap();
-
-    // Builds a fresh AnnotationMirror for the given annotation with any missing base units filled
-    // in
-
-    // TODO: merge with below
-    // create an uncached TypeCheckUnits as a "struct" to hold the integers etc
+    /**
+     * Builds a fresh {@link UnitsRep} annotation for the given {@link UnitsRep} annotation with any
+     * missing base units filled in. For all other annotations, this method returns null.
+     */
     public AnnotationMirror fillMissingBaseUnits(AnnotationMirror anno) {
         if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
-            if (fillMissingBaseUnitsCache.containsKey(anno)) {
-                return fillMissingBaseUnitsCache.get(anno);
+            if (unitsRepToCompleteUnitsRepMap.containsKey(anno)) {
+                return unitsRepToCompleteUnitsRepMap.get(anno);
             }
 
-            boolean top = AnnotationUtils.getElementValue(anno, "top", Boolean.class, true);
-            boolean bot = AnnotationUtils.getElementValue(anno, "bot", Boolean.class, true);
-            int prefixExponent =
-                    AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true);
+            TypecheckUnit unit = createTypecheckUnitNoCache(anno);
+            AnnotationMirror filledInAM = createUnitsRepAnno(unit);
 
-            Map<String, Integer> exponents = createZeroFilledBaseUnitsMap();
-
-            // replace base units with values in annotation
-            for (AnnotationMirror bu :
-                    AnnotationUtils.getElementValueArray(
-                            anno, "baseUnitComponents", AnnotationMirror.class, true)) {
-                exponents.put(
-                        AnnotationUtils.getElementValue(bu, "unit", String.class, false),
-                        AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
-            }
-
-            AnnotationMirror filledInAM = createInternalUnit(top, bot, prefixExponent, exponents);
-
-            fillMissingBaseUnitsCache.put(anno, filledInAM);
+            unitsRepToCompleteUnitsRepMap.put(anno, filledInAM);
 
             return filledInAM;
         } else {
-            // not an internal units annotation
+            // not a {@link UnitsRep} annotation
             return null;
         }
     }
 
-    // A 1 to 1 mapping between an annotation mirror and its unique typecheck unit.
-    private final Map<AnnotationMirror, TypecheckUnit> typecheckUnitCache =
-            AnnotationUtils.createAnnotationMap();
-
+    /**
+     * Create a {@link TypecheckUnit} for the given complete {@link UnitsRep} annotation and caches
+     * the pair.
+     */
     public TypecheckUnit createTypecheckUnit(AnnotationMirror anno) {
-        if (typecheckUnitCache.containsKey(anno)) {
-            return typecheckUnitCache.get(anno);
+        if (unitsRepAnnoToTypecheckUnitMap.containsKey(anno)) {
+            return unitsRepAnnoToTypecheckUnitMap.get(anno);
         }
 
-        TypecheckUnit unit = new TypecheckUnit();
+        TypecheckUnit unit = createTypecheckUnitNoCache(anno);
+        unitsRepAnnoToTypecheckUnitMap.put(anno, unit);
+        return unit;
+    }
 
-        // if it is a polyunit annotation, generate top
+    /** Create a {@link TypecheckUnit} for the given {@link UnitsRep} annotation. */
+    public TypecheckUnit createTypecheckUnitNoCache(AnnotationMirror anno) {
+        TypecheckUnit unit = new TypecheckUnit(this);
+
+        // if it is a polymorphic annotation, generate top as we are type checking the body of
+        // a polymorphic method
         if (AnnotationUtils.areSameByClass(anno, PolyUnit.class)
                 || AnnotationUtils.areSameByClass(anno, PolyAll.class)) {
             unit.setUnknownUnits(true);
+            return unit;
         }
-        // if it is a units internal annotation, generate the internal unit
+        // if it is a {@link UnitsRep} annotation, generate the equivalent {@link TypecheckUnit}
         else if (AnnotationUtils.areSameByClass(anno, UnitsRep.class)) {
             unit.setUnknownUnits(AnnotationUtils.getElementValue(anno, "top", Boolean.class, true));
             unit.setUnitsBottom(AnnotationUtils.getElementValue(anno, "bot", Boolean.class, true));
-            unit.setPrefixExponent(
-                    AnnotationUtils.getElementValue(anno, "prefixExponent", Integer.class, true));
+            unit.setPrefixExponent(AnnotationUtils.getElementValue(anno, "p", Integer.class, true));
 
             Map<String, Integer> exponents = createSortedBaseUnitMap();
             // default all base units to exponent 0
             for (String bu : baseUnits()) {
                 exponents.put(bu, 0);
             }
-            // replace base units with values in annotation {@link BUC}
+            // replace base units with values in annotation
             for (AnnotationMirror bu :
                     AnnotationUtils.getElementValueArray(
-                            anno, "baseUnitComponents", AnnotationMirror.class, true)) {
+                            anno, "bu", AnnotationMirror.class, true)) {
                 exponents.put(
-                        AnnotationUtils.getElementValue(bu, "unit", String.class, false),
-                        AnnotationUtils.getElementValue(bu, "exponent", Integer.class, false));
+                        AnnotationUtils.getElementValue(bu, "u", String.class, false),
+                        AnnotationUtils.getElementValue(bu, "e", Integer.class, false));
             }
 
             for (String bu : exponents.keySet()) {
                 unit.setExponent(bu, exponents.get(bu));
             }
+            return unit;
         } else {
             // not a units annotation
             return null;
         }
-        typecheckUnitCache.put(anno, unit);
-
-        return unit;
     }
 
-    public AnnotationMirror createInternalUnit(TypecheckUnit unit) {
-        return createInternalUnit(
-                unit.isUnknownUnits(),
-                unit.isUnitsBottom(),
-                unit.getPrefixExponent(),
-                unit.getExponents());
-    }
-
-    public AnnotationMirror createInternalUnit(
-            boolean top, boolean bot, int prefixExponent, Map<String, Integer> exponents) {
-        // not allowed to set both a UU and UB to true on the same annotation
-        assert !(top && bot);
-
-        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsRep.class);
-
-        List<AnnotationMirror> expos = new ArrayList<>();
-        for (String key : exponents.keySet()) {
-            // Construct BaseUnit annotations for each exponent
-            AnnotationBuilder bucBuilder = new AnnotationBuilder(processingEnv, BUC.class);
-            bucBuilder.setValue("unit", key);
-            bucBuilder.setValue("exponent", exponents.get(key));
-            expos.add(bucBuilder.build());
-        }
-
-        // See {@link UnitsRep}
-        builder.setValue("top", top);
-        builder.setValue("bot", bot);
-        builder.setValue("prefixExponent", prefixExponent);
-        builder.setValue("baseUnitComponents", expos);
-        return builder.build();
-    }
-
-    public void setSerializedBaseUnits(Set<ConstantSlot> constantSlots) {
-
-        if (serializeableBaseUnitNames != null) {
-            // this case occurs when re-running inference for unsat core, no need to set
-            // units again
-            return;
-        }
-
-        // tabulate whether there's any appearance of prefix != 0
-        serializePrefix = false; // assumption
-
-        // tabulate the number of appearance of base unit exponents != 0
-        serializeableBaseUnitNames = new HashSet<>();
-
-        for (ConstantSlot slot : constantSlots) {
-            TypecheckUnit unit = createTypecheckUnit(slot.getValue());
-            // System.err.println(unit);
-
-            serializePrefix = serializePrefix || (unit.getPrefixExponent() != 0);
-
-            for (Entry<String, Integer> baseUnitExponents : unit.getExponents().entrySet()) {
-                String bu = baseUnitExponents.getKey();
-                boolean exponentUsed = baseUnitExponents.getValue() != 0;
-                if (exponentUsed) {
-                    serializeableBaseUnitNames.add(bu);
-                }
+    /** Create a {@link UnitsRep} annotation for the given {@link TypecheckUnit}. */
+    public AnnotationMirror createUnitsRepAnno(TypecheckUnit unit) {
+        // see if cache already has a mapping, if so return from cache
+        for (Entry<AnnotationMirror, TypecheckUnit> entry :
+                unitsRepAnnoToTypecheckUnitMap.entrySet()) {
+            if (unit.equals(entry.getValue())) {
+                return entry.getKey();
             }
         }
 
-        Statistics.addOrIncrementEntry(
-                "serialize_prefix",
-                UnitsRepresentationUtils.getInstance().serializePrefix() ? 1 : 0);
-        Statistics.addOrIncrementEntry(
-                "serialize_baseunits",
-                UnitsRepresentationUtils.getInstance().serializableBaseUnits().size());
+        // otherwise create an {@link UnitsRep} for the typecheck unit and add to cache
+        AnnotationMirror anno =
+                createUnitsRepAnno(
+                        unit.isTop(),
+                        unit.isBottom(),
+                        unit.getPrefixExponent(),
+                        unit.getExponents());
+
+        unitsRepAnnoToTypecheckUnitMap.put(anno, unit);
+        return anno;
+    }
+
+    /** Create a {@link UnitsRep} annotation for the given normalized representation values. */
+    public AnnotationMirror createUnitsRepAnno(
+            boolean t, boolean b, int e, Map<String, Integer> buc) {
+        // not allowed to set both a UU and UB to true on the same annotation
+        if (t && b) {
+            throw new BugInCF("Cannot set top and bottom both to true at the same time");
+        }
+
+        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsRep.class);
+
+        List<AnnotationMirror> bu = new ArrayList<>();
+        for (String baseUnit : buc.keySet()) {
+            /** Construct {@link BUC} annotations for each exponent */
+            AnnotationBuilder bucBuilder = new AnnotationBuilder(processingEnv, BUC.class);
+            bucBuilder.setValue("u", baseUnit);
+            bucBuilder.setValue("e", buc.get(baseUnit));
+            bu.add(bucBuilder.build());
+        }
+
+        // See {@link UnitsRep}
+        builder.setValue("top", t);
+        builder.setValue("bot", b);
+        builder.setValue("p", e);
+        builder.setValue("bu", bu);
+        return builder.build();
+    }
+
+    /** Create a {@link UnitsRep} annotation for the given {@link TypecheckUnit}. */
+    public AnnotationMirror createPrettyPrintUnitsRepAnno(TypecheckUnit unit) {
+        // see if cache already has a mapping, if so return from cache
+        for (Entry<AnnotationMirror, TypecheckUnit> entry :
+                prettyPrintUnitsRepAnnoToTypecheckUnitMap.entrySet()) {
+            if (unit.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+
+        // otherwise create an {@link UnitsRep} for the typecheck unit and add to cache
+        AnnotationMirror anno =
+                createPrettyPrintUnitsRepAnno(
+                        unit.isTop(),
+                        unit.isBottom(),
+                        unit.getPrefixExponent(),
+                        unit.getExponents());
+
+        prettyPrintUnitsRepAnnoToTypecheckUnitMap.put(anno, unit);
+        return anno;
+    }
+
+    /** Create a {@link UnitsRep} annotation for the given normalized representation values. */
+    public AnnotationMirror createPrettyPrintUnitsRepAnno(
+            boolean t, boolean b, int e, Map<String, Integer> buc) {
+        // not allowed to set both a UU and UB to true on the same annotation
+        if (t && b) {
+            throw new BugInCF("Cannot set top and bottom both to true at the same time");
+        }
+
+        AnnotationBuilder builder = new AnnotationBuilder(processingEnv, UnitsRep.class);
+
+        List<AnnotationMirror> bu = new ArrayList<>();
+        for (String baseUnit : buc.keySet()) {
+            int exponent = buc.get(baseUnit);
+            if (exponent != 0) {
+                /** Construct {@link BUC} annotations for each exponent */
+                AnnotationBuilder bucBuilder = new AnnotationBuilder(processingEnv, BUC.class);
+                bucBuilder.setValue("u", baseUnit);
+                bucBuilder.setValue("e", exponent);
+                bu.add(bucBuilder.build());
+            }
+        }
+
+        // See {@link UnitsRep}
+        if (t) builder.setValue("top", t);
+        if (b) builder.setValue("bot", b);
+        if (e != 0) builder.setValue("p", e);
+        if (!bu.isEmpty()) builder.setValue("bu", bu);
+        return builder.build();
+    }
+
+    /**
+     * Checks to see if the given anno is {@link PolyAll} or {@link PolyUnit}
+     *
+     * @param anno
+     * @return true if the anno is either of the polymorphic annotations
+     */
+    public boolean isPolymorphic(AnnotationMirror anno) {
+        return AnnotationUtils.areSame(anno, POLYALL) || AnnotationUtils.areSame(anno, POLYUNIT);
     }
 }

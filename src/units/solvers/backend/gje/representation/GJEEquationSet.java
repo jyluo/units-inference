@@ -41,9 +41,8 @@ public class GJEEquationSet {
         return isContradiction;
     }
 
-    public void addEquation(String key, String equation) {
-        if (!(key == prefixExponentKey
-                || UnitsRepresentationUtils.getInstance().baseUnits().contains(key))) {
+    public void addEquation(UnitsRepresentationUtils unitsRepUtils, String key, String equation) {
+        if (!(key == prefixExponentKey || unitsRepUtils.baseUnits().contains(key))) {
             throw new BugInCF("Trying to add an equation for unsupported key " + key);
         }
 

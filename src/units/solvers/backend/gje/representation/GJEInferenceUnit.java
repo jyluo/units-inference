@@ -9,6 +9,8 @@ import units.utils.UnitsRepresentationUtils;
  * through GJE.
  */
 public class GJEInferenceUnit {
+    /** reference to the units representation utilities library */
+    protected final UnitsRepresentationUtils unitsRepUtils;
 
     private final int cfiSlotID;
     private final int gjeVarID;
@@ -29,7 +31,10 @@ public class GJEInferenceUnit {
     // Tree map maintaining sorted order on base unit names
     private final Map<String, Integer> exponents;
 
-    private GJEInferenceUnit(int cfiSlotID, int gjeVarID, Kind kind) {
+    private GJEInferenceUnit(
+            UnitsRepresentationUtils unitsRepUtils, int cfiSlotID, int gjeVarID, Kind kind) {
+        this.unitsRepUtils = unitsRepUtils;
+
         this.cfiSlotID = cfiSlotID;
         this.gjeVarID = gjeVarID;
         this.kind = kind;
@@ -41,21 +46,23 @@ public class GJEInferenceUnit {
         // default prefixExponent is 0
         this.prefixExponent = defaultExponent;
 
-        exponents = UnitsRepresentationUtils.createSortedBaseUnitMap();
+        exponents = unitsRepUtils.createSortedBaseUnitMap();
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (String baseUnit : unitsRepUtils.baseUnits()) {
             // default exponents are 0
             this.exponents.put(baseUnit, defaultExponent);
         }
     }
 
     // constants do not have a gje variable ID
-    public static GJEInferenceUnit makeConstantSlot(int cfiSlotID) {
-        return new GJEInferenceUnit(cfiSlotID, -1, Kind.constant);
+    public static GJEInferenceUnit makeConstantSlot(
+            UnitsRepresentationUtils unitsRepUtils, int cfiSlotID) {
+        return new GJEInferenceUnit(unitsRepUtils, cfiSlotID, -1, Kind.constant);
     }
 
-    public static GJEInferenceUnit makeVariableSlot(int cfiSlotID, int gjeSlotID) {
-        return new GJEInferenceUnit(cfiSlotID, gjeSlotID, Kind.variable);
+    public static GJEInferenceUnit makeVariableSlot(
+            UnitsRepresentationUtils unitsRepUtils, int cfiSlotID, int gjeSlotID) {
+        return new GJEInferenceUnit(unitsRepUtils, cfiSlotID, gjeSlotID, Kind.variable);
     }
 
     public Kind getKind() {
@@ -115,8 +122,8 @@ public class GJEInferenceUnit {
         sb.append(cfiSlotID);
         sb.append(" : UU = " + uu);
         sb.append(" UB = " + ub);
-        sb.append(" Prefix = " + prefixExponent);
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        sb.append(" Base-10-Prefix = " + prefixExponent);
+        for (String baseUnit : unitsRepUtils.baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();
@@ -129,18 +136,18 @@ public class GJEInferenceUnit {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
         GJEInferenceUnit other = (GJEInferenceUnit) obj;
-        if (cfiSlotID != other.cfiSlotID) return false;
-        if (exponents == null) {
-            if (other.exponents != null) return false;
-        } else if (!exponents.equals(other.exponents)) return false;
-        if (kind != other.kind) return false;
-        if (prefixExponent != other.prefixExponent) return false;
-        if (ub != other.ub) return false;
-        if (uu != other.uu) return false;
-        return true;
+        return cfiSlotID == other.cfiSlotID
+                && kind == other.kind
+                && uu == other.uu
+                && ub == other.ub
+                && prefixExponent == other.prefixExponent
+                && exponents.equals(other.exponents);
     }
 }

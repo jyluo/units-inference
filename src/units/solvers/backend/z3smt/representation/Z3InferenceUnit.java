@@ -5,13 +5,17 @@ import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
 import java.util.Map;
+import java.util.Objects;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
-import units.utils.UnitsRepresentationUtils;
+import units.utils.UnitsInferenceRepresentationUtils;
 
 /**
  * A data structure class to encapsulate a set of Z3 variables representing a unit for inference.
  */
 public class Z3InferenceUnit {
+    /** reference to the units representation utilities library */
+    private final UnitsInferenceRepresentationUtils unitsRepUtils;
+
     // TODO: long term clean up, strip out the use of z3 Java API and construct raw
     // strings for each of the variables?
     private final Context ctx;
@@ -26,15 +30,18 @@ public class Z3InferenceUnit {
     // helper constant
     private final IntNum intZero;
 
-    private Z3InferenceUnit(Context ctx, int slotID) {
+    private Z3InferenceUnit(
+            UnitsInferenceRepresentationUtils unitsRepUtils, Context ctx, int slotID) {
+        this.unitsRepUtils = unitsRepUtils;
         this.ctx = ctx;
         this.slotID = slotID;
-        exponents = UnitsRepresentationUtils.createSortedBaseUnitMap();
+        exponents = unitsRepUtils.createSortedBaseUnitMap();
         intZero = ctx.mkInt(0);
     }
 
-    public static Z3InferenceUnit makeConstantSlot(Context ctx, int slotID) {
-        Z3InferenceUnit slot = new Z3InferenceUnit(ctx, slotID);
+    public static Z3InferenceUnit makeConstantSlot(
+            UnitsInferenceRepresentationUtils unitsRepUtils, Context ctx, int slotID) {
+        Z3InferenceUnit slot = new Z3InferenceUnit(unitsRepUtils, ctx, slotID);
 
         // default UU value is false
         slot.uu = ctx.mkBool(false);
@@ -43,7 +50,7 @@ public class Z3InferenceUnit {
         // default prefixExponent is 0
         slot.prefixExponent = slot.intZero;
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
+        for (String baseUnit : unitsRepUtils.serializableBaseUnits()) {
             // default exponents are 0
             slot.exponents.put(baseUnit, slot.intZero);
         }
@@ -51,25 +58,29 @@ public class Z3InferenceUnit {
         return slot;
     }
 
-    public static Z3InferenceUnit makeVariableSlot(Context ctx, int slotID) {
-        Z3InferenceUnit slot = new Z3InferenceUnit(ctx, slotID);
+    public static Z3InferenceUnit makeVariableSlot(
+            UnitsInferenceRepresentationUtils unitsRepUtils,
+            UnitsZ3SmtEncoderUtils unitsZ3SmtEncoderUtils,
+            Context ctx,
+            int slotID) {
+        Z3InferenceUnit slot = new Z3InferenceUnit(unitsRepUtils, ctx, slotID);
 
         slot.uu =
                 ctx.mkBoolConst(
-                        UnitsZ3SmtEncoderUtils.z3VarName(
+                        unitsZ3SmtEncoderUtils.z3VarName(
                                 slotID, UnitsZ3SmtEncoderUtils.uuSlotName));
         slot.ub =
                 ctx.mkBoolConst(
-                        UnitsZ3SmtEncoderUtils.z3VarName(
+                        unitsZ3SmtEncoderUtils.z3VarName(
                                 slotID, UnitsZ3SmtEncoderUtils.ubSlotName));
         slot.prefixExponent =
                 ctx.mkIntConst(
-                        UnitsZ3SmtEncoderUtils.z3VarName(
+                        unitsZ3SmtEncoderUtils.z3VarName(
                                 slotID, UnitsZ3SmtEncoderUtils.prefixSlotName));
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
+        for (String baseUnit : unitsRepUtils.serializableBaseUnits()) {
             slot.exponents.put(
-                    baseUnit, ctx.mkIntConst(UnitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
+                    baseUnit, ctx.mkIntConst(unitsZ3SmtEncoderUtils.z3VarName(slotID, baseUnit)));
         }
 
         return slot;
@@ -116,8 +127,8 @@ public class Z3InferenceUnit {
         sb.append(slotID);
         sb.append(" : UU = " + uu.toString());
         sb.append(" UB = " + ub.toString());
-        sb.append(" Prefix = " + prefixExponent.toString());
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().serializableBaseUnits()) {
+        sb.append(" Base-10-Prefix = " + prefixExponent.toString());
+        for (String baseUnit : unitsRepUtils.serializableBaseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         // TODO: printout unused base units?
@@ -126,14 +137,7 @@ public class Z3InferenceUnit {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((exponents == null) ? 0 : exponents.hashCode());
-        result = prime * result + ((prefixExponent == null) ? 0 : prefixExponent.hashCode());
-        result = prime * result + slotID;
-        result = prime * result + ((ub == null) ? 0 : ub.hashCode());
-        result = prime * result + ((uu == null) ? 0 : uu.hashCode());
-        return result;
+        return Objects.hash(slotID, uu, ub, prefixExponent, exponents);
     }
 
     @Override
@@ -141,44 +145,14 @@ public class Z3InferenceUnit {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         Z3InferenceUnit other = (Z3InferenceUnit) obj;
-        if (exponents == null) {
-            if (other.exponents != null) {
-                return false;
-            }
-        } else if (!exponents.equals(other.exponents)) {
-            return false;
-        }
-        if (prefixExponent == null) {
-            if (other.prefixExponent != null) {
-                return false;
-            }
-        } else if (!prefixExponent.equals(other.prefixExponent)) {
-            return false;
-        }
-        if (slotID != other.slotID) {
-            return false;
-        }
-        if (ub == null) {
-            if (other.ub != null) {
-                return false;
-            }
-        } else if (!ub.equals(other.ub)) {
-            return false;
-        }
-        if (uu == null) {
-            if (other.uu != null) {
-                return false;
-            }
-        } else if (!uu.equals(other.uu)) {
-            return false;
-        }
-        return true;
+        return slotID == other.slotID
+                && uu.equals(other.uu)
+                && ub.equals(other.ub)
+                && prefixExponent.equals(other.prefixExponent)
+                && exponents.equals(other.exponents);
     }
 }

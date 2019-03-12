@@ -23,7 +23,9 @@ import units.solvers.backend.z3smt.encoder.UnitsZ3SmtConstraintEncoderFactory;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
 import units.utils.TypecheckUnit;
+import units.utils.UnitsInferenceRepresentationUtils;
 import units.utils.UnitsRepresentationUtils;
+import units.utils.UnitsTypecheckUtils;
 
 public class UnitsZ3SmtFormatTranslator
         extends Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> {
@@ -31,12 +33,30 @@ public class UnitsZ3SmtFormatTranslator
     public static BoolExpr Z3TRUE;
     public static BoolExpr Z3FALSE;
 
-    // static reference to the singleton instance
-    protected static UnitsRepresentationUtils unitsRepUtils;
+    protected final UnitsInferenceRepresentationUtils unitsRepUtils;
+    protected final UnitsTypecheckUtils unitsTypecheckUtils;
+    protected final UnitsZ3SmtEncoderUtils unitsZ3SmtEncoderUtils;
 
-    public UnitsZ3SmtFormatTranslator(Lattice lattice) {
+    public UnitsZ3SmtFormatTranslator(
+            Lattice lattice,
+            UnitsInferenceRepresentationUtils unitsRepUtils,
+            UnitsTypecheckUtils unitsTypecheckUtils) {
         super(lattice);
-        unitsRepUtils = UnitsRepresentationUtils.getInstance();
+        this.unitsRepUtils = unitsRepUtils;
+        this.unitsTypecheckUtils = unitsTypecheckUtils;
+        this.unitsZ3SmtEncoderUtils = new UnitsZ3SmtEncoderUtils(unitsRepUtils);
+    }
+
+    public UnitsRepresentationUtils getUnitsRepresentationUtils() {
+        return unitsRepUtils;
+    }
+
+    public UnitsTypecheckUtils getUnitsTypecheckUtils() {
+        return unitsTypecheckUtils;
+    }
+
+    public UnitsZ3SmtEncoderUtils getUnitsZ3SmtEncoderUtils() {
+        return unitsZ3SmtEncoderUtils;
     }
 
     @Override
@@ -97,7 +117,9 @@ public class UnitsZ3SmtFormatTranslator
             return serializedSlots.get(slotID);
         }
 
-        Z3InferenceUnit encodedSlot = Z3InferenceUnit.makeVariableSlot(ctx, slotID);
+        Z3InferenceUnit encodedSlot =
+                Z3InferenceUnit.makeVariableSlot(
+                        unitsRepUtils, unitsZ3SmtEncoderUtils, ctx, slotID);
 
         serializedSlots.put(slotID, encodedSlot);
         return encodedSlot;
@@ -131,13 +153,13 @@ public class UnitsZ3SmtFormatTranslator
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
         // Makes a constant encoded slot with default values
-        Z3InferenceUnit encodedSlot = Z3InferenceUnit.makeConstantSlot(ctx, slotID);
+        Z3InferenceUnit encodedSlot = Z3InferenceUnit.makeConstantSlot(unitsRepUtils, ctx, slotID);
 
         // TODO: move this into makeConstantSlot()
         // Replace values in constant encoded slot with values in the annotation
-        if (unit.isUnknownUnits()) {
+        if (unit.isTop()) {
             encodedSlot.setUnknownUnits(true);
-        } else if (unit.isUnitsBottom()) {
+        } else if (unit.isBottom()) {
             encodedSlot.setUnitsBottom(true);
         } else {
             encodedSlot.setPrefixExponent(unit.getPrefixExponent());
@@ -178,7 +200,7 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         Z3InferenceUnit serializedSlot = slot.serialize(this);
-        return UnitsZ3SmtEncoderUtils.slotWellformedness(ctx, serializedSlot);
+        return unitsZ3SmtEncoderUtils.slotWellformedness(ctx, serializedSlot);
     }
 
     @Override
@@ -194,7 +216,7 @@ public class UnitsZ3SmtFormatTranslator
         }
 
         Z3InferenceUnit serializedSlot = slot.serialize(this);
-        return UnitsZ3SmtEncoderUtils.slotPreference(ctx, serializedSlot);
+        return unitsZ3SmtEncoderUtils.slotPreference(ctx, serializedSlot);
     }
 
     // Decode overall solutions from Z3
@@ -212,7 +234,7 @@ public class UnitsZ3SmtFormatTranslator
             String value = parts[1];
 
             // Get slotID and component name
-            Pair<Integer, String> slot = UnitsZ3SmtEncoderUtils.slotFromZ3VarName(varName);
+            Pair<Integer, String> slot = unitsZ3SmtEncoderUtils.slotFromZ3VarName(varName);
             int slotID = slot.first;
             String component = slot.second;
 
@@ -221,7 +243,7 @@ public class UnitsZ3SmtFormatTranslator
                 // Note: fresh TypecheckUnit has all exponents = 0 by default
                 // the exponents not encoded for z3 will simply be assumed to have a solution of
                 // 0, which is always true
-                solutionSlots.put(slotID, new TypecheckUnit());
+                solutionSlots.put(slotID, new TypecheckUnit(unitsRepUtils));
             }
 
             TypecheckUnit z3Slot = solutionSlots.get(slotID);
@@ -262,20 +284,21 @@ public class UnitsZ3SmtFormatTranslator
         // TODO: infer original name somehow
 
         AnnotationMirror solutionUnit =
-                unitsRepUtils.createInternalUnit(
-                        solutionSlot.isUnknownUnits(),
-                        solutionSlot.isUnitsBottom(),
+                unitsRepUtils.createUnitsRepAnno(
+                        solutionSlot.isTop(),
+                        solutionSlot.isBottom(),
                         solutionSlot.getPrefixExponent(),
                         solutionSlot.getExponents());
 
-        // Always return top and bottom based on the booleans, since the BU values can
-        // be arbitrary
-        if (solutionSlot.isUnknownUnits()) {
-            return unitsRepUtils.SURFACE_TOP;
-        } else if (solutionSlot.isUnitsBottom()) {
-            return unitsRepUtils.SURFACE_BOTTOM;
-        } else {
-            return unitsRepUtils.getSurfaceUnit(solutionUnit);
-        }
+        // // Always return top and bottom based on the booleans, since the BU values can
+        // // be arbitrary
+        // if (solutionSlot.isTop()) {
+        // return unitsRepUtils.SURFACE_TOP;
+        // } else if (solutionSlot.isBottom()) {
+        // return unitsRepUtils.SURFACE_BOTTOM;
+        // } else {
+        // return unitsRepUtils.getSurfaceUnit(solutionUnit);
+        // }
+        return unitsRepUtils.getSurfaceUnit(solutionUnit);
     }
 }

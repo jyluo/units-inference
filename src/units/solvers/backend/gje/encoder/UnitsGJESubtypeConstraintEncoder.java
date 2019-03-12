@@ -17,7 +17,7 @@ public class UnitsGJESubtypeConstraintEncoder extends UnitsGJEAbstractConstraint
     }
 
     protected GJEEquationSet encode(Slot subtype, Slot supertype) {
-        return UnitsGJEEncoderUtils.subtype(
+        return unitsGJEEncoderUtils.subtype(
                 subtype.serialize(formatTranslator), supertype.serialize(formatTranslator));
     }
 

@@ -21,16 +21,20 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import units.solvers.backend.gje.encoder.UnitsGJEConstraintEncoderFactory;
+import units.solvers.backend.gje.encoder.UnitsGJEEncoderUtils;
 import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
 import units.utils.TypecheckUnit;
 import units.utils.UnitsRepresentationUtils;
+import units.utils.UnitsTypecheckUtils;
 
 // AbstractFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
 public class UnitsGJEFormatTranslator
         extends AbstractFormatTranslator<GJEInferenceUnit, GJEEquationSet, TypecheckUnit> {
 
-    protected UnitsRepresentationUtils unitsRepUtils;
+    protected final UnitsRepresentationUtils unitsRepUtils;
+    protected final UnitsTypecheckUtils unitsTypecheckUtils;
+    protected final UnitsGJEEncoderUtils unitsGJEEncoderUtils;
 
     /** Cache of all serialized slots, keyed on slot ID. */
     protected final Map<Integer, GJEInferenceUnit> serializedSlots = new HashMap<>();
@@ -39,10 +43,27 @@ public class UnitsGJEFormatTranslator
     protected final Map<Integer, Slot> slotGJEtoCFIMap = new HashMap<>();
     protected final Map<Slot, Integer> slotCFItoGJEMap = new HashMap<>();
 
-    public UnitsGJEFormatTranslator(Lattice lattice, UnitsRepresentationUtils unitsRepUtils) {
+    public UnitsGJEFormatTranslator(
+            Lattice lattice,
+            UnitsRepresentationUtils unitsRepUtils,
+            UnitsTypecheckUtils unitsTypecheckUtils) {
         super(lattice);
         finishInitializingEncoders();
         this.unitsRepUtils = unitsRepUtils;
+        this.unitsTypecheckUtils = unitsTypecheckUtils;
+        this.unitsGJEEncoderUtils = new UnitsGJEEncoderUtils(unitsRepUtils);
+    }
+
+    public UnitsRepresentationUtils getUnitsRepresentationUtils() {
+        return unitsRepUtils;
+    }
+
+    public UnitsTypecheckUtils getUnitsTypecheckUtils() {
+        return unitsTypecheckUtils;
+    }
+
+    public UnitsGJEEncoderUtils getUnitsGJEEncoderUtils() {
+        return unitsGJEEncoderUtils;
     }
 
     @Override
@@ -80,7 +101,8 @@ public class UnitsGJEFormatTranslator
             return serializedSlots.get(cfiSlotID);
         }
 
-        GJEInferenceUnit encodedSlot = GJEInferenceUnit.makeVariableSlot(cfiSlotID, gjeSlotID);
+        GJEInferenceUnit encodedSlot =
+                GJEInferenceUnit.makeVariableSlot(unitsRepUtils, cfiSlotID, gjeSlotID);
 
         serializedSlots.put(cfiSlotID, encodedSlot);
         return encodedSlot;
@@ -114,7 +136,7 @@ public class UnitsGJEFormatTranslator
         TypecheckUnit unit = unitsRepUtils.createTypecheckUnit(anno);
 
         // Makes a constant encoded slot with default values
-        GJEInferenceUnit encodedSlot = GJEInferenceUnit.makeConstantSlot(slotID);
+        GJEInferenceUnit encodedSlot = GJEInferenceUnit.makeConstantSlot(unitsRepUtils, slotID);
 
         // Replace values in constant encoded slot with values in the annotation
         if (unit.isTop()) {
@@ -239,13 +261,13 @@ public class UnitsGJEFormatTranslator
 
         // Always return top and bottom based on the booleans, since the BU
         // values can be arbitrary
-        //        if (solutionSlot.isUnknownUnits()) {
-        //            return unitsRepUtils.SURFACE_TOP;
-        //        } else if (solutionSlot.isUnitsBottom()) {
-        //            return unitsRepUtils.SURFACE_BOTTOM;
-        //        } else {
-        //            return unitsRepUtils.getSurfaceUnit(solutionUnit);
-        //        }
+        // if (solutionSlot.isUnknownUnits()) {
+        // return unitsRepUtils.SURFACE_TOP;
+        // } else if (solutionSlot.isUnitsBottom()) {
+        // return unitsRepUtils.SURFACE_BOTTOM;
+        // } else {
+        // return unitsRepUtils.getSurfaceUnit(solutionUnit);
+        // }
         return unitsRepUtils.getSurfaceUnit(solutionUnit);
     }
 }

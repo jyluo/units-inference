@@ -11,10 +11,16 @@ import units.utils.UnitsRepresentationUtils;
  */
 public class UnitsGJEEncoderUtils {
 
+    protected final UnitsRepresentationUtils unitsRepUtils;
+
+    public UnitsGJEEncoderUtils(UnitsRepresentationUtils unitsRepUtils) {
+        this.unitsRepUtils = unitsRepUtils;
+    }
+
     private static final String delimiter = " ";
 
     // For Equality, and also Modulo
-    public static GJEEquationSet equality(GJEInferenceUnit fst, GJEInferenceUnit snd) {
+    public GJEEquationSet equality(GJEInferenceUnit fst, GJEInferenceUnit snd) {
         if (fst.isConstant() && snd.isConstant() && !fst.equals(snd)) {
             throw new BugInCF(
                     "trying to encode an always false equality constraint: " + fst + " == " + snd);
@@ -36,6 +42,7 @@ public class UnitsGJEEncoderUtils {
                 // input: eg v1 = v2 (aka v1 - v2 = 0)
                 // output: 2 1 IDv1 -1 IDv2 0
                 eqSet.addEquation(
+                        unitsRepUtils,
                         GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
@@ -46,8 +53,9 @@ public class UnitsGJEEncoderUtils {
                                 String.valueOf(snd.getGJEVarID()),
                                 "0"));
 
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (String baseUnit : unitsRepUtils.baseUnits()) {
                     eqSet.addEquation(
+                            unitsRepUtils,
                             baseUnit,
                             String.join(
                                     delimiter,
@@ -63,11 +71,12 @@ public class UnitsGJEEncoderUtils {
         }
     }
 
-    private static GJEEquationSet equalityCV(GJEInferenceUnit constant, GJEInferenceUnit variable) {
+    private GJEEquationSet equalityCV(GJEInferenceUnit constant, GJEInferenceUnit variable) {
         GJEEquationSet eqSet = new GJEEquationSet();
         // input: eg 3 = x
         // output: 1 1 IDx 3
         eqSet.addEquation(
+                unitsRepUtils,
                 GJEEquationSet.prefixExponentKey,
                 String.join(
                         delimiter,
@@ -76,8 +85,9 @@ public class UnitsGJEEncoderUtils {
                         String.valueOf(variable.getGJEVarID()),
                         String.valueOf(constant.getPrefixExponent())));
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (String baseUnit : unitsRepUtils.baseUnits()) {
             eqSet.addEquation(
+                    unitsRepUtils,
                     baseUnit,
                     String.join(
                             delimiter,
@@ -89,12 +99,12 @@ public class UnitsGJEEncoderUtils {
         return eqSet;
     }
 
-    public static GJEEquationSet subtype(GJEInferenceUnit subT, GJEInferenceUnit superT) {
+    public GJEEquationSet subtype(GJEInferenceUnit subT, GJEInferenceUnit superT) {
         return equality(subT, superT);
     }
 
     // For Addition and Subtraction
-    public static GJEEquationSet tripleEquality(
+    public GJEEquationSet tripleEquality(
             GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
         // set lhs == rhs, and rhs == res, transitively lhs == res
@@ -103,7 +113,7 @@ public class UnitsGJEEncoderUtils {
         return eqSet;
     }
 
-    public static GJEEquationSet multiply(
+    public GJEEquationSet multiply(
             GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
         assert res.isVariable();
@@ -129,6 +139,7 @@ public class UnitsGJEEncoderUtils {
             // input: eg c1 * c2 = v
             // output: 1 1 IDv (c1 + c2)
             eqSet.addEquation(
+                    unitsRepUtils,
                     GJEEquationSet.prefixExponentKey,
                     String.join(
                             delimiter,
@@ -137,8 +148,9 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(lhs.getPrefixExponent() + rhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (String baseUnit : unitsRepUtils.baseUnits()) {
                 eqSet.addEquation(
+                        unitsRepUtils,
                         baseUnit,
                         String.join(
                                 delimiter,
@@ -167,6 +179,7 @@ public class UnitsGJEEncoderUtils {
                 // input: eg v * v = v2
                 // output: 2 2 IDv -1 IDv2 0
                 eqSet.addEquation(
+                        unitsRepUtils,
                         GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
@@ -176,8 +189,9 @@ public class UnitsGJEEncoderUtils {
                                 "-1",
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (String baseUnit : unitsRepUtils.baseUnits()) {
                     eqSet.addEquation(
+                            unitsRepUtils,
                             baseUnit,
                             String.join(
                                     delimiter,
@@ -196,6 +210,7 @@ public class UnitsGJEEncoderUtils {
                 // input: eg v1 * v2 = v3
                 // output: 3 1 IDv1 1 IDv2 -1 IDv3 0
                 eqSet.addEquation(
+                        unitsRepUtils,
                         GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
@@ -208,8 +223,9 @@ public class UnitsGJEEncoderUtils {
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
 
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (String baseUnit : unitsRepUtils.baseUnits()) {
                     eqSet.addEquation(
+                            unitsRepUtils,
                             baseUnit,
                             String.join(
                                     delimiter,
@@ -235,7 +251,7 @@ public class UnitsGJEEncoderUtils {
         }
     }
 
-    private static GJEEquationSet multiplyCV(
+    private GJEEquationSet multiplyCV(
             GJEInferenceUnit constant, GJEInferenceUnit variable, GJEInferenceUnit res) {
 
         GJEEquationSet eqSet = new GJEEquationSet();
@@ -243,6 +259,7 @@ public class UnitsGJEEncoderUtils {
         // input: eg c1 * v1 = v2
         // output: 2 1 IDv2 -1 IDv1 c1
         eqSet.addEquation(
+                unitsRepUtils,
                 GJEEquationSet.prefixExponentKey,
                 String.join(
                         delimiter,
@@ -253,8 +270,9 @@ public class UnitsGJEEncoderUtils {
                         String.valueOf(variable.getGJEVarID()),
                         String.valueOf(constant.getPrefixExponent())));
 
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        for (String baseUnit : unitsRepUtils.baseUnits()) {
             eqSet.addEquation(
+                    unitsRepUtils,
                     baseUnit,
                     String.join(
                             delimiter,
@@ -268,8 +286,7 @@ public class UnitsGJEEncoderUtils {
         return eqSet;
     }
 
-    public static GJEEquationSet divide(
-            GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
+    public GJEEquationSet divide(GJEInferenceUnit lhs, GJEInferenceUnit rhs, GJEInferenceUnit res) {
 
         assert res.isVariable();
 
@@ -294,6 +311,7 @@ public class UnitsGJEEncoderUtils {
             // input: eg c1 / c2 = v
             // output: 1 1 IDv (c1 - c2)
             eqSet.addEquation(
+                    unitsRepUtils,
                     GJEEquationSet.prefixExponentKey,
                     String.join(
                             delimiter,
@@ -302,8 +320,9 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(lhs.getPrefixExponent() - rhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (String baseUnit : unitsRepUtils.baseUnits()) {
                 eqSet.addEquation(
+                        unitsRepUtils,
                         baseUnit,
                         String.join(
                                 delimiter,
@@ -321,6 +340,7 @@ public class UnitsGJEEncoderUtils {
             // input: eg c1 / v1 = v2
             // output: 2 1 IDv1 1 IDv2 c1
             eqSet.addEquation(
+                    unitsRepUtils,
                     GJEEquationSet.prefixExponentKey,
                     String.join(
                             delimiter,
@@ -331,8 +351,9 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(lhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (String baseUnit : unitsRepUtils.baseUnits()) {
                 eqSet.addEquation(
+                        unitsRepUtils,
                         baseUnit,
                         String.join(
                                 delimiter,
@@ -351,6 +372,7 @@ public class UnitsGJEEncoderUtils {
             // input: eg v1 / c1 = v2
             // output: 2 1 IDv1 -1 IDv2 c1
             eqSet.addEquation(
+                    unitsRepUtils,
                     GJEEquationSet.prefixExponentKey,
                     String.join(
                             delimiter,
@@ -361,8 +383,9 @@ public class UnitsGJEEncoderUtils {
                             String.valueOf(res.getGJEVarID()),
                             String.valueOf(rhs.getPrefixExponent())));
 
-            for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+            for (String baseUnit : unitsRepUtils.baseUnits()) {
                 eqSet.addEquation(
+                        unitsRepUtils,
                         baseUnit,
                         String.join(
                                 delimiter,
@@ -384,10 +407,12 @@ public class UnitsGJEEncoderUtils {
                 // input: eg v / v = v3
                 // output: 1 1 IDv3 0
                 eqSet.addEquation(
+                        unitsRepUtils,
                         GJEEquationSet.prefixExponentKey,
                         String.join(delimiter, "1", "1", String.valueOf(res.getGJEVarID()), "0"));
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (String baseUnit : unitsRepUtils.baseUnits()) {
                     eqSet.addEquation(
+                            unitsRepUtils,
                             baseUnit,
                             String.join(
                                     delimiter, "1", "1", String.valueOf(res.getGJEVarID()), "0"));
@@ -400,6 +425,7 @@ public class UnitsGJEEncoderUtils {
                 // input: eg v1 / v2 = v3
                 // output: 3 1 IDv1 -1 IDv2 -1 IDv3 0
                 eqSet.addEquation(
+                        unitsRepUtils,
                         GJEEquationSet.prefixExponentKey,
                         String.join(
                                 delimiter,
@@ -412,8 +438,9 @@ public class UnitsGJEEncoderUtils {
                                 String.valueOf(res.getGJEVarID()),
                                 "0"));
 
-                for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+                for (String baseUnit : unitsRepUtils.baseUnits()) {
                     eqSet.addEquation(
+                            unitsRepUtils,
                             baseUnit,
                             String.join(
                                     delimiter,

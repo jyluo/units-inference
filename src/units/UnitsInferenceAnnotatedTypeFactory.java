@@ -47,14 +47,14 @@ import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.UserError;
-import units.utils.UnitsRepresentationUtils;
+import units.utils.UnitsInferenceRepresentationUtils;
 import units.utils.UnitsTypecheckUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
     protected final UnitsAnnotatedTypeFactory unitsATF;
 
     /** reference to the units representation utilities library */
-    protected final UnitsRepresentationUtils unitsRepUtils;
+    protected final UnitsInferenceRepresentationUtils unitsRepUtils;
 
     /** reference to the units type check utilities library */
     protected final UnitsTypecheckUtils unitsTypecheckUtils;
@@ -101,7 +101,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         postInit();
     }
 
-    public UnitsRepresentationUtils getUnitsRepresentationUtils() {
+    public UnitsInferenceRepresentationUtils getUnitsRepresentationUtils() {
         return unitsRepUtils;
     }
 

@@ -124,7 +124,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     @Override
     protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         // get all the loaded annotations
-        Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
+        Set<Class<? extends Annotation>> qualSet = new HashSet<>();
         // Super grabs all supported qualifiers from the real qualifier hierarchy
         // and also puts in VarAnnot
         qualSet.addAll(super.createSupportedTypeQualifiers());
@@ -274,6 +274,22 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             // System.err.println(" tops " + tops);
             // System.err.println(" bottoms " + bottoms);
             // System.err.println();
+        }
+
+        @Override
+        public AnnotationMirror getTopAnnotation(AnnotationMirror am) {
+            if (isVarAnnot(am)) {
+                return super.getTopAnnotation(am);
+            }
+            return unitsRepUtils.TOP;
+        }
+
+        @Override
+        public AnnotationMirror getBottomAnnotation(AnnotationMirror am) {
+            if (isVarAnnot(am)) {
+                return super.getTopAnnotation(am);
+            }
+            return unitsRepUtils.BOTTOM;
         }
     }
 

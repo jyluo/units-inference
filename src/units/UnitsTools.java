@@ -9,7 +9,7 @@ public class UnitsTools {
     public static final @C int C = 1;
     public static final @cd int cd = 1;
     public static final @day int day = 1;
-    public static final @deg double deg = 1;
+    public static final @deg int deg = 1;
     public static final @g int g = 1;
     public static final @h int h = 1;
     public static final @K int K = 1;
@@ -27,7 +27,7 @@ public class UnitsTools {
     public static final @mPERs2 int mPERs2 = 1;
     public static final @ms int ms = 1;
     public static final @ns int ns = 1;
-    public static final @rad double rad = 1;
+    public static final @rad int rad = 1;
     public static final @s int s = 1;
     public static final @us int us = 1;
 }

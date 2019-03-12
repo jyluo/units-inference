@@ -28,7 +28,6 @@ import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.type.TypeKind;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.Result;
 import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
@@ -97,45 +96,47 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         }
     }
 
-    /**
-     * copy of super but with validateType enabled, so that it eventually calls {@link
-     * #isValidUse(AnnotatedDeclaredType, AnnotatedDeclaredType, Tree)} below
-     *
-     * <p>TODO: two copies of "type.invalid.annotations.on.use" are issued, once due to {@link
-     * #commonAssignmentCheck(AnnotatedTypeMirror, ExpressionTree, String)} during {@link
-     * #visitVariable(com.sun.source.tree.VariableTree, Void)}, and once due to {@link
-     * #visitNewClass(NewClassTree, Void)}, both calling {@link #validateTypeOf(Tree)}. Deduplicate
-     * if possible.
-     */
-    @Override
-    public boolean validateTypeOf(Tree tree) {
-        AnnotatedTypeMirror type;
-        // It's quite annoying that there is no TypeTree.
-        switch (tree.getKind()) {
-            case PRIMITIVE_TYPE:
-            case PARAMETERIZED_TYPE:
-            case TYPE_PARAMETER:
-            case ARRAY_TYPE:
-            case UNBOUNDED_WILDCARD:
-            case EXTENDS_WILDCARD:
-            case SUPER_WILDCARD:
-            case ANNOTATED_TYPE:
-                type = atypeFactory.getAnnotatedTypeFromTypeTree(tree);
-                break;
-            case METHOD:
-                type = atypeFactory.getMethodReturnType((MethodTree) tree);
-                if (type == null || type.getKind() == TypeKind.VOID) {
-                    // Nothing to do for void methods.
-                    // Note that for a constructor the AnnotatedExecutableType does
-                    // not use void as return type.
-                    return true;
-                }
-                break;
-            default:
-                type = atypeFactory.getAnnotatedType(tree);
-        }
-        return validateType(tree, type);
-    }
+    // TODO: work in progress to enable checking "type.invalid.annotations.on.use" errors
+    //    /**
+    //     * copy of super but with validateType enabled, so that it eventually calls {@link
+    //     * #isValidUse(AnnotatedDeclaredType, AnnotatedDeclaredType, Tree)} below
+    //     *
+    //     * <p>TODO: two copies of "type.invalid.annotations.on.use" are issued, once due to {@link
+    //     * #commonAssignmentCheck(AnnotatedTypeMirror, ExpressionTree, String)} during {@link
+    //     * #visitVariable(com.sun.source.tree.VariableTree, Void)}, and once due to {@link
+    //     * #visitNewClass(NewClassTree, Void)}, both calling {@link #validateTypeOf(Tree)}.
+    // Deduplicate
+    //     * if possible.
+    //     */
+    //    @Override
+    //    public boolean validateTypeOf(Tree tree) {
+    //        AnnotatedTypeMirror type;
+    //        // It's quite annoying that there is no TypeTree.
+    //        switch (tree.getKind()) {
+    //            case PRIMITIVE_TYPE:
+    //            case PARAMETERIZED_TYPE:
+    //            case TYPE_PARAMETER:
+    //            case ARRAY_TYPE:
+    //            case UNBOUNDED_WILDCARD:
+    //            case EXTENDS_WILDCARD:
+    //            case SUPER_WILDCARD:
+    //            case ANNOTATED_TYPE:
+    //                type = atypeFactory.getAnnotatedTypeFromTypeTree(tree);
+    //                break;
+    //            case METHOD:
+    //                type = atypeFactory.getMethodReturnType((MethodTree) tree);
+    //                if (type == null || type.getKind() == TypeKind.VOID) {
+    //                    // Nothing to do for void methods.
+    //                    // Note that for a constructor the AnnotatedExecutableType does
+    //                    // not use void as return type.
+    //                    return true;
+    //                }
+    //                break;
+    //            default:
+    //                type = atypeFactory.getAnnotatedType(tree);
+    //        }
+    //        return validateType(tree, type);
+    //    }
 
     /** override to allow uses of classes declared as {@link Dimensionless} with units */
     @Override

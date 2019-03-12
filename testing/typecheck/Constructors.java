@@ -62,7 +62,9 @@ class Constructors {
         @m MeterClass mc1 = new MeterClass();
         @m MeterClass mc2 = new @m MeterClass();
         // can't use a non-meter unit on a class with declared type of meters
-        // :: error: (type.invalid.annotations.on.use)
+        // TODO: support issuing "type.invalid.annotations.on.use" errors
+        // :: error: (assignment.type.incompatible)
+        // :: error: (constructor.invocation.invalid)
         @m MeterClass mc3 = new @s MeterClass();
     }
 

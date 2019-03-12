@@ -48,11 +48,16 @@ import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.UserError;
 import units.utils.UnitsRepresentationUtils;
+import units.utils.UnitsTypecheckUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
-    protected UnitsAnnotatedTypeFactory unitsATF;
+    protected final UnitsAnnotatedTypeFactory unitsATF;
 
-    protected UnitsRepresentationUtils unitsRepUtils;
+    /** reference to the units representation utilities library */
+    protected final UnitsRepresentationUtils unitsRepUtils;
+
+    /** reference to the units type check utilities library */
+    protected final UnitsTypecheckUtils unitsTypecheckUtils;
 
     public UnitsInferenceAnnotatedTypeFactory(
             InferenceChecker inferenceChecker,
@@ -69,13 +74,16 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 constraintManager);
 
         if (!(realTypeFactory instanceof UnitsAnnotatedTypeFactory)) {
-            throw new BugInCF("Incorrect real type factory created");
+            throw new BugInCF(
+                    "Incorrect class of real type factory created "
+                            + realTypeFactory.getClass().getCanonicalName());
         }
 
         unitsATF = (UnitsAnnotatedTypeFactory) realTypeFactory;
 
         // Should already be initialized in the real ATF
         unitsRepUtils = unitsATF.getUnitsRepresentationUtils();
+        unitsTypecheckUtils = unitsATF.getUnitsTypecheckUtils();
 
         // and it should already have some base units
         if (unitsRepUtils.baseUnits().isEmpty()) {
@@ -91,6 +99,14 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // unitsRepUtils.VARANNOT = builder.build();
 
         postInit();
+    }
+
+    public UnitsRepresentationUtils getUnitsRepresentationUtils() {
+        return unitsRepUtils;
+    }
+
+    public UnitsTypecheckUtils getUnitsTypecheckUtils() {
+        return unitsTypecheckUtils;
     }
 
     @Override

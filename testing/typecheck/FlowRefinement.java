@@ -2,7 +2,6 @@ import units.UnitsTools;
 import units.qual.*;
 
 class FlowRefinement {
-
     void methodLocalFlowSensitiveRefinement() {
         @deg double degrees = 45.0 * UnitsTools.deg;
 

@@ -2,9 +2,7 @@ import org.checkerframework.framework.qual.PolyAll;
 import units.qual.*;
 
 class Subtyping {
-
     @UnknownUnits Integer top;
-
     @UnknownUnits Integer uu;
     @UnitsBottom Integer bot;
     @Dimensionless Integer dim;
@@ -42,11 +40,7 @@ class Subtyping {
         s = s;
     }
 
-    @PolyAll Integer polyall;
-    @PolyUnit Integer polyunit;
-    @UnitsRep Integer raw;
-
-    void oddCases() {
+    void polyBody(@PolyAll Integer polyall, @PolyUnit Integer polyunit, @UnitsRep Integer raw) {
         // For directly testing the subtyping relations defined between poly and unit types
         // these are not expected to be in source code
         polyall = raw;

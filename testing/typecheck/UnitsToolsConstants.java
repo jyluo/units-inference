@@ -2,9 +2,7 @@ import units.UnitsTools;
 import units.qual.*;
 
 class UnitsToolsConstants {
-
     @UnknownUnits Integer top;
-
     @UnknownUnits Integer uu;
     @UnitsBottom Integer bot;
     @Dimensionless Integer dim;
@@ -29,11 +27,5 @@ class UnitsToolsConstants {
         s = UnitsTools.m;
         // :: error: (assignment.type.incompatible)
         s = UnitsTools.ms;
-    }
-
-    void test2() {
-        uu = UnitsTools.top;
-        bot = UnitsTools.bottom;
-        dim = UnitsTools.dimensionless;
     }
 }

@@ -28,19 +28,21 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
+import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.AnnotationClassLoader;
-import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
+import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
 import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
@@ -48,8 +50,9 @@ import org.checkerframework.javacutil.UserError;
 import units.utils.UnitsRepresentationUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
-    // static reference to the singleton instance
-    protected static UnitsRepresentationUtils unitsRepUtils;
+    protected UnitsAnnotatedTypeFactory unitsATF;
+
+    protected UnitsRepresentationUtils unitsRepUtils;
 
     public UnitsInferenceAnnotatedTypeFactory(
             InferenceChecker inferenceChecker,
@@ -65,8 +68,15 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 slotManager,
                 constraintManager);
 
+        if (!(realTypeFactory instanceof UnitsAnnotatedTypeFactory)) {
+            throw new BugInCF("Incorrect real type factory created");
+        }
+
+        unitsATF = (UnitsAnnotatedTypeFactory) realTypeFactory;
+
         // Should already be initialized in the real ATF
-        unitsRepUtils = UnitsRepresentationUtils.getInstance();
+        unitsRepUtils = unitsATF.getUnitsRepresentationUtils();
+
         // and it should already have some base units
         if (unitsRepUtils.baseUnits().isEmpty()) {
             throw new UserError("Must supply at least 1 base unit to use Units Checker");
@@ -120,6 +130,19 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             result = super.canonicalAnnotation(anno);
         }
         return result;
+    }
+
+    // for use in AnnotatedTypeMirror.toString()
+    @Override
+    protected AnnotatedTypeFormatter createAnnotatedTypeFormatter() {
+        return unitsATF.getAnnotatedTypeFormatter();
+    }
+
+    // for use in generating error outputs
+    @Override
+    protected AnnotationFormatter createAnnotationFormatter() {
+        // the real ATF is instantiated first, so it should have a copy already
+        return unitsATF.getAnnotationFormatter();
     }
 
     @Override
@@ -305,10 +328,22 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
 
-    protected final class UnitsInferenceImplicitsTreeAnnotator extends UnitsImplicitsTreeAnnotator {
+    protected final class UnitsInferenceImplicitsTreeAnnotator extends ImplicitsTreeAnnotator {
         // Programmatically set the qualifier implicits
         public UnitsInferenceImplicitsTreeAnnotator() {
             super(UnitsInferenceAnnotatedTypeFactory.this);
+
+            // set BOTTOM for null literals
+            addLiteralKind(LiteralKind.NULL, unitsRepUtils.BOTTOM);
+
+            // set DIMENSIONLESS for the non number literals
+            addLiteralKind(LiteralKind.STRING, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.CHAR, unitsRepUtils.DIMENSIONLESS);
+            addLiteralKind(LiteralKind.BOOLEAN, unitsRepUtils.DIMENSIONLESS);
+
+            // TODO: set BOTTOM as the implicit qualifier for lower bounds? Its nice to
+            // infer a bound which is the current mode.
+
             // in inference mode, we do not implicitly set dimensionless for the number
             // literals as we want to treat them as polymorphic. A "cast" is inferred for
             // each literal
@@ -538,20 +573,5 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
             return null;
         }
-    }
-
-    // for use in AnnotatedTypeMirror.toString()
-    @Override
-    protected AnnotatedTypeFormatter createAnnotatedTypeFormatter() {
-        return new DefaultAnnotatedTypeFormatter(
-                new UnitsAnnotationFormatter(checker),
-                checker.hasOption("printVerboseGenerics"),
-                checker.hasOption("printAllQualifiers"));
-    }
-
-    // for use in generating error outputs
-    @Override
-    protected AnnotationFormatter createAnnotationFormatter() {
-        return new UnitsAnnotationFormatter(checker);
     }
 }

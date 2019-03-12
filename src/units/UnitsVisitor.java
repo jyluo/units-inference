@@ -1,6 +1,5 @@
 package units;
 
-import checkers.inference.InferenceAnnotatedTypeFactory;
 import checkers.inference.InferenceChecker;
 import checkers.inference.InferenceMain;
 import checkers.inference.InferenceVisitor;
@@ -13,20 +12,62 @@ import checkers.inference.model.ConstraintManager;
 import checkers.inference.model.Slot;
 import checkers.inference.model.VariableSlot;
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.CompoundAssignmentTree;
+import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.MethodInvocationTree;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.NewClassTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.tree.Tree.Kind;
 import com.sun.source.tree.TypeCastTree;
 import com.sun.source.tree.UnaryTree;
+import com.sun.source.util.TreePath;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.source.Result;
+import org.checkerframework.framework.type.AnnotatedTypeFactory.ParameterizedExecutableType;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedDeclaredType;
+import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.javacutil.AnnotationUtils;
+import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.TreeUtils;
-import units.representation.UnitsRepresentationUtils;
-import units.util.UnitsTypecheckUtils;
+import org.checkerframework.javacutil.TypesUtils;
+import org.checkerframework.javacutil.UserError;
+import units.qual.Dimensionless;
+import units.qual.UnitsAddition;
+import units.qual.UnitsCompare;
+import units.qual.UnitsDivision;
+import units.qual.UnitsMultiplication;
+import units.qual.UnitsSame;
+import units.qual.UnitsSames;
+import units.qual.UnitsSubtraction;
+import units.qual.UnknownUnits;
+import units.utils.UnitsRepresentationUtils;
+import units.utils.UnitsTypecheckUtils;
 
+/**
+ * Units visitor.
+ *
+ * <p>Ensure consistent use of compound assignments.
+ */
 public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTypeFactory> {
+    /** reference to the units representation utilities library */
+    protected final UnitsRepresentationUtils unitsRepUtils;
+
+    /** reference to the units type check utilities library */
+    protected final UnitsTypecheckUtils unitsTypecheckUtils;
+
+    protected UnitsAnnotatedTypeFactory unitsATF;
+
+    protected UnitsInferenceAnnotatedTypeFactory unitsIATF;
+    protected SlotManager slotManager;
+    protected ConstraintManager constraintManager;
 
     public UnitsVisitor(
             UnitsChecker checker,
@@ -34,62 +75,42 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             BaseAnnotatedTypeFactory factory,
             boolean infer) {
         super(checker, ichecker, factory, infer);
+
+        if (!(factory instanceof UnitsAnnotatedTypeFactory
+                || factory instanceof UnitsInferenceAnnotatedTypeFactory)) {
+            throw new BugInCF(
+                    "Incorrect class of type factory created "
+                            + factory.getClass().getCanonicalName());
+        }
+
+        if (factory instanceof UnitsAnnotatedTypeFactory) {
+            unitsATF = (UnitsAnnotatedTypeFactory) factory;
+            unitsRepUtils = unitsATF.getUnitsRepresentationUtils();
+            unitsTypecheckUtils = unitsATF.getUnitsTypecheckUtils();
+        } else {
+            unitsIATF = (UnitsInferenceAnnotatedTypeFactory) factory;
+            unitsRepUtils = unitsIATF.getUnitsRepresentationUtils();
+            unitsTypecheckUtils = unitsIATF.getUnitsTypecheckUtils();
+            slotManager = InferenceMain.getInstance().getSlotManager();
+            constraintManager = InferenceMain.getInstance().getConstraintManager();
+        }
     }
 
-    // TODO: https://github.com/opprop/checker-framework-inference/issues/202
-    //    @Override
-    //    protected void commonAssignmentCheck(
-    //            AnnotatedTypeMirror varType,
-    //            AnnotatedTypeMirror valueType,
-    //            Tree valueTree,
-    //            @CompilerMessageKey String errorKey) {
-    //
-    //        if (infer) {
-    //            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-    //            InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
-    //            System.err.println("===== ");
-    //            System.err.println(" infer mode: " + infer);
-    //            AnnotationMirror varAM = valueType.getAnnotationInHierarchy(iatf.getVarAnnot());
-    //            System.err.println(" varType: " + varType + " real am: " +
-    // slotManager.getSlot(varAM));
-    //
-    //            AnnotationMirror valAM = valueType.getAnnotationInHierarchy(iatf.getVarAnnot());
-    //            System.err.println(
-    //                    " valueType: " + valueType + " real am: " + slotManager.getSlot(valAM));
-    //        } else {
-    //            System.err.println(
-    //                    " varType: "
-    //                            + varType
-    //                            + " real am: "
-    //                            + varType.getAnnotationInHierarchy(
-    //                                    atypeFactory
-    //                                            .getQualifierHierarchy()
-    //                                            .getTopAnnotations()
-    //                                            .iterator()
-    //                                            .next()));
-    //            System.err.println(
-    //                    " valueType: "
-    //                            + valueType
-    //                            + " real am: "
-    //                            + valueType.getAnnotationInHierarchy(
-    //                                    atypeFactory
-    //                                            .getQualifierHierarchy()
-    //                                            .getTopAnnotations()
-    //                                            .iterator()
-    //                                            .next()));
-    //        }
-    //        System.err.println(" valueTree: " + valueTree);
-    //
-    //        super.commonAssignmentCheck(varType, valueType, valueTree, errorKey);
-    //    }
+    // TODO: is this needed in inference?
+    /** override to allow uses of classes declared as {@link Dimensionless} with units */
+    @Override
+    public boolean isValidUse(
+            AnnotatedDeclaredType declarationType, AnnotatedDeclaredType useType, Tree tree) {
+        AnnotatedDeclaredType erasedDeclaredType = declarationType.getErased();
+        AnnotationMirror anno =
+                erasedDeclaredType.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+        return AnnotationUtils.areSame(anno, unitsRepUtils.DIMENSIONLESS)
+                || super.isValidUse(declarationType, useType, tree);
+    }
 
     @Override
     public Void visitUnary(UnaryTree node, Void p) {
-        // TODO: make this more sensitive? ie make it only apply in inference mode?
-
-        // Note i++ in a for loop generates a subtype constraint that the type variable
-        // for i is a supertype of raw units internal, this subtype constraint doesn't
-        // need to be generated
+        /** Unary increment and decrement is always type safe */
         if ((node.getKind() == Kind.PREFIX_DECREMENT)
                 || (node.getKind() == Kind.PREFIX_INCREMENT)
                 || (node.getKind() == Kind.POSTFIX_DECREMENT)
@@ -100,14 +121,11 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         }
     }
 
+    @SuppressWarnings("fallthrough")
     @Override
     public Void visitBinary(BinaryTree binaryTree, Void p) {
         // infer mode, adds constraints for binary operations
         if (infer) {
-            SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            ConstraintManager constraintManager =
-                    InferenceMain.getInstance().getConstraintManager();
-
             // AnnotatedTypeMirror lhsATM =
             // atypeFactory.getAnnotatedType(binaryTree.getLeftOperand());
             // AnnotatedTypeMirror rhsATM =
@@ -117,14 +135,14 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             // VariableSlot rhs = slotManager.getVariableSlot(rhsATM);
 
             // Candidate Fix 1:
-            InferenceAnnotatedTypeFactory iatf = (InferenceAnnotatedTypeFactory) atypeFactory;
-
-            AnnotatedTypeMirror lhsATM = iatf.getAnnotatedType(binaryTree.getLeftOperand());
-            AnnotatedTypeMirror rhsATM = iatf.getAnnotatedType(binaryTree.getRightOperand());
+            AnnotatedTypeMirror lhsATM = unitsIATF.getAnnotatedType(binaryTree.getLeftOperand());
+            AnnotatedTypeMirror rhsATM = unitsIATF.getAnnotatedType(binaryTree.getRightOperand());
             // For types such as T extends @VarAnnot() Class, use @VarAnnot(), by grabbing
             // the effective annotation in varannot hierarchy
-            AnnotationMirror lhsEAM = lhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
-            AnnotationMirror rhsEAM = rhsATM.getEffectiveAnnotationInHierarchy(iatf.getVarAnnot());
+            AnnotationMirror lhsEAM =
+                    lhsATM.getEffectiveAnnotationInHierarchy(unitsIATF.getVarAnnot());
+            AnnotationMirror rhsEAM =
+                    rhsATM.getEffectiveAnnotationInHierarchy(unitsIATF.getVarAnnot());
             Slot lhs = slotManager.getSlot(lhsEAM);
             Slot rhs = slotManager.getSlot(rhsEAM);
 
@@ -185,16 +203,10 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
 
             return super.visitBinary(binaryTree, p);
         }
+
         // typecheck mode
-
-        // Note to self: in typecheck mode, always use getEffectiveAnnotationInHierarchy
-
-        // if (atypeFactory instanceof UnitsAnnotatedTypeFactory)
-        UnitsAnnotatedTypeFactory atf = (UnitsAnnotatedTypeFactory) realChecker.getTypeFactory();
-        UnitsRepresentationUtils unitsRepUtils = UnitsRepresentationUtils.getInstance();
-
-        AnnotatedTypeMirror lhsATM = atf.getAnnotatedType(binaryTree.getLeftOperand());
-        AnnotatedTypeMirror rhsATM = atf.getAnnotatedType(binaryTree.getRightOperand());
+        AnnotatedTypeMirror lhsATM = unitsATF.getAnnotatedType(binaryTree.getLeftOperand());
+        AnnotatedTypeMirror rhsATM = unitsATF.getAnnotatedType(binaryTree.getRightOperand());
         AnnotationMirror lhsAM = lhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
         AnnotationMirror rhsAM = rhsATM.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
@@ -223,27 +235,46 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             case GREATER_THAN_EQUAL: // >=
             case LESS_THAN: // <
             case LESS_THAN_EQUAL: // <=
-                // comparable constraint: lhs <: rhs, or rhs <: lhs
-                if (!(atypeFactory.getQualifierHierarchy().isSubtype(lhsAM, rhsAM)
-                        || atypeFactory.getQualifierHierarchy().isSubtype(rhsAM, lhsAM))) {
-                    checker.report(
-                            Result.failure(
-                                    "comparison.unit.mismatch",
-                                    atypeFactory
-                                            .getAnnotationFormatter()
-                                            .formatAnnotationMirror(lhsAM),
-                                    atypeFactory
-                                            .getAnnotationFormatter()
-                                            .formatAnnotationMirror(rhsAM)),
-                            binaryTree);
-                }
-                // if (!AnnotationUtils.areSame(lhsAM, rhsAM)) {
-                // }
+                checkCompare(binaryTree, lhsAM, rhsAM);
             default:
                 break;
         }
 
         return super.visitBinary(binaryTree, p);
+    }
+
+    // TODO: check this rule
+    @Override
+    public Void visitCompoundAssignment(CompoundAssignmentTree node, Void p) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+            return null;
+        }
+
+        // typecheck mode
+        ExpressionTree var = node.getVariable();
+        ExpressionTree expr = node.getExpression();
+        AnnotatedTypeMirror varType = atypeFactory.getAnnotatedType(var);
+        AnnotatedTypeMirror exprType = atypeFactory.getAnnotatedType(expr);
+
+        Kind kind = node.getKind();
+
+        if ((kind == Kind.PLUS_ASSIGNMENT || kind == Kind.MINUS_ASSIGNMENT)) {
+            if (!atypeFactory.getTypeHierarchy().isSubtype(exprType, varType)) {
+                checker.report(
+                        Result.failure("compound.assignment.type.incompatible", varType, exprType),
+                        node);
+            }
+        } else if (AnnotationUtils.areSame(
+                exprType.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP), unitsRepUtils.TOP)) {
+            // Only allow mul/div with unqualified units
+            checker.report(
+                    Result.failure("compound.assignment.type.incompatible", varType, exprType),
+                    node);
+        }
+
+        return null; // super.visitCompoundAssignment(node, p);
     }
 
     // permit casts from dimensionless to any unit
@@ -256,8 +287,8 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             // from inference output
             return super.visitTypeCast(node, p);
         }
-        // typecheck mode
 
+        // typecheck mode
         // validate "node" instead of "node.getType()" to prevent duplicate errors.
         boolean valid = validateTypeOf(node) && validateTypeOf(node.getExpression());
         if (valid) {
@@ -266,12 +297,10 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
             AnnotationMirror exprType =
                     atypeFactory
                             .getAnnotatedType(node.getExpression())
-                            .getEffectiveAnnotationInHierarchy(
-                                    UnitsRepresentationUtils.getInstance().TOP);
+                            .getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
 
             // If expression type is dimensionless, permit it to be casted to anything
-            if (UnitsTypecheckUtils.unitsEqual(
-                    exprType, UnitsRepresentationUtils.getInstance().DIMENSIONLESS)) {
+            if (unitsTypecheckUtils.unitsEqual(exprType, unitsRepUtils.DIMENSIONLESS)) {
                 if (atypeFactory.getDependentTypesHelper() != null) {
                     AnnotatedTypeMirror type = atypeFactory.getAnnotatedType(node);
                     atypeFactory.getDependentTypesHelper().checkType(type, node.getType());
@@ -294,67 +323,441 @@ public class UnitsVisitor extends InferenceVisitor<UnitsChecker, BaseAnnotatedTy
         if (infer) {
             // In inference mode, the lower bound is the constant slot for @Dimensionless
             SlotManager slotManager = InferenceMain.getInstance().getSlotManager();
-            ConstantSlot cs =
-                    slotManager.createConstantSlot(
-                            UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
+            ConstantSlot cs = slotManager.createConstantSlot(unitsRepUtils.DIMENSIONLESS);
             lowerBounds.add(slotManager.getAnnotation(cs));
         } else {
             // In type check mode, the lower bound is @Dimensionless
-            lowerBounds.add(UnitsRepresentationUtils.getInstance().DIMENSIONLESS);
+            lowerBounds.add(unitsRepUtils.DIMENSIONLESS);
         }
         return lowerBounds;
     }
 
-    //    // Debug use, finds out number of calls to each instrumented method
-    //    @Override
-    //    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
-    //        String methodName = TreeUtils.methodName(node).toString().intern();
-    //
-    //        ExecutableElement element = TreeUtils.elementFromUse(node);
-    //        String classOfMethod = element.getEnclosingElement().toString().intern();
-    //
-    //        if (classOfMethod.contentEquals("java.lang.Math")) {
-    //            switch (methodName) {
-    //                case "cos":
-    //                case "sin":
-    //                case "tan":
-    //                case "asin":
-    //                case "acos":
-    //                case "atan":
-    //                case "atan2":
-    //                case "sinh":
-    //                case "cosh":
-    //                case "tanh":
-    //                case "toDegrees":
-    //                case "toRadians":
-    //                    System.err.println(" visited: " + classOfMethod + "." + methodName);
-    //                    break;
-    //                default:
-    //                    break;
-    //            }
-    //        } else if (classOfMethod.contentEquals("java.lang.System")) {
-    //            switch (methodName) {
-    //                case "currentTimeMillis":
-    //                case "nanoTime":
-    //                    System.err.println(" visited: " + classOfMethod + "." + methodName);
-    //                    break;
-    //                default:
-    //                    break;
-    //            }
-    //        } else if (classOfMethod.contentEquals("java.lang.Thread")) {
-    //            switch (methodName) {
-    //                case "sleep":
-    //                    System.err.println(" visited: " + classOfMethod + "." + methodName);
-    //                    break;
-    //                default:
-    //                    break;
-    //            }
-    //        }
-    //
-    //        return super.visitMethodInvocation(node, p);
-    //    }
+    @Override
+    public Void visitNewClass(NewClassTree node, Void p) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+            super.visitNewClass(node, p);
+            return null;
+        }
 
-    // Notes:
-    // Slots created in ATF
-    // Constraints created in Visitor
+        // typecheck mode
+        super.visitNewClass(node, p);
+
+        ParameterizedExecutableType mType = atypeFactory.constructorFromUse(node);
+        AnnotatedExecutableType invokedMethod = mType.executableType;
+        ExecutableElement methodElement = invokedMethod.getElement();
+        // List<AnnotatedTypeMirror> typeargs = mType.typeArgs;
+
+        // System.err.println(" methodElement " + methodElement);
+
+        // Build up a list of ATMs corresponding to the index convention used in the Units
+        // method meta-annotations. null values are inserted if there is no possible ATM for
+        // that index position.
+        List<AnnotatedTypeMirror> atms = new ArrayList<>();
+        atms.add(atypeFactory.getAnnotatedType(node));
+
+        ExpressionTree receiver = TreeUtils.getReceiverTree(node);
+        // System.err.println(" receiver " + receiver);
+
+        // ATM for argument to the formal "this" parameter
+        if (receiver != null) {
+            AnnotatedTypeMirror receiverATM = atypeFactory.getAnnotatedType(receiver);
+            atms.add(receiverATM);
+        } else {
+            atms.add(null);
+        }
+
+        for (ExpressionTree arg : node.getArguments()) {
+            AnnotatedTypeMirror argATM = atypeFactory.getAnnotatedType(arg);
+            // System.err.println(" arg " + arg + " type " + argATM);
+            atms.add(argATM);
+        }
+
+        // multiple meta-annotations are allowed on each method
+        for (AnnotationMirror anno : atypeFactory.getDeclAnnotations(methodElement)) {
+            if (AnnotationUtils.areSameByClass(anno, UnitsAddition.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsSubtraction.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsMultiplication.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsDivision.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsSames.class)) {
+                for (AnnotationMirror same :
+                        AnnotationUtils.getElementValueArray(
+                                anno, "value", AnnotationMirror.class, false)) {
+                    checkMethodUnitsSame(node, invokedMethod, same, atms);
+                }
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsSame.class)) {
+                checkMethodUnitsSame(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsCompare.class)) {
+                checkMethodUnitsCompare(node, invokedMethod, anno, atms);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Override to not issue "cast.unsafe.constructor.invocation" warnings for classes declared as
+     * {@link UnknownUnits} as it is a common use case in Units checker. However, issue
+     * "cast.unsafe.constructor.invocation" if the computed polymorphic return type of a polymorphic
+     * constructor is being cast to an incomparable unit.
+     */
+    @Override
+    protected boolean checkConstructorInvocation(
+            AnnotatedDeclaredType invocation,
+            AnnotatedExecutableType constructor,
+            NewClassTree newClassTree) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        // copied from super implementation
+        AnnotatedDeclaredType computedReturnType =
+                (AnnotatedDeclaredType) constructor.getReturnType();
+        // When an interface is used as the identifier in an anonymous class (e.g. new Comparable()
+        // {}) the constructor method will be Object.init() {} which has an Object return type When
+        // TypeHierarchy attempts to convert it to the supertype (e.g. Comparable) it will return
+        // null from asSuper and return false for the check. Instead, copy the primary annotations
+        // to the declared type and then do a subtyping check.
+        if (invocation.getUnderlyingType().asElement().getKind().isInterface()
+                && TypesUtils.isObject(computedReturnType.getUnderlyingType())) {
+            final AnnotatedDeclaredType retAsDt = invocation.deepCopy();
+            retAsDt.replaceAnnotations(computedReturnType.getAnnotations());
+            computedReturnType = retAsDt;
+        }
+
+        // issue "cast.unsafe.constructor.invocation" if the computed polymorphic return type of a
+        // polymorphic constructor is being cast to an incomparable unit
+        AnnotatedDeclaredType declaredReturnType =
+                (AnnotatedDeclaredType)
+                        atypeFactory.getAnnotatedType(constructor.getElement()).getReturnType();
+        AnnotationMirror declaredReturnAnno =
+                declaredReturnType.getAnnotationInHierarchy(unitsRepUtils.TOP);
+        if (unitsRepUtils.isPolymorphic(declaredReturnAnno)
+                && !atypeFactory.getTypeHierarchy().isSubtype(computedReturnType, invocation)) {
+            checker.report(
+                    Result.warning(
+                            "cast.unsafe.constructor.invocation",
+                            computedReturnType.toString(true),
+                            invocation.toString(true)),
+                    newClassTree);
+            return false;
+        }
+
+        // do not issue warnings if the computed return type is top
+        if (AnnotationUtils.areSame(
+                computedReturnType.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP),
+                unitsRepUtils.TOP)) {
+            return true;
+        }
+
+        return super.checkConstructorInvocation(invocation, constructor, newClassTree);
+    }
+
+    // Because units permits subclasses to return objects with units, giving a
+    // "super.invocation.invalid" warning at every declaration of a subclass constructor is annoying
+    // to user of units, we override the check here to always permit the invocation of a super
+    // constructor returning dimensionless values
+    @Override
+    protected void checkSuperConstructorCall(MethodInvocationTree node) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        if (!TreeUtils.isSuperCall(node)) {
+            return;
+        }
+        TreePath path = atypeFactory.getPath(node);
+        MethodTree enclosingMethod = TreeUtils.enclosingMethod(path);
+        if (TreeUtils.isConstructor(enclosingMethod)) {
+            AnnotatedTypeMirror superType = atypeFactory.getAnnotatedType(node);
+            AnnotationMirror superTypeMirror =
+                    superType.getAnnotationInHierarchy(unitsRepUtils.TOP);
+            if (!AnnotationUtils.areSame(superTypeMirror, unitsRepUtils.DIMENSIONLESS)) {
+                super.checkSuperConstructorCall(node);
+            }
+        }
+    }
+
+    @Override
+    public Void visitMethodInvocation(MethodInvocationTree node, Void p) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        super.visitMethodInvocation(node, p);
+
+        ParameterizedExecutableType mType = atypeFactory.methodFromUse(node);
+        AnnotatedExecutableType invokedMethod = mType.executableType;
+        ExecutableElement methodElement = invokedMethod.getElement();
+        // List<AnnotatedTypeMirror> typeargs = mType.typeArgs;
+
+        // System.err.println(" invokedMethod " + invokedMethod.getErased());
+        // System.err.println(" methodElement " + methodElement);
+
+        // Build up a list of ATMs corresponding to the index convention used in the Units
+        // method meta-annotations. null values are inserted if there is no possible ATM for
+        // that index position.
+        List<AnnotatedTypeMirror> atms = new ArrayList<>();
+        atms.add(atypeFactory.getAnnotatedType(node));
+
+        boolean isStaticMethod = methodElement.getModifiers().contains(Modifier.STATIC);
+        // System.err.println(" isStaticMethod " + isStaticMethod);
+
+        ExpressionTree receiver = TreeUtils.getReceiverTree(node);
+        // System.err.println(" receiver " + receiver);
+
+        // ATM for argument to the formal "this" parameter
+        if (receiver != null && !isStaticMethod) {
+            AnnotatedTypeMirror receiverATM = atypeFactory.getAnnotatedType(receiver);
+            atms.add(receiverATM);
+        } else {
+            atms.add(null);
+        }
+
+        for (ExpressionTree arg : node.getArguments()) {
+            AnnotatedTypeMirror argATM = atypeFactory.getAnnotatedType(arg);
+            // System.err.println(" arg " + arg + " type " + argATM);
+            atms.add(argATM);
+        }
+
+        // multiple meta-annotations are allowed on each method
+        for (AnnotationMirror anno : atypeFactory.getDeclAnnotations(methodElement)) {
+            if (AnnotationUtils.areSameByClass(anno, UnitsAddition.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsSubtraction.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsMultiplication.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsDivision.class)) {
+                checkMethodUnitsArithmetic(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsSames.class)) {
+                for (AnnotationMirror same :
+                        AnnotationUtils.getElementValueArray(
+                                anno, "value", AnnotationMirror.class, false)) {
+                    checkMethodUnitsSame(node, invokedMethod, same, atms);
+                }
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsSame.class)) {
+                checkMethodUnitsSame(node, invokedMethod, anno, atms);
+            } else if (AnnotationUtils.areSameByClass(anno, UnitsCompare.class)) {
+                checkMethodUnitsCompare(node, invokedMethod, anno, atms);
+            }
+        }
+
+        //    // Debug use, finds out number of calls to each instrumented method
+        //    String methodName = TreeUtils.methodName(node).toString().intern();
+        //
+        //    ExecutableElement element = TreeUtils.elementFromUse(node);
+        //    String classOfMethod = element.getEnclosingElement().toString().intern();
+        //
+        //    if (classOfMethod.contentEquals("java.lang.Math")) {
+        //        switch (methodName) {
+        //            case "cos":
+        //            case "sin":
+        //            case "tan":
+        //            case "asin":
+        //            case "acos":
+        //            case "atan":
+        //            case "atan2":
+        //            case "sinh":
+        //            case "cosh":
+        //            case "tanh":
+        //            case "toDegrees":
+        //            case "toRadians":
+        //                System.err.println(" visited: " + classOfMethod + "." + methodName);
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //    } else if (classOfMethod.contentEquals("java.lang.System")) {
+        //        switch (methodName) {
+        //            case "currentTimeMillis":
+        //            case "nanoTime":
+        //                System.err.println(" visited: " + classOfMethod + "." + methodName);
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //    } else if (classOfMethod.contentEquals("java.lang.Thread")) {
+        //        switch (methodName) {
+        //            case "sleep":
+        //                System.err.println(" visited: " + classOfMethod + "." + methodName);
+        //                break;
+        //            default:
+        //                break;
+        //        }
+        //    }
+        return null;
+    }
+
+    protected void checkMethodUnitsArithmetic(
+            Tree node,
+            AnnotatedExecutableType invokedMethod,
+            AnnotationMirror anno,
+            List<AnnotatedTypeMirror> atms) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        int leftOperandPos = unitsTypecheckUtils.getIntElementValue(anno, "larg");
+        int rightOperandPos = unitsTypecheckUtils.getIntElementValue(anno, "rarg");
+        int resultPos = unitsTypecheckUtils.getIntElementValue(anno, "res");
+
+        // The check is done here instead of visitMethod() in case an improper meta-annotation was
+        // declared in a stub
+        validatePositionIndex(invokedMethod, anno, leftOperandPos);
+        validatePositionIndex(invokedMethod, anno, rightOperandPos);
+        validatePositionIndex(invokedMethod, anno, resultPos);
+
+        if (resultPos == leftOperandPos) {
+            throw new UserError(
+                    "The indices res and larg cannot be the same for meta-annotation "
+                            + anno
+                            + " declared on method "
+                            + invokedMethod);
+        }
+
+        if (resultPos == rightOperandPos) {
+            throw new UserError(
+                    "The indices res and rarg cannot be the same for meta-annotation "
+                            + anno
+                            + " declared on method "
+                            + invokedMethod);
+        }
+
+        if (leftOperandPos == rightOperandPos) {
+            throw new UserError(
+                    "The indices larg and rarg cannot be the same for meta-annotation "
+                            + anno
+                            + " declared on method "
+                            + invokedMethod);
+        }
+    }
+
+    protected void checkMethodUnitsSame(
+            Tree node,
+            AnnotatedExecutableType invokedMethod,
+            AnnotationMirror same,
+            List<AnnotatedTypeMirror> atms) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        int fstPos = unitsTypecheckUtils.getIntElementValue(same, "fst");
+        int sndPos = unitsTypecheckUtils.getIntElementValue(same, "snd");
+
+        // The check is done here instead of visitMethod() in case an improper meta-annotation was
+        // declared in a stub
+        validatePositionIndex(invokedMethod, same, fstPos);
+        validatePositionIndex(invokedMethod, same, sndPos);
+
+        if (fstPos == sndPos) {
+            throw new UserError(
+                    "The indices fst and snd cannot be the same for meta-annotation "
+                            + same
+                            + " declared on method "
+                            + invokedMethod);
+        }
+
+        AnnotatedTypeMirror fst = atms.get(fstPos + 1);
+        AnnotatedTypeMirror snd = atms.get(sndPos + 1);
+
+        AnnotationMirror fstAM = fst.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+        AnnotationMirror sndAM = snd.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+
+        if (fstPos != -1 && sndPos != -1 && !unitsTypecheckUtils.unitsEqual(fstAM, sndAM)) {
+            checker.report(Result.failure("units.differ", fst, snd), node);
+        }
+    }
+
+    protected void checkMethodUnitsCompare(
+            Tree node,
+            AnnotatedExecutableType invokedMethod,
+            AnnotationMirror same,
+            List<AnnotatedTypeMirror> atms) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        int fstPos = unitsTypecheckUtils.getIntElementValue(same, "fst");
+        int sndPos = unitsTypecheckUtils.getIntElementValue(same, "snd");
+
+        // TODO: for compare, -1 is not allowed
+        // The check is done here instead of visitMethod() in case an improper meta-annotation was
+        // declared in a stub
+        validatePositionIndex(invokedMethod, same, fstPos);
+        validatePositionIndex(invokedMethod, same, sndPos);
+
+        if (fstPos == sndPos) {
+            throw new UserError(
+                    "The indices fst and snd cannot be the same for meta-annotation "
+                            + same
+                            + " declared on method "
+                            + invokedMethod);
+        }
+
+        AnnotatedTypeMirror fst = atms.get(fstPos + 1);
+        AnnotatedTypeMirror snd = atms.get(sndPos + 1);
+
+        AnnotationMirror fstAM = fst.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+        AnnotationMirror sndAM = snd.getEffectiveAnnotationInHierarchy(unitsRepUtils.TOP);
+
+        checkCompare(node, fstAM, sndAM);
+    }
+
+    protected void checkCompare(Tree node, AnnotationMirror fstAM, AnnotationMirror sndAM) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        if (!unitsTypecheckUtils.unitsComparable(atypeFactory, fstAM, sndAM)) {
+            checker.report(
+                    Result.failure(
+                            "comparison.unit.mismatch",
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(fstAM),
+                            atypeFactory.getAnnotationFormatter().formatAnnotationMirror(sndAM)),
+                    node);
+        }
+    }
+
+    // TODO: varargs
+    protected void validatePositionIndex(
+            AnnotatedExecutableType invokedMethod, AnnotationMirror same, int pos) {
+        // infer mode, adds constraints
+        if (infer) {
+            // TODO
+        }
+
+        // typecheck mode
+        boolean lowerBoundValid = -1 <= pos;
+        boolean upperBoundValid = pos <= invokedMethod.getElement().getParameters().size();
+
+        if (!lowerBoundValid || (!invokedMethod.isVarArgs() && !upperBoundValid)) {
+            throw new UserError(
+                    "The index "
+                            + pos
+                            + " is invalid for meta-annotation "
+                            + same
+                            + " declared on method "
+                            + invokedMethod);
+        }
+    }
 }

@@ -1,4 +1,4 @@
-package units.representation;
+package units.util;
 
 import java.util.Map;
 import java.util.Objects;
@@ -9,13 +9,18 @@ import org.checkerframework.javacutil.BugInCF;
  * checking.
  */
 public class TypecheckUnit {
+    /** reference to the units representation utilities library */
+    protected final UnitsRepresentationUtils unitsRepUtils;
+
     private boolean uu;
     private boolean ub;
     private int prefixExponent;
     // Tree map maintaining sorted order on base unit names
     private final Map<String, Integer> exponents;
 
-    public TypecheckUnit() {
+    public TypecheckUnit(UnitsRepresentationUtils unitsRepUtils) {
+        this.unitsRepUtils = unitsRepUtils;
+
         // default UU value is false
         uu = false;
         // default UU value is false
@@ -23,24 +28,28 @@ public class TypecheckUnit {
         // default prefixExponent is 0
         prefixExponent = 0;
         // default exponents are 0
-        exponents = UnitsRepresentationUtils.getInstance().createZeroFilledBaseUnitsMap();
+        exponents = unitsRepUtils.createZeroFilledBaseUnitsMap();
     }
 
     public void setUnknownUnits(boolean val) {
+        if (uu && ub) {
+            throw new BugInCF("Cannot set top and bottom both to true at the same time");
+        }
         uu = val;
-        assert !(uu && ub);
     }
 
-    public boolean isUnknownUnits() {
+    public boolean isTop() {
         return uu;
     }
 
     public void setUnitsBottom(boolean val) {
+        if (uu && ub) {
+            throw new BugInCF("Cannot set top and bottom both to true at the same time");
+        }
         ub = val;
-        assert !(uu && ub);
     }
 
-    public boolean isUnitsBottom() {
+    public boolean isBottom() {
         return ub;
     }
 
@@ -77,8 +86,8 @@ public class TypecheckUnit {
         StringBuilder sb = new StringBuilder();
         sb.append("UU = " + uu);
         sb.append(" UB = " + ub);
-        sb.append(" Prefix = " + prefixExponent);
-        for (String baseUnit : UnitsRepresentationUtils.getInstance().baseUnits()) {
+        sb.append(" Base-10-Prefix = " + prefixExponent);
+        for (String baseUnit : unitsRepUtils.baseUnits()) {
             sb.append(" " + baseUnit + " = " + exponents.get(baseUnit));
         }
         return sb.toString();

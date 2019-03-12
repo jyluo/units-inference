@@ -4,8 +4,8 @@ import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.IntNum;
 import org.checkerframework.javacutil.Pair;
-import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
+import units.utils.UnitsRepresentationUtils;
 
 /**
  * Utility class with methods for defining z3 variable names and encoding of various relationships

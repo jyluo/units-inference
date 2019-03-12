@@ -1,9 +1,9 @@
 package units.solvers.backend.gje.encoder;
 
 import org.checkerframework.javacutil.BugInCF;
-import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
+import units.utils.UnitsRepresentationUtils;
 
 /**
  * Utility class with methods for defining z3 variable names and encoding of various relationships

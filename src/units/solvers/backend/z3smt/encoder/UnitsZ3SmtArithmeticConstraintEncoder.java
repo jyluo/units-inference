@@ -12,9 +12,9 @@ import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import org.checkerframework.javacutil.BugInCF;
-import units.representation.TypecheckUnit;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
-import units.util.UnitsTypecheckUtils;
+import units.utils.TypecheckUnit;
+import units.utils.UnitsTypecheckUtils;
 
 public class UnitsZ3SmtArithmeticConstraintEncoder
         extends Z3SmtAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>

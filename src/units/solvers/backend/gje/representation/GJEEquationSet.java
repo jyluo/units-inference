@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import org.checkerframework.javacutil.BugInCF;
-import units.representation.UnitsRepresentationUtils;
+import units.utils.UnitsRepresentationUtils;
 
 public class GJEEquationSet {
 

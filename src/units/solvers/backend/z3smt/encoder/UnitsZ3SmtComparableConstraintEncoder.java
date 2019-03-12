@@ -9,8 +9,8 @@ import checkers.inference.solver.backend.encoder.binary.ComparableConstraintEnco
 import checkers.inference.solver.frontend.Lattice;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
-import units.representation.TypecheckUnit;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
+import units.utils.TypecheckUnit;
 
 public class UnitsZ3SmtComparableConstraintEncoder
         extends Z3SmtAbstractConstraintEncoder<Z3InferenceUnit, TypecheckUnit>

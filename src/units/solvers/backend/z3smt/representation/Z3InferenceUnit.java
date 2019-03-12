@@ -5,8 +5,8 @@ import com.microsoft.z3.Context;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
 import java.util.Map;
-import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
+import units.utils.UnitsRepresentationUtils;
 
 /**
  * A data structure class to encapsulate a set of Z3 variables representing a unit for inference.

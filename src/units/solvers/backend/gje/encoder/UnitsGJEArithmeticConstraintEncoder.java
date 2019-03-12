@@ -10,7 +10,7 @@ import checkers.inference.solver.frontend.Lattice;
 import org.checkerframework.javacutil.BugInCF;
 import units.solvers.backend.gje.UnitsGJEFormatTranslator;
 import units.solvers.backend.gje.representation.GJEEquationSet;
-import units.util.UnitsTypecheckUtils;
+import units.utils.UnitsTypecheckUtils;
 
 public class UnitsGJEArithmeticConstraintEncoder extends UnitsGJEAbstractConstraintEncoder
         implements ArithmeticConstraintEncoder<GJEEquationSet> {

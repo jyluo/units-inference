@@ -20,11 +20,11 @@ import java.util.Map;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
-import units.representation.TypecheckUnit;
-import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.gje.encoder.UnitsGJEConstraintEncoderFactory;
 import units.solvers.backend.gje.representation.GJEEquationSet;
 import units.solvers.backend.gje.representation.GJEInferenceUnit;
+import units.utils.TypecheckUnit;
+import units.utils.UnitsRepresentationUtils;
 
 // AbstractFormatTranslator<SlotEncodingT, ConstraintEncodingT, SlotSolutionT>
 public class UnitsGJEFormatTranslator

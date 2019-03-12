@@ -2,7 +2,7 @@ package units.solvers.backend.gje.representation;
 
 import java.util.Map;
 import java.util.Objects;
-import units.representation.UnitsRepresentationUtils;
+import units.utils.UnitsRepresentationUtils;
 
 /**
  * A data structure class to encapsulate a set of variables representing a unit for inference

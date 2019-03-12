@@ -19,11 +19,11 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.javacutil.AnnotationUtils;
 import org.checkerframework.javacutil.Pair;
-import units.representation.TypecheckUnit;
-import units.representation.UnitsRepresentationUtils;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtConstraintEncoderFactory;
 import units.solvers.backend.z3smt.encoder.UnitsZ3SmtEncoderUtils;
 import units.solvers.backend.z3smt.representation.Z3InferenceUnit;
+import units.utils.TypecheckUnit;
+import units.utils.UnitsRepresentationUtils;
 
 public class UnitsZ3SmtFormatTranslator
         extends Z3SmtFormatTranslator<Z3InferenceUnit, TypecheckUnit> {

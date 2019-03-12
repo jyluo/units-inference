@@ -30,8 +30,7 @@ import units.utils.UnitsRepresentationUtils;
 public class UnitsGJEFormatTranslator
         extends AbstractFormatTranslator<GJEInferenceUnit, GJEEquationSet, TypecheckUnit> {
 
-    // static reference to the singleton instance
-    protected static UnitsRepresentationUtils unitsRepUtils;
+    protected UnitsRepresentationUtils unitsRepUtils;
 
     /** Cache of all serialized slots, keyed on slot ID. */
     protected final Map<Integer, GJEInferenceUnit> serializedSlots = new HashMap<>();
@@ -40,10 +39,10 @@ public class UnitsGJEFormatTranslator
     protected final Map<Integer, Slot> slotGJEtoCFIMap = new HashMap<>();
     protected final Map<Slot, Integer> slotCFItoGJEMap = new HashMap<>();
 
-    public UnitsGJEFormatTranslator(Lattice lattice) {
+    public UnitsGJEFormatTranslator(Lattice lattice, UnitsRepresentationUtils unitsRepUtils) {
         super(lattice);
         finishInitializingEncoders();
-        unitsRepUtils = UnitsRepresentationUtils.getInstance();
+        this.unitsRepUtils = unitsRepUtils;
     }
 
     @Override
@@ -118,9 +117,9 @@ public class UnitsGJEFormatTranslator
         GJEInferenceUnit encodedSlot = GJEInferenceUnit.makeConstantSlot(slotID);
 
         // Replace values in constant encoded slot with values in the annotation
-        if (unit.isUnknownUnits()) {
+        if (unit.isTop()) {
             encodedSlot.setUnknownUnits(true);
-        } else if (unit.isUnitsBottom()) {
+        } else if (unit.isBottom()) {
             encodedSlot.setUnitsBottom(true);
         } else {
             encodedSlot.setPrefixExponent(unit.getPrefixExponent());
@@ -232,20 +231,21 @@ public class UnitsGJEFormatTranslator
         // TODO: infer original name somehow
 
         AnnotationMirror solutionUnit =
-                unitsRepUtils.createInternalUnit(
-                        solutionSlot.isUnknownUnits(),
-                        solutionSlot.isUnitsBottom(),
+                unitsRepUtils.createUnitsRepAnno(
+                        solutionSlot.isTop(),
+                        solutionSlot.isBottom(),
                         solutionSlot.getPrefixExponent(),
                         solutionSlot.getExponents());
 
         // Always return top and bottom based on the booleans, since the BU
         // values can be arbitrary
-        if (solutionSlot.isUnknownUnits()) {
-            return unitsRepUtils.SURFACE_TOP;
-        } else if (solutionSlot.isUnitsBottom()) {
-            return unitsRepUtils.SURFACE_BOTTOM;
-        } else {
-            return unitsRepUtils.getSurfaceUnit(solutionUnit);
-        }
+        //        if (solutionSlot.isUnknownUnits()) {
+        //            return unitsRepUtils.SURFACE_TOP;
+        //        } else if (solutionSlot.isUnitsBottom()) {
+        //            return unitsRepUtils.SURFACE_BOTTOM;
+        //        } else {
+        //            return unitsRepUtils.getSurfaceUnit(solutionUnit);
+        //        }
+        return unitsRepUtils.getSurfaceUnit(solutionUnit);
     }
 }

@@ -45,7 +45,7 @@ import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
 import org.checkerframework.javacutil.UserError;
-import units.representation.UnitsRepresentationUtils;
+import units.utils.UnitsRepresentationUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
     // static reference to the singleton instance

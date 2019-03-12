@@ -3,7 +3,7 @@ package units;
 import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
-import units.representation.UnitsRepresentationUtils;
+import units.utils.UnitsRepresentationUtils;
 
 /** Common base class for ImplicitsTreeAnnotator. */
 public abstract class UnitsImplicitsTreeAnnotator extends ImplicitsTreeAnnotator {

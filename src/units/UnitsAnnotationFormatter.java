@@ -4,8 +4,8 @@ import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.VariableElement;
-import units.utils.UnitsRepresentationUtils;
 import org.checkerframework.framework.util.DefaultAnnotationFormatter;
+import units.utils.UnitsRepresentationUtils;
 
 public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
 

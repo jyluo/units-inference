@@ -1,4 +1,4 @@
-package units.representation;
+package units.utils;
 
 import checkers.inference.model.ConstantSlot;
 import checkers.inference.solver.util.Statistics;

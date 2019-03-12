@@ -34,6 +34,7 @@ import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotatedTypeMirror.AnnotatedExecutableType;
 import org.checkerframework.framework.type.AnnotationClassLoader;
+import org.checkerframework.framework.type.DefaultAnnotatedTypeFormatter;
 import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ImplicitsTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
@@ -42,7 +43,6 @@ import org.checkerframework.framework.util.AnnotatedTypes;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
 import org.checkerframework.javacutil.AnnotationUtils;
-import org.checkerframework.javacutil.BugInCF;
 import org.checkerframework.javacutil.ElementUtils;
 import org.checkerframework.javacutil.Pair;
 import org.checkerframework.javacutil.TreeUtils;
@@ -52,6 +52,11 @@ import units.utils.UnitsTypecheckUtils;
 
 public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFactory {
     protected final UnitsAnnotatedTypeFactory unitsATF;
+
+    /**
+     * reference to the {@link UnitsAnnotationFormatter} instance for formatting units in warnings
+     */
+    protected UnitsAnnotationFormatter unitsAnnotationFormatter;
 
     /** reference to the units representation utilities library */
     protected final UnitsInferenceRepresentationUtils unitsRepUtils;
@@ -72,13 +77,6 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
                 realChecker,
                 slotManager,
                 constraintManager);
-
-        if (!(realTypeFactory instanceof UnitsAnnotatedTypeFactory)) {
-            throw new BugInCF(
-                    "Incorrect class of real type factory created "
-                            + realTypeFactory.getClass().getCanonicalName());
-        }
-
         unitsATF = (UnitsAnnotatedTypeFactory) realTypeFactory;
 
         // Should already be initialized in the real ATF
@@ -98,6 +96,8 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
         // builder.setValue("value", -1);
         // unitsRepUtils.VARANNOT = builder.build();
 
+        unitsAnnotationFormatter.postInit(unitsRepUtils);
+
         postInit();
     }
 
@@ -111,7 +111,7 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
 
     @Override
     protected AnnotationClassLoader createAnnotationClassLoader() {
-        // Use the Units Annotated Type Loader instead of the default one
+        // Use the UnitsAnnotationClassLoader instead of the default one
         return new UnitsAnnotationClassLoader(checker);
     }
 
@@ -151,14 +151,21 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     // for use in AnnotatedTypeMirror.toString()
     @Override
     protected AnnotatedTypeFormatter createAnnotatedTypeFormatter() {
-        return unitsATF.getAnnotatedTypeFormatter();
+        boolean printVerboseGenerics = checker.hasOption("printVerboseGenerics");
+        return new DefaultAnnotatedTypeFormatter(
+                createAnnotationFormatter(),
+                printVerboseGenerics,
+                // -AprintVerboseGenerics implies -AprintAllQualifiers
+                printVerboseGenerics || checker.hasOption("printAllQualifiers"));
     }
 
     // for use in generating error outputs
     @Override
     protected AnnotationFormatter createAnnotationFormatter() {
-        // the real ATF is instantiated first, so it should have a copy already
-        return unitsATF.getAnnotationFormatter();
+        if (unitsAnnotationFormatter == null) {
+            unitsAnnotationFormatter = new UnitsAnnotationFormatter();
+        }
+        return unitsAnnotationFormatter;
     }
 
     @Override

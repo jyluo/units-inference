@@ -1,4 +1,4 @@
-package units.util;
+package units.utils;
 
 import javax.lang.model.element.AnnotationMirror;
 import org.checkerframework.framework.type.AnnotatedTypeFactory;

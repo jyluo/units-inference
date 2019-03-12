@@ -1,4 +1,4 @@
-package units.util;
+package units.utils;
 
 import java.util.Map;
 import java.util.Objects;

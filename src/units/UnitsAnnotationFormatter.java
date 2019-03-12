@@ -4,21 +4,27 @@ import java.util.List;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.VariableElement;
-import org.checkerframework.common.basetype.BaseTypeChecker;
+import units.utils.UnitsRepresentationUtils;
 import org.checkerframework.framework.util.DefaultAnnotationFormatter;
-import units.representation.UnitsRepresentationUtils;
 
 public class UnitsAnnotationFormatter extends DefaultAnnotationFormatter {
 
-    public UnitsAnnotationFormatter(BaseTypeChecker checker) {}
+    /** reference to the units representation utilities library */
+    protected UnitsRepresentationUtils unitsRepUtils;
+
+    public UnitsAnnotationFormatter() {}
+
+    public void postInit(UnitsRepresentationUtils unitsRepUtils) {
+        this.unitsRepUtils = unitsRepUtils;
+    }
 
     @Override
     protected void formatAnnotationMirror(AnnotationMirror anno, StringBuilder sb) {
-        super.formatAnnotationMirror(
-                UnitsRepresentationUtils.getInstance().getSurfaceUnit(anno), sb);
+        super.formatAnnotationMirror(unitsRepUtils.getPrettyPrintUnit(anno), sb);
     }
 
-    // Same as superclass implementation except that we recursively format nested annotations
+    // Same as superclass implementation except that it also recursively formats nested annotations
+    // this is needed to format the {@link units.qual.BUC} annotations
     @Override
     protected void formatAnnotationMirrorArg(AnnotationValue av, StringBuilder sb) {
         Object val = av.getValue();

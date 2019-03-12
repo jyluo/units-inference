@@ -2,16 +2,14 @@ import units.qual.*;
 
 package java.lang;
 
+class Object {
+    void wait(@ms long timeout) throws InterruptedException;
+    void wait(@ms long timeout, @ns int nanos) throws InterruptedException;
+}
+
 class System {
     static @ms long currentTimeMillis();
     static @ns long nanoTime();
-}
-
-// Throwable is implicitly @UnknownUnits
-class Throwable implements Serializable {
-    void printStackTrace(@UnknownUnits Throwable this);
-    void printStackTrace(@UnknownUnits Throwable this, PrintStream arg0);
-    void printStackTrace(@UnknownUnits Throwable this, PrintWriter arg0);
 }
 
 class String implements Serializable, Comparable<String>, CharSequence {

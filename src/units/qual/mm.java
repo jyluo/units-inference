@@ -7,12 +7,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A dimensionless "unit".
+ * Millimeter.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-@UnitsAlias()
+@SuppressWarnings("checkstyle:typename")
+@UnitsAlias(
+        p = -3,
+        bu = {@BUC(u = "m", e = 1)})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface Dimensionless {}
+public @interface mm {}

@@ -9,7 +9,7 @@ import org.checkerframework.framework.qual.DefaultQualifierInHierarchy;
 import org.checkerframework.framework.qual.SubtypeOf;
 
 /**
- * Internal representation of a Unit, used as the core annotation mirror
+ * Internal representation of a Unit. All units annotations are normalized to this annotation.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
@@ -17,7 +17,6 @@ import org.checkerframework.framework.qual.SubtypeOf;
 @DefaultQualifierInHierarchy
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-// TODO somehow make this not usable by users?
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 public @interface UnitsRep {
 
@@ -25,7 +24,7 @@ public @interface UnitsRep {
 
     boolean bot() default false;
 
-    int prefixExponent() default 0;
+    int p() default 0;
 
-    BUC[] baseUnitComponents() default {};
+    BUC[] bu() default {};
 }

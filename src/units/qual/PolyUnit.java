@@ -18,9 +18,8 @@ import org.checkerframework.framework.qual.PolymorphicQualifier;
  * meters or seconds:
  *
  * <pre>
- * <code>
  * {@literal @}PolyUnit int triplePolyUnit(@PolyUnit int amount) {
- *    return 3*amount;
+ *    return 3 * amount;
  *  }
  *
  *  void testPolyUnit() {
@@ -33,7 +32,6 @@ import org.checkerframework.framework.qual.PolymorphicQualifier;
  *    // :: error: (assignment.type.incompatible)
  *   {@literal @}s int sec3 = triplePolyUnit(m1);
  *  }
- * </code>
  * </pre>
  *
  * @checker_framework.manual #units-checker Units Checker

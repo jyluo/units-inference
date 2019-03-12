@@ -7,12 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A dimensionless "unit".
+ * Meter per second squared.
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-@UnitsAlias()
+@SuppressWarnings("checkstyle:typename")
+@UnitsAlias(bu = {@BUC(u = "m", e = 1), @BUC(u = "s", e = -2)})
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-public @interface Dimensionless {}
+public @interface mPERs2 {}

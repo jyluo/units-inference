@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
  *
  * @checker_framework.manual #units-checker Units Checker
  */
+@SuppressWarnings("checkstyle:typename")
 @BaseUnit
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

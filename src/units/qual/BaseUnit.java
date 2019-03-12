@@ -6,7 +6,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/** Meta annotation used to declare that a unit is a base unit. */
+/**
+ * Meta annotation used to declare that a unit is a base unit.
+ *
+ * @checker_framework.manual #units-checker Units Checker
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE})

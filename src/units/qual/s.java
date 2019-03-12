@@ -7,10 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A second (1/60 of a minute).
+ * Second (1/60 of a minute).
  *
  * @checker_framework.manual #units-checker Units Checker
  */
+@SuppressWarnings("checkstyle:typename")
 @BaseUnit
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

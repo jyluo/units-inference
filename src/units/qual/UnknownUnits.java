@@ -11,15 +11,8 @@ import java.lang.annotation.Target;
  *
  * @checker_framework.manual #units-checker Units Checker
  */
-// @DefaultQualifierInHierarchyInUncheckedCode()
-// @DefaultInUncheckedCodeFor({TypeUseLocation.PARAMETER, TypeUseLocation.UPPER_BOUND})
-// @DefaultFor({
-// // LOCAL_VARIABLE, // for flow based type refinement in the body of methods
-// // EXCEPTION_PARAMETER, // exceptions are always top
-// IMPLICIT_UPPER_BOUND, // <T>, so that T can take on any type in usage
-// })
-@UnitsAlias(baseUnitComponents = {})
+@UnitsAlias(top = true)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) // ElementType.TYPE,
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 public @interface UnknownUnits {}

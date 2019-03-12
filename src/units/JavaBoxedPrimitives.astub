@@ -5,19 +5,19 @@ import java.lang.Comparable;
 
 package java.lang;
 
-class Number { // implements Serializable
+class Number {
     @PolyUnit byte byteValue(@PolyUnit Number this);
     @PolyUnit short shortValue(@PolyUnit Number this);
     @PolyUnit int intValue(@PolyUnit Number this);
     @PolyUnit long longValue(@PolyUnit Number this);
     @PolyUnit float floatValue(@PolyUnit Number this);
     @PolyUnit double doubleValue(@PolyUnit Number this);
-    Number();
 }
 
-class Byte { // extends Number implements Comparable<Byte>
+class Byte {
     static @PolyUnit Byte valueOf(@PolyUnit byte arg0);
-    @PolyUnit Byte(@PolyUnit byte arg0);
+    // TODO: this does not work, but poly constructors in source does
+    // @PolyUnit Byte(@PolyUnit byte arg0);
 
     @PolyUnit byte byteValue(@PolyUnit Byte this);
     @PolyUnit short shortValue(@PolyUnit Byte this);
@@ -31,21 +31,22 @@ class Byte { // extends Number implements Comparable<Byte>
     int hashCode(@UnknownUnits Byte this);
     static int hashCode(@UnknownUnits byte arg0);
 
-    // handled in units checker like comparison operators
-
+    @UnitsCompare(fst=0, snd=1)
     boolean equals(@UnknownUnits Byte this, @UnknownUnits Object arg0);
 
+    @UnitsCompare(fst=0, snd=1)
     int compareTo(@UnknownUnits Byte this, @UnknownUnits Byte arg0);
 
+    @UnitsCompare(fst=1, snd=2)
     static int compare(@UnknownUnits byte arg0, @UnknownUnits byte arg1);
 
     static @PolyUnit int toUnsignedInt(@PolyUnit byte arg0);
     static @PolyUnit long toUnsignedLong(@PolyUnit byte arg0);
 }
 
-class Short { // extends Number implements Comparable<Short>
+class Short {
     static @PolyUnit Short valueOf(@PolyUnit short arg0);
-    @PolyUnit Short(@PolyUnit short arg0);
+    // @PolyUnit Short(@PolyUnit short arg0);
 
     @PolyUnit byte byteValue(@PolyUnit Short this);
     @PolyUnit short shortValue(@PolyUnit Short this);
@@ -59,12 +60,13 @@ class Short { // extends Number implements Comparable<Short>
     int hashCode(@UnknownUnits Short this);
     static int hashCode(@UnknownUnits short arg0);
 
-    // handled in units checker like comparison operators
-
+    @UnitsCompare(fst = 0, snd = 1)
     boolean equals(@UnknownUnits Short this, @UnknownUnits Object arg0);
 
+    @UnitsCompare(fst = 0, snd = 1)
     int compareTo(@UnknownUnits Short this, @UnknownUnits Short arg0);
 
+    @UnitsCompare(fst = 1, snd = 2)
     static int compare(@UnknownUnits short arg0, @UnknownUnits short arg1);
 
     static @PolyUnit short reverseBytes(@PolyUnit short arg0);
@@ -72,13 +74,13 @@ class Short { // extends Number implements Comparable<Short>
     static @PolyUnit long toUnsignedLong(@PolyUnit short arg0);
 }
 
-class Integer { // extends Number implements Comparable<Integer>
-    static @PolyUnit Integer valueOf(@PolyUnit int arg0);       // auto boxing
-    @PolyUnit Integer(@PolyUnit int arg0);
+class Integer {
+    static @PolyUnit Integer valueOf(@PolyUnit int arg0); // auto boxing
+    // @PolyUnit Integer(@PolyUnit int arg0);
 
     @PolyUnit byte byteValue(@PolyUnit Integer this);
     @PolyUnit short shortValue(@PolyUnit Integer this);
-    @PolyUnit int intValue(@PolyUnit Integer this);     // auto unboxing
+    @PolyUnit int intValue(@PolyUnit Integer this); // auto unboxing
     @PolyUnit long longValue(@PolyUnit Integer this);
     @PolyUnit float floatValue(@PolyUnit Integer this);
     @PolyUnit double doubleValue(@PolyUnit Integer this);
@@ -98,22 +100,25 @@ class Integer { // extends Number implements Comparable<Integer>
     static @PolyUnit Integer getInteger(String name, @PolyUnit int val);
     static @PolyUnit Integer getInteger(String name, @PolyUnit Integer val);
 
-    // handled in units checker like comparison operators
-
+    @UnitsCompare(fst = 0, snd = 1)
     boolean equals(@UnknownUnits Integer this, @UnknownUnits Object arg0);
 
+    @UnitsCompare(fst = 0, snd = 1)
     int compareTo(@UnknownUnits Integer this, @UnknownUnits Integer arg0);
 
+    @UnitsCompare(fst = 1, snd = 2)
     static int compare(@UnknownUnits int arg0, @UnknownUnits int arg1);
 
+    @UnitsCompare(fst = 1, snd = 2)
     static int compareUnsigned(@UnknownUnits int arg0, @UnknownUnits int arg1);
 
-    static @PolyUnit long toUnsignedLong(@PolyUnit int arg0);
+    @UnitsAddition(res = -1, larg = 1, rarg = 2)
+    static int sum(@UnknownUnits int a, @UnknownUnits int b);
 
-    // handled in units checker like division and remainder operators
-
+    @UnitsDivision(res = -1, larg = 1, rarg = 2)
     static int divideUnsigned(@UnknownUnits int arg0, @UnknownUnits int arg1);
 
+    @UnitsSame(fst = -1, snd = 1)
     static int remainderUnsigned(@UnknownUnits int arg0, @UnknownUnits int arg1);
 
     static @PolyUnit int highestOneBit(@PolyUnit int arg0);
@@ -121,24 +126,21 @@ class Integer { // extends Number implements Comparable<Integer>
     static int numberOfLeadingZeros(@UnknownUnits int arg0);
     static int numberOfTrailingZeros(@UnknownUnits int arg0);
     static int bitCount(@UnknownUnits int arg0);
+    static int signum(@UnknownUnits int arg0);
 
     static @PolyUnit int rotateLeft(@PolyUnit int arg0, int distance);
     static @PolyUnit int rotateRight(@PolyUnit int arg0, int distance);
     static @PolyUnit int reverse(@PolyUnit int arg0);
-    static int signum(@UnknownUnits int arg0);
     static @PolyUnit int reverseBytes(@PolyUnit int arg0);
-
-    // handled in units checker like plus operator
-
-    static int sum(@UnknownUnits int a, @UnknownUnits int b);
+    static @PolyUnit long toUnsignedLong(@PolyUnit int arg0);
 
     static @PolyUnit int max(@PolyUnit int arg0, @PolyUnit int arg1);
     static @PolyUnit int min(@PolyUnit int arg0, @PolyUnit int arg1);
 }
 
-class Long { // extends Number implements Comparable<Long>
+class Long {
     static @PolyUnit Long valueOf(@PolyUnit long arg0);
-    @PolyUnit Long(@PolyUnit long arg0);
+    // @PolyUnit Long(@PolyUnit long arg0);
 
     @PolyUnit byte byteValue(@PolyUnit Long this);
     @PolyUnit short shortValue(@PolyUnit Long this);
@@ -155,27 +157,31 @@ class Long { // extends Number implements Comparable<Long>
     static String toHexString(@UnknownUnits long arg0);
     static String toOctalString(@UnknownUnits long arg0);
     static String toBinaryString(@UnknownUnits long arg0);
-
     int hashCode(@UnknownUnits Long this);
     static int hashCode(@UnknownUnits long arg0);
 
     static @PolyUnit Long getLong(String arg0, @PolyUnit long arg1);
     static @PolyUnit Long getLong(String arg0, @PolyUnit Long arg1);
 
-    // handled in units checker like comparison operators
-
+    @UnitsCompare(fst = 0, snd = 1)
     boolean equals(@UnknownUnits Long this, @UnknownUnits Object arg0);
 
+    @UnitsCompare(fst = 0, snd = 1)
     int compareTo(@UnknownUnits Long this, @UnknownUnits Long arg0);
 
+    @UnitsCompare(fst = 1, snd = 2)
     static int compare(@UnknownUnits long arg0, @UnknownUnits long arg1);
 
+    @UnitsCompare(fst = 1, snd = 2)
     static int compareUnsigned(@UnknownUnits long arg0, @UnknownUnits long arg1);
 
-    // handled in units checker like division and remainder operators
+    @UnitsAddition(res = -1, larg = 1, rarg = 2)
+    static long sum(@UnknownUnits long a, @UnknownUnits long b);
 
+    @UnitsDivision(res = -1, larg = 1, rarg = 2)
     static long divideUnsigned(@UnknownUnits long arg0, @UnknownUnits long arg1);
 
+    @UnitsSame(fst = -1, snd = 1)
     static long remainderUnsigned(@UnknownUnits long arg0, @UnknownUnits long arg1);
 
     static @PolyUnit long highestOneBit(@PolyUnit long arg0);
@@ -183,25 +189,21 @@ class Long { // extends Number implements Comparable<Long>
     static int numberOfLeadingZeros(@UnknownUnits long arg0);
     static int numberOfTrailingZeros(@UnknownUnits long arg0);
     static int bitCount(@UnknownUnits long arg0);
+    static int signum(@UnknownUnits long arg0);
 
     static @PolyUnit long rotateLeft(@PolyUnit long arg0, int arg1);
     static @PolyUnit long rotateRight(@PolyUnit long arg0, int arg1);
     static @PolyUnit long reverse(@PolyUnit long arg0);
-    static int signum(@UnknownUnits long arg0);
     static @PolyUnit long reverseBytes(@PolyUnit long arg0);
-
-    // handled in units checker like plus operator
-
-    static long sum(@UnknownUnits long a, @UnknownUnits long b);
 
     static @PolyUnit long max(@PolyUnit long arg0, @PolyUnit long arg1);
     static @PolyUnit long min(@PolyUnit long arg0, @PolyUnit long arg1);
 }
 
-class Float { // extends Number implements Comparable<Float>
+class Float {
     static @PolyUnit Float valueOf(@PolyUnit float arg0);
-    @PolyUnit Float(@PolyUnit float arg0);
-    @PolyUnit Float(@PolyUnit double arg0);
+    // @PolyUnit Float(@PolyUnit float arg0);
+    // @PolyUnit Float(@PolyUnit double arg0);
 
     @PolyUnit byte byteValue(@PolyUnit Float this);
     @PolyUnit short shortValue(@PolyUnit Float this);
@@ -223,29 +225,29 @@ class Float { // extends Number implements Comparable<Float>
     static boolean isInfinite(@UnknownUnits float arg0);
     static boolean isFinite(@UnknownUnits float arg0);
 
-    // handled in units checker like comparison operators
-
+    @UnitsCompare(fst = 0, snd = 1)
     boolean equals(@UnknownUnits Float this, @UnknownUnits Object arg0);
 
+    @UnitsCompare(fst = 0, snd = 1)
     int compareTo(@UnknownUnits Float this, @UnknownUnits Float arg0);
 
+    @UnitsCompare(fst = 1, snd = 2)
     static int compare(@UnknownUnits float arg0, @UnknownUnits float arg1);
+
+    @UnitsAddition(res = -1, larg = 1, rarg = 2)
+    static float sum(@UnknownUnits float a, @UnknownUnits float b);
 
     static @PolyUnit int floatToIntBits(@PolyUnit float arg0);
     static @PolyUnit int floatToRawIntBits(@PolyUnit float arg0);
     static @PolyUnit float intBitsToFloat(@PolyUnit int arg0);
 
-    // handled in units checker like plus operator
-
-    static float sum(@UnknownUnits float a, @UnknownUnits float b);
-
     static @PolyUnit float max(@PolyUnit float arg0, @PolyUnit float arg1);
     static @PolyUnit float min(@PolyUnit float arg0, @PolyUnit float arg1);
 }
 
-class Double { // extends Number implements Comparable<Double>
+class Double {
     static @PolyUnit Double valueOf(@PolyUnit double arg0);
-    @PolyUnit Double(@PolyUnit double arg0);
+    // @PolyUnit Double(@PolyUnit double arg0);
 
     @PolyUnit byte byteValue(@PolyUnit Double this);
     @PolyUnit short shortValue(@PolyUnit Double this);
@@ -267,21 +269,21 @@ class Double { // extends Number implements Comparable<Double>
     static boolean isInfinite(@UnknownUnits double arg0);
     static boolean isFinite(@UnknownUnits double arg0);
 
-    // handled in units checker like comparison operators
-
+    @UnitsCompare(fst = 0, snd = 1)
     boolean equals(@UnknownUnits Double this, @UnknownUnits Object arg0);
 
+    @UnitsCompare(fst = 0, snd = 1)
     int compareTo(@UnknownUnits Double this, @UnknownUnits Double arg0);
 
+    @UnitsCompare(fst = 1, snd = 2)
     static int compare(@UnknownUnits double arg0, @UnknownUnits double arg1);
+
+    @UnitsAddition(res = -1, larg = 1, rarg = 2)
+    static double sum(@UnknownUnits double a, @UnknownUnits double b);
 
     static @PolyUnit long doubleToLongBits(@PolyUnit double arg0);
     static @PolyUnit long doubleToRawLongBits(@PolyUnit double arg0);
     static @PolyUnit double longBitsToDouble(@PolyUnit long arg0);
-
-    // handled in units checker like plus operator
-
-    static double sum(@UnknownUnits double a, @UnknownUnits double b);
 
     static @PolyUnit double max(@PolyUnit double arg0, @PolyUnit double arg1);
     static @PolyUnit double min(@PolyUnit double arg0, @PolyUnit double arg1);

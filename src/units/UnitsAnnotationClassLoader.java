@@ -4,10 +4,10 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 import javax.lang.model.element.AnnotationMirror;
-import units.qual.BaseUnit;
-import units.qual.UnitsAlias;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.type.AnnotationClassLoader;
+import units.qual.BaseUnit;
+import units.qual.UnitsAlias;
 
 public class UnitsAnnotationClassLoader extends AnnotationClassLoader {
 

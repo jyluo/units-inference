@@ -82,7 +82,6 @@ class Constructors {
         // warning issued for casting the Dimensionless object to seconds
         // :: warning: (cast.unsafe.constructor.invocation)
         @s PAClass pac4 = new @s PAClass(5);
-        // :: warning: (cast.unsafe)
         pac4 = (@s PAClass) new PAClass(5);
 
         // warning issued for casting the seconds object to meters
@@ -118,7 +117,6 @@ class Constructors {
         // warning issued for casting the Dimensionless object to seconds
         // :: warning: (cast.unsafe.constructor.invocation)
         @s PUClass puc4 = new @s PUClass(5);
-        // :: warning: (cast.unsafe)
         puc4 = (@s PUClass) new PUClass(5);
 
         // warning issued for casting the seconds object to meters

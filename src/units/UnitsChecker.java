@@ -7,23 +7,35 @@ import checkers.inference.SlotManager;
 import checkers.inference.model.ConstraintManager;
 import java.lang.annotation.Annotation;
 import java.util.Set;
+import javax.annotation.processing.SupportedOptions;
 import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.framework.qual.StubFiles;
-import units.representation.UnitsRepresentationUtils;
 
+/**
+ * Units Checker main class.
+ *
+ * <p>Supports "units" option to add support for additional individually named and externally
+ * defined units, and "unitsDirs" option to add support for directories of externally defined units.
+ * Directories must be well-formed paths from file system root, separated by colon (:) between each
+ * directory.
+ *
+ * @checker_framework.manual #units-checker Units Checker
+ */
 @StubFiles({
     "JavaBoxedPrimitives.astub",
     "JavaIOPrintstream.astub",
     "JavaLang.astub",
     "JavaMath.astub",
-    "JavaMathTrig.astub",
     "JavaThread.astub",
     "JavaUtil.astub",
-    "JavaUtilConcurrent.astub", // for ode4j, not yet annotated for hombucha
+    "JavaUtilConcurrent.astub",
     "ExperimentsJavaAwtGeomAffineTransform.astub", // for imgscalr experiment
     "ExperimentsSunMiscUnsafe.astub", // for JLargeArrays
 })
+@SupportedOptions({"units", "unitsDirs"})
 public class UnitsChecker extends BaseInferrableChecker {
+
+    protected UnitsInferenceAnnotatedTypeFactory unitsIATF;
 
     @Override
     public void initChecker() {
@@ -48,8 +60,14 @@ public class UnitsChecker extends BaseInferrableChecker {
             BaseAnnotatedTypeFactory realTypeFactory,
             SlotManager slotManager,
             ConstraintManager constraintManager) {
-        return new UnitsInferenceAnnotatedTypeFactory(
-                inferenceChecker, realTypeFactory, realChecker, slotManager, constraintManager);
+        unitsIATF =
+                new UnitsInferenceAnnotatedTypeFactory(
+                        inferenceChecker,
+                        realTypeFactory,
+                        realChecker,
+                        slotManager,
+                        constraintManager);
+        return unitsIATF;
     }
 
     @Override
@@ -64,6 +82,6 @@ public class UnitsChecker extends BaseInferrableChecker {
 
     @Override
     public Set<Class<? extends Annotation>> additionalAnnotationsForJaifHeaderInsertion() {
-        return UnitsRepresentationUtils.getInstance().surfaceUnitsSet();
+        return unitsIATF.getUnitsRepresentationUtils().surfaceUnitsSet();
     }
 }

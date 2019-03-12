@@ -65,11 +65,8 @@ class Variables {
         @UnitsRep(
                 top = false,
                 bot = false,
-                prefixExponent = 4,
-                baseUnitComponents = {
-                    @BUC(unit = "m", exponent = 12),
-                    @BUC(unit = "s", exponent = -34)
-                })
+                p = 4,
+                bu = {@BUC(u = "m", e = 12), @BUC(u = "s", e = -34)})
         Integer x = 50;
     }
 }

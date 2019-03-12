@@ -630,4 +630,27 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
             return null;
         }
     }
+
+    /**
+     * override because {@link AnnotatedTypeFactory#getExplicitAnnotationsOnNewClassTree} does not
+     * handle aliases
+     */
+    @Override
+    protected Set<AnnotationMirror> getExplicitAnnotationsOnNewClassTree(
+            NewClassTree newClassTree, Set<? extends AnnotationMirror> allAnnotations) {
+        Set<AnnotationMirror> allAnnotationsDeAliased = new HashSet<>();
+
+        for (AnnotationMirror anno : allAnnotations) {
+            allAnnotationsDeAliased.add(unitsRepUtils.getSurfaceUnit(anno));
+        }
+
+        Set<AnnotationMirror> explicitAnnotations = new HashSet<>();
+        // check using super via the surface unit names
+        for (AnnotationMirror anno :
+                super.getExplicitAnnotationsOnNewClassTree(newClassTree, allAnnotationsDeAliased)) {
+            // return the equivalent @UnitsRep annotation mirrors
+            explicitAnnotations.add(unitsRepUtils.getUnitsRepAnno(anno));
+        }
+        return explicitAnnotations;
+    }
 }

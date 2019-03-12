@@ -69,6 +69,7 @@ sourceSets {
 }
 
 compileJava {
+    dependsOn('installGitHooks')
     options.compilerArgs = [
             '-implicit:class',
             '-Awarns',
@@ -217,6 +218,7 @@ List<String> getJavaFilesToFormat() {
     List<String> args = new ArrayList<>();
     for (File f : javaFiles) {
         args += f.absolutePath
+        // print f.absolutePath + "\n"
     }
     return args
 }
@@ -249,3 +251,10 @@ task reformat(type: Exec, dependsOn: [getCodeFormatScripts, pythonIsInstalled], 
 }
 
 tasks.test.dependsOn 'checkFormat'
+
+task installGitHooks(type: Copy) {
+    description 'Copies git hooks to .git directory'
+    from files("scripts/git.pre-commit")
+    rename('git\\.(.*)', '$1')
+    into '.git/hooks'
+}

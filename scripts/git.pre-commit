@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# This file will be used as ../../.git/hooks/pre-commit.
+# However, it should be edited as scripts/git.pre-commit.
+# You can install it by running: (cd .. && ./gradlew installGitHooks)
+
+# Fail if any command fails
+set -e
+
+# "ant -e check-style" would check every file; on commit we only need to
+# check files that changed.
+# Need to keep checked files in sync with getJavaFilesToFormat in build.gradle.
+# Otherwise `./gradlew reformat` might not reformat a file that this
+# hook complains about.
+CHANGED_JAVA_FILES=`git diff --staged --name-only --diff-filter=ACM | grep '\.java$' | grep -v '/jdk/' | grep -v 'stubparser/' | grep -v '/nullness-javac-errors/' ` || true
+# echo CHANGED_JAVA_FILES "'"${CHANGED_JAVA_FILES}"'"
+if [ ! -z "$CHANGED_JAVA_FILES" ]; then
+    ./gradlew getCodeFormatScripts -q
+    ## For debugging:
+    # echo "CHANGED_JAVA_FILES: ${CHANGED_JAVA_FILES}"
+    python scripts/.run-google-java-format/check-google-java-format.py --aosp ${CHANGED_JAVA_FILES} || (echo "Try running: ./gradlew reformat" && /bin/false)
+fi
+
+# This is to handle non-.java files, since the above already handled .java files.
+# May need to remove files that are allowed to have trailing whitespace or are
+# not text files.
+CHANGED_FILES=`git diff --staged --name-only --diff-filter=ACM | grep -v '\.class$' | grep -v '\.gz$' | grep -v '\.jar$' | grep -v '\.pdf$' | grep -v '\.png$' | grep -v '\.xcf$'` || true
+if [ ! -z "$CHANGED_FILES" ]; then
+    # echo "CHANGED_FILES: ${CHANGED_FILES}"
+    FILES_WITH_TRAILING_SPACES=`grep -l -s '[[:blank:]]$' ${CHANGED_FILES} 2>&1` || true
+    if [ ! -z "$FILES_WITH_TRAILING_SPACES" ]; then
+        echo "Some files have trailing whitespace: ${FILES_WITH_TRAILING_SPACES}" && exit 1
+    fi
+fi

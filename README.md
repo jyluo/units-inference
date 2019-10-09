@@ -1,5 +1,5 @@
 # Units Inference
-[![Build Status](https://travis-ci.org/opprop/units-inference.svg?branch=master)](https://travis-ci.org/opprop/units-inference)
+[![Build Status](https://travis-ci.com/jyluo/units-inference.svg?branch=master)](https://travis-ci.com/jyluo/units-inference)
 
 Units Inference System
 

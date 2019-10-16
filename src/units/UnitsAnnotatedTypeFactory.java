@@ -1,6 +1,7 @@
 package units;
 
 import com.sun.source.tree.BinaryTree;
+import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree.Kind;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.qual.TypeUseLocation;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotationClassLoader;
@@ -21,6 +23,10 @@ import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.type.typeannotator.DefaultForTypeAnnotator;
+import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
+import org.checkerframework.framework.type.typeannotator.PropagationTypeAnnotator;
+import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
@@ -43,11 +49,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         super(checker, true);
         unitsRepUtils = UnitsRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
-
-        // add implicits for exceptions
-        addTypeNameImplicit(java.lang.Exception.class, unitsRepUtils.DIMENSIONLESS);
-        addTypeNameImplicit(java.lang.Throwable.class, unitsRepUtils.DIMENSIONLESS);
-        addTypeNameImplicit(java.lang.Void.class, unitsRepUtils.BOTTOM);
     }
 
     @Override
@@ -350,12 +351,13 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new UnitsTypecheckImplicitsTreeAnnotator(), new UnitsPropagationTreeAnnotator());
+        		new UnitsTypecheckLiteralTreeAnnotator(), 
+        		new UnitsPropagationTreeAnnotator());
     }
 
-    protected final class UnitsTypecheckImplicitsTreeAnnotator extends UnitsImplicitsTreeAnnotator {
+    protected final class UnitsTypecheckLiteralTreeAnnotator extends UnitsLiteralTreeAnnotator {
         // Programmatically set the qualifier implicits
-        public UnitsTypecheckImplicitsTreeAnnotator() {
+        public UnitsTypecheckLiteralTreeAnnotator() {
             super(UnitsAnnotatedTypeFactory.this);
             // in type checking mode, we also set dimensionless for the number literals
             addLiteralKind(LiteralKind.INT, unitsRepUtils.DIMENSIONLESS);
@@ -368,6 +370,12 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     private final class UnitsPropagationTreeAnnotator extends PropagationTreeAnnotator {
         public UnitsPropagationTreeAnnotator() {
             super(UnitsAnnotatedTypeFactory.this);
+        }
+        
+        @Override
+        public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
+        	
+        	return super.visitLiteral(tree, type);
         }
 
         @Override
@@ -431,6 +439,24 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
 
             return null;
+        }
+    }
+    
+    @Override
+    protected TypeAnnotator createTypeAnnotator() {
+        return new ListTypeAnnotator(
+                new UnitsDefaultForTypeAnnotator(this), super.createTypeAnnotator());
+    }
+    
+    protected class UnitsDefaultForTypeAnnotator extends DefaultForTypeAnnotator {
+        // Programmatically set the qualifier 
+        public UnitsDefaultForTypeAnnotator(AnnotatedTypeFactory atf) {
+            super(atf);
+
+            // add defaults for exceptions
+            addTypes(java.lang.Exception.class, unitsRepUtils.DIMENSIONLESS);
+            addTypes(java.lang.Throwable.class, unitsRepUtils.DIMENSIONLESS);
+            addTypes(java.lang.Void.class, unitsRepUtils.BOTTOM);
         }
     }
 

@@ -370,12 +370,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         public UnitsPropagationTreeAnnotator() {
             super(UnitsAnnotatedTypeFactory.this);
         }
-        
-        @Override
-        public Void visitLiteral(LiteralTree tree, AnnotatedTypeMirror type) {
-        	
-        	return super.visitLiteral(tree, type);
-        }
 
         @Override
         public Void visitBinary(BinaryTree binaryTree, AnnotatedTypeMirror type) {

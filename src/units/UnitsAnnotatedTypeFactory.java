@@ -60,7 +60,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         // get all the loaded annotations
         Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
-        qualSet.addAll(getBundledTypeQualifiersWithPolyAll());
+        qualSet.addAll(getBundledTypeQualifiers());
 
         // // load all the external units
         // loadAllExternalUnits();

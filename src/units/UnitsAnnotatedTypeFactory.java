@@ -1,7 +1,6 @@
 package units;
 
 import com.sun.source.tree.BinaryTree;
-import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.Tree.Kind;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -226,19 +225,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 }
             }
 
-            // Set direct supertypes of PolyAll
-            // replace raw @UnitsRep with UnitsTop in super of PolyAll
-            for (Entry<AnnotationMirror, Set<AnnotationMirror>> e : supertypesMap.entrySet()) {
-                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.POLYALL)) {
-                    Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
-                    polyAllSupers.addAll(e.getValue());
-                    polyAllSupers.add(unitsRepUtils.TOP);
-                    polyAllSupers.remove(unitsRepUtils.RAWUNITSREP);
-                    supertypesMap.put(e.getKey(), polyAllSupers);
-                    break;
-                }
-            }
-
             // Set direct supertypes of PolyUnit
             // replace raw @UnitsRep with UnitsTop in super of PolyUnit
             for (Entry<AnnotationMirror, Set<AnnotationMirror>> e : supertypesMap.entrySet()) {
@@ -313,12 +299,10 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
 
             // Case: @PolyAll and @PolyUnit are treated as @UnknownUnits
-            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYUNIT)) {
                 return isSubtype(unitsRepUtils.TOP, superAnno);
             }
-            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYUNIT)) {
                 return true;
             }
 
@@ -350,8 +334,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-        		new UnitsTypecheckLiteralTreeAnnotator(), 
-        		new UnitsPropagationTreeAnnotator());
+                new UnitsTypecheckLiteralTreeAnnotator(), new UnitsPropagationTreeAnnotator());
     }
 
     protected final class UnitsTypecheckLiteralTreeAnnotator extends UnitsLiteralTreeAnnotator {
@@ -434,15 +417,15 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             return null;
         }
     }
-    
+
     @Override
     protected TypeAnnotator createTypeAnnotator() {
         return new ListTypeAnnotator(
                 new UnitsDefaultForTypeAnnotator(this), super.createTypeAnnotator());
     }
-    
+
     protected class UnitsDefaultForTypeAnnotator extends DefaultForTypeAnnotator {
-        // Programmatically set the qualifier 
+        // Programmatically set the qualifier
         public UnitsDefaultForTypeAnnotator(AnnotatedTypeFactory atf) {
             super(atf);
 

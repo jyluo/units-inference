@@ -42,9 +42,6 @@ public class UnitsRepresentationUtils {
     private static ProcessingEnvironment processingEnv;
     private static Elements elements;
 
-    /** An instance of {@link PolyAll} as an {@link AnnotationMirror} */
-    public AnnotationMirror POLYALL;
-
     /** An instance of {@link PolyUnit} as an {@link AnnotationMirror} */
     public AnnotationMirror POLYUNIT;
 

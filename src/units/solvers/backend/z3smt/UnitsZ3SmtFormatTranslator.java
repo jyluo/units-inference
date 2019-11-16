@@ -170,8 +170,7 @@ public class UnitsZ3SmtFormatTranslator
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode PolyAll and PolyUnit as constant trues
-            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
                 return ctx.mkTrue();
             }
         }
@@ -186,8 +185,7 @@ public class UnitsZ3SmtFormatTranslator
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode PolyAll and PolyUnit as constant trues
-            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
                 return ctx.mkTrue();
             }
         }

@@ -98,8 +98,7 @@ public class UnitsGJEFormatTranslator
 
         // Temp Hack: forcefully encode constant slot for poly qualifiers as
         // unknownunits
-        if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)
-                || AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)) {
+        if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
             anno = unitsRepUtils.TOP;
         }
 

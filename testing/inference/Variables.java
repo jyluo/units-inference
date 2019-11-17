@@ -48,8 +48,6 @@ class Variables {
         @m Integer explicitValueOfCall = Integer.valueOf(10);
         // :: fixable-error: (constructor.invocation.invalid)
         @m Integer omittingConstructorArgType = new @m Integer(10);
-        // :: fixable-error: (assignment.type.incompatible)
-        // :: fixable-error: (constructor.invocation.invalid)
         @m Integer omittingConstructorReturnType = new Integer(10 * UnitsTools.m);
         // :: fixable-error: (assignment.type.incompatible)
         @m Integer omittingConstructorArgAndReturnType = new Integer(10);
@@ -61,7 +59,6 @@ class Variables {
     }
 
     void customUnitForInsertion() {
-        // :: fixable-error: (assignment.type.incompatible)
         @UnitsRep(
                 top = false,
                 bot = false,
@@ -70,6 +67,7 @@ class Variables {
                     @BUC(unit = "m", exponent = 12),
                     @BUC(unit = "s", exponent = -34)
                 })
+        // :: fixable-error: (assignment.type.incompatible)
         Integer x = 50;
     }
 }

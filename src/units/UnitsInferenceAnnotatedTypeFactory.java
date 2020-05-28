@@ -300,14 +300,14 @@ public class UnitsInferenceAnnotatedTypeFactory extends InferenceAnnotatedTypeFa
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new UnitsInferenceImplicitsTreeAnnotator(),
+                new UnitsInferenceLiteralTreeAnnotator(),
                 new UnitsInferenceTreeAnnotator(
                         this, realChecker, realTypeFactory, variableAnnotator, slotManager));
     }
 
-    protected final class UnitsInferenceImplicitsTreeAnnotator extends UnitsImplicitsTreeAnnotator {
+    protected final class UnitsInferenceLiteralTreeAnnotator extends UnitsLiteralTreeAnnotator {
         // Programmatically set the qualifier implicits
-        public UnitsInferenceImplicitsTreeAnnotator() {
+        public UnitsInferenceLiteralTreeAnnotator() {
             super(UnitsInferenceAnnotatedTypeFactory.this);
             // in inference mode, we do not implicitly set dimensionless for the number
             // literals as we want to treat them as polymorphic. A "cast" is inferred for

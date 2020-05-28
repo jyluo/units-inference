@@ -1,12 +1,7 @@
-import org.checkerframework.framework.qual.PolyAll;
 import units.UnitsTools;
 import units.qual.*;
 
 class Methods {
-    @PolyAll int polyAllMethod(@PolyAll int x) {
-        return x;
-    }
-
     @PolyUnit int polyUnitMethod(@PolyUnit int x) {
         return x;
     }
@@ -17,13 +12,6 @@ class Methods {
 
     @m int meterMethod(@m int x) {
         return x;
-    }
-
-    void polyAllMethodTest() {
-        // :: fixable-error: (assignment.type.incompatible)
-        @m int pam1 = polyAllMethod(5);
-
-        int pam2 = polyAllMethod(5 * UnitsTools.m);
     }
 
     void polyUnitMethodTest() {
@@ -39,13 +27,6 @@ class Methods {
     void normalMethodTest() {
         // :: fixable-error: (argument.type.incompatible)
         int nm1 = meterMethod(5);
-    }
-
-    void chainPolyAllMethodTest() {
-        // :: fixable-error: (assignment.type.incompatible)
-        @m int cpam1 = polyAllMethod(polyAllMethod(5));
-
-        int cpam2 = polyAllMethod(polyAllMethod(5 * UnitsTools.m));
     }
 
     void chainPolyUnitMethodTest() {

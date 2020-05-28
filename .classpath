@@ -4,8 +4,9 @@
 	<classpathentry kind="src" output="build/classes/java/test" path="tests"/>
 	<classpathentry kind="src" path="/checker"/>
 	<classpathentry kind="src" path="/checker-framework-inference"/>
-    <classpathentry kind="lib" path="/checker-framework-inference/lib/com.microsoft.z3.jar"/>
+	<classpathentry kind="lib" path="/checker-framework-inference/lib/com.microsoft.z3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8/"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="/checker-framework-inference/dist/checker-framework-inference.jar"/>
 	<classpathentry kind="output" path="build/classes/java"/>
 </classpath>

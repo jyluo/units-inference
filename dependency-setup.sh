@@ -18,7 +18,7 @@ echo "------ Downloading everthing from REPO_SITE: $REPO_SITE ------"
 if [ -d $JSR308/checker-framework-inference ] ; then
     (cd $JSR308/checker-framework-inference && git pull)
 else
-    BRANCH=upstream_update_mar_5_2019
+    BRANCH=master
     echo "Cloning from branch" $BRANCH
     (cd $JSR308 && git clone -b $BRANCH --depth 1 https://github.com/"$REPO_SITE"/checker-framework-inference.git)
 fi

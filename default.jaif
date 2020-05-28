@@ -1,0 +1,97 @@
+package units.qual:
+  annotation @us:
+
+package units.qual:
+  annotation @RDU:
+
+package units.qual:
+  annotation @m:
+
+package units.qual:
+  annotation @mPERs:
+
+package units.qual:
+  annotation @m2:
+
+package units.qual:
+  annotation @ms:
+
+package units.qual:
+  annotation @Dimensionless:
+
+package units.qual:
+  annotation @ns:
+
+package units.qual:
+  annotation @PolyUnit:
+
+package units.qual:
+  annotation @km:
+
+package units.qual:
+  annotation @BUC:
+    int exponent
+    String unit
+
+package units.qual:
+  annotation @UnitsRep:
+    boolean top
+    boolean bot
+    int prefixExponent
+    annotation-field units.qual.BUC[] baseUnitComponents
+
+package units.qual:
+  annotation @s:
+
+package units.qual:
+  annotation @rad:
+
+package units.qual:
+  annotation @UnitsBottom:
+
+package units.qual:
+  annotation @UnknownUnits:
+
+package units.qual:
+  annotation @deg:
+
+package :
+class JavaUtilConcurrentTimeUnit:@units.qual.Dimensionless
+method testReturn(JJ)V:
+insert-annotation Method.parameter 1, Variable.type: @units.qual.s
+insert-annotation Method.parameter -1: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 2, ExpressionStatement.expression, Assignment.expression, MethodInvocation.argument 0: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 3, ExpressionStatement.expression, Assignment.expression, MethodInvocation.argument 0: @units.qual.Dimensionless
+insert-annotation Method.parameter 0, Variable.type: @units.qual.s
+insert-annotation Method.body, Block.statement 0, Variable.type: @units.qual.s
+insert-annotation Method.body, Block.statement 1, Variable.type: @units.qual.ms
+
+method testParams()V:
+insert-annotation Method.body, Block.statement 0, Variable.type: @units.qual.s
+insert-annotation Method.body, Block.statement 1, Variable.type: @units.qual.ns
+insert-annotation Method.body, Block.statement 2, Variable.type: @units.qual.ns
+insert-annotation Method.body, Block.statement 3, Variable.type: @units.qual.s
+insert-annotation Method.parameter -1: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 2, Variable.initializer: @units.qual.ns
+insert-annotation Method.body, Block.statement 3, Variable.initializer: @units.qual.s
+
+method <init>()V:
+
+method test(JLjava/util/concurrent/TimeUnit;)V:
+insert-annotation Method.parameter 1, Variable.type: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 0, Variable.type: @units.qual.ms
+insert-annotation Method.parameter 0, Variable.type: @units.qual.Dimensionless
+insert-annotation Method.parameter -1: @units.qual.Dimensionless
+
+method test2()V:
+insert-annotation Method.parameter -1: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 0, Variable.type: @units.qual.s
+insert-annotation Method.body, Block.statement 1, Variable.type: @units.qual.ms
+insert-annotation Method.body, Block.statement 2, Variable.type: @units.qual.us
+insert-annotation Method.body, Block.statement 3, Variable.type: @units.qual.ns
+insert-annotation Method.body, Block.statement 4, Variable.initializer, MethodInvocation.argument 0: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 5, Variable.initializer, MethodInvocation.argument 0: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 6, Variable.initializer, MethodInvocation.argument 0: @units.qual.Dimensionless
+insert-annotation Method.body, Block.statement 7, Variable.initializer, MethodInvocation.argument 0: @units.qual.Dimensionless
+
+

@@ -115,8 +115,7 @@ public class UnitsZ3SmtFormatTranslator
 
         // Temp Hack: forcefully encode constant slot for poly qualifiers as
         // unknownunits
-        if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)
-                || AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)) {
+        if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
             anno = unitsRepUtils.TOP;
         }
 
@@ -171,8 +170,7 @@ public class UnitsZ3SmtFormatTranslator
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode PolyAll and PolyUnit as constant trues
-            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
                 return ctx.mkTrue();
             }
         }
@@ -187,8 +185,7 @@ public class UnitsZ3SmtFormatTranslator
             ConstantSlot cs = (ConstantSlot) slot;
             AnnotationMirror anno = cs.getValue();
             // encode PolyAll and PolyUnit as constant trues
-            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(anno, unitsRepUtils.POLYUNIT)) {
                 return ctx.mkTrue();
             }
         }

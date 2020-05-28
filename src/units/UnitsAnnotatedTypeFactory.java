@@ -13,6 +13,7 @@ import org.checkerframework.common.basetype.BaseAnnotatedTypeFactory;
 import org.checkerframework.common.basetype.BaseTypeChecker;
 import org.checkerframework.framework.qual.LiteralKind;
 import org.checkerframework.framework.qual.TypeUseLocation;
+import org.checkerframework.framework.type.AnnotatedTypeFactory;
 import org.checkerframework.framework.type.AnnotatedTypeFormatter;
 import org.checkerframework.framework.type.AnnotatedTypeMirror;
 import org.checkerframework.framework.type.AnnotationClassLoader;
@@ -21,6 +22,9 @@ import org.checkerframework.framework.type.QualifierHierarchy;
 import org.checkerframework.framework.type.treeannotator.ListTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.PropagationTreeAnnotator;
 import org.checkerframework.framework.type.treeannotator.TreeAnnotator;
+import org.checkerframework.framework.type.typeannotator.DefaultForTypeAnnotator;
+import org.checkerframework.framework.type.typeannotator.ListTypeAnnotator;
+import org.checkerframework.framework.type.typeannotator.TypeAnnotator;
 import org.checkerframework.framework.util.AnnotationFormatter;
 import org.checkerframework.framework.util.GraphQualifierHierarchy;
 import org.checkerframework.framework.util.MultiGraphQualifierHierarchy.MultiGraphFactory;
@@ -43,11 +47,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         super(checker, true);
         unitsRepUtils = UnitsRepresentationUtils.getInstance(processingEnv, elements);
         postInit();
-
-        // add implicits for exceptions
-        addTypeNameImplicit(java.lang.Exception.class, unitsRepUtils.DIMENSIONLESS);
-        addTypeNameImplicit(java.lang.Throwable.class, unitsRepUtils.DIMENSIONLESS);
-        addTypeNameImplicit(java.lang.Void.class, unitsRepUtils.BOTTOM);
     }
 
     @Override
@@ -60,7 +59,7 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     protected Set<Class<? extends Annotation>> createSupportedTypeQualifiers() {
         // get all the loaded annotations
         Set<Class<? extends Annotation>> qualSet = new HashSet<Class<? extends Annotation>>();
-        qualSet.addAll(getBundledTypeQualifiersWithPolyAll());
+        qualSet.addAll(getBundledTypeQualifiers());
 
         // // load all the external units
         // loadAllExternalUnits();
@@ -146,28 +145,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
         defs.addCheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.LOCAL_VARIABLE);
     }
 
-    // Note: remember to use
-    // --cfArgs="-AuseDefaultsForUncheckedCode=source,bytecode" in cmd line option
-    // -AuseDefaultsForUncheckedCode=bytecode // uses those defaults in byte code
-    // -AuseDefaultsForUncheckedCode=source,bytecode // also uses those defaults in
-    // source code
-    @Override
-    protected void addUncheckedCodeDefaults(QualifierDefaults defs) {
-        super.addUncheckedCodeDefaults(defs);
-
-        // experiment with:
-        // This seems to have no effect thus far in the constraints generated in inference
-        // top param, receiver, bot return for inference, explain unsat
-        defs.addUncheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.RECEIVER);
-        defs.addUncheckedCodeDefault(unitsRepUtils.TOP, TypeUseLocation.PARAMETER);
-        defs.addUncheckedCodeDefault(unitsRepUtils.BOTTOM, TypeUseLocation.RETURN);
-
-        // bot param, top return for tightest api restriction??
-
-        // dimensionless is default for all other locations
-        // defs.addUncheckedCodeDefault(unitsRepUtils.DIMENSIONLESS, TypeUseLocation.OTHERWISE);
-    }
-
     @Override
     public QualifierHierarchy createQualifierHierarchy(MultiGraphFactory factory) {
         return new UnitsQualifierHierarchy(factory);
@@ -222,19 +199,6 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
                 if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.RAWUNITSREP)) {
                     supertypesMap.put(unitsRepUtils.TOP, e.getValue());
                     supertypesMap.remove(e.getKey());
-                    break;
-                }
-            }
-
-            // Set direct supertypes of PolyAll
-            // replace raw @UnitsRep with UnitsTop in super of PolyAll
-            for (Entry<AnnotationMirror, Set<AnnotationMirror>> e : supertypesMap.entrySet()) {
-                if (AnnotationUtils.areSame(e.getKey(), unitsRepUtils.POLYALL)) {
-                    Set<AnnotationMirror> polyAllSupers = AnnotationUtils.createAnnotationSet();
-                    polyAllSupers.addAll(e.getValue());
-                    polyAllSupers.add(unitsRepUtils.TOP);
-                    polyAllSupers.remove(unitsRepUtils.RAWUNITSREP);
-                    supertypesMap.put(e.getKey(), polyAllSupers);
                     break;
                 }
             }
@@ -313,12 +277,10 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
 
             // Case: @PolyAll and @PolyUnit are treated as @UnknownUnits
-            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(subAnno, unitsRepUtils.POLYUNIT)) {
                 return isSubtype(unitsRepUtils.TOP, superAnno);
             }
-            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYALL)
-                    || AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYUNIT)) {
+            if (AnnotationUtils.areSame(superAnno, unitsRepUtils.POLYUNIT)) {
                 return true;
             }
 
@@ -350,12 +312,12 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
     @Override
     public TreeAnnotator createTreeAnnotator() {
         return new ListTreeAnnotator(
-                new UnitsTypecheckImplicitsTreeAnnotator(), new UnitsPropagationTreeAnnotator());
+                new UnitsTypecheckLiteralTreeAnnotator(), new UnitsPropagationTreeAnnotator());
     }
 
-    protected final class UnitsTypecheckImplicitsTreeAnnotator extends UnitsImplicitsTreeAnnotator {
+    protected final class UnitsTypecheckLiteralTreeAnnotator extends UnitsLiteralTreeAnnotator {
         // Programmatically set the qualifier implicits
-        public UnitsTypecheckImplicitsTreeAnnotator() {
+        public UnitsTypecheckLiteralTreeAnnotator() {
             super(UnitsAnnotatedTypeFactory.this);
             // in type checking mode, we also set dimensionless for the number literals
             addLiteralKind(LiteralKind.INT, unitsRepUtils.DIMENSIONLESS);
@@ -431,6 +393,24 @@ public class UnitsAnnotatedTypeFactory extends BaseAnnotatedTypeFactory {
             }
 
             return null;
+        }
+    }
+
+    @Override
+    protected TypeAnnotator createTypeAnnotator() {
+        return new ListTypeAnnotator(
+                new UnitsDefaultForTypeAnnotator(this), super.createTypeAnnotator());
+    }
+
+    protected class UnitsDefaultForTypeAnnotator extends DefaultForTypeAnnotator {
+        // Programmatically set the qualifier
+        public UnitsDefaultForTypeAnnotator(AnnotatedTypeFactory atf) {
+            super(atf);
+
+            // add defaults for exceptions
+            addTypes(java.lang.Exception.class, unitsRepUtils.DIMENSIONLESS);
+            addTypes(java.lang.Throwable.class, unitsRepUtils.DIMENSIONLESS);
+            addTypes(java.lang.Void.class, unitsRepUtils.BOTTOM);
         }
     }
 

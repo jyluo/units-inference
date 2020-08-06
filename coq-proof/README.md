@@ -8,6 +8,10 @@ Coq v8.11.0
 
 run `./compile.sh`
 
+### Interactively check pUnits proofs
+
+run `./openCoqIDE.sh` to open the proof files in CoqIDE in their dependent ordering.
+
 ### Clean up
 
 run `./cleanup.sh` to remove coq output files

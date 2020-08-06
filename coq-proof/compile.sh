@@ -28,9 +28,6 @@ fi
 echo "Using coqc at $COQC"
 $COQC -v
 
-# Compile options
-COQC="$COQC -opt"
-
 $COQC TacticalLemmas.v
 $COQC IDDefs.v
 $COQC MapsDefs.v

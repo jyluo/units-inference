@@ -1,8 +1,8 @@
-The scripts contained in this folder were tested on ubuntu 18.04 LTS, it is intended to be run on linux.
+The scripts contained in this folder were tested on ubuntu 20.04 LTS, it is intended to be run on linux.
 
-### Setup
+### Dependencies
 
-run `./setup-coq.sh` to download and install Coq v8.8.0 along with its dependencies
+Coq v8.11.0
 
 ### Check pUnits proofs
 

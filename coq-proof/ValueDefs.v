@@ -4,7 +4,7 @@ Import List.ListNotations.
 Require Import Arith.
 Require Import Arith.EqNat.
 
-Require Import UnitsDefs.
+From PUnits Require Import UnitsDefs.
 
 (* Values, which are numbers that are labeled with a Unit *)
 Inductive Value : Type :=

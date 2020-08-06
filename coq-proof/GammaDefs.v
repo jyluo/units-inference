@@ -1,7 +1,8 @@
 Require Import Bool.
-Require Import UnitsDefs.
-Require Import IDDefs.
-Require Import MapsDefs.
+
+From PUnits Require Import UnitsDefs.
+From PUnits Require Import IDDefs.
+From PUnits Require Import MapsDefs.
 
 (* Gamma is a map from IDs to Types *)
 

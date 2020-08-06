@@ -4,7 +4,8 @@ Import List.ListNotations.
 Require Import Arith.
 Require Import Arith.EqNat.
 Require Import Omega.
-Require Import Strings.String. Open Scope string_scope.
+Require String.
+Open Scope string_scope.
 Open Scope core_scope.
 
 Ltac move_to_top x :=

@@ -1,11 +1,15 @@
-Require Import TacticalLemmas.
-Require Import UnitsDefs.
-Require Import SubtypingDefs.
-Require Import IDDefs.
-Require Import ValueDefs.
-Require Import GammaDefs.
-Require Import HeapDefs.
-Require Import GammaHeapCorrespondence.
+Require Import Strings.String.
+Open Scope string_scope.
+Open Scope core_scope.
+
+From PUnits Require Import TacticalLemmas.
+From PUnits Require Import UnitsDefs.
+From PUnits Require Import SubtypingDefs.
+From PUnits Require Import IDDefs.
+From PUnits Require Import ValueDefs.
+From PUnits Require Import GammaDefs.
+From PUnits Require Import HeapDefs.
+From PUnits Require Import GammaHeapCorrespondence.
 
 (* ======================================================= *)
 Inductive Field_Declarations : Type :=

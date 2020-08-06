@@ -1,7 +1,7 @@
-Require Import UnitsDefs.
-Require Import IDDefs.
-Require Import ValueDefs.
-Require Import MapsDefs.
+From PUnits Require Import UnitsDefs.
+From PUnits Require Import IDDefs.
+From PUnits Require Import ValueDefs.
+From PUnits Require Import MapsDefs.
 
 (* Heap is a map from IDs to pairs of its field type and value
 we use Coq's built in pair data structure

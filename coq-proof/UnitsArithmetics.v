@@ -3,9 +3,9 @@ Require Import List.
 Import List.ListNotations.
 Require Import Lists.ListSet.
 
-Require Import UnitsDefs.
-Require Import SubtypingDefs.
-Require Import ValueDefs.
+From PUnits Require Import UnitsDefs.
+From PUnits Require Import SubtypingDefs.
+From PUnits Require Import ValueDefs.
 
 (* Defines supported arithmetic operations *)
 

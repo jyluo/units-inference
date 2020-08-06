@@ -1,4 +1,4 @@
-Require Import UnitsDefs.
+From PUnits Require Import UnitsDefs.
 
 (* Print Visibility. *)
 

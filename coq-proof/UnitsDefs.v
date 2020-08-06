@@ -309,7 +309,7 @@ Qed.
 
 Definition unit_beq (u1 u2 : Unit) : bool :=
   if unit_eq_dec u1 u2 then true else false.
-Hint Unfold unit_beq.
+Hint Unfold unit_beq : pUnitsHintDatabase.
 
 Theorem unit_beq_true :
   forall (u : Unit),

@@ -28,7 +28,7 @@ Tactic Notation "prog_cases" tactic(first) ident(c) :=
   first;
   [ Case_aux c "program"
   ].
-Hint Constructors Program.
+Hint Constructors Program : pUnitsHintDatabase.
 
 Notation "{ fds s }" := (program fds s) (at level 1).
 
@@ -44,7 +44,7 @@ Tactic Notation "prog_has_type_cases" tactic(first) ident(c) :=
   first;
   [ Case_aux c "T_Program"
   ].
-Hint Constructors prog_has_type.
+Hint Constructors prog_has_type : pUnitsHintDatabase.
 
 (* ======================================================= *)
 Reserved Notation " p1 'prog==>' p2 " (at level 8).
@@ -61,7 +61,7 @@ Tactic Notation "prog_small_step_cases" tactic(first) ident(c) :=
   [ Case_aux c "ST_PROG_FieldDefs_Step"
   | Case_aux c "ST_PROG_Statementss_Step"
   ].
-Hint Constructors prog_small_step.
+Hint Constructors prog_small_step : pUnitsHintDatabase.
 
 (* ======================================================= *)
 (* step is deterministic *)

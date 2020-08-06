@@ -27,7 +27,7 @@ Tactic Notation "stmt_cases" tactic(first) ident(c) :=
   [ Case_aux c "STMT_Empty"
   | Case_aux c "STMT_Assign"
   ].
-Hint Constructors Statements.
+Hint Constructors Statements : pUnitsHintDatabase.
 
 (* ======================================================= *)
 Reserved Notation "'stmt:' g '|-' s " (at level 40).
@@ -47,7 +47,7 @@ Tactic Notation "stmt_has_type_cases" tactic(first) ident(c) :=
   [ Case_aux c "T_STMT_Empty"
   | Case_aux c "T_STMT_Assign"
   ].
-Hint Constructors stmt_has_type.
+Hint Constructors stmt_has_type : pUnitsHintDatabase.
 
 (* ======================================================= *)
 
@@ -66,7 +66,7 @@ Tactic Notation "stmt_small_step_cases" tactic(first) ident(c) :=
   [ Case_aux c "ST_STMT_Assign_Val"
   | Case_aux c "ST_STMT_Assign_Exp"
   ].
-Hint Constructors stmt_small_step.
+Hint Constructors stmt_small_step : pUnitsHintDatabase.
 
 (* ======================================================= *)
 (* step is deterministic *)

@@ -31,7 +31,7 @@ Tactic Notation "exp_cases" tactic(first) ident(c) :=
   | Case_aux c "E_Field_Lookup"
   | Case_aux c "E_Arith"
   ].
-Hint Constructors Expression.
+Hint Constructors Expression : pUnitsHintDatabase.
 
 Notation "e1 ':+' e2" := (E_Arith e1 op_add e2) (at level 2).
 Notation "e1 ':*' e2" := (E_Arith e1 op_mul e2) (at level 2).
@@ -57,7 +57,7 @@ Tactic Notation "expr_has_type_cases" tactic(first) ident(c) :=
   | Case_aux c "T_Field_Lookup"
   | Case_aux c "T_Arith"
   ].
-Hint Constructors expr_has_type.
+Hint Constructors expr_has_type : pUnitsHintDatabase.
 
 (* ======================================================= *)
 Reserved Notation " he1 'expr==>' e2 " (at level 8).
@@ -81,7 +81,7 @@ Tactic Notation "expr_small_step_cases" tactic(first) ident(c) :=
   | Case_aux c "ST_Arith_Left_Reduce"
   | Case_aux c "ST_Arith_Right_Reduce"
   ].
-Hint Constructors expr_small_step.
+Hint Constructors expr_small_step : pUnitsHintDatabase.
 
 (* ======================================================= *)
 (* step is deterministic *)

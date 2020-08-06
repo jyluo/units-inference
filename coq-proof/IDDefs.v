@@ -13,9 +13,9 @@ Notation "'Id' i" := (identifier i) (at level 1) : core_scope.
 Definition x := identifier 0.
 Definition y := identifier 1.
 Definition z := identifier 2.
-Hint Unfold x.
-Hint Unfold y.
-Hint Unfold z.
+Hint Unfold x : pUnitsHintDatabase.
+Hint Unfold y : pUnitsHintDatabase.
+Hint Unfold z : pUnitsHintDatabase.
 
 (* Lemmas for ID equality and inequality, as well as simplification lemmas for subsequent proofs *)
 (* ID equality is decideable *)
@@ -55,7 +55,7 @@ Qed.
 
 Definition id_beq id1 id2 :=
   if id_eq_dec id1 id2 then true else false.
-Hint Unfold id_beq.
+Hint Unfold id_beq : pUnitsHintDatabase.
 
 Theorem id_beq_refl : forall id, id_beq id id = true.
 Proof.

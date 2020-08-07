@@ -2,7 +2,7 @@ The scripts contained in this folder were tested on ubuntu 20.04 LTS, it is inte
 
 ### Dependencies
 
-Coq v8.11.0
+Coq v8.11.0. For interactive proof checking: CoqIDE v8.11.0.
 
 ### Check pUnits proofs
 

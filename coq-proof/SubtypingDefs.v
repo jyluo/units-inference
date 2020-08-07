@@ -1,7 +1,5 @@
 From PUnits Require Import UnitsDefs.
 
-(* Print Visibility. *)
-
 (* Subtype and LUB definitions. *)
 
 Definition isSubtype(u1 u2 : Unit) : bool :=

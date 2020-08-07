@@ -4,12 +4,12 @@ Import List.ListNotations.
 Require Import Arith.
 Require Import Arith.EqNat.
 
-(* Field identifiers, which are fields with De Bruijn index names (nat) *)
+(* Variable identifiers v, which are variables with De Bruijn index names. *)
 Inductive ID : Type :=
   identifier : nat -> ID.
 Notation "'Id' i" := (identifier i) (at level 1) : core_scope.
 
-(* define x y and z as IDs for use in examples, with customizable units *)
+(* Define x y and z as IDs for use in examples. *)
 Definition x := identifier 0.
 Definition y := identifier 1.
 Definition z := identifier 2.
@@ -17,8 +17,10 @@ Hint Unfold x : pUnitsHintDatabase.
 Hint Unfold y : pUnitsHintDatabase.
 Hint Unfold z : pUnitsHintDatabase.
 
-(* Lemmas for ID equality and inequality, as well as simplification lemmas for subsequent proofs *)
-(* ID equality is decideable *)
+(* Lemmas for ID equality, as well as simplification lemmas for subsequent
+proofs. *)
+
+(* ID equality is decideable. *)
 Theorem id_eq_dec : forall id1 id2 : ID, {id1 = id2} + {id1 <> id2}.
 Proof.
   intros id1 id2.

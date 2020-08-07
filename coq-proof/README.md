@@ -34,10 +34,9 @@ run `./cleanup.sh` to remove coq output files
 
 `StackFrame.v` defines Stack Frame **_F_** as a map from **_v_** to its static type **_Tv_** and labeled value **_l_**, using the map definitions from `MapsDefs.v`.
 
-# CORRECT ^
-
-
 `SubtypingDefs.v` contains the definitions and helper lemmas for the subtype relationship between units types, and functions such as the least upper bound of units.
+
+# CORRECT ^
 
 `GammaStackFrameCorrespondence.v` defines the correspondince between a wellformed gamma and a wellformed heap.
 

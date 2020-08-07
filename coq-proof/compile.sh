@@ -35,14 +35,16 @@ function compile() {
 }
 
 compile TacticalLemmas.v
-compile IDDefs.v
 compile MapsDefs.v
 
 compile UnitsDefs.v
-
 compile ValueDefs.v
+
+compile IDDefs.v
+
 compile GammaDefs.v
 compile HeapDefs.v
+
 compile SubtypingDefs.v
 compile GammaHeapCorrespondence.v
 

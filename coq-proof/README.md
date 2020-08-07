@@ -20,7 +20,7 @@ run `./cleanup.sh` to remove coq output files
 
 `TacticalLemmas.v` contains tactic notations from the Software Foundations Coq [Library](http://flint.cs.yale.edu/cs428/coq/sf/SfLib.html), which helps break down proof cases.
 
-`Maps.v` contains the definitions and lemmas for maps from any key type `K` to value type `V`, augmented by a key equality function `key_eq`.
+`MapsDefs.v` contains the definitions and lemmas for maps from any key type `K` to any value type `V`, augmented by a key equality function `key_eq`.
 
 `UnitsDefs.v` contains the definitions and lemmas for the unit types **_T_**.
 
@@ -28,9 +28,9 @@ run `./cleanup.sh` to remove coq output files
 
 `IDDefs.v` contains the definitions and lemmas for field identifiers **_f_**.
 
-`GammaDefs.v` defines gamma as a map from **_f_** to **_T_**, using the map definitions from `Maps.v`.
+`GammaDefs.v` defines gamma as a map from **_f_** to **_T_**, using the map definitions from `MapsDefs.v`.
 
-`HeapDefs.v` defines heap as a map from **_f_** to its static field type **_Tf_** and runtime value **_v_**, using the map definitions from `Maps.v`.
+`HeapDefs.v` defines heap as a map from **_f_** to its static field type **_Tf_** and runtime value **_v_**, using the map definitions from `MapsDefs.v`.
 
 `SubtypingDefs.v` contains the definitions and lemmas for the subtype relationship between units qualifiers, and functions such as the least upper bound of units.
 

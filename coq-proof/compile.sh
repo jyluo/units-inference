@@ -38,7 +38,7 @@ compile TacticalLemmas.v
 compile MapsDefs.v
 
 compile UnitsDefs.v
-compile ValueDefs.v
+compile LabeledLiterals.v
 
 compile IDDefs.v
 

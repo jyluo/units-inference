@@ -26,15 +26,17 @@ run `./cleanup.sh` to remove coq output files
 
 `UnitsDefs.v` contains the definitions and helper lemmas for the unit types **_T_**.
 
-`ValueDefs.v` contains the definitions and helper lemmas for labeled literals (static semantics) / labeled values (operational semantics) **_l_**, which are modeled as nats labeled with a unit in Coq.
+`LabeledLiterals.v` contains the definitions and helper lemmas for labeled literals (static semantics) / labeled values (operational semantics) **_l_**, which are modeled as nats labeled with a unit in Coq.
+
+`IDDefs.v` contains the definitions and helper lemmas for variable identifiers **_v_**.
+
+`GammaDefs.v` defines gamma as a map from **_v_** to **_T_**, using the map definitions from `MapsDefs.v`.
+
+# new name: StackFrame
+`HeapDefs.v` defines Stack Frame **_F_** as a map from **_v_** to its static type **_Tv_** and labeled value **_l_**, using the map definitions from `MapsDefs.v`.
 
 # CORRECT ^
 
-`IDDefs.v` contains the definitions and helper lemmas for field identifiers **_f_**.
-
-`GammaDefs.v` defines gamma as a map from **_f_** to **_T_**, using the map definitions from `MapsDefs.v`.
-
-`HeapDefs.v` defines heap as a map from **_f_** to its static field type **_Tf_** and runtime value **_v_**, using the map definitions from `MapsDefs.v`.
 
 `SubtypingDefs.v` contains the definitions and helper lemmas for the subtype relationship between units types, and functions such as the least upper bound of units.
 

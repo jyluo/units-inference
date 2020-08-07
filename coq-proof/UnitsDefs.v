@@ -334,4 +334,3 @@ Definition mUnit := declaredUnit m.
 Definition sUnit := declaredUnit s.
 Definition gUnit := declaredUnit g.
 Definition m2Unit := declaredUnit m2.
-

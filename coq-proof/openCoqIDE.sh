@@ -5,7 +5,7 @@
 coqide TacticalLemmas.v \
   MapsDefs.v \
   UnitsDefs.v \
-  ValueDefs.v \
+  LabeledLiterals.v \
   IDDefs.v \
   GammaDefs.v \
   HeapDefs.v \
@@ -15,4 +15,5 @@ coqide TacticalLemmas.v \
   FieldDefs.v \
   ExpressionDefs.v \
   StatementDefs.v \
-  ProgramDefs.v
+  ProgramDefs.v \
+  &

@@ -8,7 +8,7 @@ From PUnits Require Import StackFrame.
 (* ======================================================= *)
 
 (* If gamma contains a field f, then there exists Tv and Tf such that Tv <: Tf,
-    and Gamma(f) = FieldType(h, f) = Tf, FieldValue(h, f) = Tv z for some z. *)
+    and Gamma(f) = VarType(h, f) = Tf, VarValue(h, f) = Tv z for some z. *)
 
 Reserved Notation "'gh:' g '|-' h 'OK'" (at level 40).
 Inductive Gamma_StackFrame_OK : Gamma -> StackFrame -> Prop :=
@@ -16,8 +16,8 @@ Inductive Gamma_StackFrame_OK : Gamma -> StackFrame -> Prop :=
     ( forall (f : ID), Gamma_Contains g f = true ->
       exists (Tf Tv : Unit) (z : nat),
         Gamma_Get g f = Some Tf /\
-        FieldType h f = Some Tf /\
+        VarType h f = Some Tf /\
         Tv <: Tf = true /\
-        FieldValue h f = Some (Val Tv z) ) ->
+        VarValue h f = Some (Val Tv z) ) ->
     gh: g |- h OK
 where "'gh:' g '|-' h 'OK'" := (Gamma_StackFrame_OK g h).

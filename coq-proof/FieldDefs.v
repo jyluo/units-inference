@@ -125,15 +125,15 @@ Proof.
         exists T, T, z.
         assert (T = Tf'). eapply Gamma_Get_Content_Eq. apply H1. apply H2. subst.
         split. apply H1.
-        split. apply StackFrame_Update_FieldType_Eq.
+        split. apply StackFrame_Update_VarType_Eq.
         split. apply subtype_reflexive.
-        apply StackFrame_Update_FieldValue_Eq.
+        apply StackFrame_Update_VarValue_Eq.
       (* Case: f <> f' : in h' the value of f' is some Tv' z' *)
         exists Tf', Tv', z'.
         split. apply H2.
-        split. rewrite <- H3. apply StackFrame_Update_FieldType_Neq. apply n.
+        split. rewrite <- H3. apply StackFrame_Update_VarType_Neq. apply n.
         split. apply H4.
-        rewrite <- H5. apply StackFrame_Update_FieldValue_Neq. apply n.
+        rewrite <- H5. apply StackFrame_Update_VarValue_Neq. apply n.
     (* then prove that fds: Gamma_Extend g1 f T |- fds' in g2 *)
       simpl. apply HT.
 Qed.

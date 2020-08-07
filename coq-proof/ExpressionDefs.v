@@ -63,7 +63,7 @@ Hint Constructors expr_has_type : pUnitsHintDatabase.
 Reserved Notation " he1 'expr==>' e2 " (at level 8).
 Inductive expr_small_step : prod StackFrame Expression -> Expression -> Prop :=
   | ST_Field_Lookup : forall (h : StackFrame) (f : ID) (T : Unit) (z : nat),
-    FieldValue h f = Some (Val T z) ->
+    VarValue h f = Some (Val T z) ->
     ( h, E_Field_Lookup f ) expr==> (E_Value (Val T z))
   | ST_Arith_Values : forall (h : StackFrame) (T1 T2 : Unit) (z1 z2 : nat) (op : OpKind),
     ( h, E_Arith (E_Value (Val T1 z1)) op (E_Value (Val T2 z2)) ) expr==> (E_Value (Val (computeUnit op T1 T2) (computeNat op z1 z2)) )
@@ -96,7 +96,7 @@ Proof.
   expr_small_step_cases (induction He1) Case.
   Case "ST_Field_Lookup".
     intros e2 He2. inversion He2; subst.
-    assert (Val T z = Val T0 z0). eapply FieldValue_Content_Eq; eauto.
+    assert (Val T z = Val T0 z0). eapply VarValue_Content_Eq; eauto.
     destruct H0. reflexivity.
   Case "ST_Arith_Values".
     intros e2 He2. inversion He2; subst.
@@ -182,7 +182,7 @@ Proof.
     inversion HGH; subst.
     destruct H1 with f as [Tf']. apply H. destruct H2 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.
     assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
-    assert (Val T z = Val Tv' z'). eapply FieldValue_Content_Eq; eauto. inversion H7. subst.
+    assert (Val T z = Val Tv' z'). eapply VarValue_Content_Eq; eauto. inversion H7. subst.
     exists Tv'. split.
       apply H5.
       apply T_Value.

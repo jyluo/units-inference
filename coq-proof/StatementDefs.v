@@ -54,7 +54,7 @@ Hint Constructors stmt_has_type : pUnitsHintDatabase.
 Reserved Notation " s1 'stmt==>' s2 " (at level 8).
 Inductive stmt_small_step : prod StackFrame Statements -> prod StackFrame Statements -> Prop :=
   | ST_STMT_Assign_Val : forall (h : StackFrame) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
-    FieldType h f = Some Tf ->
+    VarType h f = Some Tf ->
     Tv <: Tf = true ->
     ( h, STMT_Assign f (E_Value (Val Tv z)) s2 ) stmt==> ( (StackFrame_Update h f Tf Tv z), s2 )
   | ST_STMT_Assign_Exp : forall (h : StackFrame) (f : ID) (e e' : Expression) (s2 : Statements),
@@ -81,7 +81,7 @@ Proof.
   stmt_small_step_cases (induction Hs1) Case.
   Case "ST_STMT_Assign_Val".
     intros s3 Hs3; inversion Hs3; subst.
-      assert (Tf = Tf0). eapply FieldType_Content_Eq; eauto. subst. reflexivity.
+      assert (Tf = Tf0). eapply VarType_Content_Eq; eauto. subst. reflexivity.
       inversion H6.
   Case "ST_STMT_Assign_Exp".
     intros s3 Hs3; inversion Hs3; subst.
@@ -147,17 +147,17 @@ Proof.
         (* Case: f = f' : in h', the value of f' is Tf Te z *)
           exists Tf, Te, z. rewrite -> e in H3.
           assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
-          assert (Tf' = Tf0). eapply FieldType_Content_Eq; eauto. subst.
+          assert (Tf' = Tf0). eapply VarType_Content_Eq; eauto. subst.
           split. apply H3.
-          split. apply StackFrame_Update_FieldType_Eq.
+          split. apply StackFrame_Update_VarType_Eq.
           split. apply H1.
-          apply StackFrame_Update_FieldValue_Eq.
+          apply StackFrame_Update_VarValue_Eq.
         (* Case: f <> f' : in h' the value of f' is some Tf' Tv' z' *)
           exists Tf', Tv', z'. subst.
           split. apply H3.
-          split. rewrite <- H4. apply StackFrame_Update_FieldType_Neq. apply n.
+          split. rewrite <- H4. apply StackFrame_Update_VarType_Neq. apply n.
           split. apply H6.
-          rewrite <- H7. apply StackFrame_Update_FieldValue_Neq. apply n.
+          rewrite <- H7. apply StackFrame_Update_VarValue_Neq. apply n.
       (* then prove that g |- s' *)
         apply HT.
     SCase "ST_STMT_Assign_Exp". (* f = e ; s2 , e --> e' *)

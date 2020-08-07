@@ -103,9 +103,9 @@ Definition Gamma_Extend_Fields (g : Gamma) (fds : Field_Declarations) : Gamma :=
 
 Theorem fds_preservation : forall (g1 g2 : Gamma) (h h' : StackFrame) (fds fds' : Field_Declarations),
   fds: g1 |- fds in g2 ->
-  gh: g2 |- h OK ->
+  gf: g2 |- h OK ->
   (h, fds) fds==> (h', fds') ->
-  gh: g2 |- h' OK /\ fds: Gamma_Extend_Fields g1 fds |- fds' in g2.
+  gf: g2 |- h' OK /\ fds: Gamma_Extend_Fields g1 fds |- fds' in g2.
 Proof.
   intros g1 g2 h h' fds fds' HT HGH HS.
   generalize dependent fds'. generalize dependent h'.

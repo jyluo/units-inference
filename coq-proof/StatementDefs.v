@@ -96,7 +96,7 @@ Inductive STMT_Normal_Form : Statements -> Prop :=
 (* ======================================================= *)
 Theorem stmt_progress : forall (g : Gamma) (h : StackFrame) (s : Statements),
   stmt: g |- s ->
-  gh: g |- h OK ->
+  gf: g |- h OK ->
   STMT_Normal_Form s \/ exists (h' : StackFrame) (s' : Statements), (h, s) stmt==> (h', s').
 Proof.
   intros g h s HT HGH.
@@ -123,9 +123,9 @@ Qed.
 (* ======================================================= *)
 Theorem stmt_preservation : forall (g : Gamma) (s s' : Statements) (h h' : StackFrame),
   stmt: g |- s ->
-  gh: g |- h OK ->
+  gf: g |- h OK ->
   (h, s) stmt==> (h', s') ->
-  gh: g |- h' OK /\ stmt: g |- s'.
+  gf: g |- h' OK /\ stmt: g |- s'.
 Proof.
   (* by induction on typing of stmts *)
   intros g s s' h h' HT HGH HS.

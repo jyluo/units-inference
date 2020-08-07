@@ -93,7 +93,7 @@ Inductive prog_normal_form : Program -> Prop :=
 (* ======================================================= *)
 Theorem prog_progress : forall (g1 g2 : Gamma) (h : StackFrame) (p : Program),
   prog: g1 |- p in g2 ->
-  gh: g2 |- h OK ->
+  gf: g2 |- h OK ->
   prog_normal_form p \/ exists (h' : StackFrame) (p' : Program), (h, p) prog==> (h', p').
 Proof.
   (* by induction on typing of prog *)
@@ -129,9 +129,9 @@ Definition Gamma_Extend_Prog (g : Gamma) (p : Program) : Gamma :=
 (* ======================================================= *)
 Theorem prog_preservation : forall (g post_gamma : Gamma) (h h' : StackFrame) (p p' : Program),
   prog: g |- p in post_gamma ->
-  gh: post_gamma |- h OK ->
+  gf: post_gamma |- h OK ->
   (h, p) prog==> (h', p') ->
-  gh: post_gamma |- h' OK /\ prog: (Gamma_Extend_Prog g p) |- p' in post_gamma.
+  gf: post_gamma |- h' OK /\ prog: (Gamma_Extend_Prog g p) |- p' in post_gamma.
 Proof.
   (* by induction on typing of program *)
   intros g post_gamma h h' p p' HT HGH HS.

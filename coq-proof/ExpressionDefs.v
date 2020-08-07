@@ -122,7 +122,7 @@ Inductive expr_normal_form : Expression -> Prop :=
 (* ======================================================= *)
 Theorem expr_progress : forall (g : Gamma) (h : StackFrame) (e : Expression) (T : Unit),
   expr: g |- e in T ->
-  gh: g |- h OK ->
+  gf: g |- h OK ->
   expr_normal_form e \/ exists e', (h, e) expr==> e'.
 Proof.
   (* by induction on typing of e *)
@@ -163,7 +163,7 @@ Qed.
 (* ======================================================= *)
 Theorem expr_preservation : forall (g : Gamma) (h : StackFrame) (e e' : Expression) (T : Unit),
   expr: g |- e in T ->
-  gh: g |- h OK ->
+  gf: g |- h OK ->
   (h, e) expr==> e' ->
   exists (T' : Unit), T' <: T = true /\ expr: g |- e' in T'.
 Proof.

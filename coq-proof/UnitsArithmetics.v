@@ -7,9 +7,9 @@ From PUnits Require Import UnitsDefs.
 From PUnits Require Import SubtypingDefs.
 From PUnits Require Import LabeledLiterals.
 
-(* Defines supported arithmetic operations *)
-
-(* ======================================================= *)
+(* Defines arithmetic operations op. Here it is instantiated with addition,
+multiplication, and modulus. More operations can be added and does not change
+the high level proof. *)
 Inductive OpKind : Type :=
   | op_add : OpKind
   | op_mul : OpKind
@@ -40,13 +40,13 @@ Proof.
 Qed.
 
 Theorem addUnit_top_T_is_top :
-  forall (T : Unit), addUnit top T = top.
+  forall (u : Unit), addUnit top u = top.
 Proof.
   intros. unfold addUnit. apply LUB_top_T_is_top.
 Qed.
 
 Theorem addUnit_T_top_is_top :
-  forall (T : Unit), addUnit T top = top.
+  forall (u : Unit), addUnit u top = top.
 Proof.
   intros.
   rewrite -> addUnit_commutative.
@@ -54,13 +54,13 @@ Proof.
 Qed.
 
 Theorem addUnit_bottom_T_is_T :
-  forall (T : Unit), addUnit bottom T = T.
+  forall (u : Unit), addUnit bottom u = u.
 Proof.
   intros. unfold addUnit. apply LUB_bottom_T_is_T.
 Qed.
 
 Theorem addUnit_T_bottom_is_T :
-  forall (T : Unit), addUnit T bottom = T.
+  forall (u : Unit), addUnit u bottom = u.
 Proof.
   intros.
   rewrite -> addUnit_commutative.
@@ -359,8 +359,8 @@ Definition computeNat (op : OpKind) (z1 z2 : nat) : nat :=
   | op_mod => z1 mod z2
   end.
 
-Definition computeValue (op : OpKind) (v1 v2 : Value) : Value :=
-  match v1, v2 with
+Definition computeLabeledLiteral (op : OpKind) (l1 l2 : LabeledLiteral) : LabeledLiteral :=
+  match l1, l2 with
   | Lit u1 z1, Lit u2 z2 => Lit (computeUnit op u1 u2) (computeNat op z1 z2)
   end.
 
@@ -389,4 +389,3 @@ Proof.
     apply mulUnit_Right_ST_Consistent. apply H.
     apply modUnit_Right_ST_Consistent. apply H.
 Qed.
-

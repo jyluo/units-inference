@@ -36,11 +36,11 @@ run `./cleanup.sh` to remove coq output files
 
 `SubtypingDefs.v` contains the definitions and helper lemmas for the subtype relationship between units types, and functions such as the least upper bound of units.
 
-# CORRECT ^
-
 `GammaStackFrameCorrespondence.v` defines the correspondince between a wellformed gamma and a wellformed heap.
 
 `UnitsArithmetics.v` defines and proves properties for the arithmetic functions add, multiply, and modulo between units; including the subtype consistent lemmas discussed in the paper.
+
+# CORRECT ^
 
 `FieldDefs.v` contains the definitions and the proof of progress and preservation helper lemmas for field declarations **_fd_** in our language.
 

@@ -7,17 +7,19 @@ From PUnits Require Import StackFrame.
 
 (* ======================================================= *)
 
-(* If gamma contains a field f, then there exists Tv and Tf such that Tv <: Tf,
-    and Gamma(f) = VarType(h, f) = Tf, VarValue(h, f) = Tv z for some z. *)
+(* If gamma g contains a variable v, then there exists Tl and Tv such that
+Tl <: Tv,
+Gamma(v) = VarType(f, v) = Tv, and
+VarValue(f, v) = Tl z for some z. *)
 
-Reserved Notation "'gh:' g '|-' h 'OK'" (at level 40).
+Reserved Notation "'gf:' g '|-' f 'OK'" (at level 40).
 Inductive Gamma_StackFrame_OK : Gamma -> StackFrame -> Prop :=
-  | GH_Correspondence : forall (g : Gamma) (h : StackFrame),
-    ( forall (f : ID), Gamma_Contains g f = true ->
-      exists (Tf Tv : Unit) (z : nat),
-        Gamma_Get g f = Some Tf /\
-        VarType h f = Some Tf /\
-        Tv <: Tf = true /\
-        VarValue h f = Some (Val Tv z) ) ->
-    gh: g |- h OK
-where "'gh:' g '|-' h 'OK'" := (Gamma_StackFrame_OK g h).
+  | GF_Correspondence : forall (g : Gamma) (f : StackFrame),
+    ( forall (v : ID), Gamma_Contains g v = true ->
+      exists (Tv Tl : Unit) (z : nat),
+        Gamma_Get g v = Some Tv /\
+        VarType f v = Some Tv /\
+        Tl <: Tv = true /\
+        VarValue f v = Some (Val Tl z) ) ->
+    gf: g |- f OK
+where "'gf:' g '|-' f 'OK'" := (Gamma_StackFrame_OK g f).

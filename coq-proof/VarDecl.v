@@ -27,12 +27,12 @@ Reserved Notation "'vds:' g1 '|-' vds 'in' g2" (at level 40).
 Inductive vds_has_type : Gamma -> Variable_Declarations -> Gamma -> Prop :=
   | T_VD_Empty : forall (g : Gamma),
     vds: g |- VD_Empty in g
-  | T_VD : forall (g1 g2 : Gamma) (tail : Variable_Declarations) (T : Unit) (v : ID) (z : nat),
+  | T_VD : forall (g1 g2 : Gamma) (vds : Variable_Declarations) (T : Unit) (v : ID) (z : nat),
     Gamma_Contains g1 v = false ->
     Gamma_Contains g2 v = true ->
     Gamma_Get g2 v = Some T ->
-    vds: Gamma_Extend g1 v T |- tail in g2 ->
-    vds: g1 |- VD_Decl T v z tail in g2
+    vds: Gamma_Extend g1 v T |- vds in g2 ->
+    vds: g1 |- VD_Decl T v z vds in g2
 where "'vds:' g1 '|-' vds 'in' g2" := (vds_has_type g1 vds g2).
 Tactic Notation "vds_has_type_cases" tactic(first) ident(c) :=
   first;
@@ -87,7 +87,7 @@ Proof.
     right.
     destruct IHHT.
       inversion H2. exists (StackFrame_Update f v T T z). exists VD_Empty. apply ST_VD.
-      exists (StackFrame_Update f v T T z). exists tail. apply ST_VD.
+      exists (StackFrame_Update f v T T z). exists vds. apply ST_VD.
 Qed.
 
 (* ======================================================= *)

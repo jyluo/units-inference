@@ -9,7 +9,7 @@ From PUnits Require Import IDDefs.
 From PUnits Require Import LabeledLiterals.
 From PUnits Require Import GammaDefs.
 From PUnits Require Import StackFrame.
-From PUnits Require Import GammaHeapCorrespondence.
+From PUnits Require Import GammaStackFrameCorrespondence.
 
 (* ======================================================= *)
 Inductive Field_Declarations : Type :=
@@ -43,9 +43,9 @@ Hint Constructors fds_has_type : pUnitsHintDatabase.
 
 (* ======================================================= *)
 Reserved Notation " fds1 'fds==>' fds2 " (at level 8).
-Inductive fds_small_step : prod Heap Field_Declarations -> prod Heap Field_Declarations -> Prop :=
-  | ST_FD : forall (h : Heap) (T : Unit) (f : ID) (z : nat) (fds : Field_Declarations),
-    ( h, FD_Decl T f z fds ) fds==> ( (Heap_Update h f T T z), fds )
+Inductive fds_small_step : prod StackFrame Field_Declarations -> prod StackFrame Field_Declarations -> Prop :=
+  | ST_FD : forall (h : StackFrame) (T : Unit) (f : ID) (z : nat) (fds : Field_Declarations),
+    ( h, FD_Decl T f z fds ) fds==> ( (StackFrame_Update h f T T z), fds )
 where " fds1 'fds==>' fds2 " := (fds_small_step fds1 fds2).
 Tactic Notation "fds_small_step_cases" tactic(first) ident(c) :=
   first;
@@ -74,7 +74,7 @@ Inductive FD_Normal_Form : Field_Declarations -> Prop :=
   | V_FD_Empty : FD_Normal_Form FD_Empty.
 
 (* ======================================================= *)
-Theorem fds_progress : forall (g1 g2 : Gamma) (h : Heap) (fds : Field_Declarations),
+Theorem fds_progress : forall (g1 g2 : Gamma) (h : StackFrame) (fds : Field_Declarations),
   fds: g1 |- fds in g2 ->
   FD_Normal_Form fds \/ exists h' fds', (h, fds) fds==> (h', fds').
 Proof.
@@ -86,8 +86,8 @@ Proof.
   Case "T_FD".
     right.
     destruct IHHT.
-      inversion H2. exists (Heap_Update h f T T z). exists FD_Empty. apply ST_FD.
-      exists (Heap_Update h f T T z). exists tail. apply ST_FD.
+      inversion H2. exists (StackFrame_Update h f T T z). exists FD_Empty. apply ST_FD.
+      exists (StackFrame_Update h f T T z). exists tail. apply ST_FD.
 Qed.
 
 (* ======================================================= *)
@@ -101,7 +101,7 @@ Definition Gamma_Extend_Fields (g : Gamma) (fds : Field_Declarations) : Gamma :=
 
 (* ======================================================= *)
 
-Theorem fds_preservation : forall (g1 g2 : Gamma) (h h' : Heap) (fds fds' : Field_Declarations),
+Theorem fds_preservation : forall (g1 g2 : Gamma) (h h' : StackFrame) (fds fds' : Field_Declarations),
   fds: g1 |- fds in g2 ->
   gh: g2 |- h OK ->
   (h, fds) fds==> (h', fds') ->
@@ -125,15 +125,15 @@ Proof.
         exists T, T, z.
         assert (T = Tf'). eapply Gamma_Get_Content_Eq. apply H1. apply H2. subst.
         split. apply H1.
-        split. apply Heap_Update_FieldType_Eq.
+        split. apply StackFrame_Update_FieldType_Eq.
         split. apply subtype_reflexive.
-        apply Heap_Update_FieldValue_Eq.
+        apply StackFrame_Update_FieldValue_Eq.
       (* Case: f <> f' : in h' the value of f' is some Tv' z' *)
         exists Tf', Tv', z'.
         split. apply H2.
-        split. rewrite <- H3. apply Heap_Update_FieldType_Neq. apply n.
+        split. rewrite <- H3. apply StackFrame_Update_FieldType_Neq. apply n.
         split. apply H4.
-        rewrite <- H5. apply Heap_Update_FieldValue_Neq. apply n.
+        rewrite <- H5. apply StackFrame_Update_FieldValue_Neq. apply n.
     (* then prove that fds: Gamma_Extend g1 f T |- fds' in g2 *)
       simpl. apply HT.
 Qed.

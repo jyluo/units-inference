@@ -16,7 +16,7 @@ From PUnits Require Import IDDefs.
 From PUnits Require Import LabeledLiterals.
 From PUnits Require Import GammaDefs.
 From PUnits Require Import StackFrame.
-From PUnits Require Import GammaHeapCorrespondence.
+From PUnits Require Import GammaStackFrameCorrespondence.
 
 (* Print Grammar pattern. *)
 
@@ -61,16 +61,16 @@ Hint Constructors expr_has_type : pUnitsHintDatabase.
 
 (* ======================================================= *)
 Reserved Notation " he1 'expr==>' e2 " (at level 8).
-Inductive expr_small_step : prod Heap Expression -> Expression -> Prop :=
-  | ST_Field_Lookup : forall (h : Heap) (f : ID) (T : Unit) (z : nat),
+Inductive expr_small_step : prod StackFrame Expression -> Expression -> Prop :=
+  | ST_Field_Lookup : forall (h : StackFrame) (f : ID) (T : Unit) (z : nat),
     FieldValue h f = Some (Val T z) ->
     ( h, E_Field_Lookup f ) expr==> (E_Value (Val T z))
-  | ST_Arith_Values : forall (h : Heap) (T1 T2 : Unit) (z1 z2 : nat) (op : OpKind),
+  | ST_Arith_Values : forall (h : StackFrame) (T1 T2 : Unit) (z1 z2 : nat) (op : OpKind),
     ( h, E_Arith (E_Value (Val T1 z1)) op (E_Value (Val T2 z2)) ) expr==> (E_Value (Val (computeUnit op T1 T2) (computeNat op z1 z2)) )
-  | ST_Arith_Left_Reduce : forall (h : Heap) (e1 e1' e2 : Expression) (op : OpKind),
+  | ST_Arith_Left_Reduce : forall (h : StackFrame) (e1 e1' e2 : Expression) (op : OpKind),
     ( h, e1 ) expr==> e1' ->
     ( h, E_Arith e1 op e2 ) expr==> (E_Arith e1' op e2)
-  | ST_Arith_Right_Reduce : forall (h : Heap) (v1 : Value) (e2 e2' : Expression) (op : OpKind),
+  | ST_Arith_Right_Reduce : forall (h : StackFrame) (v1 : Value) (e2 e2' : Expression) (op : OpKind),
     ( h, e2 ) expr==> e2' ->
     ( h, E_Arith (E_Value v1) op e2 ) expr==> (E_Arith (E_Value v1) op e2')
 where " he1 'expr==>' e2 " := (expr_small_step he1 e2).
@@ -86,7 +86,7 @@ Hint Constructors expr_small_step : pUnitsHintDatabase.
 (* ======================================================= *)
 (* step is deterministic *)
 Theorem expr_small_step_deterministic:
-  forall (h : Heap) (e e1 e2 : Expression),
+  forall (h : StackFrame) (e e1 e2 : Expression),
     (h, e) expr==> e1 ->
     (h, e) expr==> e2 ->
     e1 = e2.
@@ -120,7 +120,7 @@ Inductive expr_normal_form : Expression -> Prop :=
   | V_Expr_Value : forall (T : Unit) (z : nat), expr_normal_form (E_Value (Val T z)).
 
 (* ======================================================= *)
-Theorem expr_progress : forall (g : Gamma) (h : Heap) (e : Expression) (T : Unit),
+Theorem expr_progress : forall (g : Gamma) (h : StackFrame) (e : Expression) (T : Unit),
   expr: g |- e in T ->
   gh: g |- h OK ->
   expr_normal_form e \/ exists e', (h, e) expr==> e'.
@@ -161,7 +161,7 @@ Proof.
 Qed.
 
 (* ======================================================= *)
-Theorem expr_preservation : forall (g : Gamma) (h : Heap) (e e' : Expression) (T : Unit),
+Theorem expr_preservation : forall (g : Gamma) (h : StackFrame) (e e' : Expression) (T : Unit),
   expr: g |- e in T ->
   gh: g |- h OK ->
   (h, e) expr==> e' ->

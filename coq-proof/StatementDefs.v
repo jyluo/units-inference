@@ -15,7 +15,7 @@ From PUnits Require Import IDDefs.
 From PUnits Require Import LabeledLiterals.
 From PUnits Require Import GammaDefs.
 From PUnits Require Import StackFrame.
-From PUnits Require Import GammaHeapCorrespondence.
+From PUnits Require Import GammaStackFrameCorrespondence.
 From PUnits Require Import ExpressionDefs.
 
 (* ======================================================= *)
@@ -52,12 +52,12 @@ Hint Constructors stmt_has_type : pUnitsHintDatabase.
 (* ======================================================= *)
 
 Reserved Notation " s1 'stmt==>' s2 " (at level 8).
-Inductive stmt_small_step : prod Heap Statements -> prod Heap Statements -> Prop :=
-  | ST_STMT_Assign_Val : forall (h : Heap) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
+Inductive stmt_small_step : prod StackFrame Statements -> prod StackFrame Statements -> Prop :=
+  | ST_STMT_Assign_Val : forall (h : StackFrame) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
     FieldType h f = Some Tf ->
     Tv <: Tf = true ->
-    ( h, STMT_Assign f (E_Value (Val Tv z)) s2 ) stmt==> ( (Heap_Update h f Tf Tv z), s2 )
-  | ST_STMT_Assign_Exp : forall (h : Heap) (f : ID) (e e' : Expression) (s2 : Statements),
+    ( h, STMT_Assign f (E_Value (Val Tv z)) s2 ) stmt==> ( (StackFrame_Update h f Tf Tv z), s2 )
+  | ST_STMT_Assign_Exp : forall (h : StackFrame) (f : ID) (e e' : Expression) (s2 : Statements),
     ( h, e ) expr==> e' ->
     ( h, STMT_Assign f e s2 ) stmt==> ( h, STMT_Assign f e' s2 )
 where " s1 'stmt==>' s2 " := (stmt_small_step s1 s2).
@@ -71,7 +71,7 @@ Hint Constructors stmt_small_step : pUnitsHintDatabase.
 (* ======================================================= *)
 (* step is deterministic *)
 Theorem stmt_small_step_deterministic:
-  forall (s s1 s2 : prod Heap Statements),
+  forall (s s1 s2 : prod StackFrame Statements),
     s stmt==> s1 ->
     s stmt==> s2 ->
     s1 = s2.
@@ -94,10 +94,10 @@ Inductive STMT_Normal_Form : Statements -> Prop :=
   | V_STMT_Value : STMT_Normal_Form STMT_Empty.
 
 (* ======================================================= *)
-Theorem stmt_progress : forall (g : Gamma) (h : Heap) (s : Statements),
+Theorem stmt_progress : forall (g : Gamma) (h : StackFrame) (s : Statements),
   stmt: g |- s ->
   gh: g |- h OK ->
-  STMT_Normal_Form s \/ exists (h' : Heap) (s' : Statements), (h, s) stmt==> (h', s').
+  STMT_Normal_Form s \/ exists (h' : StackFrame) (s' : Statements), (h, s) stmt==> (h', s').
 Proof.
   intros g h s HT HGH.
   stmt_has_type_cases (induction HT) Case; subst.
@@ -112,7 +112,7 @@ Proof.
     assert (expr_normal_form e \/ exists e', (h, e) expr==> e'). apply expr_progress with g Te. apply H2. apply HGH.
     inversion H7; subst.
     (* Subcase: e is a value -> step by ST_STMT_Assign_Val *)
-      destruct H8; subst. inversion H2; subst. exists (Heap_Update h f Tf' Te z), s2.
+      destruct H8; subst. inversion H2; subst. exists (StackFrame_Update h f Tf' Te z), s2.
       eapply ST_STMT_Assign_Val.
         apply H4.
         apply H1.
@@ -121,7 +121,7 @@ Proof.
 Qed.
 
 (* ======================================================= *)
-Theorem stmt_preservation : forall (g : Gamma) (s s' : Statements) (h h' : Heap),
+Theorem stmt_preservation : forall (g : Gamma) (s s' : Statements) (h h' : StackFrame),
   stmt: g |- s ->
   gh: g |- h OK ->
   (h, s) stmt==> (h', s') ->
@@ -149,15 +149,15 @@ Proof.
           assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
           assert (Tf' = Tf0). eapply FieldType_Content_Eq; eauto. subst.
           split. apply H3.
-          split. apply Heap_Update_FieldType_Eq.
+          split. apply StackFrame_Update_FieldType_Eq.
           split. apply H1.
-          apply Heap_Update_FieldValue_Eq.
+          apply StackFrame_Update_FieldValue_Eq.
         (* Case: f <> f' : in h' the value of f' is some Tf' Tv' z' *)
           exists Tf', Tv', z'. subst.
           split. apply H3.
-          split. rewrite <- H4. apply Heap_Update_FieldType_Neq. apply n.
+          split. rewrite <- H4. apply StackFrame_Update_FieldType_Neq. apply n.
           split. apply H6.
-          rewrite <- H7. apply Heap_Update_FieldValue_Neq. apply n.
+          rewrite <- H7. apply StackFrame_Update_FieldValue_Neq. apply n.
       (* then prove that g |- s' *)
         apply HT.
     SCase "ST_STMT_Assign_Exp". (* f = e ; s2 , e --> e' *)

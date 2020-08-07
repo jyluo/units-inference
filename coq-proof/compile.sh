@@ -46,7 +46,7 @@ compile GammaDefs.v
 compile StackFrame.v
 
 compile SubtypingDefs.v
-compile GammaHeapCorrespondence.v
+compile GammaStackFrameCorrespondence.v
 
 compile UnitsArithmetics.v
 

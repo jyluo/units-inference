@@ -16,7 +16,7 @@ From PUnits Require Import IDDefs.
 From PUnits Require Import LabeledLiterals.
 From PUnits Require Import GammaDefs.
 From PUnits Require Import StackFrame.
-From PUnits Require Import GammaHeapCorrespondence.
+From PUnits Require Import GammaStackFrameCorrespondence.
 From PUnits Require Import FieldDefs.
 From PUnits Require Import ExpressionDefs.
 From PUnits Require Import StatementDefs.
@@ -48,7 +48,7 @@ Hint Constructors prog_has_type : pUnitsHintDatabase.
 
 (* ======================================================= *)
 Reserved Notation " p1 'prog==>' p2 " (at level 8).
-Inductive prog_small_step : prod Heap Program -> prod Heap Program -> Prop :=
+Inductive prog_small_step : prod StackFrame Program -> prod StackFrame Program -> Prop :=
   | ST_PROG_FieldDefs_Step : forall h h' fds fds' s,
     ( h, fds ) fds==> ( h', fds' ) ->
     ( h, program fds s ) prog==> ( h', program fds' s )
@@ -91,10 +91,10 @@ Inductive prog_normal_form : Program -> Prop :=
   | V_PROG_NF : prog_normal_form (program FD_Empty STMT_Empty).
 
 (* ======================================================= *)
-Theorem prog_progress : forall (g1 g2 : Gamma) (h : Heap) (p : Program),
+Theorem prog_progress : forall (g1 g2 : Gamma) (h : StackFrame) (p : Program),
   prog: g1 |- p in g2 ->
   gh: g2 |- h OK ->
-  prog_normal_form p \/ exists (h' : Heap) (p' : Program), (h, p) prog==> (h', p').
+  prog_normal_form p \/ exists (h' : StackFrame) (p' : Program), (h, p) prog==> (h', p').
 Proof.
   (* by induction on typing of prog *)
   intros g1 g2 h p HT HGH.
@@ -102,7 +102,7 @@ Proof.
   Case "T_Program".
     assert (FD_Normal_Form fds \/ exists heap' fds', (h, fds) fds==> (heap', fds')).
       eapply fds_progress. apply H.
-    assert (STMT_Normal_Form s \/ exists (h' : Heap) (s' : Statements), (h, s) stmt==> (h', s')).
+    assert (STMT_Normal_Form s \/ exists (h' : StackFrame) (s' : Statements), (h, s) stmt==> (h', s')).
       eapply stmt_progress. apply H0. apply HGH.
     destruct H1; subst.
     (* Case : FD is normal form *)
@@ -127,7 +127,7 @@ Definition Gamma_Extend_Prog (g : Gamma) (p : Program) : Gamma :=
   end.
 
 (* ======================================================= *)
-Theorem prog_preservation : forall (g post_gamma : Gamma) (h h' : Heap) (p p' : Program),
+Theorem prog_preservation : forall (g post_gamma : Gamma) (h h' : StackFrame) (p p' : Program),
   prog: g |- p in post_gamma ->
   gh: post_gamma |- h OK ->
   (h, p) prog==> (h', p') ->

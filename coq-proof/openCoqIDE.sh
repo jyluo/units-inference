@@ -10,7 +10,7 @@ coqide TacticalLemmas.v \
   GammaDefs.v \
   StackFrame.v \
   SubtypingDefs.v \
-  GammaHeapCorrespondence.v \
+  GammaStackFrameCorrespondence.v \
   UnitsArithmetics.v \
   FieldDefs.v \
   ExpressionDefs.v \

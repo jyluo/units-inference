@@ -17,7 +17,7 @@ Definition StackFrameValue_beq ( fv1 fv2 : StackFrameValue ) : bool :=
 
 Definition StackFrame := Map ID StackFrameValue.
 
-Definition empty_heap := Empty_Map ID StackFrameValue.
+Definition empty_stackframe := Empty_Map ID StackFrameValue.
 Definition StackFrame_Update (f : StackFrame) (v : ID) (Tv Tl : Unit) (z : nat) : StackFrame := Map_Add id_beq f v (Tv, Val Tl z).
 Definition StackFrame_Get (f : StackFrame) (v : ID) : option StackFrameValue := Map_Get id_beq f v.
 Definition StackFrame_Contains (f : StackFrame) (v : ID) : bool := Map_Contains id_beq f v.

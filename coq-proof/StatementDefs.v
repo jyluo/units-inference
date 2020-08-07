@@ -18,10 +18,11 @@ From PUnits Require Import StackFrame.
 From PUnits Require Import GammaStackFrameCorrespondence.
 From PUnits Require Import ExpressionDefs.
 
-(* ======================================================= *)
+(* Assignment statement s in the language, modeled with an empty statement to
+inductively define a sequence of statements. *)
 Inductive Statements : Type :=
   | STMT_Empty : Statements
-  | STMT_Assign : ID -> Expression -> Statements -> Statements. (* f = e ; s *)
+  | STMT_Assign : ID -> Expression -> Statements -> Statements. (* v = e ; s *)
 Tactic Notation "stmt_cases" tactic(first) ident(c) :=
   first;
   [ Case_aux c "STMT_Empty"
@@ -34,13 +35,13 @@ Reserved Notation "'stmt:' g '|-' s " (at level 40).
 Inductive stmt_has_type : Gamma -> Statements -> Prop :=
   | T_STMT_Empty : forall (g : Gamma),
     stmt: g |- STMT_Empty
-  | T_STMT_Assign : forall (g : Gamma) (f : ID) (Tf Te : Unit) (e : Expression) (s2 : Statements),
-    Gamma_Contains g f = true ->
-    Gamma_Get g f = Some Tf ->
-    Te <: Tf = true ->
+  | T_STMT_Assign : forall (g : Gamma) (v : ID) (Tv Te : Unit) (e : Expression) (s2 : Statements),
+    Gamma_Contains g v = true ->
+    Gamma_Get g v = Some Tv ->
+    Te <: Tv = true ->
     expr: g |- e in Te ->
     stmt: g |- s2 ->
-    stmt: g |- STMT_Assign f e s2
+    stmt: g |- STMT_Assign v e s2
 where "'stmt:' g '|-' s "  := (stmt_has_type g s).
 Tactic Notation "stmt_has_type_cases" tactic(first) ident(c) :=
   first;
@@ -53,17 +54,17 @@ Hint Constructors stmt_has_type : pUnitsHintDatabase.
 
 Reserved Notation " s1 'stmt==>' s2 " (at level 8).
 Inductive stmt_small_step : prod StackFrame Statements -> prod StackFrame Statements -> Prop :=
-  | ST_STMT_Assign_Lit : forall (h : StackFrame) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
-    VarType h f = Some Tf ->
-    Tv <: Tf = true ->
-    ( h, STMT_Assign f (E_Value (Lit Tv z)) s2 ) stmt==> ( (StackFrame_Update h f Tf Tv z), s2 )
-  | ST_STMT_Assign_Exp : forall (h : StackFrame) (f : ID) (e e' : Expression) (s2 : Statements),
-    ( h, e ) expr==> e' ->
-    ( h, STMT_Assign f e s2 ) stmt==> ( h, STMT_Assign f e' s2 )
+  | ST_STMT_Assign_Lit : forall (f : StackFrame) (v : ID) (Tv Tl : Unit) (z : nat) (s2 : Statements),
+    VarType f v = Some Tv ->
+    Tl <: Tv = true ->
+    ( f, STMT_Assign v (E_LabeledLiteral (Lit Tl z)) s2 ) stmt==> ( (StackFrame_Update f v Tv Tl z), s2 )
+  | ST_STMT_Assign_Exp : forall (f : StackFrame) (v : ID) (e e' : Expression) (s2 : Statements),
+    ( f, e ) expr==> e' ->
+    ( f, STMT_Assign v e s2 ) stmt==> ( f, STMT_Assign v e' s2 )
 where " s1 'stmt==>' s2 " := (stmt_small_step s1 s2).
 Tactic Notation "stmt_small_step_cases" tactic(first) ident(c) :=
   first;
-  [ Case_aux c "ST_STMT_Assign_Val"
+  [ Case_aux c "ST_STMT_Assign_Lit"
   | Case_aux c "ST_STMT_Assign_Exp"
   ].
 Hint Constructors stmt_small_step : pUnitsHintDatabase.
@@ -79,14 +80,14 @@ Proof.
   intros s s1 s2 Hs1 Hs2.
   generalize dependent s2.
   stmt_small_step_cases (induction Hs1) Case.
-  Case "ST_STMT_Assign_Val".
+  Case "ST_STMT_Assign_Lit".
     intros s3 Hs3; inversion Hs3; subst.
-      assert (Tf = Tf0). eapply VarType_Content_Eq; eauto. subst. reflexivity.
+      assert (Tv = Tv0). eapply VarType_Content_Eq; eauto. subst. reflexivity.
       inversion H6.
   Case "ST_STMT_Assign_Exp".
     intros s3 Hs3; inversion Hs3; subst.
       inversion H.
-      assert (e' = e'0). apply expr_small_step_deterministic with h e; eauto. subst. reflexivity.
+      assert (e' = e'0). apply expr_small_step_deterministic with f e; eauto. subst. reflexivity.
 Qed.
 
 (* ======================================================= *)
@@ -94,77 +95,77 @@ Inductive STMT_Normal_Form : Statements -> Prop :=
   | V_STMT_Value : STMT_Normal_Form STMT_Empty.
 
 (* ======================================================= *)
-Theorem stmt_progress : forall (g : Gamma) (h : StackFrame) (s : Statements),
+Theorem stmt_progress : forall (g : Gamma) (f : StackFrame) (s : Statements),
   stmt: g |- s ->
-  gf: g |- h OK ->
-  STMT_Normal_Form s \/ exists (h' : StackFrame) (s' : Statements), (h, s) stmt==> (h', s').
+  gf: g |- f OK ->
+  STMT_Normal_Form s \/ exists (f' : StackFrame) (s' : Statements), (f, s) stmt==> (f', s').
 Proof.
-  intros g h s HT HGH.
+  intros g f s HT HGF.
   stmt_has_type_cases (induction HT) Case; subst.
   Case "T_STMT_Empty".
     left. apply V_STMT_Value.
   Case "T_STMT_Assign".
-    (* Case: f = e *)
+    (* Case: v = e *)
     right.
-    inversion HGH; subst.
-    destruct H3 with f as [Tf']. apply H. clear H3. destruct H4 as [Tv']. destruct H3 as [z']. Tactics.destruct_pairs.
-    assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
-    assert (expr_normal_form e \/ exists e', (h, e) expr==> e'). apply expr_progress with g Te. apply H2. apply HGH.
+    inversion HGF; subst.
+    destruct H3 with v as [Tv']. apply H. clear H3. destruct H4 as [Tl']. destruct H3 as [z']. Tactics.destruct_pairs.
+    assert (Tv = Tv'). eapply Gamma_Get_Content_Eq; eauto. subst.
+    assert (expr_normal_form e \/ exists e', (f, e) expr==> e'). apply expr_progress with g Te. apply H2. apply HGF.
     inversion H7; subst.
-    (* Subcase: e is a value -> step by ST_STMT_Assign_Lit *)
-      destruct H8; subst. inversion H2; subst. exists (StackFrame_Update h f Tf' Te z), s2.
-      eapply ST_STMT_Assign_Val.
+    (* Subcase: e is a labeled value Te z and s takes a step by ST_STMT_Assign_Lit *)
+      destruct H8; subst. inversion H2; subst. exists (StackFrame_Update f v Tv' Te z), s2.
+      eapply ST_STMT_Assign_Lit.
         apply H4.
         apply H1.
-    (* Subcase : e can take a step -> step by ST_STMT_Assign_Exp *)
-      destruct H8 as [e']; subst. exists h, (STMT_Assign f e' s2). apply ST_STMT_Assign_Exp. apply H8.
+    (* Subcase : e can reduce and s takes a step by ST_STMT_Assign_Exp, reducing e *)
+      destruct H8 as [e']; subst. exists f, (STMT_Assign v e' s2). apply ST_STMT_Assign_Exp. apply H8.
 Qed.
 
 (* ======================================================= *)
-Theorem stmt_preservation : forall (g : Gamma) (s s' : Statements) (h h' : StackFrame),
+Theorem stmt_preservation : forall (g : Gamma) (s s' : Statements) (f f' : StackFrame),
   stmt: g |- s ->
-  gf: g |- h OK ->
-  (h, s) stmt==> (h', s') ->
-  gf: g |- h' OK /\ stmt: g |- s'.
+  gf: g |- f OK ->
+  (f, s) stmt==> (f', s') ->
+  gf: g |- f' OK /\ stmt: g |- s'.
 Proof.
   (* by induction on typing of stmts *)
-  intros g s s' h h' HT HGH HS.
-  generalize dependent s'. generalize dependent h'.
-  stmt_has_type_cases (induction HT) Case; intros h' s' HS; subst.
+  intros g s s' f f' HT HGF HS.
+  generalize dependent s'. generalize dependent f'.
+  stmt_has_type_cases (induction HT) Case; intros f' s' HS; subst.
   Case "T_STMT_Empty".
     inversion HS. (* empty stmt list does not step *)
-  Case "T_STMT_Assign". (* s :=  f = e ; s2 *)
+  Case "T_STMT_Assign". (* v = e ; s2 *)
     stmt_small_step_cases (inversion HS) SCase; subst.
-    SCase "ST_STMT_Assign_Val". (* f = v ; s2 *)
+    SCase "ST_STMT_Assign_Lit". (* v = l ; s2 *)
       split.
-      (* first prove that g |- h' OK *)
+      (* first prove that g |- f' OK *)
         inversion H2; subst.
-        apply GH_Correspondence.
-        intros f' HGf'.
-        inversion HGH; subst.
-        destruct H3 with f' as [Tf']. apply HGf'. clear H3. destruct H4 as [Tv']. destruct H3 as [z']. Tactics.destruct_pairs.
-        destruct (id_eq_dec f' f).
-        (* Case: f = f' : in h', the value of f' is Tf Te z *)
-          exists Tf, Te, z. rewrite -> e in H3.
-          assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
-          assert (Tf' = Tf0). eapply VarType_Content_Eq; eauto. subst.
+        apply GF_Correspondence.
+        intros v' HGf'.
+        inversion HGF; subst.
+        destruct H3 with v' as [Tv']. apply HGf'. clear H3. destruct H4 as [Tl']. destruct H3 as [z']. Tactics.destruct_pairs.
+        destruct (id_eq_dec v' v).
+        (* Case: v = v' : in f', v' is mapped to Tv Te z *)
+          exists Tv, Te, z. rewrite -> e in H3.
+          assert (Tv = Tv'). eapply Gamma_Get_Content_Eq; eauto. subst.
+          assert (Tv' = Tv0). eapply VarType_Content_Eq; eauto. subst.
           split. apply H3.
           split. apply StackFrame_Update_VarType_Eq.
           split. apply H1.
           apply StackFrame_Update_VarValue_Eq.
-        (* Case: f <> f' : in h' the value of f' is some Tf' Tv' z' *)
-          exists Tf', Tv', z'. subst.
+        (* Case: v <> v' : in f', v' is mapped to some Tv' Tl' z' *)
+          exists Tv', Tl', z'. subst.
           split. apply H3.
           split. rewrite <- H4. apply StackFrame_Update_VarType_Neq. apply n.
           split. apply H6.
           rewrite <- H7. apply StackFrame_Update_VarValue_Neq. apply n.
       (* then prove that g |- s' *)
         apply HT.
-    SCase "ST_STMT_Assign_Exp". (* f = e ; s2 , e --> e' *)
+    SCase "ST_STMT_Assign_Exp". (* v = e ; s2 and e --> e' *)
       split.
-      (* first prove that g |- h' OK *)
-        apply HGH.
-      (* then prove that g |- f = e' ; s2 *)
+      (* first prove that g |- f' OK *)
+        apply HGF.
+      (* then prove that g |- v = e' ; s2 *)
         eapply expr_preservation in H2.
           destruct H2 as [T']. destruct H2.
           eapply T_STMT_Assign.
@@ -174,6 +175,6 @@ Proof.
               apply H2. apply H1.
             apply H3.
             apply HT.
-          apply HGH.
+          apply HGF.
           apply H4.
 Qed.

@@ -41,7 +41,7 @@ Notation "e1 ':%' e2" := (E_Arith e1 op_mod e2) (at level 2).
 Reserved Notation "'expr:' G '|-' e 'in' U" (at level 40).
 Inductive expr_has_type : Gamma -> Expression -> Unit -> Prop :=
   | T_Value : forall (g : Gamma) (Tv : Unit) (z : nat),
-    expr: g |- E_Value (Val Tv z) in Tv
+    expr: g |- E_Value (Lit Tv z) in Tv
   | T_Field_Lookup : forall (g : Gamma) (f : ID) (Tf : Unit),
     Gamma_Contains g f = true ->
     Gamma_Get g f = Some Tf ->
@@ -63,10 +63,10 @@ Hint Constructors expr_has_type : pUnitsHintDatabase.
 Reserved Notation " he1 'expr==>' e2 " (at level 8).
 Inductive expr_small_step : prod StackFrame Expression -> Expression -> Prop :=
   | ST_Field_Lookup : forall (h : StackFrame) (f : ID) (T : Unit) (z : nat),
-    VarValue h f = Some (Val T z) ->
-    ( h, E_Field_Lookup f ) expr==> (E_Value (Val T z))
+    VarValue h f = Some (Lit T z) ->
+    ( h, E_Field_Lookup f ) expr==> (E_Value (Lit T z))
   | ST_Arith_Values : forall (h : StackFrame) (T1 T2 : Unit) (z1 z2 : nat) (op : OpKind),
-    ( h, E_Arith (E_Value (Val T1 z1)) op (E_Value (Val T2 z2)) ) expr==> (E_Value (Val (computeUnit op T1 T2) (computeNat op z1 z2)) )
+    ( h, E_Arith (E_Value (Lit T1 z1)) op (E_Value (Lit T2 z2)) ) expr==> (E_Value (Lit (computeUnit op T1 T2) (computeNat op z1 z2)) )
   | ST_Arith_Left_Reduce : forall (h : StackFrame) (e1 e1' e2 : Expression) (op : OpKind),
     ( h, e1 ) expr==> e1' ->
     ( h, E_Arith e1 op e2 ) expr==> (E_Arith e1' op e2)
@@ -96,7 +96,7 @@ Proof.
   expr_small_step_cases (induction He1) Case.
   Case "ST_Field_Lookup".
     intros e2 He2. inversion He2; subst.
-    assert (Val T z = Val T0 z0). eapply VarValue_Content_Eq; eauto.
+    assert (Lit T z = Lit T0 z0). eapply VarValue_Content_Eq; eauto.
     destruct H0. reflexivity.
   Case "ST_Arith_Values".
     intros e2 He2. inversion He2; subst.
@@ -117,7 +117,7 @@ Qed.
 
 (* ======================================================= *)
 Inductive expr_normal_form : Expression -> Prop :=
-  | V_Expr_Value : forall (T : Unit) (z : nat), expr_normal_form (E_Value (Val T z)).
+  | V_Expr_Value : forall (T : Unit) (z : nat), expr_normal_form (E_Value (Lit T z)).
 
 (* ======================================================= *)
 Theorem expr_progress : forall (g : Gamma) (h : StackFrame) (e : Expression) (T : Unit),
@@ -139,7 +139,7 @@ Proof.
     inversion HGH; subst.
     destruct H1 with f as [Tf']. apply H. clear H1. destruct H2 as [Tv]. destruct H1 as [z]. Tactics.destruct_pairs.
     assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
-    exists (E_Value (Val Tv z)). apply ST_Field_Lookup. apply H4.
+    exists (E_Value (Lit Tv z)). apply ST_Field_Lookup. apply H4.
   Case "T_Arith".
     (* Case: e is an arithmetic expression e1 op e2 for some op. We proceed by
        sub-case analysis on whether e1 is normal form or not *)
@@ -153,9 +153,9 @@ Proof.
       (* Case: e2 is normal form, then there exists a value
          (T1 op T2) (z1 op z2) which e1 op e2 steps to *)
         inversion He2NF; subst. inversion HT2; subst. rename z into z2.
-        exists (E_Value (Val (computeUnit op T1 T2) (computeNat op z1 z2))). apply ST_Arith_Values.
+        exists (E_Value (Lit (computeUnit op T1 T2) (computeNat op z1 z2))). apply ST_Arith_Values.
       (* Case: e2 can take a step to e2', then e1 op e2 steps to e1 op e2' *)
-        inversion He2STEP as [e2']; subst. exists (E_Arith (E_Value (Val T1 z1)) op e2'). apply ST_Arith_Right_Reduce. apply H.
+        inversion He2STEP as [e2']; subst. exists (E_Arith (E_Value (Lit T1 z1)) op e2'). apply ST_Arith_Right_Reduce. apply H.
     (* Case: e1 can take a step to e1', then e1 op e2 steps to e1' op e2 *)
     inversion He1STEP as [e1']; subst. exists (E_Arith e1' op e2). apply ST_Arith_Left_Reduce. apply H.
 Qed.
@@ -182,7 +182,7 @@ Proof.
     inversion HGH; subst.
     destruct H1 with f as [Tf']. apply H. destruct H2 as [Tv']. destruct H2 as [z']. Tactics.destruct_pairs.
     assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
-    assert (Val T z = Val Tv' z'). eapply VarValue_Content_Eq; eauto. inversion H7. subst.
+    assert (Lit T z = Lit Tv' z'). eapply VarValue_Content_Eq; eauto. inversion H7. subst.
     exists Tv'. split.
       apply H5.
       apply T_Value.

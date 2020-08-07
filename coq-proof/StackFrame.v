@@ -18,7 +18,7 @@ Definition StackFrameValue_beq ( fv1 fv2 : StackFrameValue ) : bool :=
 Definition StackFrame := Map ID StackFrameValue.
 
 Definition empty_stackframe := Empty_Map ID StackFrameValue.
-Definition StackFrame_Update (f : StackFrame) (v : ID) (Tv Tl : Unit) (z : nat) : StackFrame := Map_Add id_beq f v (Tv, Val Tl z).
+Definition StackFrame_Update (f : StackFrame) (v : ID) (Tv Tl : Unit) (z : nat) : StackFrame := Map_Add id_beq f v (Tv, Lit Tl z).
 Definition StackFrame_Get (f : StackFrame) (v : ID) : option StackFrameValue := Map_Get id_beq f v.
 Definition StackFrame_Contains (f : StackFrame) (v : ID) : bool := Map_Contains id_beq f v.
 Definition StackFrame_IsSubMap (f1 f2 : StackFrame) : bool := Map_IsSubMap id_beq StackFrameValue_beq f1 f2.
@@ -75,7 +75,7 @@ Qed.
 Theorem StackFrame_Contains_Implies_Get :
   forall (f : StackFrame) (v : ID),
   StackFrame_Contains f v = true ->
-  exists (Tv Tl : Unit) (z : nat), StackFrame_Get f v = Some (Tv, Val Tl z).
+  exists (Tv Tl : Unit) (z : nat), StackFrame_Get f v = Some (Tv, Lit Tl z).
 Proof.
   unfold StackFrame_Contains.
   unfold StackFrame_Get.
@@ -103,7 +103,7 @@ Qed.
 Theorem StackFrame_Contains_Implies_VarValue :
   forall (f : StackFrame) (v : ID),
   StackFrame_Contains f v = true ->
-  exists (Tl : Unit) (z : nat), VarValue f v = Some (Val Tl z).
+  exists (Tl : Unit) (z : nat), VarValue f v = Some (Lit Tl z).
 Proof.
   intros.
   unfold VarValue.
@@ -164,7 +164,7 @@ Qed.
 
 Theorem StackFrame_Update_VarValue_Eq :
   forall (f : StackFrame) (v : ID) (Tv Tl : Unit) (z : nat),
-  VarValue (StackFrame_Update f v Tv Tl z) v = Some (Val Tl z).
+  VarValue (StackFrame_Update f v Tv Tl z) v = Some (Lit Tl z).
 Proof.
   intros.
   unfold VarValue. unfold StackFrame_Update. unfold StackFrame_Get.

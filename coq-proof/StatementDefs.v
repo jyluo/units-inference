@@ -53,10 +53,10 @@ Hint Constructors stmt_has_type : pUnitsHintDatabase.
 
 Reserved Notation " s1 'stmt==>' s2 " (at level 8).
 Inductive stmt_small_step : prod StackFrame Statements -> prod StackFrame Statements -> Prop :=
-  | ST_STMT_Assign_Val : forall (h : StackFrame) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
+  | ST_STMT_Assign_Lit : forall (h : StackFrame) (f : ID) (Tf Tv : Unit) (z : nat) (s2 : Statements),
     VarType h f = Some Tf ->
     Tv <: Tf = true ->
-    ( h, STMT_Assign f (E_Value (Val Tv z)) s2 ) stmt==> ( (StackFrame_Update h f Tf Tv z), s2 )
+    ( h, STMT_Assign f (E_Value (Lit Tv z)) s2 ) stmt==> ( (StackFrame_Update h f Tf Tv z), s2 )
   | ST_STMT_Assign_Exp : forall (h : StackFrame) (f : ID) (e e' : Expression) (s2 : Statements),
     ( h, e ) expr==> e' ->
     ( h, STMT_Assign f e s2 ) stmt==> ( h, STMT_Assign f e' s2 )
@@ -111,7 +111,7 @@ Proof.
     assert (Tf = Tf'). eapply Gamma_Get_Content_Eq; eauto. subst.
     assert (expr_normal_form e \/ exists e', (h, e) expr==> e'). apply expr_progress with g Te. apply H2. apply HGH.
     inversion H7; subst.
-    (* Subcase: e is a value -> step by ST_STMT_Assign_Val *)
+    (* Subcase: e is a value -> step by ST_STMT_Assign_Lit *)
       destruct H8; subst. inversion H2; subst. exists (StackFrame_Update h f Tf' Te z), s2.
       eapply ST_STMT_Assign_Val.
         apply H4.

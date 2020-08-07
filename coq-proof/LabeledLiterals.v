@@ -9,16 +9,16 @@ From PUnits Require Import UnitsDefs.
 (* Labeled literal / labeled value l = T z, which are numbers z that are labeled
 with a Unit T. Here we model z as a nat. *)
 Inductive LabeledLiteral : Type :=
-  Val : Unit -> nat -> LabeledLiteral.
+  Lit : Unit -> nat -> LabeledLiteral.
 
 Definition LabeledLiteral_GetUnit (l : LabeledLiteral) : Unit :=
   match l with
-  | Val u _ => u
+  | Lit u _ => u
   end.
 
 Definition LabeledLiteral_GetNumber (l : LabeledLiteral) : nat :=
   match l with
-  | Val _ z => z
+  | Lit _ z => z
   end.
 
 (* Lemmas for equality, as well as simplification lemmas for subsequent

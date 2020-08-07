@@ -361,7 +361,7 @@ Definition computeNat (op : OpKind) (z1 z2 : nat) : nat :=
 
 Definition computeValue (op : OpKind) (v1 v2 : Value) : Value :=
   match v1, v2 with
-  | Val u1 z1, Val u2 z2 => Val (computeUnit op u1 u2) (computeNat op z1 z2)
+  | Lit u1 z1, Lit u2 z2 => Lit (computeUnit op u1 u2) (computeNat op z1 z2)
   end.
 
 (* ======================================================= *)

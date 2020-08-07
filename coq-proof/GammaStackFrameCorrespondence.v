@@ -20,6 +20,6 @@ Inductive Gamma_StackFrame_OK : Gamma -> StackFrame -> Prop :=
         Gamma_Get g v = Some Tv /\
         VarType f v = Some Tv /\
         Tl <: Tv = true /\
-        VarValue f v = Some (Val Tl z) ) ->
+        VarValue f v = Some (Lit Tl z) ) ->
     gf: g |- f OK
 where "'gf:' g '|-' f 'OK'" := (Gamma_StackFrame_OK g f).

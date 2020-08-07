@@ -4,11 +4,11 @@ Import List.ListNotations.
 Require Import Lists.ListSet.
 Require Import EqNat.
 
-(* Map data structure consistsing of a set of pairs, keyed on the keys *)
-
+(* Map data structure consistsing of a set of pairs. *)
 Definition Map (K V : Type) := set (prod K V).
 Definition Empty_Map (K V : Type) := empty_set (prod K V).
 
+(* All key equality functions are decideable. *)
 Theorem key_eq_dec :
   forall {K : Type} (key_eq : K -> K -> bool) (k1 k2 : K),
   {key_eq k1 k2 = true} + {key_eq k1 k2 <> true}.
@@ -19,7 +19,8 @@ Proof.
     right. discriminate.
 Qed.
 
-(* Inserts or replaces k -> v into map m, given key_eq as a comparison function *)
+(* Inserts or replaces k -> v into map m, given key_eq as a comparison
+function. *)
 Fixpoint Map_Add {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) (v : V) : Map K V :=
   match m with
   | [] => [ (k, v) ]
@@ -29,7 +30,8 @@ Fixpoint Map_Add {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) (v
                         (k1, v1) :: Map_Add key_eq m' k v
   end.
 
-(* Gets the value v for given key k if k -> v is in the map, otherwise returns None *)
+(* Gets the value v for given key k if k -> v is in the map, otherwise returns
+None. *)
 Fixpoint Map_Get {K V : Type} (key_eq : K -> K -> bool) (m : Map K V) (k : K) : option V :=
   match m with
   | [] => None
@@ -71,6 +73,8 @@ Fixpoint Map_IsSubMap {K V : Type} (key_eq : K -> K -> bool) (val_eq : V -> V ->
   | (k, v) :: mSub' => (Map_Contains key_eq mSuper k) && Map_IsSubMap key_eq val_eq mSub' mSuper
   end.
 
+(* Tests of Map definition through instantiating a Map withnat keys and values
+and beq_nat comparison function. *)
 Module Map_Tests.
 Definition NatMap := Map nat nat.
 Definition Empty_NatMap := Empty_Map nat nat.

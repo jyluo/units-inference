@@ -5,9 +5,8 @@ Require Import List.
 Import List.ListNotations.
 Require Import Lists.ListSet.
 
-(* Print Visibility. *)
-
-(* Base units, here we instantiate with all 7 base SI units *)
+(* Base units, here we instantiate with all 7 base SI units, but this can be
+defined with any number of base units. *)
 Inductive BaseUnit : Type :=
   | meter : BaseUnit
   | second : BaseUnit
@@ -17,21 +16,23 @@ Inductive BaseUnit : Type :=
   | candela : BaseUnit
   | mole : BaseUnit.
 
+(* A base unit raised to a natural number power. *)
 Inductive BaseUnitComponent : Type :=
   | bc : BaseUnit -> nat -> BaseUnitComponent.
 
-(* Base 10 prefix *)
-Inductive PrefixBases : Type :=
-  | ten : PrefixBases.
+(* Prefix bases, here instantiated with a base of 10 but it can be any base. *)
+Inductive PrefixBase : Type :=
+  | ten : PrefixBase.
 
+(* Prefix, defined as a prefix base raised to a natural number power. *)
 Inductive PrefixComponent : Type :=
-  | pc : PrefixBases -> nat -> PrefixComponent.
+  | pc : PrefixBase -> nat -> PrefixComponent.
 
-(* A normalized unit is a prefix component + a set of base unit components *)
+(* A normalized unit is a prefix + a set of base unit components. *)
 Inductive NormalizedUnit : Type :=
   | normUnit: PrefixComponent -> set BaseUnitComponent -> NormalizedUnit.
 
-(* Some example definitions of units *)
+(* Some example definitions of units. *)
 Definition m := normUnit (pc ten 0) [bc meter 1 ; bc second 0 ; bc gram 0].
 Definition km := normUnit (pc ten 3) [bc meter 1 ; bc second 0 ; bc gram 0].
 Definition m2 := normUnit (pc ten 0) [bc meter 2 ; bc second 0 ; bc gram 0].
@@ -39,13 +40,13 @@ Definition s := normUnit (pc ten 0) [bc meter 0 ; bc second 1 ; bc gram 0].
 Definition g := normUnit (pc ten 0) [bc meter 0 ; bc second 0 ; bc gram 1].
 Definition dimensionless := normUnit (pc ten 0) [bc meter 0 ; bc second 0 ; bc gram 0].
 
-(* Units qualifiers *)
+(* Units types T. *)
 Inductive Unit : Type :=
   | top : Unit
   | bottom : Unit
   | declaredUnit : NormalizedUnit -> Unit.
 
-(* equality definitions *)
+(* Unit equality definitions and supporting lemmas. *)
 
 (* ======================================================================= *)
 

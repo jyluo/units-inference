@@ -26,7 +26,7 @@ run `./cleanup.sh` to remove coq output files
 
 `UnitsDefs.v` contains the definitions and helper lemmas for the unit types **_T_**.
 
-`ValueDefs.v` contains the definitions and helper lemmas for labeled literals **_l_**, which are modeled as nats labeled with a unit in Coq.
+`ValueDefs.v` contains the definitions and helper lemmas for labeled literals (static semantics) / labeled values (operational semantics) **_l_**, which are modeled as nats labeled with a unit in Coq.
 
 # CORRECT ^
 

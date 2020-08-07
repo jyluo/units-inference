@@ -6,8 +6,8 @@ Require Import Arith.EqNat.
 
 From PUnits Require Import UnitsDefs.
 
-(* Labeled literal l = T z, which are numbers z that are labeled with a Unit T.
-Here we model z as a nat. *)
+(* Labeled literal / labeled value l = T z, which are numbers z that are labeled
+with a Unit T. Here we model z as a nat. *)
 Inductive Value : Type :=
   Val : Unit -> nat -> Value.
 

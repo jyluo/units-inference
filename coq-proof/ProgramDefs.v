@@ -17,7 +17,7 @@ From PUnits Require Import LabeledLiterals.
 From PUnits Require Import GammaDefs.
 From PUnits Require Import StackFrame.
 From PUnits Require Import GammaStackFrameCorrespondence.
-From PUnits Require Import FieldDefs.
+From PUnits Require Import VarDecl.
 From PUnits Require Import ExpressionDefs.
 From PUnits Require Import StatementDefs.
 
@@ -49,7 +49,7 @@ Hint Constructors prog_has_type : pUnitsHintDatabase.
 (* ======================================================= *)
 Reserved Notation " p1 'prog==>' p2 " (at level 8).
 Inductive prog_small_step : prod StackFrame Program -> prod StackFrame Program -> Prop :=
-  | ST_PROG_FieldDefs_Step : forall h h' fds fds' s,
+  | ST_PROG_VarDecl_Step : forall h h' fds fds' s,
     ( h, fds ) fds==> ( h', fds' ) ->
     ( h, program fds s ) prog==> ( h', program fds' s )
   | ST_PROG_Statementss_Step : forall h h' s s',
@@ -58,7 +58,7 @@ Inductive prog_small_step : prod StackFrame Program -> prod StackFrame Program -
 where " p1 'prog==>' p2 " := (prog_small_step p1 p2).
 Tactic Notation "prog_small_step_cases" tactic(first) ident(c) :=
   first;
-  [ Case_aux c "ST_PROG_FieldDefs_Step"
+  [ Case_aux c "ST_PROG_VarDecl_Step"
   | Case_aux c "ST_PROG_Statementss_Step"
   ].
 Hint Constructors prog_small_step : pUnitsHintDatabase.
@@ -74,7 +74,7 @@ Proof.
   intros p p1 p2 Hp1.
   generalize dependent p2.
   prog_small_step_cases (induction Hp1) Case.
-  Case "ST_PROG_FieldDefs_Step".
+  Case "ST_PROG_VarDecl_Step".
     intros p2 Hp2; inversion Hp2; subst.
       assert ((h', fds') = (h'0, fds'0)) as HfdsEQ. eapply fds_small_step_deterministic.
         apply H. apply H4. inversion HfdsEQ; subst. reflexivity.
@@ -116,7 +116,7 @@ Proof.
     (* Case : FD can take a step *)
       destruct H1 as [h']. destruct H1 as [fds']. right.
       exists h'. exists (program fds' s).
-      apply ST_PROG_FieldDefs_Step. apply H1.
+      apply ST_PROG_VarDecl_Step. apply H1.
 Qed.
 
 (* ======================================================= *)
@@ -142,7 +142,7 @@ Proof.
   Case "T_Program".
     destruct p' as [fds' s'].
     prog_small_step_cases (inversion HS) SCase; subst.
-    SCase "ST_PROG_FieldDefs_Step".
+    SCase "ST_PROG_VarDecl_Step".
       inversion H2; subst.
       unfold Gamma_Extend_Prog. simpl.
       eapply fds_preservation in H.

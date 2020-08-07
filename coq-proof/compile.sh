@@ -50,7 +50,7 @@ compile GammaStackFrameCorrespondence.v
 
 compile UnitsArithmetics.v
 
-compile FieldDefs.v
+compile VarDecl.v
 compile ExpressionDefs.v
 compile StatementDefs.v
 compile ProgramDefs.v

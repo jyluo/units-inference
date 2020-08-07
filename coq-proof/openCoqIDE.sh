@@ -12,7 +12,7 @@ coqide TacticalLemmas.v \
   SubtypingDefs.v \
   GammaStackFrameCorrespondence.v \
   UnitsArithmetics.v \
-  FieldDefs.v \
+  VarDecl.v \
   ExpressionDefs.v \
   StatementDefs.v \
   ProgramDefs.v \

@@ -3,17 +3,17 @@
 # Opens the definitions in their dependent ordering, where
 # later file names in the sequence depend on the earlier ones.
 coqide TacticalLemmas.v \
-  MapsDefs.v \
-  UnitsDefs.v \
+  Maps.v \
+  Units.v \
   LabeledLiterals.v \
-  IDDefs.v \
-  GammaDefs.v \
+  IDs.v \
+  Gamma.v \
   StackFrame.v \
-  SubtypingDefs.v \
+  Subtyping.v \
   GammaStackFrameCorrespondence.v \
   UnitsArithmetics.v \
-  VarDecl.v \
-  ExpressionDefs.v \
-  StatementDefs.v \
-  ProgramDefs.v \
+  VarDecls.v \
+  Expressions.v \
+  Statements.v \
+  Program.v \
   &

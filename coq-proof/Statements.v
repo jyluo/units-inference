@@ -9,14 +9,14 @@ Open Scope string_scope.
 Open Scope core_scope.
 
 From PUnits Require Import TacticalLemmas.
-From PUnits Require Import UnitsDefs.
-From PUnits Require Import SubtypingDefs.
-From PUnits Require Import IDDefs.
+From PUnits Require Import Units.
+From PUnits Require Import Subtyping.
+From PUnits Require Import IDs.
 From PUnits Require Import LabeledLiterals.
-From PUnits Require Import GammaDefs.
+From PUnits Require Import Gamma.
 From PUnits Require Import StackFrame.
 From PUnits Require Import GammaStackFrameCorrespondence.
-From PUnits Require Import ExpressionDefs.
+From PUnits Require Import Expressions.
 
 (* Assignment statement s in the language, modeled with an empty statement to
 inductively define a sequence of statements. *)

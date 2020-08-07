@@ -1,8 +1,8 @@
 Require Import Bool.
 
-From PUnits Require Import UnitsDefs.
-From PUnits Require Import IDDefs.
-From PUnits Require Import MapsDefs.
+From PUnits Require Import Units.
+From PUnits Require Import IDs.
+From PUnits Require Import Maps.
 
 (* Gamma is a map from Variable Identifiers v to Unit types T. *)
 Definition Gamma := Map ID Unit.

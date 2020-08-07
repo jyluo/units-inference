@@ -151,4 +151,3 @@ Proof. reflexivity. Qed.
 Example submapTest5: NatMap_IsSubMap [(100, 30)] [(5, 10); (10, 20)] = false.
 Proof. reflexivity. Qed.
 End Map_Tests.
-

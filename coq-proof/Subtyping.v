@@ -1,4 +1,4 @@
-From PUnits Require Import UnitsDefs.
+From PUnits Require Import Units.
 
 (* Units Subtype and Least Upper Bound definitions. *)
 

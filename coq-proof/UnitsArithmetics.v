@@ -3,8 +3,8 @@ Require Import List.
 Import List.ListNotations.
 Require Import Lists.ListSet.
 
-From PUnits Require Import UnitsDefs.
-From PUnits Require Import SubtypingDefs.
+From PUnits Require Import Units.
+From PUnits Require Import Subtyping.
 From PUnits Require Import LabeledLiterals.
 
 (* Defines arithmetic operations op. Here it is instantiated with addition,

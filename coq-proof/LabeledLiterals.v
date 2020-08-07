@@ -4,7 +4,7 @@ Import List.ListNotations.
 Require Import Arith.
 Require Import Arith.EqNat.
 
-From PUnits Require Import UnitsDefs.
+From PUnits Require Import Units.
 
 (* Labeled literal / labeled value l = T z, which are numbers z that are labeled
 with a Unit T. Here we model z as a nat. *)

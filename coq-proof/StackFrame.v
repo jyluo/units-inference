@@ -1,7 +1,7 @@
-From PUnits Require Import UnitsDefs.
-From PUnits Require Import IDDefs.
+From PUnits Require Import Units.
+From PUnits Require Import IDs.
 From PUnits Require Import LabeledLiterals.
-From PUnits Require Import MapsDefs.
+From PUnits Require Import Maps.
 
 (* Stack Frame F is a map from Variable Identifiers v to pairs of its static
 type Tv and labeled value l = Tl z. Formally v is mapped to a tuple, but for

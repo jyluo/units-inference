@@ -18,21 +18,25 @@ run `./cleanup.sh` to remove coq output files
 
 ## Proof file structure
 
+#TODO use <img src="https://latex.codecogs.com/svg.latex?\Large&space;x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" title="\Large x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" />  to get latex symbols.
+
 `TacticalLemmas.v` contains tactic notations from the Software Foundations Coq [Library](http://flint.cs.yale.edu/cs428/coq/sf/SfLib.html), which helps break down proof cases.
 
-`MapsDefs.v` contains the definitions and lemmas for maps from any key type `K` to any value type `V`, augmented by a key equality function `key_eq`.
+`MapsDefs.v` contains the definitions and helper lemmas for maps from any key type `K` to any value type `V`, augmented by a key equality function `key_eq`.
 
-`UnitsDefs.v` contains the definitions and lemmas for the unit types **_T_**.
+`UnitsDefs.v` contains the definitions and helper lemmas for the unit types **_T_**.
 
-`ValueDefs.v` contains the definitions and lemmas for labeled values **_v_**, which are modeled as nats labeled with a unit in Coq.
+`ValueDefs.v` contains the definitions and helper lemmas for labeled literals **_l_**, which are modeled as nats labeled with a unit in Coq.
 
-`IDDefs.v` contains the definitions and lemmas for field identifiers **_f_**.
+# CORRECT ^
+
+`IDDefs.v` contains the definitions and helper lemmas for field identifiers **_f_**.
 
 `GammaDefs.v` defines gamma as a map from **_f_** to **_T_**, using the map definitions from `MapsDefs.v`.
 
 `HeapDefs.v` defines heap as a map from **_f_** to its static field type **_Tf_** and runtime value **_v_**, using the map definitions from `MapsDefs.v`.
 
-`SubtypingDefs.v` contains the definitions and lemmas for the subtype relationship between units qualifiers, and functions such as the least upper bound of units.
+`SubtypingDefs.v` contains the definitions and helper lemmas for the subtype relationship between units types, and functions such as the least upper bound of units.
 
 `GammaHeapCorrespondence.v` defines the correspondince between a wellformed gamma and a wellformed heap.
 

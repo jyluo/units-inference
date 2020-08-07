@@ -6,7 +6,8 @@ Require Import Arith.EqNat.
 
 From PUnits Require Import UnitsDefs.
 
-(* Values, which are numbers that are labeled with a Unit *)
+(* Labeled literal l = T z, which are numbers z that are labeled with a Unit T.
+Here we model z as a nat. *)
 Inductive Value : Type :=
   Val : Unit -> nat -> Value.
 
@@ -20,8 +21,10 @@ Definition Value_GetNumber (v : Value) : nat :=
   | Val _ z => z
   end.
 
-(* Lemmas for Value equality and inequality, as well as simplification lemmas for subsequent proofs *)
-(* Value equality is decideable *)
+(* Lemmas for equality, as well as simplification lemmas for subsequent
+proofs. *)
+
+(* Value equality is decideable. *)
 Theorem Value_eq_dec : forall v1 v2 : Value, {v1 = v2} + {v1 <> v2}.
 Proof.
   intros v1 v2.

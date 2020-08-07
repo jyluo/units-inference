@@ -32,8 +32,7 @@ run `./cleanup.sh` to remove coq output files
 
 `GammaDefs.v` defines gamma as a map from **_v_** to **_T_**, using the map definitions from `MapsDefs.v`.
 
-# new name: StackFrame
-`HeapDefs.v` defines Stack Frame **_F_** as a map from **_v_** to its static type **_Tv_** and labeled value **_l_**, using the map definitions from `MapsDefs.v`.
+`StackFrame.v` defines Stack Frame **_F_** as a map from **_v_** to its static type **_Tv_** and labeled value **_l_**, using the map definitions from `MapsDefs.v`.
 
 # CORRECT ^
 

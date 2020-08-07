@@ -5,7 +5,7 @@ Require Import Lists.ListSet.
 
 From PUnits Require Import UnitsDefs.
 From PUnits Require Import SubtypingDefs.
-From PUnits Require Import ValueDefs.
+From PUnits Require Import LabeledLiterals.
 
 (* Defines supported arithmetic operations *)
 

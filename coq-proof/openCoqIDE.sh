@@ -8,7 +8,7 @@ coqide TacticalLemmas.v \
   LabeledLiterals.v \
   IDDefs.v \
   GammaDefs.v \
-  HeapDefs.v \
+  StackFrame.v \
   SubtypingDefs.v \
   GammaHeapCorrespondence.v \
   UnitsArithmetics.v \

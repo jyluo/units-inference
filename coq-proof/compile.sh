@@ -43,7 +43,7 @@ compile LabeledLiterals.v
 compile IDDefs.v
 
 compile GammaDefs.v
-compile HeapDefs.v
+compile StackFrame.v
 
 compile SubtypingDefs.v
 compile GammaHeapCorrespondence.v

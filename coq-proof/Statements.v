@@ -56,7 +56,6 @@ Reserved Notation " s1 'stmt==>' s2 " (at level 8).
 Inductive stmt_small_step : prod StackFrame Statements -> prod StackFrame Statements -> Prop :=
   | ST_STMT_Assign_Lit : forall (f : StackFrame) (v : ID) (Tv Tl : Unit) (z : nat) (s2 : Statements),
     VarType f v = Some Tv ->
-    Tl <: Tv = true ->
     ( f, STMT_Assign v (E_LabeledLiteral (Lit Tl z)) s2 ) stmt==> ( (StackFrame_Update f v Tv Tl z), s2 )
   | ST_STMT_Assign_Exp : forall (f : StackFrame) (v : ID) (e e' : Expression) (s2 : Statements),
     ( f, e ) expr==> e' ->
@@ -83,7 +82,7 @@ Proof.
   Case "ST_STMT_Assign_Lit".
     intros s3 Hs3; inversion Hs3; subst.
       assert (Tv = Tv0). eapply VarType_Content_Eq; eauto. subst. reflexivity.
-      inversion H6.
+      inversion H5.
   Case "ST_STMT_Assign_Exp".
     intros s3 Hs3; inversion Hs3; subst.
       inversion H.
@@ -116,7 +115,6 @@ Proof.
       destruct H8; subst. inversion H2; subst. exists (StackFrame_Update f v Tv' Te z), s2.
       eapply ST_STMT_Assign_Lit.
         apply H4.
-        apply H1.
     (* Subcase : e can reduce and s takes a step by ST_STMT_Assign_Exp, reducing e *)
       destruct H8 as [e']; subst. exists f, (STMT_Assign v e' s2). apply ST_STMT_Assign_Exp. apply H8.
 Qed.
@@ -143,7 +141,7 @@ Proof.
         apply GF_Correspondence.
         intros v' HGf'.
         inversion HGF; subst.
-        destruct H3 with v' as [Tv']. apply HGf'. clear H3. destruct H4 as [Tl']. destruct H3 as [z']. Tactics.destruct_pairs.
+        destruct H3 with v' as [Tv']. apply HGf'. clear H3. destruct H5 as [Tl']. destruct H3 as [z']. Tactics.destruct_pairs.
         destruct (id_eq_dec v' v).
         (* Case: v = v' : in f', v' is mapped to Tv Te z *)
           exists Tv, Te, z. rewrite -> e in H3.
@@ -156,7 +154,7 @@ Proof.
         (* Case: v <> v' : in f', v' is mapped to some Tv' Tl' z' *)
           exists Tv', Tl', z'. subst.
           split. apply H3.
-          split. rewrite <- H4. apply StackFrame_Update_VarType_Neq. apply n.
+          split. rewrite <- H5. apply StackFrame_Update_VarType_Neq. apply n.
           split. apply H6.
           rewrite <- H7. apply StackFrame_Update_VarValue_Neq. apply n.
       (* then prove that g |- s' *)
